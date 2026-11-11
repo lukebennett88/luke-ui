@@ -7,4 +7,4 @@ export {
 	type CheckboxLabelProps,
 	CheckboxRoot,
 	type CheckboxRootProps,
-} from '../../core/primitives/checkbox/checkbox.js';
+} from '../../core/checkbox/primitive/checkbox.js';

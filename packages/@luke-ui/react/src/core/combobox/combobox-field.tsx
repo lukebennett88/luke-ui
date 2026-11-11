@@ -3,21 +3,6 @@ import type { ComboBoxProps as RacComboBoxProps } from 'react-aria-components/Co
 import { Icon } from '../icon/icon.js';
 import { LoadingSpinner } from '../loading-spinner/loading-spinner.js';
 import { useIsMobileDevice } from '../overlays/use-is-mobile-device.js';
-import { ComboboxClearButton } from '../primitives/combobox/clear-button.js';
-import { ComboboxControl } from '../primitives/combobox/control.js';
-import { ComboboxEmptyState } from '../primitives/combobox/empty-state.js';
-import { ComboboxInput } from '../primitives/combobox/input.js';
-import type { ComboboxLoadMoreItemProps } from '../primitives/combobox/item.js';
-import { ComboboxLoadMoreItem } from '../primitives/combobox/item.js';
-import type { ComboboxListBoxProps } from '../primitives/combobox/listbox.js';
-import { ComboboxListBox } from '../primitives/combobox/listbox.js';
-import type { ComboboxPopoverProps } from '../primitives/combobox/popover.js';
-import { ComboboxPopover } from '../primitives/combobox/popover.js';
-import type { ComboboxRootProps, ComboboxSize } from '../primitives/combobox/root.js';
-import { ComboboxRoot } from '../primitives/combobox/root.js';
-import { ComboboxTrayTrigger } from '../primitives/combobox/tray-trigger.js';
-import { ComboboxTray } from '../primitives/combobox/tray.js';
-import { ComboboxTrigger } from '../primitives/combobox/trigger.js';
 import type { FieldAccessibleNameProps } from '../primitives/field/field.js';
 import { Field } from '../primitives/field/field.js';
 import {
@@ -26,6 +11,21 @@ import {
 } from '../primitives/field/is-invalid-from-error-message.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
+import { ComboboxClearButton } from './primitive/clear-button.js';
+import { ComboboxControl } from './primitive/control.js';
+import { ComboboxEmptyState } from './primitive/empty-state.js';
+import { ComboboxInput } from './primitive/input.js';
+import type { ComboboxLoadMoreItemProps } from './primitive/item.js';
+import { ComboboxLoadMoreItem } from './primitive/item.js';
+import type { ComboboxListBoxProps } from './primitive/listbox.js';
+import { ComboboxListBox } from './primitive/listbox.js';
+import type { ComboboxPopoverProps } from './primitive/popover.js';
+import { ComboboxPopover } from './primitive/popover.js';
+import type { ComboboxRootProps, ComboboxSize } from './primitive/root.js';
+import { ComboboxRoot } from './primitive/root.js';
+import { ComboboxTrayTrigger } from './primitive/tray-trigger.js';
+import { ComboboxTray } from './primitive/tray.js';
+import { ComboboxTrigger } from './primitive/trigger.js';
 
 type ComboboxLoadingState = 'error' | 'filtering' | 'idle' | 'loading' | 'loadingMore' | 'sorting';
 

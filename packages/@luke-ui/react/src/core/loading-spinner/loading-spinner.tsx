@@ -1,17 +1,13 @@
 import type { ComponentProps, ReactNode } from 'react';
 import { useId } from 'react';
-import {
-	ICON_VIEWBOX,
-	ICON_VIEWBOX_SIZE,
-	SPINNER_CIRCLE_RADIUS,
-	SPINNER_STROKE_WIDTH,
-} from '../sizing/icon-sizing.js';
+import { ICON_VIEWBOX, ICON_VIEWBOX_SIZE } from '../icon/icon-sizing.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
 import { useSynchronizeAnimations } from '../use-synchronize-animations/use-synchronize-animations.js';
 import { VisuallyHidden } from '../visually-hidden/visually-hidden.js';
 import type { LoadingSpinnerRecipeVariants } from './recipe.css.js';
 import { loadingSpinnerRecipe, rubberBandAnimationName, spinAnimationName } from './recipe.css.js';
+import { SPINNER_CIRCLE_RADIUS, SPINNER_STROKE_WIDTH } from './spinner-sizing.js';
 
 interface LoadingSpinnerVariantProps extends NonNullable<LoadingSpinnerRecipeVariants> {}
 

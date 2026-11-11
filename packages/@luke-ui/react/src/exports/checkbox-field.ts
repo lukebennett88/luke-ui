@@ -1,1 +1,1 @@
-export { CheckboxField, type CheckboxFieldProps } from '../core/checkbox-field/checkbox-field.js';
+export { CheckboxField, type CheckboxFieldProps } from '../core/checkbox/checkbox-field.js';

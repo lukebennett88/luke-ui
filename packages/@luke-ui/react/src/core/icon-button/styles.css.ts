@@ -1,4 +1,4 @@
-import { contextualIconSize } from '../sizing/icon-sizing.js';
+import { contextualIconSize } from '../icon/icon-sizing.js';
 import { globalStyleInLayer, style } from '../styles/layered-style.css.js';
 
 /** Centers the icon graphic inside an icon-only control. */

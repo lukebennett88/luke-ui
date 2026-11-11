@@ -470,7 +470,7 @@ values scale with the root font size. Build literal scales with `literalScale` i
 
 Buttons provide `xsmall` icons and spinners at both recipe sizes. Field controls provide `xsmall`
 icons at `small` and `small` icons at `medium`. Explicit `Icon.size` overrides win over context. The
-context is CSS: a recipe spreads `iconSizeVars(size)` from `core/sizing/icon-sizing.ts` into its
+context is CSS: a recipe spreads `iconSizeVars(size)` from `core/icon/icon-sizing.ts` into its
 `vars`, which sets the inherited `--luke-icon-size`. `iconRecipe`, `createIcon`, and the spinner
 read it when they have no `size` variant. Inheritance follows the DOM, so a portalled part such as a
 list box item sets its own. `--luke-icon-size` and `iconSizeVars` are public, so applications set

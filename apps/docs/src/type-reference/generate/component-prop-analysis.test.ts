@@ -77,7 +77,7 @@ test(
 	'keeps label, id, and ref props on CheckboxField while hiding external naming, children, isInvalid, and generic DOM props',
 	async () => {
 		const names = await visiblePropNames(
-			'packages/@luke-ui/react/src/core/checkbox-field/checkbox-field.tsx',
+			'packages/@luke-ui/react/src/core/checkbox/checkbox-field.tsx',
 			'CheckboxFieldProps',
 		);
 		expect(names).toContain('label');
@@ -101,7 +101,7 @@ test(
 	'keeps accessible-name props on ComboboxField while hiding generic DOM props',
 	async () => {
 		const names = await visiblePropNames(
-			'packages/@luke-ui/react/src/core/combobox-field/combobox-field.tsx',
+			'packages/@luke-ui/react/src/core/combobox/combobox-field.tsx',
 			'ComboboxFieldProps',
 		);
 		expect(names).toContain('label');
@@ -206,7 +206,7 @@ test(
 	'keeps the redeclared form and state contract visible on the Combobox root primitive',
 	async () => {
 		const names = await visiblePropNames(
-			'packages/@luke-ui/react/src/core/primitives/combobox/root.tsx',
+			'packages/@luke-ui/react/src/core/combobox/primitive/root.tsx',
 			'ComboboxRootProps',
 		);
 		expect(names).toContain('isDisabled');
@@ -678,7 +678,7 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 	{
 		exportName: 'ComboboxTriggerProps',
 		name: 'ComboboxTriggerProps',
-		path: 'packages/@luke-ui/react/src/core/primitives/combobox/trigger.tsx',
+		path: 'packages/@luke-ui/react/src/core/combobox/primitive/trigger.tsx',
 		props: [
 			'aria-describedby',
 			'aria-details',
@@ -711,7 +711,7 @@ const PINNED_VISIBLE_PROPS: ReadonlyArray<{
 	{
 		exportName: 'ComboboxClearButtonProps',
 		name: 'ComboboxClearButtonProps',
-		path: 'packages/@luke-ui/react/src/core/primitives/combobox/clear-button.tsx',
+		path: 'packages/@luke-ui/react/src/core/combobox/primitive/clear-button.tsx',
 		props: [
 			'aria-describedby',
 			'aria-details',

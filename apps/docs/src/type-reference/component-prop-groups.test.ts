@@ -70,7 +70,7 @@ test('renders the native props note with the exported type name', () => {
 });
 
 test('classifies every ComboboxRootProps form/validation prop as Forms', () => {
-	// ComboboxRootProps (packages/@luke-ui/react/src/core/primitives/combobox/root.tsx)
+	// ComboboxRootProps (packages/@luke-ui/react/src/core/combobox/primitive/root.tsx)
 	// redeclares these nine RAC props as its form/validation contract. Naming them literally
 	// here means upstream drift, or a future edit to FORM_PROPS, fails this test loudly.
 	expect(classifyPropGroup('autoFocus')).toBe('Forms');

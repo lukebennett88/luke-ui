@@ -1,4 +1,4 @@
-import type { IconSize } from './icon-sizing.js';
+import type { IconSize } from '../icon/icon-sizing.js';
 
 /** Complete recipe sizes shared by compatible controls and actions. */
 export type ControlSize = 'small' | 'medium';

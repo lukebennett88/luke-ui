@@ -1,10 +1,6 @@
 import { createVar } from '@vanilla-extract/css';
 import { vars } from '../../../theme/contract.css.js';
 import { FONT_METRIC_SCALE } from '../../../theme/font-metric-scale.js';
-import { CHECKBOX_GLYPH_SIZE } from '../../sizing/choice-sizing.js';
-import type { RecipeSelection } from '../../styles/recipe-types.js';
-import type { SlottedConfigInput } from '../../styles/recipe.js';
-import { recipe } from '../../styles/recipe.js';
 import {
 	choiceControl,
 	choiceForcedColors,
@@ -14,7 +10,11 @@ import {
 	chosenForcedSelectors,
 	hovered,
 	pressed,
-} from '../field/choice-control.css.js';
+} from '../../primitives/field/choice-control.css.js';
+import type { RecipeSelection } from '../../styles/recipe-types.js';
+import type { SlottedConfigInput } from '../../styles/recipe.js';
+import { recipe } from '../../styles/recipe.js';
+import { CHECKBOX_GLYPH_SIZE } from '../checkbox-sizing.js';
 
 const checkboxGlyphSize = createVar();
 

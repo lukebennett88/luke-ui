@@ -5,9 +5,9 @@
 // ignore source order. Generators append imports; they do not sort this list.
 import '../primitives/button/recipe.css.js';
 import '../primitives/field/recipe.css.js';
-import '../primitives/checkbox/styles.css.js';
+import '../checkbox/primitive/styles.css.js';
 import '../primitives/radio/styles.css.js';
-import '../primitives/combobox/styles.css.js';
+import '../combobox/primitive/styles.css.js';
 import '../primitives/select/styles.css.js';
 import '../primitives/text-input/styles.css.js';
 import '../primitives/text-input/recipe.css.js';

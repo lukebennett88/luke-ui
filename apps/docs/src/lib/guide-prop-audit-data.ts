@@ -37,7 +37,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		['isLoading'],
 	'feedback/loading-spinner.mdx::packages/@luke-ui/react/src/core/loading-spinner/loading-spinner.tsx::LoadingSpinnerProps':
 		['aria-label', 'color', 'isLoading', 'size'],
-	'forms/checkbox-field.mdx::packages/@luke-ui/react/src/core/checkbox-field/checkbox-field.tsx::CheckboxFieldProps':
+	'forms/checkbox-field.mdx::packages/@luke-ui/react/src/core/checkbox/checkbox-field.tsx::CheckboxFieldProps':
 		[
 			'defaultSelected',
 			'description',
@@ -89,7 +89,7 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'validationBehavior',
 		'validationErrors',
 	],
-	'forms/combobox-field.mdx::packages/@luke-ui/react/src/core/combobox-field/combobox-field.tsx::ComboboxFieldProps':
+	'forms/combobox-field.mdx::packages/@luke-ui/react/src/core/combobox/combobox-field.tsx::ComboboxFieldProps':
 		[
 			'aria-label',
 			'aria-labelledby',
@@ -115,9 +115,9 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 			'size',
 			'validate',
 		],
-	'forms/combobox-field.mdx::packages/@luke-ui/react/src/core/primitives/combobox/item.tsx::ComboboxItemProps':
+	'forms/combobox-field.mdx::packages/@luke-ui/react/src/core/combobox/primitive/item.tsx::ComboboxItemProps':
 		[],
-	'forms/combobox-field.mdx::packages/@luke-ui/react/src/core/primitives/combobox/section.tsx::ComboboxSectionProps':
+	'forms/combobox-field.mdx::packages/@luke-ui/react/src/core/combobox/primitive/section.tsx::ComboboxSectionProps':
 		[],
 	'forms/radio-group.mdx::packages/@luke-ui/react/src/core/radio-group/radio-group.tsx::RadioGroupProps':
 		[
@@ -272,39 +272,39 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		['elementType', 'isFocusable', 'ref', 'renderRoot'],
 	'primitives/button.mdx::packages/@luke-ui/react/src/core/primitives/button/button.tsx::ButtonProps':
 		['appearance', 'inlineSize', 'isDisabled', 'isPending', 'size', 'tone'],
-	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx::CheckboxControlProps':
+	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/checkbox/primitive/checkbox.tsx::CheckboxControlProps':
 		[],
-	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx::CheckboxIndicatorProps':
+	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/checkbox/primitive/checkbox.tsx::CheckboxIndicatorProps':
 		[],
-	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx::CheckboxLabelProps':
+	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/checkbox/primitive/checkbox.tsx::CheckboxLabelProps':
 		['children', 'ref'],
-	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/primitives/checkbox/checkbox.tsx::CheckboxRootProps':
+	'primitives/checkbox.mdx::packages/@luke-ui/react/src/core/checkbox/primitive/checkbox.tsx::CheckboxRootProps':
 		['aria-labelledby', 'id', 'inputId', 'inputRef', 'isInvalid', 'ref', 'size'],
-	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/clear-button.tsx::ComboboxClearButtonProps':
+	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/combobox/primitive/clear-button.tsx::ComboboxClearButtonProps':
 		[],
-	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/empty-state.tsx::ComboboxEmptyStateProps':
+	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/combobox/primitive/empty-state.tsx::ComboboxEmptyStateProps':
 		['children'],
-	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/control.tsx::ComboboxControlProps':
+	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/combobox/primitive/control.tsx::ComboboxControlProps':
 		['size'],
-	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/input.tsx::ComboboxInputProps':
+	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/combobox/primitive/input.tsx::ComboboxInputProps':
 		['size'],
-	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/item.tsx::ComboboxItemProps':
+	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/combobox/primitive/item.tsx::ComboboxItemProps':
 		[],
-	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/item.tsx::ComboboxLoadMoreItemProps':
+	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/combobox/primitive/item.tsx::ComboboxLoadMoreItemProps':
 		[],
-	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/listbox.tsx::ComboboxListBoxProps':
+	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/combobox/primitive/listbox.tsx::ComboboxListBoxProps':
 		['items', 'loadMoreItem'],
-	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/popover.tsx::ComboboxPopoverProps':
+	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/combobox/primitive/popover.tsx::ComboboxPopoverProps':
 		[],
-	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/root.tsx::ComboboxRootProps':
+	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/combobox/primitive/root.tsx::ComboboxRootProps':
 		['aria-label', 'defaultItems', 'id', 'inputId', 'ref', 'size'],
-	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/section.tsx::ComboboxSectionProps':
+	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/combobox/primitive/section.tsx::ComboboxSectionProps':
 		['title'],
-	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/tray-trigger.tsx::ComboboxTrayTriggerProps':
+	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/combobox/primitive/tray-trigger.tsx::ComboboxTrayTriggerProps':
 		['placeholder'],
-	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/tray.tsx::ComboboxTrayProps':
+	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/combobox/primitive/tray.tsx::ComboboxTrayProps':
 		['children'],
-	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/primitives/combobox/trigger.tsx::ComboboxTriggerProps':
+	'primitives/combobox.mdx::packages/@luke-ui/react/src/core/combobox/primitive/trigger.tsx::ComboboxTriggerProps':
 		['aria-label', 'size'],
 	'primitives/field.mdx::packages/@luke-ui/react/src/core/primitives/field/description.tsx::FieldDescriptionProps':
 		['id'],

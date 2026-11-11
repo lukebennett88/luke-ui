@@ -1,8 +1,8 @@
 import { createVar, fallbackVar } from '@vanilla-extract/css';
 import { iconMaskUrls } from '../../../../.generated/icon-mask-data.js';
 import { vars } from '../../../theme/contract.css.js';
+import { ICON_SIZES } from '../../icon/icon-sizing.js';
 import { iconMaskStyle } from '../../icon/mask-style.js';
-import { ICON_SIZES } from '../../sizing/icon-sizing.js';
 import { pressFeedback } from '../../styles/press-feedback.js';
 import type { SlottedConfigInput } from '../../styles/recipe.js';
 import { recipe } from '../../styles/recipe.js';

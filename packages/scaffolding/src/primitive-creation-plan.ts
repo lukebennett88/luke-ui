@@ -60,7 +60,7 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 	const files: Array<PlanFile> = [
 		{
 			contents: renderPrimitiveSource({ pascalName, recipeName }),
-			path: `packages/@luke-ui/react/src/core/primitives/${name}/${name}.tsx`,
+			path: `packages/@luke-ui/react/src/core/${name}/primitive/${name}.tsx`,
 		},
 		{
 			contents: renderPackageExport({ name, pascalName }),
@@ -68,7 +68,7 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 		},
 		{
 			contents: renderRecipe({ recipeName }),
-			path: `packages/@luke-ui/react/src/core/primitives/${name}/recipe.css.ts`,
+			path: `packages/@luke-ui/react/src/core/${name}/primitive/recipe.css.ts`,
 		},
 		{
 			contents: renderPrimitiveTest({
@@ -77,7 +77,7 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 				pascalName,
 				visualCoverage: input.visualCoverage,
 			}),
-			path: `packages/@luke-ui/react/src/core/primitives/${name}/${name}.browser.test.tsx`,
+			path: `packages/@luke-ui/react/src/core/${name}/primitive/${name}.browser.test.tsx`,
 		},
 	];
 
@@ -102,7 +102,7 @@ export function createPrimitiveWork(input: ParsedPrimitiveAnswers): PrimitiveCre
 		importEdits: [
 			{
 				kind: 'import',
-				line: `import '../primitives/${name}/recipe.css.js';`,
+				line: `import '../${name}/primitive/recipe.css.js';`,
 				path: 'packages/@luke-ui/react/src/core/styles/modules.css.ts',
 			},
 		],
@@ -150,7 +150,7 @@ export function ${input.pascalName}(props: ${input.pascalName}Props): JSX.Elemen
 }
 
 function renderPackageExport(input: { name: string; pascalName: string }): string {
-	return `export { ${input.pascalName}, type ${input.pascalName}Props } from '../../core/primitives/${input.name}/${input.name}.js';
+	return `export { ${input.pascalName}, type ${input.pascalName}Props } from '../../core/${input.name}/primitive/${input.name}.js';
 `;
 }
 
@@ -178,7 +178,7 @@ function renderHostedDocsPage(input: {
 	pascalName: string;
 }): string {
 	const exampleSlug = `${input.name}-primitive/basic`;
-	const propsPath = `packages/@luke-ui/react/src/core/primitives/${input.name}/${input.name}.tsx`;
+	const propsPath = `packages/@luke-ui/react/src/core/${input.name}/primitive/${input.name}.tsx`;
 	const propsTable = renderComponentPropsTable({
 		name: `${input.pascalName}Props`,
 		path: propsPath,

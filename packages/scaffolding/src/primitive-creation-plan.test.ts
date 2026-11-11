@@ -44,9 +44,9 @@ describe('createPrimitivePlan', () => {
 		expect(plan.files.map((file) => file.path).toSorted()).toEqual([
 			'apps/docs/content/docs/components/primitives/status-badge.mdx',
 			'apps/docs/src/examples/status-badge-primitive/basic.tsx',
-			'packages/@luke-ui/react/src/core/primitives/status-badge/recipe.css.ts',
-			'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.browser.test.tsx',
-			'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.tsx',
+			'packages/@luke-ui/react/src/core/status-badge/primitive/recipe.css.ts',
+			'packages/@luke-ui/react/src/core/status-badge/primitive/status-badge.browser.test.tsx',
+			'packages/@luke-ui/react/src/core/status-badge/primitive/status-badge.tsx',
 			'packages/@luke-ui/react/src/exports/primitives/status-badge.ts',
 		]);
 		expect(plan).not.toHaveProperty('jsonEdits');
@@ -54,10 +54,10 @@ describe('createPrimitivePlan', () => {
 		expect(plan).not.toHaveProperty('textFileInserts');
 
 		const recipeSource = plan.files.find((file) =>
-			file.path.endsWith('/status-badge/recipe.css.ts'),
+			file.path.endsWith('/status-badge/primitive/recipe.css.ts'),
 		)?.contents;
 		const primitiveSource = plan.files.find((file) =>
-			file.path.endsWith('/status-badge/status-badge.tsx'),
+			file.path.endsWith('/status-badge/primitive/status-badge.tsx'),
 		)?.contents;
 		const packageExportSource = plan.files.find((file) =>
 			file.path.endsWith('/exports/primitives/status-badge.ts'),
@@ -82,7 +82,7 @@ describe('createPrimitivePlan', () => {
 		expect(recipeSource).toContain('base: {},');
 		expect(recipeSource).not.toContain('inline-flex');
 		expect(packageExportSource).toContain(
-			"export { StatusBadge, type StatusBadgeProps } from '../../core/primitives/status-badge/status-badge.js';",
+			"export { StatusBadge, type StatusBadgeProps } from '../../core/status-badge/primitive/status-badge.js';",
 		);
 		expect(packageExportSource).not.toContain('ecipe');
 		expect(example).toContain("from '@luke-ui/react/primitives/status-badge'");
@@ -92,7 +92,7 @@ describe('createPrimitivePlan', () => {
 		expect(findComponentPropsTableTags(guide)).toEqual([
 			{
 				name: 'StatusBadgeProps',
-				path: 'packages/@luke-ui/react/src/core/primitives/status-badge/status-badge.tsx',
+				path: 'packages/@luke-ui/react/src/core/status-badge/primitive/status-badge.tsx',
 			},
 		]);
 		expect(guide).toContain('src="status-badge-primitive/basic"');
