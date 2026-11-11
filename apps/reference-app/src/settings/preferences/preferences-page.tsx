@@ -8,18 +8,13 @@ import {
 	SelectValue,
 } from '@luke-ui/react/primitives/select';
 import { useOutletContext } from 'react-router';
-import type { Preferences } from '../api/schemas.js';
-import {
-	SettingsPage,
-	SettingsRow,
-	SettingsSection,
-	SettingsStatus,
-} from '../components/settings-section.js';
-import { SettingsSwitchRow } from '../components/settings-switch.js';
-import * as styles from '../styles/settings.css.js';
+import type { SettingsOutletContext } from '../settings-outlet-context.js';
+import { SettingsPage, SettingsRow, SettingsSection, SettingsStatus } from '../settings-section.js';
+import * as styles from '../settings.css.js';
 import type { PrefRow } from './preferences-config.js';
 import { INTERFACE_PREFS } from './preferences-config.js';
-import type { SettingsOutletContext } from './settings-layout.js';
+import type { Preferences } from './schema.js';
+import { SettingsSwitchRow } from './settings-switch.js';
 
 export function PreferencesPage() {
 	const {

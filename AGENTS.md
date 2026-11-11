@@ -26,6 +26,7 @@ documentation, tests, or both.
 
 ## Universal rules
 
+- Read [Architecture](docs/ARCHITECTURE.md) when placing code or changing dependencies.
 - Read the applicable [repository guides](README.md#repository-guides) before changing or reviewing
   their subject. Keep technical rules in those guides and workflows in skills or agent guidance.
 - Preserve existing work and staging state. Do not reset, clean, stash, or overwrite it. Keep

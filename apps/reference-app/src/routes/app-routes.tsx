@@ -8,13 +8,13 @@ import type { QueryClient } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import type { RouteObject } from 'react-router';
 import { isRouteErrorResponse, redirect, useRouteError } from 'react-router';
-import { settingsQueryOptions } from '../api/settings-query.js';
+import { PreferencesPage } from '../settings/preferences/preferences-page.js';
+import { ProfilePage } from '../settings/profile/profile-page.js';
+import { SecurityPage } from '../settings/security/security-page.js';
+import { SettingsLayout, SettingsMenuPage } from '../settings/settings-layout.js';
+import { settingsQueryOptions } from '../settings/settings-query.js';
 import { HomePage } from './home.js';
-import { PreferencesPage } from './preferences.js';
-import { ProfilePage } from './profile.js';
 import { RootLayout } from './root-layout.js';
-import { SecurityPage } from './security.js';
-import { SettingsLayout, SettingsMenuPage } from './settings-layout.js';
 
 /** Route tree shared by the browser router and the test harness. */
 export function createAppRoutes(queryClient: QueryClient): Array<RouteObject> {

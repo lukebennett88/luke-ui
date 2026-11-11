@@ -6,57 +6,28 @@ import { Link } from '@luke-ui/react/link';
 import { ScrollFade } from '@luke-ui/react/scroll-fade';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
-import { useIsMutating, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { useEffect, useRef, useState } from 'react';
 import { Outlet, Link as RouterLink, useLocation } from 'react-router';
-import type { Preferences, Settings } from '../api/schemas.js';
-import { settingsApi } from '../api/settings-api.js';
-import {
-	PREFERENCES_MUTATION_KEY,
-	settingsQueryKey,
-	settingsQueryOptions,
-} from '../api/settings-query.js';
-import { SETTINGS_NAV, SettingsNav, SettingsNavSearch } from '../components/settings-nav.js';
-import * as styles from '../styles/settings.css.js';
+import { usePreferencesMutation } from './preferences/preferences-mutation.js';
+import type { Settings } from './schemas.js';
+import { SETTINGS_NAV, SettingsNav, SettingsNavSearch } from './settings-nav.js';
+import type { SettingsOutletContext } from './settings-outlet-context.js';
+import { settingsQueryOptions } from './settings-query.js';
+import * as styles from './settings.css.js';
 
 const MAIN_ID = 'settings-main';
 
-export type SettingsOutletContext = {
-	preferences: Preferences;
-	isPreferencesPending: boolean;
-	preferencesError?: string;
-	resetPreferencesStatus: () => void;
-	savePreferences: (patch: Partial<Preferences>) => void;
-};
-
 export function SettingsLayout() {
 	const { pathname } = useLocation();
-	const queryClient = useQueryClient();
 	const settings = useQuery(settingsQueryOptions).data!;
-	const preferencesMutation = useMutation({
-		mutationFn: (patch: Partial<Preferences>) => settingsApi.updatePreferences(patch),
-		mutationKey: PREFERENCES_MUTATION_KEY,
-		onSuccess: (nextSettings) => queryClient.setQueryData(settingsQueryKey, nextSettings),
-	});
-	const isPreferencesPending =
-		useIsMutating({ exact: true, mutationKey: PREFERENCES_MUTATION_KEY }) > 0;
-	const preferences = useMemo(() => {
-		return preferencesMutation.isPending
-			? { ...settings.preferences, ...preferencesMutation.variables }
-			: settings.preferences;
-	}, [preferencesMutation.isPending, preferencesMutation.variables, settings.preferences]);
+	const preferencesContext = usePreferencesMutation(settings.preferences);
 
 	const current = SETTINGS_NAV.find((item) => item.to === pathname);
 	const isMenu = pathname === '/settings/menu';
 	const mainRef = useRef<HTMLDivElement>(null);
 	const previousPathname = useRef(pathname);
 	const [sidebarNavQuery, setSidebarNavQuery] = useState('');
-
-	function savePreferences(patch: Partial<Preferences>) {
-		if (isPreferencesPending) return;
-		preferencesMutation.reset();
-		preferencesMutation.mutate(patch);
-	}
 
 	useEffect(() => {
 		if (previousPathname.current === pathname) return;
@@ -148,20 +119,7 @@ export function SettingsLayout() {
 							</Box>
 						)}
 						<Container maxInlineSize="container.672">
-							<Outlet
-								context={
-									{
-										isPreferencesPending,
-										preferences,
-										preferencesError:
-											preferencesMutation.error instanceof Error
-												? preferencesMutation.error.message
-												: undefined,
-										resetPreferencesStatus: preferencesMutation.reset,
-										savePreferences,
-									} satisfies SettingsOutletContext
-								}
-							/>
+							<Outlet context={preferencesContext satisfies SettingsOutletContext} />
 						</Container>
 					</Box>
 				</Box>

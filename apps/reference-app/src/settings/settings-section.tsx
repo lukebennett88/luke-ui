@@ -4,7 +4,7 @@ import { Stack } from '@luke-ui/react/stack';
 import type { TextProps } from '@luke-ui/react/text';
 import { Text } from '@luke-ui/react/text';
 import type { ReactNode } from 'react';
-import * as styles from '../styles/settings.css.js';
+import * as styles from './settings.css.js';
 
 export function SettingsPage({ children, title }: { children: ReactNode; title: string }) {
 	return (

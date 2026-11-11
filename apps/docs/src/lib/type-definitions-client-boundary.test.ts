@@ -1,4 +1,5 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { dirname, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ts } from 'ts-morph';
@@ -6,6 +7,7 @@ import { expect, test } from 'vite-plus/test';
 
 const docsSrcDir = fileURLToPath(new URL('..', import.meta.url));
 const JS_EXTENSION_PATTERN = /\.js$/;
+const TS_EXTENSION_PATTERN = /\.tsx?$/;
 
 /** The API table component pages render, which loads and shows the type definitions. */
 const CLIENT_ENTRY = resolve(docsSrcDir, 'components/component-props-table.tsx');
@@ -32,6 +34,17 @@ test('the API table loads type definitions without build-time dependencies', () 
 			(name) => name.startsWith('node:') || BUILD_ONLY_PACKAGES.some((pkg) => name === pkg),
 		),
 	).toEqual([]);
+});
+
+test('follows explicit TypeScript imports to build-only dependencies', () => {
+	const dir = mkdtempSync(resolve(tmpdir(), 'client-boundary-'));
+	try {
+		writeFileSync(resolve(dir, 'entry.ts'), "import './generator.ts';");
+		writeFileSync(resolve(dir, 'generator.ts'), "import 'node:fs';");
+		expect(valueImportGraph(resolve(dir, 'entry.ts')).packages).toContain('node:fs');
+	} finally {
+		rmSync(dir, { recursive: true, force: true });
+	}
 });
 
 /**
@@ -94,9 +107,11 @@ function isTypeOnlyImport(statement: ts.ImportDeclaration): boolean {
 	);
 }
 
-/** Resolves `./x.js` to its `.ts` or `.tsx` source. Asset imports such as `?url` are skipped. */
+/** Resolves relative source imports. Asset imports such as `?url` are skipped. */
 function resolveLocalModule(fromDir: string, specifier: string): string | undefined {
 	if (specifier.includes('?')) return;
-	const base = resolve(fromDir, specifier).replace(JS_EXTENSION_PATTERN, '');
+	const target = resolve(fromDir, specifier);
+	if (TS_EXTENSION_PATTERN.test(target)) return existsSync(target) ? target : undefined;
+	const base = target.replace(JS_EXTENSION_PATTERN, '');
 	return ['.ts', '.tsx'].map((extension) => `${base}${extension}`).find((path) => existsSync(path));
 }

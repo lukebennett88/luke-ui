@@ -59,16 +59,8 @@ exports. See [PUBLIC_API.md](PUBLIC_API.md) for the public surface rules.
 
 ## Package structure
 
-- `src/core/` holds implementation, styles, helpers, and colocated tests and fixtures.
-- `src/exports/` holds the public modules. See [PUBLIC_API.md](PUBLIC_API.md#what-is-public).
-- `src/theme/` holds the compiler, foundations, and visual theme fixtures in `__fixtures__/`.
-  Published themes live in `packages/@luke-ui/theme-*`.
-- `src/shared/` holds small, domain-free primitives such as class-name constants and typed object
-  helpers. Keep component, compiler, and recipe logic in their own zones.
-
-`exports` may import from `core`, `theme`, and `shared`. `core` may import from `theme` and
-`shared`. `theme` may import from `shared`. `shared` imports from no other zone. Lint in the root
-`vite.config.ts` enforces the internal zone boundaries.
+[Architecture](ARCHITECTURE.md#react-library) owns source zones, functional ownership, and
+dependency directions.
 
 A component directory contains `<component>.tsx`, `recipe.css.ts` for its public recipe,
 `styles.css.ts` when private styling is needed, and `<component>.browser.test.tsx` for behaviour,

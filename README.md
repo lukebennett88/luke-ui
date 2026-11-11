@@ -49,6 +49,7 @@ orchestration.
 
 ## Repository guides
 
+- [Architecture](docs/ARCHITECTURE.md): functional ownership and dependency boundaries.
 - [Conventions](docs/CONVENTIONS.md): repo-wide coding conventions.
 - [Components](docs/COMPONENTS.md): component and primitive structure, package paths, and generator
   rules.

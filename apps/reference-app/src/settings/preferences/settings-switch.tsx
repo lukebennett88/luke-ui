@@ -6,8 +6,8 @@ import {
 	SwitchThumb,
 } from '@luke-ui/react/primitives/switch';
 import { Stack } from '@luke-ui/react/stack';
-import * as styles from '../styles/settings.css.js';
-import { SettingsRowControl } from './settings-section.js';
+import { SettingsRowControl } from '../settings-section.js';
+import * as styles from '../settings.css.js';
 
 /**
  * A settings row for a switch. The row draws the visible label and description with `FieldLabel` and

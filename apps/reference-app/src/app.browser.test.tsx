@@ -2,7 +2,7 @@ import axe from 'axe-core';
 import { act } from 'react';
 import { expect, onTestFinished, test, vi } from 'vite-plus/test';
 import { cdp, page } from 'vite-plus/test/context';
-import { settingsApi } from './api/settings-api.js';
+import { settingsApi } from './settings/settings-api.js';
 import { renderApp } from './test/render-app.js';
 
 test('home opens settings, desktop navigation follows the URL, and Back to app returns home', async () => {

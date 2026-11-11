@@ -7,11 +7,11 @@ import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-quer
 import { useId, useState } from 'react';
 import { Dialog, DialogTrigger } from 'react-aria-components/Dialog';
 import { Modal, ModalOverlay } from 'react-aria-components/Modal';
-import { DEFAULT_SETTINGS } from '../api/schemas.js';
-import { settingsApi } from '../api/settings-api.js';
-import { settingsQueryKey } from '../api/settings-query.js';
-import * as styles from '../styles/settings.css.js';
-import { SettingsRow, SettingsSection, SettingsStatus } from './settings-section.js';
+import { DEFAULT_SETTINGS } from '../schemas.js';
+import { settingsApi } from '../settings-api.js';
+import { settingsQueryKey } from '../settings-query.js';
+import { SettingsRow, SettingsSection, SettingsStatus } from '../settings-section.js';
+import * as styles from '../settings.css.js';
 
 const CLEAR_MUTATION_KEY = [...settingsQueryKey, 'clear'] as const;
 
