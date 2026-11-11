@@ -15,13 +15,13 @@ import type { Root } from 'react-dom/client';
 import { createRoot } from 'react-dom/client';
 import { afterEach, assert, expect, test, vi } from 'vite-plus/test';
 import { page, userEvent } from 'vite-plus/test/context';
-import type { TypeTokens } from '../lib/type-tokens.js';
+import { MdxCode } from '../components/docs-article/mdx-elements.js';
+import { DocsThemeRoot } from '../components/theme-controls.js';
 import { ComponentPropsTable } from './component-props-table.js';
-import { MdxCode } from './docs-article/mdx-elements.js';
-import { DocsThemeRoot } from './theme-controls.js';
 import { TypeDefinitionsProvider } from './type-definitions-context.js';
 import { TypeTokensView } from './type-popover.js';
 import { TypeTable } from './type-table.js';
+import type { TypeTokens } from './type-tokens.js';
 
 /** Matches the docs article `maxInlineSize` of `52rem` at a 16px root. */
 const ARTICLE_INLINE_SIZE = '832px';

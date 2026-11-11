@@ -8,11 +8,11 @@ import { Breadcrumb, Breadcrumbs } from 'react-aria-components/Breadcrumbs';
 import { Dialog, DialogTrigger } from 'react-aria-components/Dialog';
 import { Link } from 'react-aria-components/Link';
 import { Popover } from 'react-aria-components/Popover';
-import type { TypeTokens } from '../lib/type-tokens.js';
-import { lineBreakText } from '../lib/type-tokens.js';
 import type { TypeDefinitionsContextValue } from './type-definitions-context.js';
 import { TypeDefinitionsContext } from './type-definitions-context.js';
 import * as styles from './type-popover.css.js';
+import type { TypeTokens } from './type-tokens.js';
+import { lineBreakText } from './type-tokens.js';
 
 /** Opens a type in place inside a popover that is already open, as React Aria's type popover does. */
 const OpenTypeContext = createContext<((typeName: string) => void) | null>(null);

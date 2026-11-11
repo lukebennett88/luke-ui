@@ -1,9 +1,9 @@
 import type { GeneratedDoc } from 'fumadocs-typescript';
-import { NATIVE_PROPS_FORWARDING_KEY } from './component-prop-groups.js';
+import { NATIVE_PROPS_FORWARDING_KEY } from '../component-prop-groups.js';
+import type { TypeDefinition, TypeDefinitionsPayload } from '../type-definition-model.js';
+import type { TypeTokens } from '../type-tokens.js';
+import { typeTokensToText } from '../type-tokens.js';
 import type { ComponentPropsTableData } from './remark-attach-type-definitions.js';
-import type { TypeDefinition, TypeDefinitionsPayload } from './type-definition-model.js';
-import type { TypeTokens } from './type-tokens.js';
-import { typeTokensToText } from './type-tokens.js';
 
 interface MdastNode {
 	type: string;

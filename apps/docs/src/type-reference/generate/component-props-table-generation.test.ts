@@ -2,13 +2,13 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createGenerator, createFileSystemGeneratorCache } from 'fumadocs-typescript';
 import { expect, test } from 'vite-plus/test';
-import { NATIVE_PROPS_FORWARDING_KEY } from './component-prop-groups.js';
+import { NATIVE_PROPS_FORWARDING_KEY } from '../component-prop-groups.js';
+import type { EnrichedGeneratedDoc } from '../type-definition-model.js';
+import type { TypeTokens } from '../type-tokens.js';
+import { typeTokensToText } from '../type-tokens.js';
 import { createComponentPropsGenerator } from './create-component-props-generator.js';
-import type { EnrichedGeneratedDoc } from './type-definition-model.js';
-import type { TypeTokens } from './type-tokens.js';
-import { typeTokensToText } from './type-tokens.js';
 
-const repoRoot = fileURLToPath(new URL('../../../..', import.meta.url));
+const repoRoot = fileURLToPath(new URL('../../../../..', import.meta.url));
 const generator = createGenerator({
 	cache: createFileSystemGeneratorCache(resolve(repoRoot, 'apps/docs/.source/fumadocs-typescript')),
 });
@@ -133,7 +133,7 @@ test('does not mark an object-only type with the native-props entry', async () =
 test('preserves optional alias-of-union props instead of collapsing them to union', async () => {
 	const [doc] = (await componentPropsGenerator.generateTypeTable(
 		{
-			path: 'apps/docs/src/lib/__fixtures__/optional-alias-doc-props.ts',
+			path: 'apps/docs/src/type-reference/generate/__fixtures__/optional-alias-doc-props.ts',
 			name: 'OptionalAliasDocProps',
 		},
 		{ basePath: repoRoot },
@@ -296,7 +296,7 @@ test('prefers resolved callback signatures over indexed-access annotations', asy
 test('keeps explicit undefined on indexed-access targets and strips only implied optionality', async () => {
 	const [doc] = (await componentPropsGenerator.generateTypeTable(
 		{
-			path: 'apps/docs/src/lib/__fixtures__/indexed-access-doc-props.ts',
+			path: 'apps/docs/src/type-reference/generate/__fixtures__/indexed-access-doc-props.ts',
 			name: 'IndexedAccessDocProps',
 		},
 		{ basePath: repoRoot },
@@ -329,7 +329,7 @@ test('keeps explicit undefined on indexed-access targets and strips only implied
 test('prefers non-never annotations across element/render union branches', async () => {
 	const [doc] = await componentPropsGenerator.generateTypeTable(
 		{
-			path: 'apps/docs/src/lib/__fixtures__/union-branch-doc-props.ts',
+			path: 'apps/docs/src/type-reference/generate/__fixtures__/union-branch-doc-props.ts',
 			name: 'UnionBranchDocProps',
 		},
 		{ basePath: repoRoot },
@@ -375,7 +375,7 @@ test('prefers non-never annotations across element/render union branches', async
 test('keeps optional and explicit-undefined props distinct', async () => {
 	const [doc] = await componentPropsGenerator.generateTypeTable(
 		{
-			path: 'apps/docs/src/lib/__fixtures__/optionality-doc-props.ts',
+			path: 'apps/docs/src/type-reference/generate/__fixtures__/optionality-doc-props.ts',
 			name: 'OptionalityDocProps',
 		},
 		{ basePath: repoRoot },

@@ -12,14 +12,15 @@ import {
 } from './component-prop-analysis.js';
 import { createComponentPropsGenerator } from './create-component-props-generator.js';
 
-const repoRoot = fileURLToPath(new URL('../../../..', import.meta.url));
+const repoRoot = fileURLToPath(new URL('../../../../..', import.meta.url));
 const reactSrcDir = lukeUiReactSrcDir(repoRoot);
 // The union fixture stands in for shapes Luke UI has only one of. `BoxProps` is the sole union among
 // the documented types, so the negative case — a union that forwards nothing — has no real
 // counterpart to assert against. Analysing the fixture against its own directory makes its two plain
 // branches "first-party" exactly the way a component's own interfaces are.
-const UNION_FIXTURE_PATH = 'apps/docs/src/lib/__fixtures__/prop-analysis-union.ts';
-const fixtureSrcDir = resolve(repoRoot, 'apps/docs/src/lib/__fixtures__');
+const UNION_FIXTURE_PATH =
+	'apps/docs/src/type-reference/generate/__fixtures__/prop-analysis-union.ts';
+const fixtureSrcDir = resolve(repoRoot, 'apps/docs/src/type-reference/generate/__fixtures__');
 const generator = createComponentPropsGenerator({
 	cache: createFileSystemGeneratorCache(resolve(repoRoot, 'apps/docs/.source/fumadocs-typescript')),
 });

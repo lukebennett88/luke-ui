@@ -3,18 +3,18 @@ import { fileURLToPath } from 'node:url';
 import { loader } from 'fumadocs-core/source';
 import { createFileSystemGeneratorCache } from 'fumadocs-typescript';
 import { expect, test } from 'vite-plus/test';
-import { docs as docsCollection } from '../../.source/server.js';
-import { NATIVE_PROPS_FORWARDING_KEY } from './component-prop-groups.js';
+import { docs as docsCollection } from '../../../.source/server.js';
+import { NATIVE_PROPS_FORWARDING_KEY } from '../component-prop-groups.js';
+import type { TypeDefinitionsPayload } from '../type-definition-model.js';
 import { createComponentPropsGenerator } from './create-component-props-generator.js';
 import { stringifyComponentPropsTable } from './stringify-component-props-table.js';
-import type { TypeDefinitionsPayload } from './type-definition-model.js';
 
 const source = loader({
 	baseUrl: '/',
 	source: docsCollection.toFumadocsSource(),
 });
 
-const repoRoot = fileURLToPath(new URL('../../../..', import.meta.url));
+const repoRoot = fileURLToPath(new URL('../../../../..', import.meta.url));
 const componentPropsGenerator = createComponentPropsGenerator({
 	cache: createFileSystemGeneratorCache(resolve(repoRoot, 'apps/docs/.source/fumadocs-typescript')),
 });
@@ -152,7 +152,7 @@ test(
 		const [doc] = await componentPropsGenerator.generateTypeTable(
 			{
 				name: 'OptionalityDocProps',
-				path: 'apps/docs/src/lib/__fixtures__/optionality-doc-props.ts',
+				path: 'apps/docs/src/type-reference/generate/__fixtures__/optionality-doc-props.ts',
 			},
 			{ basePath: repoRoot },
 		);

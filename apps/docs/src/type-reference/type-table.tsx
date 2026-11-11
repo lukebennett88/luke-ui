@@ -4,9 +4,8 @@ import { Stack } from '@luke-ui/react/stack';
 import { cx } from '@luke-ui/react/utils';
 import type { ComponentProps, ReactNode } from 'react';
 import { Fragment, useId } from 'react';
-import type { TypeTokens } from '../lib/type-tokens.js';
-import { InheritTypography, MdxLink } from './docs-article/mdx-elements.js';
-import * as referenceStyles from './reference-table.css.js';
+import { InheritTypography, MdxLink } from '../components/docs-article/mdx-elements.js';
+import * as referenceStyles from '../components/reference-table.css.js';
 import {
 	CellText,
 	ReferenceHeaderCell,
@@ -15,9 +14,10 @@ import {
 	TableCell,
 	TableColumn,
 	TableRowHeader,
-} from './reference-table.js';
+} from '../components/reference-table.js';
 import { TypeTokensView } from './type-popover.js';
 import * as styles from './type-table.css.js';
+import type { TypeTokens } from './type-tokens.js';
 
 const HREF_PATTERN = /^(?:[/#]|https?:)/;
 

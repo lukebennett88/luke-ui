@@ -9,7 +9,6 @@ import { useFumadocsLoader } from 'fumadocs-core/source/client';
 import { Suspense } from 'react';
 import * as z from 'zod';
 import browserCollections from '../../.source/browser';
-import { ComponentPropsTable } from '../components/component-props-table.js';
 import { DocsArticle } from '../components/docs-article/docs-article.js';
 import {
 	Card,
@@ -28,7 +27,6 @@ import { IconGallery } from '../components/icon-gallery';
 import type { PageActionsMode } from '../components/page-actions';
 import { PageActions } from '../components/page-actions';
 import { SourceCodeBlock } from '../components/source-code-block';
-import { TypeTable } from '../components/type-table.js';
 import { withBasePath } from '../lib/base-path.js';
 import { GITHUB_REPO_URL } from '../lib/github.js';
 import { markdownUrlForPage } from '../lib/markdown-page-path.js';
@@ -36,6 +34,8 @@ import { resolvePageHeadMeta } from '../lib/page-head.js';
 import { findPageSectionName } from '../lib/page-section.js';
 import { siteUrl } from '../lib/site-url.js';
 import { source } from '../lib/source';
+import { ComponentPropsTable } from '../type-reference/component-props-table.js';
+import { TypeTable } from '../type-reference/type-table.js';
 
 const GITHUB_DOCS_URL = `${GITHUB_REPO_URL}/blob/main/apps/docs/content/docs`;
 const GITHUB_TREE_URL = `${GITHUB_REPO_URL}/tree/main`;

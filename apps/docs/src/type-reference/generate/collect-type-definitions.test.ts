@@ -1,9 +1,9 @@
 import type { ts } from 'ts-morph';
 import { Project } from 'ts-morph';
 import { expect, test } from 'vite-plus/test';
+import type { TypeTokens } from '../type-tokens.js';
+import { typeTokensToText } from '../type-tokens.js';
 import { createTypeDefinitionCollector } from './collect-type-definitions.js';
-import type { TypeTokens } from './type-tokens.js';
-import { typeTokensToText } from './type-tokens.js';
 
 const PACKAGE_DIR = '/repo/packages/@luke-ui/react';
 

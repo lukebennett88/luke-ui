@@ -14,12 +14,12 @@ import { createFileSystemGeneratorCache, generateHash } from 'fumadocs-typescrip
 import { createServer } from 'vite-plus';
 import type { ViteDevServer } from 'vite-plus';
 import { expect, test } from 'vite-plus/test';
-import { findComponentPropsTableTags } from './component-props-table-tags.js';
+import { findComponentPropsTableTags } from '../../lib/component-props-table-tags.js';
+import type { EnrichedGeneratedDoc } from '../type-definition-model.js';
+import { typeTokensToText } from '../type-tokens.js';
 import { createComponentPropsGenerator } from './create-component-props-generator.js';
 import { createLiveTypescriptGenerator } from './create-live-typescript-generator.js';
 import { remarkWatchTypeTableSources } from './remark-watch-type-table-sources.js';
-import type { EnrichedGeneratedDoc } from './type-definition-model.js';
-import { typeTokensToText } from './type-tokens.js';
 import { collectTypescriptSourceGraph } from './typescript-source-graph.js';
 
 const timeout = 60_000;

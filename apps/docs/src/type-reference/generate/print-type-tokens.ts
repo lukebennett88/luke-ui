@@ -1,5 +1,5 @@
 import { ts } from 'ts-morph';
-import type { TypeToken, TypeTokenKind } from './type-tokens.js';
+import type { TypeToken, TypeTokenKind } from '../type-tokens.js';
 
 export interface TypeTokenPrinter {
 	/** Formats a declaration, such as `type Name<Value> = …;` or `interface Name { … }`. */

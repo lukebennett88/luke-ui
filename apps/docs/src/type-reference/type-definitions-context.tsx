@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
 import { createContext, useCallback, useMemo, useReducer } from 'react';
-import { loadTypeDefinitions } from '../lib/load-type-definitions.js';
-import type { TypeDefinitionsLoadState } from '../lib/type-definitions-load-state.js';
-import { typeDefinitionsLoadReducer } from '../lib/type-definitions-load-state.js';
+import { loadTypeDefinitions } from './load-type-definitions.js';
+import type { TypeDefinitionsLoadState } from './type-definitions-load-state.js';
+import { typeDefinitionsLoadReducer } from './type-definitions-load-state.js';
 
 export interface TypeDefinitionsContextValue {
 	/** Starts loading the definitions unless they are loading or loaded. Never rejects. */

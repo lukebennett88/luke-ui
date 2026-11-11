@@ -3,13 +3,13 @@ import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 import { replaceSource } from 'fumadocs-core/mdx-plugins/stringifier';
 import { visit } from 'unist-util-visit';
-import { stringifyComponentPropsTable } from './stringify-component-props-table.js';
 import type {
 	EnrichedGeneratedDoc,
 	LinkedTypeDefinitions,
 	TypeDefinitionsPayload,
-} from './type-definition-model.js';
-import { parseTypeDefinitionsPayload } from './type-definition-model.js';
+} from '../type-definition-model.js';
+import { parseTypeDefinitionsPayload } from '../type-definition-model.js';
+import { stringifyComponentPropsTable } from './stringify-component-props-table.js';
 
 type ReplaceSourceFile = Parameters<typeof replaceSource>[0];
 type ReplaceSourceNode = Parameters<typeof replaceSource>[1];

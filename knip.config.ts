@@ -16,7 +16,7 @@ export default {
 				'src/playground/editor-skeleton-script.ts',
 				'src/lib/theme-prefs-script.ts',
 				// Read by path, not imported: the prop analysis loads source files through ts-morph.
-				'src/lib/__fixtures__/**/*.ts',
+				'src/type-reference/generate/__fixtures__/**/*.ts',
 				'src/routes/**/*.ts',
 				'src/routes/**/*.tsx',
 				'src/examples/**/*',

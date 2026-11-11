@@ -3,10 +3,10 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createFileSystemGeneratorCache } from 'fumadocs-typescript';
 import { expect, test } from 'vite-plus/test';
+import type { EnrichedGeneratedDoc } from '../type-definition-model.js';
+import { typeTokensToText } from '../type-tokens.js';
 import { createComponentPropsGenerator } from './create-component-props-generator.js';
 import { createLiveTypescriptGenerator } from './create-live-typescript-generator.js';
-import type { EnrichedGeneratedDoc } from './type-definition-model.js';
-import { typeTokensToText } from './type-tokens.js';
 import { hashTypescriptSourceGraph } from './typescript-source-graph.js';
 
 const timeout = 60_000;

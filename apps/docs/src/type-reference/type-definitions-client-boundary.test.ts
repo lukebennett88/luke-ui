@@ -10,24 +10,24 @@ const JS_EXTENSION_PATTERN = /\.js$/;
 const TS_EXTENSION_PATTERN = /\.tsx?$/;
 
 /** The API table component pages render, which loads and shows the type definitions. */
-const CLIENT_ENTRY = resolve(docsSrcDir, 'components/component-props-table.tsx');
+const CLIENT_ENTRY = resolve(docsSrcDir, 'type-reference/component-props-table.tsx');
 
 /** Packages the type-definition generator needs at build time and the browser must not load. */
 const BUILD_ONLY_PACKAGES = ['fumadocs-typescript', 'ts-morph', 'typescript', 'zod'];
 
 /** Generator modules that analyse TypeScript or write assets at build time. */
 const BUILD_ONLY_MODULES = new Set([
-	'lib/collect-type-definitions.ts',
-	'lib/component-prop-analysis.ts',
-	'lib/enrich-generated-doc-types.ts',
-	'lib/remark-attach-type-definitions.ts',
-	'lib/stringify-component-props-table.ts',
+	'type-reference/generate/collect-type-definitions.ts',
+	'type-reference/generate/component-prop-analysis.ts',
+	'type-reference/generate/enrich-generated-doc-types.ts',
+	'type-reference/generate/remark-attach-type-definitions.ts',
+	'type-reference/generate/stringify-component-props-table.ts',
 ]);
 
 test('the API table loads type definitions without build-time dependencies', () => {
 	const { localModules, packages } = valueImportGraph(CLIENT_ENTRY);
 
-	expect(localModules).toContain('lib/load-type-definitions.ts');
+	expect(localModules).toContain('type-reference/load-type-definitions.ts');
 	expect(localModules.filter((path) => BUILD_ONLY_MODULES.has(path))).toEqual([]);
 	expect(
 		packages.filter(
