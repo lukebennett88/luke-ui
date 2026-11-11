@@ -353,7 +353,7 @@ test('shows a delayed spinner for a slow Action', async () => {
 		releaseSlow?.();
 	});
 
-	const { locator, user } = render(
+	const { locator } = render(
 		<Button
 			pressAction={async () => {
 				await slowGate;
@@ -365,8 +365,9 @@ test('shows a delayed spinner for a slow Action', async () => {
 	const slow = locator.getByRole('button', { name: 'Slow' });
 	const spinner = watchSpinner(slow.element());
 
-	await act(async () => {
-		await user.click(slow);
+	// A browser user click advances fake time before it returns.
+	act(() => {
+		slow.element().click();
 	});
 	expect(slow.element().getAttribute('data-pending')).toBe('true');
 	expect(spinner.appearedAt()).toBeUndefined();
