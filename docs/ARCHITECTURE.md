@@ -38,6 +38,16 @@ value imports of build-only modules, including transitive imports. Keep runtime-
 separate from filesystem access, TypeScript analysis, and asset generation. Type-only dependencies
 are allowed when erased from runtime output. Preserve lazy loading and pre-hydration entrypoints.
 
+## Lint configuration ownership
+
+Keep workspace-specific lint overrides in that workspace's `lint.config.ts`, as in
+`apps/docs/lint.config.ts` and `apps/reference-app/lint.config.ts`. Export the overrides and import
+and spread them into the root `vite.config.ts`. Use paths relative to the repository root.
+
+Vite+ runs repository lint from the root configuration. It does not merge workspace lint overrides
+automatically, so each workspace's overrides must be imported there. Keep repository-wide rules in
+the root configuration.
+
 ## Workspace responsibilities
 
 Arrows in this inventory mean permitted dependency direction, not mandatory imports. Manifests,
