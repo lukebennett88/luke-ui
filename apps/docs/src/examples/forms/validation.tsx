@@ -35,7 +35,7 @@ export default () => {
 
 	return (
 		<Form onSubmit={handleSubmit} validationBehavior="aria">
-			<Stack gap="space.16">
+			<Stack gap="space.16" style={{ maxInlineSize: '20rem' }}>
 				<TextInputField
 					errorMessage={errors.email}
 					label="Email address"

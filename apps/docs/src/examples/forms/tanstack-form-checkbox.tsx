@@ -38,7 +38,7 @@ export default () => {
 	});
 
 	return (
-		<Stack gap="space.16">
+		<Stack gap="space.16" style={{ maxInlineSize: '20rem' }}>
 			<Form
 				necessityIndicator="required-label"
 				onSubmit={(event) => {

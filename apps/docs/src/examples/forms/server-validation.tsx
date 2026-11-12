@@ -18,7 +18,7 @@ export default () => {
 	const isSuccess = Boolean(state.values?.username && !state.errors);
 
 	return (
-		<Stack gap="space.16">
+		<Stack gap="space.16" style={{ maxInlineSize: '20rem' }}>
 			<Form action={formAction} necessityIndicator="required-label" validationErrors={state.errors}>
 				<Stack gap="space.16">
 					<TextInputField

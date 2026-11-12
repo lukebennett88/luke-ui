@@ -10,7 +10,7 @@ export default () => {
 	const [submittedEmail, formAction, isPending] = useActionState(submitEmail, '');
 
 	return (
-		<Stack gap="space.16">
+		<Stack gap="space.16" style={{ maxInlineSize: '20rem' }}>
 			<Form action={formAction} necessityIndicator="required-label">
 				<Stack gap="space.16">
 					<TextInputField

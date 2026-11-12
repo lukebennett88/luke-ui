@@ -99,6 +99,13 @@ test('a narrow preview constrains the rendered example, not its source', async (
 	expect(container?.querySelector('pre')?.textContent).not.toContain('maxInlineSize');
 });
 
+test('a complete form keeps its width in a wide preview', async () => {
+	await renderExampleBlock({ src: 'forms/build-a-form', title: 'Forms: Build a form' });
+	const field = page.getByRole('textbox', { name: 'Email address' }).element();
+	expect(field.getBoundingClientRect().width).toBeLessThanOrEqual(320);
+	expect(container?.querySelector('pre')?.textContent).toContain('20rem');
+});
+
 test('resizes the preview with pointer and keyboard, then resets it', async () => {
 	await page.viewport(1000, 800);
 	renderPreviewHarness();

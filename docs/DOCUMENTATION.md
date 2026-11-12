@@ -296,7 +296,10 @@ default-exports an anonymous arrow function, `export default () => {...}`. The m
 identifies the component and variation, so the rendered source repeats no function name.
 
 Reference an example from an MDX page with `<ExampleBlock src="<component>/<name>" title="..." />`.
-Title it `<page or component>: <qualifier>`, for example `Button: Icons`.
+Use `previewWidth="narrow"` to constrain the docs preview when useful. This is a docs-only setting:
+opening the example in the Playground uses the available width. Put any width that is part of the
+example itself in its source. Title it `<page or component>: <qualifier>`, for example
+`Button: Icons`.
 
 The preview renders an example in normal document flow, so a block-level example fills the preview
 width. Pass `layout="centered"` for an example with an intrinsic size, such as a button or an icon.
