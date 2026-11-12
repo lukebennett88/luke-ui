@@ -82,35 +82,39 @@ test('resolves against the root content box, not the viewport width', async () =
 	rootStyle.remove();
 });
 
-for (const emptyValue of [null, undefined, '']) {
+// The empty string is not a typed value. Untyped callers can still pass it, so it must behave
+// like an omitted breakpoint.
+for (const emptyValue of [null, undefined, ''] as Array<null>) {
 	test(`keeps the earlier breakpoint value where a breakpoint is ${JSON.stringify(emptyValue)}`, async () => {
 		await page.viewport(breakpoints.bp640, 800);
 		const element = mount(
-			createSprinkles({ maxInlineSize: { initial: '10px', bp640: emptyValue } }),
+			createSprinkles({ maxInlineSize: { initial: 'container.448', bp640: emptyValue } }),
 		);
 
-		expect(getComputedStyle(element).maxInlineSize).toBe('10px');
+		expect(getComputedStyle(element).maxInlineSize).toBe('448px');
 	});
 }
 
 test("does not take an ancestor's value where a breakpoint is null", async () => {
 	await page.viewport(breakpoints.bp640, 800);
-	const parent = mount(createSprinkles({ maxInlineSize: { initial: '50px', bp640: '400px' } }));
+	const parent = mount(
+		createSprinkles({ maxInlineSize: { initial: 'none', bp640: 'container.672' } }),
+	);
 	const element = mount(
-		createSprinkles({ maxInlineSize: { initial: '10px', bp640: null } }),
+		createSprinkles({ maxInlineSize: { initial: 'container.448', bp640: null } }),
 		parent,
 	);
 
-	expect(getComputedStyle(element).maxInlineSize).toBe('10px');
+	expect(getComputedStyle(element).maxInlineSize).toBe('448px');
 });
 
 test('returns class and style output that merges with consumer props', () => {
-	// `display` is a static class. `inlineSize` is a dynamic property, so Sprinkles emits inline
+	// `display` is a static class. `maxInlineSize` is a dynamic property, so Sprinkles emits inline
 	// style for it. A consumer style-only fixture would still pass if `mergeProps` dropped the
 	// generated `style`.
 	const generated = createSprinkles({
 		display: 'grid',
-		inlineSize: '400px',
+		maxInlineSize: 'container.448',
 	});
 	const props = mergeProps(generated, {
 		className: 'consumer-class',
@@ -120,7 +124,7 @@ test('returns class and style output that merges with consumer props', () => {
 
 	expect(element.classList).toContain('consumer-class');
 	expect(getComputedStyle(element).display).toBe('grid');
-	expect(getComputedStyle(element).inlineSize).toBe('400px');
+	expect(getComputedStyle(element).maxInlineSize).toBe('448px');
 	expect(getComputedStyle(element).backgroundColor).toBe('rgb(1, 2, 3)');
 });
 
@@ -191,6 +195,133 @@ test('columnGap overrides gap when both are set at the same breakpoint', async (
 
 	expect(computedStyle.rowGap).toBe(resolvedCustomProperty(element, '--luke-space-24'));
 	expect(computedStyle.columnGap).toBe(resolvedCustomProperty(element, '--luke-space-4'));
+});
+
+test('sizing keywords resolve to their CSS values', () => {
+	const parent = mount({ style: { inlineSize: '400px', blockSize: '300px' } });
+	const element = mount(
+		createSprinkles({
+			blockSize: '100%',
+			inlineSize: 'fit-content',
+			maxBlockSize: 'none',
+			maxInlineSize: '100%',
+			minBlockSize: '0',
+			minInlineSize: 'min-content',
+		}),
+		parent,
+	);
+	const computedStyle = getComputedStyle(element);
+
+	expect(computedStyle.blockSize).toBe('300px');
+	expect(computedStyle.inlineSize).toBe('0px');
+	expect(computedStyle.maxBlockSize).toBe('none');
+	expect(computedStyle.maxInlineSize).toBe('100%');
+	expect(computedStyle.minBlockSize).toBe('0px');
+	expect(computedStyle.minInlineSize).toBe('min-content');
+});
+
+test('maxInlineSize resolves container presets responsively', async () => {
+	const element = mount(
+		createSprinkles({ maxInlineSize: { initial: '100%', bp768: 'container.672' } }),
+	);
+
+	await page.viewport(320, 800);
+	expect(getComputedStyle(element).maxInlineSize).toBe('100%');
+
+	await page.viewport(breakpoints.bp768, 800);
+	expect(getComputedStyle(element).maxInlineSize).toBe('672px');
+});
+
+test('insets resolve space tokens, zero, and auto', () => {
+	const parent = mount({
+		style: { position: 'relative', inlineSize: '400px', blockSize: '300px' },
+	});
+	const element = mount(
+		createSprinkles({
+			insetBlockEnd: 'space.8',
+			insetBlockStart: 'auto',
+			insetInlineStart: '0',
+			position: 'absolute',
+		}),
+		parent,
+	);
+	const computedStyle = getComputedStyle(element);
+
+	const insetBlockEnd = resolvedCustomProperty(element, '--luke-space-8');
+
+	expect(computedStyle.insetBlockEnd).toBe(insetBlockEnd);
+	// A positioned element reports the used value, so `auto` resolves from the opposite inset.
+	expect(computedStyle.insetBlockStart).toBe(`${300 - Number.parseFloat(insetBlockEnd)}px`);
+	expect(computedStyle.insetInlineStart).toBe('0px');
+});
+
+test('a longhand inset overrides the inset shorthand', () => {
+	const parent = mount({ style: { position: 'relative' } });
+	const element = mount(
+		createSprinkles({
+			inset: '0',
+			insetInline: 'space.8',
+			insetInlineStart: 'space.16',
+			position: 'absolute',
+		}),
+		parent,
+	);
+	const computedStyle = getComputedStyle(element);
+
+	expect(computedStyle.insetInlineStart).toBe(resolvedCustomProperty(element, '--luke-space-16'));
+	expect(computedStyle.insetInlineEnd).toBe(resolvedCustomProperty(element, '--luke-space-8'));
+	expect(computedStyle.insetBlockStart).toBe('0px');
+	expect(computedStyle.insetBlockEnd).toBe('0px');
+});
+
+test('insets apply space tokens responsively', async () => {
+	const parent = mount({ style: { position: 'relative' } });
+	const element = mount(
+		createSprinkles({
+			insetBlockStart: { initial: 'space.4', bp768: 'space.16' },
+			position: 'absolute',
+		}),
+		parent,
+	);
+
+	await page.viewport(320, 800);
+	expect(getComputedStyle(element).insetBlockStart).toBe(
+		resolvedCustomProperty(element, '--luke-space-4'),
+	);
+
+	await page.viewport(breakpoints.bp768, 800);
+	expect(getComputedStyle(element).insetBlockStart).toBe(
+		resolvedCustomProperty(element, '--luke-space-16'),
+	);
+});
+
+test('flex longhands set grow, shrink, and basis independently', () => {
+	const parent = mount({ style: { display: 'flex', inlineSize: '400px' } });
+	const grown = mount(createSprinkles({ flexBasis: '0', flexGrow: '1' }), parent);
+	const fixed = mount(createSprinkles({ flexShrink: '0' }), parent);
+	fixed.style.inlineSize = '100px';
+	const computedStyle = getComputedStyle(grown);
+
+	expect(computedStyle.flexGrow).toBe('1');
+	expect(computedStyle.flexShrink).toBe('1');
+	expect(computedStyle.flexBasis).toBe('0px');
+	expect(getComputedStyle(fixed).flexShrink).toBe('0');
+	expect(grown.getBoundingClientRect().width).toBe(300);
+});
+
+test('flexBasis accepts content', () => {
+	const element = mount(createSprinkles({ flexBasis: 'content' }));
+
+	expect(getComputedStyle(element).flexBasis).toBe('content');
+});
+
+test('order applies numbers responsively, including zero', async () => {
+	const element = mount(createSprinkles({ order: { initial: -1, bp768: 0 } }));
+
+	await page.viewport(320, 800);
+	expect(getComputedStyle(element).order).toBe('-1');
+	await page.viewport(breakpoints.bp768, 800);
+	expect(getComputedStyle(element).order).toBe('0');
 });
 
 /**

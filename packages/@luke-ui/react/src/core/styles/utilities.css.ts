@@ -5,6 +5,7 @@ import { typedEntries } from '../../shared/utils/utils.js';
 import { vars } from '../../theme/contract.css.js';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 import type { Prettify } from '../types/prettify.js';
+import { containerMaxInlineSizeTokens } from './container-tokens.js';
 import { layers } from './layers.css.js';
 import { responsiveConditions } from './responsive-conditions.js';
 import { spaceTokens } from './space-tokens.js';
@@ -21,6 +22,33 @@ const spaceScale = {
 } as const;
 
 const marginScale = { ...spaceScale, auto: 'auto' } as const;
+
+/** Insets share margin's scale: space tokens, `0`, and `auto`. No lengths, percentages, or negatives. */
+const insetScale = marginScale;
+
+/**
+ * Keyword sizes every sizing property accepts. There is no length scale: one-off dimensions use
+ * `style`, and responsive ones use `className` with an authored `@container` query.
+ */
+const sizeKeywordScale = {
+	'0': '0',
+	'100%': '100%',
+	'fit-content': 'fit-content',
+	'max-content': 'max-content',
+	'min-content': 'min-content',
+} as const;
+
+/** `inlineSize`, `blockSize`, and the minimum sizes. */
+const sizeScale = { ...sizeKeywordScale, auto: 'auto' } as const;
+
+/** Maximum sizes replace `auto` with `none`. */
+const maxSizeScale = { ...sizeKeywordScale, none: 'none' } as const;
+
+/** Only `maxInlineSize` also accepts the `container.*` presets. */
+const maxInlineSizeScale = { ...maxSizeScale, ...containerMaxInlineSizeTokens } as const;
+
+/** `flexBasis` takes the base sizes plus `content`. */
+const flexBasisScale = { ...sizeScale, content: 'content' } as const;
 
 /** Border widths offered by the design system. */
 const borderWidthScale = { none: '0', thin: '1px', thick: '2px' } as const;
@@ -129,7 +157,7 @@ const dynamicProperties = {
 		normal: 'normal',
 		stretch: 'stretch',
 	},
-	blockSize: true,
+	blockSize: sizeScale,
 	// `control` and every `<role>.strong` are guaranteed 3:1 boundaries. `decorative` is not.
 	borderColor: borderColorScale,
 	borderRadius: vars.radius,
@@ -148,8 +176,7 @@ const dynamicProperties = {
 		'inline-grid': 'inline-grid',
 		none: 'none',
 	},
-	flex: true,
-	flexBasis: true,
+	flexBasis: flexBasisScale,
 	flexDirection: {
 		column: 'column',
 		'column-reverse': 'column-reverse',
@@ -167,14 +194,14 @@ const dynamicProperties = {
 	gridRow: true,
 	gridRowEnd: true,
 	gridRowStart: true,
-	inlineSize: true,
-	inset: true,
-	insetBlock: true,
-	insetBlockEnd: true,
-	insetBlockStart: true,
-	insetInline: true,
-	insetInlineEnd: true,
-	insetInlineStart: true,
+	inlineSize: sizeScale,
+	inset: insetScale,
+	insetBlock: insetScale,
+	insetBlockEnd: insetScale,
+	insetBlockStart: insetScale,
+	insetInline: insetScale,
+	insetInlineEnd: insetScale,
+	insetInlineStart: insetScale,
 	justifyContent: {
 		center: 'center',
 		end: 'end',
@@ -210,10 +237,11 @@ const dynamicProperties = {
 	marginInline: marginScale,
 	marginInlineEnd: marginScale,
 	marginInlineStart: marginScale,
-	maxBlockSize: true,
-	maxInlineSize: true,
-	minBlockSize: true,
-	minInlineSize: true,
+	maxBlockSize: maxSizeScale,
+	maxInlineSize: maxInlineSizeScale,
+	minBlockSize: sizeScale,
+	minInlineSize: sizeScale,
+	// Typed as `number` below. csstype's `order` also accepts any string.
 	order: true,
 	overflow: {
 		auto: 'auto',
@@ -261,18 +289,25 @@ const dynamicProperties = {
 	rowGap: spaceScale,
 } as const;
 
+/** Properties whose public value type is narrower than their csstype value. */
+type ValueOverrides = {
+	order: number;
+};
+
 /**
- * Value accepted by one utility property. Constrained scales use their keys. Unconstrained
- * (`true`) properties keep the previous Rainbow Sprinkles contract: the csstype value for that
- * CSS property name.
+ * Value accepted by one utility property. Constrained scales use their keys. `ValueOverrides`
+ * narrow unconstrained (`true`) properties. Other unconstrained properties keep the previous
+ * Rainbow Sprinkles contract: the csstype value for that CSS property name.
  */
-type ScaleValue<Property extends PropertyKey, Scale> = Scale extends true
-	? Property extends keyof CSSProperties
-		? CSSProperties[Property]
-		: never
-	: Scale extends Record<string, unknown>
-		? keyof Scale & string
-		: never;
+type ScaleValue<Property extends PropertyKey, Scale> = Property extends keyof ValueOverrides
+	? ValueOverrides[Property]
+	: Scale extends true
+		? Property extends keyof CSSProperties
+			? CSSProperties[Property]
+			: never
+		: Scale extends Record<string, unknown>
+			? keyof Scale & string
+			: never;
 
 /**
  * Direct value, or a responsive object keyed by breakpoint. A breakpoint that is omitted, `null`,

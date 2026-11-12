@@ -417,7 +417,7 @@ test('a rail ignores the flex item props it owns', () => {
 	// Cast past the types to prove the runtime drops a prop a JavaScript caller could still pass.
 	const railProps = { 'data-testid': 'rail', flexGrow: '1' } as LockupRailProps;
 	const { container } = render(
-		<Lockup gap="space.8" inlineSize="20rem">
+		<Lockup gap="space.8" style={{ inlineSize: '20rem' }}>
 			<LockupRail {...railProps}>
 				<Square size="1rem" />
 			</LockupRail>

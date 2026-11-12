@@ -4,7 +4,6 @@ import type { SprinklesProps } from './utilities.css.js';
 const layoutPropertyNames = [
 	'alignSelf',
 	'blockSize',
-	'flex',
 	'flexBasis',
 	'flexGrow',
 	'flexShrink',

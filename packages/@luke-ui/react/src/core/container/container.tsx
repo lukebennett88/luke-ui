@@ -1,12 +1,12 @@
 import type { JSX } from 'react';
 import { Box, omitUnsupportedSprinklesProps } from '../box/box.js';
+import type { containerMaxInlineSizeTokens } from '../styles/container-tokens.js';
 import type { LayoutProps } from '../styles/layout-props.js';
 import { layoutProperties } from '../styles/layout-props.js';
 import type { SprinklesProps } from '../styles/utilities.css.js';
 import type { BoxLikeElementProps, BoxLikeRenderProps } from '../types/box-like-props.js';
 import type { DistributiveOmit } from '../types/distributive-omit.js';
 import type { Prettify } from '../types/prettify.js';
-import type { containerMaxInlineSizeTokens } from './recipe.css.js';
 import { containerRecipe } from './recipe.css.js';
 
 /** Props for `Container`. */
@@ -54,7 +54,7 @@ interface _ContainerElementProps
 
 interface _ContainerRenderProps extends BoxLikeRenderProps, _ContainerOmit, _ContainerLayoutProps {}
 
-/** Approved maximum inline-size presets. Use Box for arbitrary widths. */
+/** Approved maximum inline-size presets. Use `style` or `className` for one-off widths. */
 type ContainerMaxInlineSize = keyof typeof containerMaxInlineSizeTokens;
 
 const containerOwnedProperties: ReadonlySet<PropertyKey> = new Set<_ContainerOwnedProperty>([

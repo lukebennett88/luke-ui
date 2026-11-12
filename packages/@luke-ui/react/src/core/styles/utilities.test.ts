@@ -2,6 +2,7 @@ import { assertType, expect, expectTypeOf, test } from 'vite-plus/test';
 import type { BoxProps } from '../../../dist/box.js';
 import { vars } from '../../theme/contract.css.js';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
+import { containerMaxInlineSizeTokens } from './container-tokens.js';
 import { createSprinkles } from './utilities.css.js';
 import type { SprinklesProps } from './utilities.css.js';
 
@@ -18,6 +19,8 @@ test('exposes the responsive layout and appearance property surface', () => {
 	expect(createSprinkles.properties).toContain('borderRadius');
 	expect(createSprinkles.properties).not.toContain('color');
 	expect(createSprinkles.properties).not.toContain('fontSize');
+	// Consumers state grow, shrink, and basis separately. There is no hidden shorthand.
+	expect(createSprinkles.properties).not.toContain('flex');
 });
 
 test('resolves borderColor tokens to their theme variables', () => {
@@ -94,6 +97,12 @@ test('derives token-backed Box values from the public contract', () => {
 			return [['borderColor', `${role}.strong`, vars.color.border[role].strong]] as const;
 		}),
 		...Object.entries(vars.space).map(([key, value]) => ['gap', `space.${key}`, value] as const),
+		...Object.entries(vars.space).map(
+			([key, value]) => ['insetBlockEnd', `space.${key}`, value] as const,
+		),
+		...Object.entries(containerMaxInlineSizeTokens).map(
+			([key, value]) => ['maxInlineSize', key, value] as const,
+		),
 	];
 
 	const mismatched = cases.filter(([property, key, value]) => {
@@ -131,14 +140,14 @@ test('replaces input className and style with generated output', () => {
 	const result = createSprinkles({
 		className: 'consumer-class',
 		display: 'grid',
-		inlineSize: '20rem',
+		maxInlineSize: 'container.448',
 		style: { color: 'red' },
 	});
 
 	expect(result.className).not.toContain('consumer-class');
 	expect(result.className.length).toBeGreaterThan(0);
 	expect(result.style).not.toEqual({ color: 'red' });
-	expect(Object.values(result.style)).toContain('20rem');
+	expect(Object.values(result.style)).toContain('28rem');
 });
 
 test('does not claim to preserve symbol keys or non-enumerable props', () => {
@@ -230,15 +239,119 @@ test('responsive objects reject unknown breakpoints and off-scale values', () =>
 	assertType<UtilityProps['padding']>({ initial: '16px' });
 });
 
-test('unconstrained properties keep property-specific CSS value typing', () => {
-	// @ts-expect-error — booleans are not CSS size values
+test('sizing props reject lengths, tokens, and numbers', () => {
+	expectTypeOf<UtilityProps['inlineSize']>().not.toBeAny();
+	// @ts-expect-error — a space token is not a size
+	assertType<UtilityProps['inlineSize']>('space.32');
+	// @ts-expect-error — the historical spacing name compiled to invalid CSS
+	assertType<UtilityProps['inlineSize']>('sp32');
+	// @ts-expect-error — arbitrary lengths use style or className
+	assertType<UtilityProps['inlineSize']>('42rem');
+	// @ts-expect-error — container presets are maximum inline sizes only
+	assertType<UtilityProps['inlineSize']>('container.672');
+	// @ts-expect-error — zero is the string "0"
+	assertType<UtilityProps['minInlineSize']>(0);
+	// @ts-expect-error — arbitrary lengths use style or className
+	assertType<UtilityProps['minBlockSize']>('4rem');
+	// @ts-expect-error — a space token is not a size
+	assertType<UtilityProps['blockSize']>('space.16');
+	// @ts-expect-error — functions are not utility values
+	assertType<UtilityProps['blockSize']>('calc(100% - 1rem)');
+	// @ts-expect-error — container presets are inline only
+	assertType<UtilityProps['maxBlockSize']>('container.672');
+	// @ts-expect-error — maximum sizes use none, not auto
+	assertType<UtilityProps['maxInlineSize']>('auto');
+	// @ts-expect-error — maximum sizes use none, not auto
+	assertType<UtilityProps['maxBlockSize']>('auto');
+	// @ts-expect-error — none is a maximum-size keyword
+	assertType<UtilityProps['minInlineSize']>('none');
+	// @ts-expect-error — booleans are not size values
 	assertType<UtilityProps['inlineSize']>(true);
-	// @ts-expect-error — plain objects are not CSS size values
-	assertType<UtilityProps['inlineSize']>({ bogus: '1px' });
-	// @ts-expect-error — booleans are not CSS order values
+	// @ts-expect-error — the value must still be a supported keyword at every breakpoint
+	assertType<UtilityProps['inlineSize']>({ initial: '100%', bp768: '42rem' });
+});
+
+test('sizing props accept keywords, string zero, and responsive values', () => {
+	for (const value of ['0', 'auto', '100%', 'min-content', 'max-content', 'fit-content'] as const) {
+		assertType<UtilityProps['inlineSize']>(value);
+		assertType<UtilityProps['blockSize']>(value);
+		assertType<UtilityProps['minInlineSize']>(value);
+		assertType<UtilityProps['minBlockSize']>(value);
+	}
+	for (const value of ['0', 'none', '100%', 'min-content', 'max-content', 'fit-content'] as const) {
+		assertType<UtilityProps['maxInlineSize']>(value);
+		assertType<UtilityProps['maxBlockSize']>(value);
+	}
+	expectTypeOf<
+		'container.448' | 'container.672' | 'container.896' | 'container.1152' | 'container.1280'
+	>().toExtend<UtilityProps['maxInlineSize']>();
+	assertType<UtilityProps['maxInlineSize']>({ initial: '100%', bp768: 'container.672' });
+	assertType<UtilityProps['inlineSize']>({ initial: '100%', bp1024: 'auto' });
+});
+
+test('insets accept space tokens, zero, and auto only', () => {
+	assertType<UtilityProps['inset']>('0');
+	assertType<UtilityProps['insetBlockEnd']>('space.8');
+	assertType<UtilityProps['insetInlineStart']>('auto');
+	assertType<UtilityProps['insetBlock']>({ initial: 'space.4', bp768: 'space.16' });
+	// @ts-expect-error — percentages are not inset values
+	assertType<UtilityProps['inset']>('50%');
+	// @ts-expect-error — percentages are not inset values
+	assertType<UtilityProps['insetInlineStart']>('50%');
+	// @ts-expect-error — arbitrary lengths are not inset values
+	assertType<UtilityProps['insetInline']>('1rem');
+	// @ts-expect-error — negative values are not inset values
+	assertType<UtilityProps['insetInlineEnd']>('-1rem');
+	// @ts-expect-error — zero is the string "0"
+	assertType<UtilityProps['insetBlockStart']>(0);
+});
+
+test('flex shorthand is removed in favour of grow, shrink, and basis', () => {
+	expectTypeOf<UtilityProps>().not.toHaveProperty('flex');
+	// @ts-expect-error — use flexGrow, flexShrink, and flexBasis
+	assertType<UtilityProps>({ flex: 1 });
+	// @ts-expect-error — use flexGrow, flexShrink, and flexBasis
+	assertType<UtilityProps>({ flex: '1' });
+	// @ts-expect-error — use flexGrow, flexShrink, and flexBasis
+	assertType<UtilityProps>({ flex: 'auto' });
+	assertType<UtilityProps>({ flexBasis: '0', flexGrow: '1', flexShrink: '0' });
+	assertType<UtilityProps['flexGrow']>({ initial: '0', bp768: '1' });
+});
+
+test('flexBasis accepts the base sizes plus content', () => {
+	for (const value of [
+		'0',
+		'auto',
+		'100%',
+		'min-content',
+		'max-content',
+		'fit-content',
+		'content',
+	] as const) {
+		assertType<UtilityProps['flexBasis']>(value);
+	}
+	// @ts-expect-error — container presets are maximum inline sizes only
+	assertType<UtilityProps['flexBasis']>('container.672');
+	// @ts-expect-error — none is a maximum-size keyword
+	assertType<UtilityProps['flexBasis']>('none');
+	// @ts-expect-error — arbitrary lengths use style or className
+	assertType<UtilityProps['flexBasis']>('14rem');
+	// @ts-expect-error — zero is the string "0"
+	assertType<UtilityProps['flexBasis']>(0);
+	// @ts-expect-error — flexGrow takes string keywords
+	assertType<UtilityProps['flexGrow']>(1);
+});
+
+test('order accepts numbers only', () => {
+	assertType<UtilityProps['order']>(0);
+	assertType<UtilityProps['order']>(-1);
+	assertType<UtilityProps['order']>({ initial: 2, bp768: 0 });
+	// @ts-expect-error — order is numeric
+	assertType<UtilityProps['order']>('space.32');
+	// @ts-expect-error — order is numeric
+	assertType<UtilityProps['order']>('1');
+	// @ts-expect-error — booleans are not order values
 	assertType<UtilityProps['order']>(true);
-	// @ts-expect-error — booleans are not CSS flex values
-	assertType<UtilityProps['flex']>(false);
 });
 
 test('createSprinkles.properties is a read-only Set contract', () => {

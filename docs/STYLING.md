@@ -439,8 +439,36 @@ responsive conditions. Do not add `px`/`py` padding shorthands.
 Container accepts only `container.448`, `container.672`, `container.896`, `container.1152`, and
 `container.1280` presets. They select fixed `rem` maximum inline sizes and establish a local
 container-query boundary. Their numeric suffixes reference CSS pixels at a 16px root, and their
-maximum inline sizes scale with the root font size. Use Box for arbitrary widths. Container presets
-do not need a separate theme variable family.
+maximum inline sizes scale with the root font size. Container presets do not need a separate theme
+variable family. Box and the shared layout components accept the same presets on `maxInlineSize`.
+
+### Sizing, inset, flex, and order values
+
+Utility props accept a closed vocabulary, not arbitrary CSS. There is no length scale.
+
+| Props                                                                                                          | Values                                                                       |
+| -------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `inlineSize`, `blockSize`, `minInlineSize`, `minBlockSize`                                                     | `"0"`, `auto`, `100%`, `min-content`, `max-content`, `fit-content`           |
+| `maxInlineSize`, `maxBlockSize`                                                                                | `"0"`, `none`, `100%`, `min-content`, `max-content`, `fit-content`           |
+| `maxInlineSize` only                                                                                           | The five `container.*` presets as well                                       |
+| `inset`, `insetBlock`, `insetBlockStart`, `insetBlockEnd`, `insetInline`, `insetInlineStart`, `insetInlineEnd` | Space tokens, `"0"`, and `auto`. No lengths, percentages, or negative values |
+| `flexBasis`                                                                                                    | The `inlineSize` values plus `content`                                       |
+| `flexGrow`, `flexShrink`                                                                                       | `"0"` and `"1"`                                                              |
+| `order`                                                                                                        | A number. It is the only numeric utility prop                                |
+
+Keyword and zero values are strings, so write `minInlineSize="0"`, not `minInlineSize={0}`. Every
+value keeps responsive object support. The scales live in `core/styles/utilities.css.ts` as Rainbow
+Sprinkles `dynamicProperties`, so each property still emits one class per condition and the value
+lands in inline style. Narrowing a scale changes types, not emitted CSS.
+
+There is no `flex` shorthand prop. The shorthand silently resets basis and shrink, so state the
+behaviour you need with the longhands. `flexGrow="1"` is usually enough. Add `flexBasis="0"` only
+when items must share space regardless of their content, and `flexShrink="0"` to stop an item
+shrinking. Do not reintroduce the shorthand through `style` without a demonstrated need.
+
+One-off dimensions use the escape hatches. Put a fixed length on `style`, such as
+`style={{ maxInlineSize: '42rem' }}`, or a `vars` value such as `vars.controlSize['40']`. Author a
+responsive one-off in CSS through `className`. See [Responsive values](#responsive-values).
 
 ### Control recipe sizes
 
@@ -582,6 +610,34 @@ the root's inline size with or without a theme. Keep `@media` for environmental 
 A container query with no container never matches, so the style silently stays at its base value. Do
 not set `container-type` on an element below the root without naming the container: unnamed queries
 on its descendants would start measuring it.
+
+A responsive one-off dimension belongs in authored CSS, applied through `className`. Build its
+`@container` query from `breakpoints` so it switches at the same thresholds as utility props:
+
+```ts
+// settings-layout.css.ts
+import { breakpoints } from '@luke-ui/react/theme';
+import { style } from '@vanilla-extract/css';
+
+export const sidebar = style({
+	inlineSize: '100%',
+	'@container': {
+		[`(inline-size >= ${breakpoints.bp768}px)`]: {
+			inlineSize: '15.25rem',
+		},
+	},
+});
+```
+
+```tsx
+<Box className={styles.sidebar} flexShrink="0">
+	{navigation}
+</Box>
+```
+
+The unnamed query measures the nearest ancestor size container, exactly as responsive utility props
+do. That is the root unless a `Container` or another inline-size container sits closer. It does not
+measure the viewport, so do not substitute `@media`.
 
 ### Utility surface
 

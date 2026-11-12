@@ -11,11 +11,10 @@ test('Lockup keeps its element and alignment unions closed', () => {
 /** Flex item props a rail and the body own. Lockup itself accepts them. */
 const ownedFlexItemProps = {
 	alignSelf: 'center',
-	flex: '1',
 	flexBasis: '0',
 	flexGrow: '1',
 	flexShrink: '1',
-	order: '1',
+	order: 1,
 	placeSelf: 'center',
 } as const;
 
@@ -23,7 +22,7 @@ test('Lockup parts accept the layout props they do not own', () => {
 	assertType<LockupProps>({ ...ownedFlexItemProps, minInlineSize: '0', padding: 'space.8' });
 	assertType<LockupRailProps>({ insetInlineStart: '0', minInlineSize: '0', position: 'relative' });
 	assertType<LockupBodyProps>({
-		maxInlineSize: '20rem',
+		maxInlineSize: 'container.448',
 		paddingBlock: 'space.4',
 		position: 'relative',
 	});
@@ -44,8 +43,6 @@ test('Lockup rejects the props it does not support', () => {
 	// @ts-expect-error — a rail keeps its intrinsic inline size
 	assertType<LockupRailProps>({ alignSelf: ownedFlexItemProps.alignSelf });
 	// @ts-expect-error — a rail keeps its intrinsic inline size
-	assertType<LockupRailProps>({ flex: ownedFlexItemProps.flex });
-	// @ts-expect-error — a rail keeps its intrinsic inline size
 	assertType<LockupRailProps>({ flexBasis: ownedFlexItemProps.flexBasis });
 	// @ts-expect-error — a rail keeps its intrinsic inline size
 	assertType<LockupRailProps>({ flexGrow: ownedFlexItemProps.flexGrow });
@@ -58,8 +55,6 @@ test('Lockup rejects the props it does not support', () => {
 	// @ts-expect-error — the body owns how it grows and shrinks
 	assertType<LockupBodyProps>({ alignSelf: ownedFlexItemProps.alignSelf });
 	// @ts-expect-error — the body owns how it grows and shrinks
-	assertType<LockupBodyProps>({ flex: ownedFlexItemProps.flex });
-	// @ts-expect-error — the body owns how it grows and shrinks
 	assertType<LockupBodyProps>({ flexBasis: ownedFlexItemProps.flexBasis });
 	// @ts-expect-error — the body owns how it grows and shrinks
 	assertType<LockupBodyProps>({ flexGrow: ownedFlexItemProps.flexGrow });
@@ -70,5 +65,5 @@ test('Lockup rejects the props it does not support', () => {
 	// @ts-expect-error — the body owns how it grows and shrinks
 	assertType<LockupBodyProps>({ placeSelf: ownedFlexItemProps.placeSelf });
 	// @ts-expect-error — the body owns its minimum inline size
-	assertType<LockupBodyProps>({ minInlineSize: '10rem' });
+	assertType<LockupBodyProps>({ minInlineSize: 'min-content' });
 });
