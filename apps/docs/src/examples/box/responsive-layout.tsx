@@ -16,10 +16,10 @@ function Item() {
 			alignItems="center"
 			backgroundColor="neutral.solid"
 			display="flex"
-			flex={1}
+			flexGrow="1"
 			justifyContent="center"
-			minBlockSize="4rem"
 			padding="space.16"
+			style={{ minBlockSize: '4rem' }}
 		>
 			<Text elementType="span" fontWeight="label">
 				Item

@@ -8,7 +8,7 @@ export default () => {
 	const [days, setDays] = useState(['monday']);
 
 	return (
-		<Stack gap="space.16" maxInlineSize="20rem">
+		<Stack gap="space.16">
 			<CheckboxGroup label="Days available" onChange={setDays} value={days}>
 				<CheckboxField label="Monday" value="monday" />
 				<CheckboxField label="Tuesday" value="tuesday" />

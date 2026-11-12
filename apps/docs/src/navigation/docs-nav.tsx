@@ -26,9 +26,10 @@ const navRowProps = {
 	alignItems: 'center',
 	borderRadius: 'control',
 	display: 'flex',
-	minBlockSize: '2rem',
 	paddingInline: 'space.8',
 } as const;
+
+const navRowMinBlockSize = '2rem';
 
 const navLinkRestMinBlockSize = '2.25rem';
 
@@ -225,7 +226,7 @@ function SectionHeading({
 	id: string;
 }) {
 	return (
-		<Box {...navRowProps}>
+		<Box {...navRowProps} style={{ minBlockSize: navRowMinBlockSize }}>
 			<Heading
 				color="secondary"
 				fontWeight="label"
@@ -268,7 +269,6 @@ export function DocsNavLink({
 		<Box
 			{...navRowProps}
 			inlineSize="100%"
-			minBlockSize={fallbackVar(styles.navLinkMinBlockSize, navLinkRestMinBlockSize)}
 			renderRoot={(domProps) => {
 				const className = cx(domProps.className, styles.navLink);
 				if (isExternal) {
@@ -295,6 +295,9 @@ export function DocsNavLink({
 						to={href}
 					/>
 				);
+			}}
+			style={{
+				minBlockSize: fallbackVar(styles.navLinkMinBlockSize, navLinkRestMinBlockSize),
 			}}
 		>
 			{icon == null ? (

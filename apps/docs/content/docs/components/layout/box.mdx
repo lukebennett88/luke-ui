@@ -10,34 +10,22 @@ normal `div` when no supported layout property applies.
 
 <ExampleBlock src="box/basic" title="Box: Basic" />
 
-## Layout properties
+## Choose a layout
 
-Box supports display, logical margin and padding, inline and block sizing, positioning, overflow,
-gap, flex, and grid-child properties. It does not set grid tracks or areas. Use
-[Grid](/components/layout/grid) for a grid container.
+Use Box for a custom flex layout or to control an item within a flex or grid container. Use
+[Grid](/components/layout/grid) to define grid tracks or areas. Read
+[Layout](/docs/layout#choose-a-layout-component) to choose between layout components.
 
-```tsx
-<Box
-	display="flex"
-	alignItems="center"
-	gap="space.12"
-	maxInlineSize="42rem"
-	paddingInline="space.24"
->
-	{children}
-</Box>
-```
+## Size and space content
 
-## Responsive values
+Use sizing and spacing props to constrain content and set gaps, padding, or margins. Read
+[Layout](/docs/layout#spacing-and-sizing) for the supported values. For a size outside those values,
+read [Styling](/docs/styling#size-elements-outside-the-utility-values).
 
-Pass a direct value when it does not change. Use an object keyed by breakpoint when it does. Read
-[Layout](/docs/layout#responsive-values) for the breakpoint list, the cascade from `initial`, and a
-worked example.
+## Adapt to available space
 
-## Spacing values
-
-Padding, gap, and margin accept value-based spacing keys. Read
-[Layout](/docs/layout#spacing-and-sizing) for the full scale and for logical property names.
+Pass responsive values when a layout needs to change with its container. Read
+[Layout](/docs/layout#responsive-values) for breakpoints and container behaviour.
 
 ## Choose the rendered element
 

@@ -11,7 +11,7 @@ function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
 export default () => {
 	return (
 		<form onSubmit={handleSubmit}>
-			<Stack gap="space.16" maxInlineSize="20rem">
+			<Stack gap="space.16">
 				<TextInputField isRequired label="Email address" name="emailAddress" type="email" />
 				<Cluster>
 					<Button type="submit">Submit</Button>

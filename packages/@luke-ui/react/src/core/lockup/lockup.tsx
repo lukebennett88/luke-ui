@@ -159,7 +159,6 @@ interface _LockupRenderProps extends _LockupRenderOmit, LayoutProps, _LockupOwnP
 /** Flex item utilities a rail owns, so it keeps its intrinsic inline size. */
 const railOwnedProperties = [
 	'alignSelf',
-	'flex',
 	'flexBasis',
 	'flexGrow',
 	'flexShrink',

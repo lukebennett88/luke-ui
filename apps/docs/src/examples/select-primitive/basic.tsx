@@ -12,7 +12,7 @@ import { Stack } from '@luke-ui/react/stack';
 
 export default () => {
 	return (
-		<Stack gap="space.16" maxInlineSize="20rem">
+		<Stack gap="space.16">
 			<SelectRoot name="country" placeholder="Choose a country">
 				<Field description="Choose where you are based." label="Country">
 					<SelectTrigger>

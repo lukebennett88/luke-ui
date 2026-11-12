@@ -64,7 +64,7 @@ test('renders semantic elements and a consumer-owned renderRoot prop', () => {
 test('consumer className and style win collisions on the ordinary element path', () => {
 	const ref = createRef<HTMLElement>();
 	const baseline = render(
-		<Box data-testid="box-baseline" display="flex" gap="space.16" inlineSize="12rem" />,
+		<Box data-testid="box-baseline" display="flex" gap="space.16" inlineSize="fit-content" />,
 	);
 	const utilityClassName = baseline.locator.getByTestId('box-baseline').element().className;
 	baseline.unmount();
@@ -76,9 +76,9 @@ test('consumer className and style win collisions on the ordinary element path',
 			display="flex"
 			gap="space.16"
 			id="box-root"
-			inlineSize="12rem"
+			inlineSize="fit-content"
 			ref={ref}
-			style={{ backgroundColor: 'rgb(1, 2, 3)', display: 'grid' }}
+			style={{ backgroundColor: 'rgb(1, 2, 3)', display: 'grid', inlineSize: '12rem' }}
 		>
 			Element path
 		</Box>,
@@ -101,7 +101,7 @@ test('consumer className and style win collisions on the renderRoot callback pat
 			data-testid="box-baseline"
 			display="flex"
 			gap={{ initial: 'space.8', bp768: 'space.24' }}
-			inlineSize="10rem"
+			inlineSize="fit-content"
 		/>,
 	);
 	const utilityClassName = baseline.locator.getByTestId('box-baseline').element().className;
@@ -113,13 +113,13 @@ test('consumer className and style win collisions on the renderRoot callback pat
 			className="consumer-class"
 			display="flex"
 			gap={{ initial: 'space.8', bp768: 'space.24' }}
-			inlineSize="10rem"
+			inlineSize="fit-content"
 			ref={ref}
 			renderRoot={(domProps) => {
 				receivedRef = domProps.ref;
 				return <article {...domProps} data-testid="box-render" />;
 			}}
-			style={{ backgroundColor: 'rgb(4, 5, 6)', display: 'grid' }}
+			style={{ backgroundColor: 'rgb(4, 5, 6)', display: 'grid', inlineSize: '10rem' }}
 		>
 			Render path
 		</Box>,
@@ -177,6 +177,8 @@ for (const [name, Component] of Object.entries({
 				{},
 			]);
 		}
+		// The preset resolves to its rem value instead of passing through as invalid CSS.
+		expect(getComputedStyle(element).maxInlineSize).toBe('672px');
 		expect(ref.current).toBe(element);
 		unmount();
 		expect(ref.current).toBeNull();

@@ -106,7 +106,7 @@ export function Playground() {
 	};
 
 	return (
-		<Stack blockSize="100dvh">
+		<Stack style={{ blockSize: '100dvh' }}>
 			<SiteHeader />
 			<Group
 				className={styles.panelGroup}
@@ -120,7 +120,7 @@ export function Playground() {
 					minSize={160}
 					style={{ overflow: 'hidden' }}
 				>
-					<Box blockSize="100%" minBlockSize={0}>
+					<Box blockSize="100%" minBlockSize="0">
 						<ClientOnly
 							fallback={
 								<>
@@ -147,7 +147,7 @@ export function Playground() {
 					minSize={160}
 					style={{ overflow: 'hidden' }}
 				>
-					<Stack blockSize="100%" minBlockSize={0}>
+					<Stack blockSize="100%" minBlockSize="0">
 						<PreviewToolbar
 							isFullscreen={isPreviewFullscreen}
 							onFullscreenChange={setIsPreviewFullscreen}
@@ -164,7 +164,7 @@ export function Playground() {
 							flexBasis="auto"
 							flexGrow="1"
 							flexShrink="1"
-							minBlockSize={0}
+							minBlockSize="0"
 						>
 							<div className={styles.previewFrame} style={{ inlineSize: viewportWidth }}>
 								{/* Iframes swallow pointer events, which kills separator drags that cross into the preview — disable them while the separator is engaged. */}

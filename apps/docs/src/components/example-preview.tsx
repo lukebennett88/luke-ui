@@ -4,6 +4,7 @@ import type { ComponentProps, ReactNode } from 'react';
 import { useEffect, useId, useRef, useState } from 'react';
 import type { GroupImperativeHandle } from 'react-resizable-panels';
 import { Group, Panel, Separator } from 'react-resizable-panels';
+import type { PreviewWidth } from '../lib/story-wrapper.js';
 import { StoryWrapper } from '../lib/story-wrapper.js';
 import { useIsDesktop } from '../playground/use-is-desktop.js';
 import * as styles from './example-preview.css.js';
@@ -11,10 +12,12 @@ import * as styles from './example-preview.css.js';
 export function ExamplePreview({
 	children,
 	layout,
+	previewWidth,
 	title,
 }: {
 	children: ReactNode;
 	layout?: ComponentProps<typeof StoryWrapper>['layout'];
+	previewWidth?: PreviewWidth;
 	title: string;
 }) {
 	const isDesktop = useIsDesktop();
@@ -60,7 +63,9 @@ export function ExamplePreview({
 			>
 				{/* CSS sets the gutter before measurement. Examples query this canvas's width. */}
 				<Box backgroundColor="surface.base" className={styles.previewCanvas} overflow="hidden">
-					<StoryWrapper layout={layout}>{children}</StoryWrapper>
+					<StoryWrapper layout={layout} previewWidth={previewWidth}>
+						{children}
+					</StoryWrapper>
 				</Box>
 			</Panel>
 			<Separator
@@ -115,7 +120,6 @@ function ExamplePreviewResizeGrip() {
 			alignItems="center"
 			aria-hidden
 			backgroundColor="surface.base"
-			blockSize={GRIP_BLOCK_SIZE}
 			borderRadius="full"
 			borderStyle="solid"
 			borderWidth="thin"
@@ -123,12 +127,15 @@ function ExamplePreviewResizeGrip() {
 			data-example-preview-grip
 			display="flex"
 			elementType="span"
-			inlineSize={GRIP_INLINE_SIZE}
-			insetBlockStart="50%"
-			insetInlineStart="50%"
 			justifyContent="center"
 			overflow="hidden"
 			position="absolute"
+			style={{
+				blockSize: GRIP_BLOCK_SIZE,
+				inlineSize: GRIP_INLINE_SIZE,
+				insetBlockStart: '50%',
+				insetInlineStart: '50%',
+			}}
 		>
 			<GripIcon style={{ blockSize: '100%', inlineSize: '100%' }} />
 		</Box>

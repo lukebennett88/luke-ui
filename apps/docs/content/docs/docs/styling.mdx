@@ -90,6 +90,21 @@ for supported variation.
 around components. They do not set semantic colour, typography, or pseudo states. Read
 [Layout](/docs/layout) for the full API.
 
+### Size elements outside the utility values
+
+Layout sizing props accept keywords such as `100%` and `fit-content`, and `maxInlineSize` accepts
+the `container.*` presets. They do not accept arbitrary lengths. Put a fixed length on `style`. For
+a size that changes at a breakpoint, write CSS with a `@container` query built from `breakpoints` in
+`@luke-ui/react/theme`, then pass it as `className`.
+
+<SourceCodeBlock src="styling/responsive-size.css.ts" />
+
+<SourceCodeBlock src="styling/responsive-size" />
+
+An unnamed `@container` query measures the nearest ancestor size container, the same one responsive
+layout props use. That is the document root unless a `Container` sits closer. Do not swap it for a
+`@media` query, which measures the viewport instead.
+
 ### Use semantic variables for custom UI
 
 The public `vars` token contract lets an application-owned element follow the active theme.
@@ -183,7 +198,7 @@ outside Luke UI's layers, so do not use it to reach into a component's internal 
 ```tsx
 import { Box } from '@luke-ui/react/box';
 
-<Box className="mx-auto" maxInlineSize="64rem" paddingInline="space.16">
+<Box className="mx-auto max-w-5xl" paddingInline="space.16">
 	{children}
 </Box>;
 ```

@@ -52,13 +52,13 @@ export default function PlaygroundEditor({
 	};
 
 	return (
-		<Stack blockSize="100%" minBlockSize={0}>
+		<Stack blockSize="100%" minBlockSize="0">
 			<PlaygroundPaneToolbar>
 				<Button isPending={isFormatting} onPress={() => void handleFormat()} size="small">
 					Format
 				</Button>
 			</PlaygroundPaneToolbar>
-			<Box flexBasis="auto" flexGrow="1" flexShrink="1" minBlockSize={0}>
+			<Box flexBasis="auto" flexGrow="1" flexShrink="1" minBlockSize="0">
 				<Editor
 					defaultLanguage="typescript"
 					defaultValue={defaultValue}

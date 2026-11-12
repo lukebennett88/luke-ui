@@ -75,13 +75,15 @@ function ColorSample({
 			if (token.path === 'color.background.backdrop') return <BackdropSample value={value} />;
 			return (
 				<Box
-					blockSize={SAMPLE_BLOCK_SIZE}
 					borderColor="control"
 					borderRadius="detail"
 					borderStyle="solid"
 					borderWidth="thin"
-					inlineSize={SAMPLE_INLINE_SIZE}
-					style={{ backgroundColor: value }}
+					style={{
+						backgroundColor: value,
+						blockSize: SAMPLE_BLOCK_SIZE,
+						inlineSize: SAMPLE_INLINE_SIZE,
+					}}
 				/>
 			);
 		case 'foreground':
@@ -93,9 +95,8 @@ function ColorSample({
 					}
 					borderRadius="detail"
 					display="flex"
-					inlineSize={SAMPLE_INLINE_SIZE}
 					justifyContent="center"
-					minBlockSize={SAMPLE_BLOCK_SIZE}
+					style={{ inlineSize: SAMPLE_INLINE_SIZE, minBlockSize: SAMPLE_BLOCK_SIZE }}
 				>
 					<Text fontWeight="emphasis" style={{ color: value }} typography="label">
 						Aa
@@ -105,21 +106,26 @@ function ColorSample({
 		case 'focus':
 			return (
 				<Box
-					blockSize={SAMPLE_BLOCK_SIZE}
 					borderRadius="detail"
-					inlineSize={SAMPLE_INLINE_SIZE}
-					style={{ outline: `2px solid ${value}`, outlineOffset: '-2px' }}
+					style={{
+						blockSize: SAMPLE_BLOCK_SIZE,
+						inlineSize: SAMPLE_INLINE_SIZE,
+						outline: `2px solid ${value}`,
+						outlineOffset: '-2px',
+					}}
 				/>
 			);
 		case 'border':
 			return (
 				<Box
-					blockSize={SAMPLE_BLOCK_SIZE}
 					borderRadius="detail"
 					borderStyle="solid"
 					borderWidth="thick"
-					inlineSize={SAMPLE_INLINE_SIZE}
-					style={{ borderColor: value }}
+					style={{
+						blockSize: SAMPLE_BLOCK_SIZE,
+						borderColor: value,
+						inlineSize: SAMPLE_INLINE_SIZE,
+					}}
 				/>
 			);
 	}
@@ -132,15 +138,14 @@ function ColorSample({
 function BackdropSample({ value }: { value: string }) {
 	return (
 		<Box
-			blockSize={SAMPLE_BLOCK_SIZE}
 			borderColor="decorative"
 			borderRadius="detail"
 			borderStyle="solid"
 			borderWidth="thin"
 			display="flex"
-			inlineSize={SAMPLE_INLINE_SIZE}
 			overflow="hidden"
 			position="relative"
+			style={{ blockSize: SAMPLE_BLOCK_SIZE, inlineSize: SAMPLE_INLINE_SIZE }}
 		>
 			<Box backgroundColor="surface.base" flexGrow="1" />
 			<Box backgroundColor="neutral.solid" flexGrow="1" />

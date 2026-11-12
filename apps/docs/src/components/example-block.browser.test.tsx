@@ -39,6 +39,73 @@ test('a missing example stays readable at mobile width', async () => {
 	expect(document.documentElement.scrollWidth).toBe(document.documentElement.clientWidth);
 });
 
+test('the title grows to fill the header and can shrink below its content', async () => {
+	await renderExampleBlock();
+	const titleBox = page.getByText('Box: Responsive layout').element().parentElement;
+	assert(titleBox, 'expected the title box');
+	const header = titleBox.parentElement;
+	assert(header, 'expected the frame header');
+	const computedStyle = getComputedStyle(titleBox);
+
+	expect(computedStyle.flexGrow).toBe('1');
+	expect(computedStyle.flexShrink).toBe('1');
+	expect(computedStyle.flexBasis).toBe('auto');
+	expect(computedStyle.minInlineSize).toBe('0px');
+	const actions = header.lastElementChild;
+	assert(actions && actions !== titleBox, 'expected the actions');
+	// The title box takes the space the actions leave, so the actions sit at the inline end.
+	expect(Math.round(actions.getBoundingClientRect().right)).toBe(
+		Math.round(
+			header.getBoundingClientRect().right -
+				Number.parseFloat(getComputedStyle(header).paddingInlineEnd),
+		),
+	);
+	// Without growth, the title box would stop at its text and leave a gap before the actions.
+	expect(
+		Math.round(
+			titleBox.getBoundingClientRect().right +
+				Number.parseFloat(getComputedStyle(header).columnGap),
+		),
+	).toBe(Math.round(actions.getBoundingClientRect().left));
+});
+
+test('responsive layout items share a row in a wide preview and stack in a narrow one', async () => {
+	await renderExampleBlock({ width: 900 });
+	const [first, second] = responsiveLayoutItems();
+
+	expect(first.top).toBe(second.top);
+	expect(first.width).toBe(second.width);
+
+	act(() => root?.unmount());
+	container?.remove();
+	await renderExampleBlock({ width: 400 });
+	const [narrowFirst, narrowSecond] = responsiveLayoutItems();
+
+	expect(narrowSecond.top).toBeGreaterThan(narrowFirst.bottom);
+	expect(narrowFirst.width).toBe(narrowSecond.width);
+	expect(narrowFirst.height).toBe(64);
+});
+
+test('a narrow preview constrains the rendered example, not its source', async () => {
+	await renderExampleBlock({
+		previewWidth: 'narrow',
+		src: 'button/block-layout',
+		title: 'Button: Block layout',
+	});
+	const button = page.getByRole('button', { name: 'Continue' }).element();
+
+	expect(button.getBoundingClientRect().width).toBe(320);
+	expect(container?.querySelector('[data-preview-width="narrow"]')).not.toBeNull();
+	expect(container?.querySelector('pre')?.textContent).not.toContain('maxInlineSize');
+});
+
+test('a complete form keeps its width in a wide preview', async () => {
+	await renderExampleBlock({ src: 'forms/build-a-form', title: 'Forms: Build a form' });
+	const field = page.getByRole('textbox', { name: 'Email address' }).element();
+	expect(field.getBoundingClientRect().width).toBeLessThanOrEqual(320);
+	expect(container?.querySelector('pre')?.textContent).toContain('20rem');
+});
+
 test('resizes the preview with pointer and keyboard, then resets it', async () => {
 	await page.viewport(1000, 800);
 	renderPreviewHarness();
@@ -222,16 +289,28 @@ function previewWidth() {
 	return panel.getBoundingClientRect().width;
 }
 
+function responsiveLayoutItems(): [DOMRect, DOMRect] {
+	const [first, second, ...rest] = [
+		...(container?.querySelectorAll<HTMLElement>('[data-panel] span') ?? []),
+	]
+		.filter((element) => element.textContent === 'Item')
+		.map((element) => element.parentElement?.getBoundingClientRect());
+	assert(first && second && rest.length === 0, 'expected two layout items');
+	return [first, second];
+}
+
 async function waitForResizeInteraction() {
 	await expect.poll(() => separator().getBoundingClientRect().width).toBe(1);
 	await expect.poll(() => separator().getAttribute('aria-disabled')).toBeNull();
 }
 
 async function renderExampleBlock({
+	previewWidth: requestedPreviewWidth,
 	src = 'box/responsive-layout',
 	title = 'Box: Responsive layout',
 	width = 800,
 }: {
+	previewWidth?: 'narrow';
 	src?: string;
 	title?: string;
 	width?: number;
@@ -239,7 +318,7 @@ async function renderExampleBlock({
 	const rootRoute = createRootRoute({
 		component: () => (
 			<DocsThemeRoot>
-				<ExampleBlock src={src} title={title} />
+				<ExampleBlock previewWidth={requestedPreviewWidth} src={src} title={title} />
 			</DocsThemeRoot>
 		),
 	});

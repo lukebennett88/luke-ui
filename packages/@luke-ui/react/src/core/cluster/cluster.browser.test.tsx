@@ -56,7 +56,7 @@ test('uses no gap by default and accepts alignment overrides', () => {
 		<Cluster
 			alignItems="stretch"
 			data-testid="cluster"
-			inlineSize="2rem"
+			style={{ inlineSize: '2rem' }}
 			justifyContent="space-between"
 		>
 			<span style={{ inlineSize: '1rem' }} />

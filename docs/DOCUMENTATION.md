@@ -276,7 +276,9 @@ Use layout primitives for structure, not one-off wrappers.
   padding and borders. Do not add an empty `Box` just to group children. If a control needs to keep
   its intrinsic inline size inside a stretching `Stack`, wrap it in `Cluster` instead of stretching
   it.
-- Form-style examples usually sit in a `Stack` with `maxInlineSize="20rem"`.
+- Use `previewWidth="narrow"` for a narrow docs preview when the width is incidental to the example.
+  Define the width in the example source when it demonstrates the layout itself, such as a complete
+  form. For a fixed width, use `style={{ maxInlineSize: '20rem' }}`.
 - Do not set `inlineSize="100%"` to fill the preview. A block-level example root already fills it.
 - Use `ExampleItem` from `#docs` for placeholder children in a layout example, so each child's box
   is visible.
@@ -296,7 +298,10 @@ default-exports an anonymous arrow function, `export default () => {...}`. The m
 identifies the component and variation, so the rendered source repeats no function name.
 
 Reference an example from an MDX page with `<ExampleBlock src="<component>/<name>" title="..." />`.
-Title it `<page or component>: <qualifier>`, for example `Button: Icons`.
+Use `previewWidth="narrow"` to constrain the docs preview when useful. This is a docs-only setting:
+opening the example in the Playground uses the available width. Put any width that is part of the
+example itself in its source. Title it `<page or component>: <qualifier>`, for example
+`Button: Icons`.
 
 The preview renders an example in normal document flow, so a block-level example fills the preview
 width. Pass `layout="centered"` for an example with an intrinsic size, such as a button or an icon.

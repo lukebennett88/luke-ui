@@ -14,7 +14,7 @@ afterEach(async () => {
 
 test('creates equal explicit columns', () => {
 	const { locator } = render(
-		<Grid columns={3} data-testid="grid" gap="space.8" inlineSize="30rem">
+		<Grid columns={3} data-testid="grid" gap="space.8" style={{ inlineSize: '30rem' }}>
 			<span style={{ blockSize: '1rem' }} />
 			<span style={{ blockSize: '1rem' }} />
 			<span style={{ blockSize: '1rem' }} />
@@ -45,8 +45,7 @@ test('keeps consumer className and style alongside grid presentation', () => {
 			columns={2}
 			data-testid="grid"
 			gap="space.8"
-			inlineSize="20rem"
-			style={{ backgroundColor: 'rgb(4, 5, 6)', position: 'relative' }}
+			style={{ backgroundColor: 'rgb(4, 5, 6)', inlineSize: '20rem', position: 'relative' }}
 		>
 			<span style={{ blockSize: '1rem' }} />
 			<span style={{ blockSize: '1rem' }} />
@@ -65,7 +64,7 @@ test('keeps consumer className and style alongside grid presentation', () => {
 
 test('applies a CSS track list passed to columns', () => {
 	const { locator } = render(
-		<Grid columns="12rem 1fr" data-testid="grid" inlineSize="40rem">
+		<Grid columns="12rem 1fr" data-testid="grid" style={{ inlineSize: '40rem' }}>
 			<span data-testid="fixed" style={{ blockSize: '1rem' }} />
 			<span data-testid="flexible" style={{ blockSize: '1rem' }} />
 		</Grid>,
@@ -84,7 +83,7 @@ test('applies a CSS track list passed to columns', () => {
 test('rejects "3" as columns and keeps one implicit column', () => {
 	const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 	const { locator } = render(
-		<Grid columns={{ initial: '3' }} data-testid="grid" inlineSize="40rem">
+		<Grid columns={{ initial: '3' }} data-testid="grid" style={{ inlineSize: '40rem' }}>
 			<span style={{ blockSize: '1rem' }}>First</span>
 			<span style={{ blockSize: '1rem' }}>Second</span>
 		</Grid>,
@@ -107,7 +106,7 @@ test('rejects "3" as columns and keeps one implicit column', () => {
 test('does not reject "3 " as a columns string', () => {
 	const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 	render(
-		<Grid columns="3 " data-testid="grid" inlineSize="40rem">
+		<Grid columns="3 " data-testid="grid" style={{ inlineSize: '40rem' }}>
 			<span style={{ blockSize: '1rem' }} />
 		</Grid>,
 	);
@@ -136,7 +135,7 @@ test('applies a CSS track list passed to rows', () => {
 
 test('places children in named areas', () => {
 	const { locator } = render(
-		<Grid areas={['a b', 'c c']} columns={2} data-testid="grid" inlineSize="30rem">
+		<Grid areas={['a b', 'c c']} columns={2} data-testid="grid" style={{ inlineSize: '30rem' }}>
 			<Box data-testid="c" gridArea="c" style={{ blockSize: '1rem' }} />
 			<Box data-testid="a" gridArea="a" style={{ blockSize: '1rem' }} />
 			<Box data-testid="b" gridArea="b" style={{ blockSize: '1rem' }} />
@@ -164,7 +163,7 @@ for (const invalidAreas of [[], ['a b', 'c'], ['a a', 'a b']]) {
 	test(`rejects ${JSON.stringify(invalidAreas)} as areas and keeps auto-placement`, () => {
 		const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 		const { locator } = render(
-			<Grid areas={invalidAreas} columns={2} data-testid="grid" inlineSize="30rem">
+			<Grid areas={invalidAreas} columns={2} data-testid="grid" style={{ inlineSize: '30rem' }}>
 				<span data-testid="first" style={{ blockSize: '1rem' }} />
 				<span data-testid="second" style={{ blockSize: '1rem' }} />
 			</Grid>,
@@ -249,7 +248,7 @@ test('does not overflow a parent narrower than the auto-fit minimum', () => {
 
 test('lets children span tracks with Box grid-placement props', () => {
 	const { locator } = render(
-		<Grid columns={4} data-testid="grid" gap="space.8" inlineSize="40rem">
+		<Grid columns={4} data-testid="grid" gap="space.8" style={{ inlineSize: '40rem' }}>
 			<Box data-testid="wide" gridColumn="span 2" style={{ blockSize: '1rem' }} />
 			<span data-testid="narrow" style={{ blockSize: '1rem' }} />
 			<span style={{ blockSize: '1rem' }} />
@@ -366,7 +365,7 @@ test('keeps the inline axis under RTL', () => {
 
 test('does not let long unbreakable content expand equal grid tracks', () => {
 	const { locator } = render(
-		<Grid columns={2} data-testid="grid" gap="space.8" inlineSize="20rem">
+		<Grid columns={2} data-testid="grid" gap="space.8" style={{ inlineSize: '20rem' }}>
 			<span data-testid="long">
 				supercalifragilisticexpialidocioussupercalifragilisticexpialidocious
 			</span>

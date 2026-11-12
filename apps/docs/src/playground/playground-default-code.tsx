@@ -46,7 +46,6 @@ export default () => {
 			borderWidth="thin"
 			boxShadow="raised"
 			marginInline="auto"
-			maxInlineSize="26rem"
 			// Utility props take an object keyed by breakpoint. Breakpoints are
 			// container queries resolved against the theme root, so this follows the
 			// preview's inline size.
@@ -59,6 +58,7 @@ export default () => {
 				bp768: 'space.48',
 			}}
 			renderRoot={(domProps) => <form {...domProps} onSubmit={handleSubmit} />}
+			style={{ maxInlineSize: '26rem' }}
 		>
 			<Stack gap="space.24">
 				<Heading level={2}>Sign in</Heading>

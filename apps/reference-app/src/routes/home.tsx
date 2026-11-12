@@ -32,7 +32,7 @@ export function HomePage() {
 				flexGrow="1"
 				marginBlock={{ bp768: 'space.8' }}
 				marginInline={{ bp768: 'space.8' }}
-				minBlockSize={0}
+				minBlockSize="0"
 				overflow="hidden"
 			>
 				<Box

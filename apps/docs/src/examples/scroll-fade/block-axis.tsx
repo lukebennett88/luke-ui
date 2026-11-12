@@ -7,9 +7,8 @@ export default () => {
 		<ScrollFade
 			aria-label="Example items"
 			axis="block"
-			blockSize="8.75rem"
-			inlineSize="20rem"
 			padding="space.12"
+			style={{ blockSize: '8.75rem', inlineSize: '20rem' }}
 		>
 			<Stack gap="space.12">
 				{['First item', 'Second item', 'Third item', 'Fourth item', 'Fifth item', 'Sixth item'].map(

@@ -140,9 +140,18 @@ Spacing props accept `space.4` through the curated `space.96` steps, plus string
 `vars.space['4']` through `vars.space['96']`, with no zero entry. Numerical steps are fixed
 reference measurements emitted in `rem`. Custom lengths belong in CSS.
 
-`Container.maxInlineSize` is required and accepts only the five approved `container.*` presets. Use
-Box for arbitrary maximum widths. These naming decisions supersede
-[#761](https://github.com/lukebennett88/luke-ui/issues/761).
+`Container.maxInlineSize` is required and accepts only the five approved `container.*` presets.
+These naming decisions supersede [#761](https://github.com/lukebennett88/luke-ui/issues/761).
+
+Box and shared layout utilities accept a closed value vocabulary, with no length scale. Sizing props
+take intrinsic keywords, `100%`, and string `"0"`. Only `maxInlineSize` also takes the `container.*`
+presets, and Container's own prop is not widened through shared layout props. Insets take space
+tokens, `"0"`, and `auto`. `flexBasis` takes the sizing keywords plus `content`, and `order` takes a
+number. There is no `flex` shorthand prop. Arbitrary lengths, percentages, and CSS functions belong
+on `style`, or in authored CSS through `className` when they are responsive.
+[Styling](STYLING.md#sizing-inset-flex-and-order-values) lists every value. These rules supersede
+[#836](https://github.com/lukebennett88/luke-ui/issues/836)'s earlier compatibility requirement and
+[#952](https://github.com/lukebennett88/luke-ui/issues/952)'s constraint against contracting Box.
 
 ### Button inline sizing
 

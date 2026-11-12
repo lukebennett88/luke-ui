@@ -1,11 +1,6 @@
 import { createVar } from '@vanilla-extract/css';
-import { literalScale } from '../../theme/literal-scale.js';
+import { containerMaxInlineSizeTokens } from '../styles/container-tokens.js';
 import { recipe } from '../styles/recipe.js';
-
-/** Rem values for fixed `maxInlineSize` tokens on `Container`. */
-export const containerMaxInlineSizeTokens = literalScale('container.', [
-	448, 672, 896, 1152, 1280,
-] as const);
 
 /** Maximum inline size selected by a preset. */
 const containerMaxInlineSizeVar = createVar();

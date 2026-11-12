@@ -8,6 +8,7 @@ import { cx } from '@luke-ui/react/utils';
 import type { ComponentProps, ComponentType, JSX, ReactNode } from 'react';
 import { Suspense, use, useId } from 'react';
 import type { HighlightedSource } from '../lib/highlighted-source.js';
+import type { PreviewWidth } from '../lib/story-wrapper.js';
 import { StoryWrapper } from '../lib/story-wrapper.js';
 import { DocsLink } from './docs-link.js';
 import * as styles from './example-block.css.js';
@@ -18,6 +19,8 @@ type ExampleBlockProps = {
 	src: string;
 	title: string;
 	layout?: ComponentProps<typeof StoryWrapper>['layout'];
+	/** Constrains the rendered preview, not the example source, to a narrow inline size. */
+	previewWidth?: PreviewWidth;
 };
 
 export function ExampleBlock(props: ExampleBlockProps): JSX.Element {
@@ -39,7 +42,7 @@ function ExampleLoadingState({ layout, title }: Pick<ExampleBlockProps, 'layout'
 					alignItems="center"
 					display="flex"
 					justifyContent="center"
-					minBlockSize={isFullBleed ? '6rem' : undefined}
+					style={isFullBleed ? { minBlockSize: '6rem' } : undefined}
 				>
 					<LoadingSpinner aria-label={loadingLabel} />
 				</Box>
@@ -48,7 +51,7 @@ function ExampleLoadingState({ layout, title }: Pick<ExampleBlockProps, 'layout'
 	);
 }
 
-function ExampleContent({ layout, src, title }: ExampleBlockProps): JSX.Element {
+function ExampleContent({ layout, previewWidth, src, title }: ExampleBlockProps): JSX.Element {
 	const slashIndex = src.indexOf('/');
 	const component = src.slice(0, slashIndex);
 	const name = src.slice(slashIndex + 1);
@@ -81,7 +84,7 @@ function ExampleContent({ layout, src, title }: ExampleBlockProps): JSX.Element 
 			}
 			title={title}
 		>
-			<ExamplePreview layout={layout} title={title}>
+			<ExamplePreview layout={layout} previewWidth={previewWidth} title={title}>
 				<PreviewComponent />
 			</ExamplePreview>
 			{/* Remount when the source changes so expand state resets without an effect. */}
@@ -128,7 +131,7 @@ function ExampleFrame({ actions, ariaLabel, children, title }: ExampleFrameProps
 				paddingBlock="space.8"
 				paddingInline="space.16"
 			>
-				<Box flex="1 1 auto" minInlineSize={0}>
+				<Box flexGrow="1" minInlineSize="0">
 					<Text color="secondary" elementType="div" id={titleId} typography="label">
 						{title}
 					</Text>

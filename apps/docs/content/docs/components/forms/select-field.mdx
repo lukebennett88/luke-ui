@@ -10,7 +10,7 @@ button, label, description, validation message, popover, and listbox. Use
 [`ComboboxField`](/components/forms/combobox-field) instead when searching or filtering the options
 helps.
 
-<ExampleBlock src="select-field/basic" title="Select Field: Basic" />
+<ExampleBlock src="select-field/basic" title="Select Field: Basic" previewWidth="narrow" />
 
 ## Items and selection
 
@@ -32,7 +32,11 @@ Pass `defaultValue` to start with an option selected. Pass `value` and `onChange
 selection yourself. `onChange` receives the selected key, or `null` when nothing is selected, and
 `value` takes the same type.
 
-<ExampleBlock src="select-field/controlled" title="Select Field: Controlled" />
+<ExampleBlock
+	src="select-field/controlled"
+	title="Select Field: Controlled"
+	previewWidth="narrow"
+/>
 
 ## Required fields
 
@@ -51,7 +55,11 @@ message after validation fails. Pass `errorMessage` only for an error you alread
 from a form library or your server. A non-empty message marks the field invalid. Read
 [Validation](/docs/validation) for where messages come from, server errors, and how to write them.
 
-<ExampleBlock src="select-field/validation" title="Select Field: Validation" />
+<ExampleBlock
+	src="select-field/validation"
+	title="Select Field: Validation"
+	previewWidth="narrow"
+/>
 
 To move focus to the trigger yourself, pass `triggerRef`. `ref` reaches the root element.
 

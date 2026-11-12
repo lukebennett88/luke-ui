@@ -4,7 +4,7 @@ import { TextInputField } from '@luke-ui/react/text-input-field';
 
 export default () => {
 	return (
-		<Stack gap="space.16" maxInlineSize="20rem">
+		<Stack gap="space.16">
 			<TextInputField
 				label="Search documentation"
 				name="documentationSearch"

@@ -51,3 +51,29 @@ test('Box-like layout components share the two-argument renderRoot contract', ()
 	expectTypeOf<NonNullable<GridProps['renderRoot']>>().toEqualTypeOf<RenderRoot>();
 	expectTypeOf<NonNullable<StackProps['renderRoot']>>().toEqualTypeOf<RenderRoot>();
 });
+
+test('shared layout components follow the constrained utility values', () => {
+	assertType<BoxProps>({ maxInlineSize: 'container.672' });
+	assertType<StackProps>({ maxInlineSize: 'container.672' });
+	assertType<GridProps>({ maxInlineSize: 'container.672' });
+	assertType<ClusterProps>({ maxInlineSize: { initial: '100%', bp768: 'container.672' } });
+	assertType<StackProps>({ flexBasis: '0', flexGrow: '1', minInlineSize: '0', order: 1 });
+	// @ts-expect-error — the flex shorthand is removed from shared layout props
+	assertType<StackProps>({ flex: 1 });
+	// @ts-expect-error — the flex shorthand is removed from shared layout props
+	assertType<ClusterProps>({ flex: 'auto' });
+	// @ts-expect-error — arbitrary lengths use style or className
+	assertType<GridProps>({ inlineSize: '42rem' });
+	// @ts-expect-error — percentages are not inset values
+	assertType<AspectRatioProps>({ insetInlineStart: '50%' });
+});
+
+test('Container keeps its required container-only maxInlineSize', () => {
+	expectTypeOf<ContainerProps['maxInlineSize']>().toEqualTypeOf<
+		'container.448' | 'container.672' | 'container.896' | 'container.1152' | 'container.1280'
+	>();
+	// @ts-expect-error — shared layout keywords do not widen Container's owned prop
+	assertType<ContainerProps>({ maxInlineSize: 'none' });
+	// @ts-expect-error — Container requires a preset
+	assertType<ContainerProps>({});
+});

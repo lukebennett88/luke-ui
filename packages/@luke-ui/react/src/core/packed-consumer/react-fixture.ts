@@ -476,7 +476,44 @@ export const withoutDisplay: ThemeInput = {
 };
 
 export const presetContainer = <Container maxInlineSize="container.448">Content</Container>;
-export const customWidthBox = <Box maxInlineSize="80ch">Content</Box>;
+export const customWidthBox = <Box style={{ maxInlineSize: '80ch' }}>Content</Box>;
+export const containerWidthBox = <Box maxInlineSize="container.672">Content</Box>;
+
+// Constrained utility values: keywords, string zero, tokens, numeric order, responsive objects.
+export const supportedUtilityValues: Array<BoxProps> = [
+	{ inlineSize: '100%', blockSize: 'auto', minInlineSize: '0', minBlockSize: 'min-content' },
+	{ maxInlineSize: 'none', maxBlockSize: 'fit-content' },
+	{ maxInlineSize: { initial: '100%', bp768: 'container.672' } },
+	{ position: 'absolute', inset: '0', insetBlockEnd: 'space.8', insetInlineStart: 'auto' },
+	{ flexBasis: 'content', flexGrow: '1', flexShrink: '0' },
+	{ flexBasis: { initial: 'auto', bp640: '0' }, order: { initial: 0, bp640: -1 } },
+];
+// @ts-expect-error — space tokens are not sizes
+export const rejectedSpaceInlineSize: BoxProps['inlineSize'] = 'space.32';
+// @ts-expect-error — the historical spacing name is not a size
+export const rejectedHistoricalInlineSize: BoxProps['inlineSize'] = 'sp32';
+// @ts-expect-error — arbitrary lengths use style or className
+export const rejectedLengthInlineSize: BoxProps['inlineSize'] = '42rem';
+// @ts-expect-error — container presets are maximum inline sizes only
+export const rejectedContainerInlineSize: BoxProps['inlineSize'] = 'container.672';
+// @ts-expect-error — arbitrary lengths use style or className
+export const rejectedLengthMinBlockSize: BoxProps['minBlockSize'] = '4rem';
+// @ts-expect-error — zero is the string "0"
+export const rejectedNumericZero: BoxProps['minInlineSize'] = 0;
+// @ts-expect-error — maximum sizes use none, not auto
+export const rejectedMaxAuto: BoxProps['maxInlineSize'] = 'auto';
+// @ts-expect-error — percentages are not inset values
+export const rejectedPercentInset: BoxProps['inset'] = '50%';
+// @ts-expect-error — order is numeric
+export const rejectedTokenOrder: BoxProps['order'] = 'space.32';
+// @ts-expect-error — container presets are not flex bases
+export const rejectedContainerFlexBasis: BoxProps['flexBasis'] = 'container.672';
+// @ts-expect-error — the flex shorthand is removed; use flexGrow, flexShrink, and flexBasis
+export const rejectedFlexNumber = <Box flex={1}>Content</Box>;
+// @ts-expect-error — the flex shorthand is removed; use flexGrow, flexShrink, and flexBasis
+export const rejectedFlexString = <Box flex="1">Content</Box>;
+// @ts-expect-error — the flex shorthand is removed; use flexGrow, flexShrink, and flexBasis
+export const rejectedFlexAuto = <Box flex="auto">Content</Box>;
 
 export const fullButton = <Button inlineSize="full">Continue</Button>;
 // @ts-expect-error — text actions do not accept inline sizing

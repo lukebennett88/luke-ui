@@ -100,10 +100,10 @@ export function PropTableHead({ layout }: { layout: PropTableLayout }) {
 	return (
 		<Fragment>
 			<colgroup>
-				<TableColumn className={referenceStyles.hideNarrow} inlineSize="30%" />
+				<TableColumn className={referenceStyles.hideNarrow} style={{ inlineSize: '30%' }} />
 				<col />
 				{layout.showDefault ? (
-					<TableColumn className={referenceStyles.hideNarrow} inlineSize="20%" />
+					<TableColumn className={referenceStyles.hideNarrow} style={{ inlineSize: '20%' }} />
 				) : null}
 			</colgroup>
 			<ReferenceTableHeader>

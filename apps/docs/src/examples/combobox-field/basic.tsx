@@ -12,7 +12,7 @@ const fruits: Array<Fruit> = [
 
 export default () => {
 	return (
-		<Stack gap="space.16" maxInlineSize="20rem">
+		<Stack gap="space.16">
 			<ComboboxField
 				defaultItems={fruits}
 				defaultValue="apple"

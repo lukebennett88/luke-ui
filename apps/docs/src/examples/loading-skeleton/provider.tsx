@@ -9,7 +9,7 @@ export default () => {
 	const [isLoading, setIsLoading] = useState(true);
 
 	return (
-		<Stack gap="space.16" maxInlineSize="28rem">
+		<Stack gap="space.16" style={{ maxInlineSize: '28rem' }}>
 			<CheckboxField isSelected={isLoading} label="Show loading state" onChange={setIsLoading} />
 			<LoadingSkeletonProvider isLoading={isLoading}>
 				<Stack gap="space.8">

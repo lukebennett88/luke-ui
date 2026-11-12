@@ -11,7 +11,7 @@ function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
 export default () => {
 	return (
 		<form onSubmit={handleSubmit}>
-			<Stack gap="space.16" maxInlineSize="20rem">
+			<Stack gap="space.16">
 				<RadioGroup isRequired label="Text alignment" name="alignment">
 					<RadioField label="Left" value="left" />
 					<RadioField label="Centre" value="centre" />

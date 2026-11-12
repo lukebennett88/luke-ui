@@ -11,7 +11,7 @@ function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
 export default () => {
 	return (
 		<form onSubmit={handleSubmit}>
-			<Stack gap="space.16" maxInlineSize="20rem">
+			<Stack gap="space.16">
 				<CheckboxGroup label="Consent" name="consent">
 					<CheckboxField isRequired label="I accept the terms" value="terms" />
 					<CheckboxField label="Email me updates" value="updates" />

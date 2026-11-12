@@ -58,10 +58,10 @@ export function SettingsLayout() {
 					flexDirection="column"
 					flexShrink="0"
 					gap="space.24"
-					inlineSize="244px"
-					minBlockSize={0}
+					minBlockSize="0"
 					overflow="hidden"
 					paddingBlock="space.16"
+					style={{ inlineSize: '244px' }}
 				>
 					<Stack className={styles.sidebarHeader} flexShrink="0" gap="space.12">
 						<Box>
@@ -90,8 +90,8 @@ export function SettingsLayout() {
 					id={MAIN_ID}
 					marginBlock={{ bp768: 'space.8' }}
 					marginInlineEnd={{ bp768: 'space.8' }}
-					minBlockSize={0}
-					minInlineSize={0}
+					minBlockSize="0"
+					minInlineSize="0"
 					overflow="hidden"
 					tabIndex={-1}
 				>

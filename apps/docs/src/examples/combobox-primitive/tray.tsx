@@ -27,7 +27,7 @@ function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
 export default () => {
 	return (
 		<form onSubmit={handleSubmit}>
-			<Stack gap="space.16" maxInlineSize="20rem">
+			<Stack gap="space.16">
 				<ComboboxRoot defaultItems={countries} isRequired name="country">
 					<Field label="Country">
 						<ComboboxControl>

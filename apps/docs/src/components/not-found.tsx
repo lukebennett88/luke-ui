@@ -26,7 +26,7 @@ export function NotFound() {
 					<Heading level={1} typography="display">
 						Page not found
 					</Heading>
-					<Box maxInlineSize="36rem">
+					<Box style={{ maxInlineSize: '36rem' }}>
 						<Text color="secondary" elementType="p" typography="lead">
 							Check the address, or search the docs.
 						</Text>

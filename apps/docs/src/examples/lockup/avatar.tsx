@@ -9,12 +9,11 @@ export default () => {
 			<LockupRail>
 				<Box
 					backgroundColor="neutral.subtle"
-					blockSize="3rem"
 					borderColor="decorative"
 					borderRadius="full"
 					borderStyle="solid"
 					borderWidth="thin"
-					inlineSize="3rem"
+					style={{ blockSize: '3rem', inlineSize: '3rem' }}
 				/>
 			</LockupRail>
 			<LockupBody>

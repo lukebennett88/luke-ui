@@ -9,7 +9,7 @@ const ratios = ['1 / 1', '4 / 3', '3 / 2', '16 / 9', '21 / 9'] as const;
 const blankPixel = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
 
 test('defaults to a square frame when ratio is omitted', () => {
-	const { locator } = render(<AspectRatio data-testid="ratio" inlineSize="16rem" />);
+	const { locator } = render(<AspectRatio data-testid="ratio" style={{ inlineSize: '16rem' }} />);
 	const element = locator.getByTestId('ratio').element();
 	if (!(element instanceof HTMLElement)) throw new Error('Expected AspectRatio element.');
 	const { height, width } = element.getBoundingClientRect();
@@ -21,7 +21,7 @@ test('defaults to a square frame when ratio is omitted', () => {
 for (const ratio of ratios) {
 	test(`locks the frame to ${ratio}`, () => {
 		const { locator } = render(
-			<AspectRatio data-testid="ratio" inlineSize="16rem" ratio={ratio} />,
+			<AspectRatio data-testid="ratio" style={{ inlineSize: '16rem' }} ratio={ratio} />,
 		);
 		const element = locator.getByTestId('ratio').element();
 		if (!(element instanceof HTMLElement)) throw new Error('Expected AspectRatio element.');
@@ -36,7 +36,7 @@ for (const ratio of ratios) {
 
 test('sizes a media child to fill the frame without caller fill styles', () => {
 	const { locator } = render(
-		<AspectRatio data-testid="ratio" inlineSize="16rem" ratio="16 / 9">
+		<AspectRatio data-testid="ratio" style={{ inlineSize: '16rem' }} ratio="16 / 9">
 			<img alt="Ocean" data-testid="media" height="180" src={blankPixel} width="240" />
 		</AspectRatio>,
 	);
@@ -52,7 +52,7 @@ test('sizes a media child to fill the frame without caller fill styles', () => {
 
 test('defaults objectFit to cover on the media child', () => {
 	const { locator } = render(
-		<AspectRatio inlineSize="16rem" ratio="16 / 9">
+		<AspectRatio style={{ inlineSize: '16rem' }} ratio="16 / 9">
 			<img alt="Ocean" data-testid="media" height="180" src={blankPixel} width="240" />
 		</AspectRatio>,
 	);
@@ -64,7 +64,7 @@ test('defaults objectFit to cover on the media child', () => {
 
 test('applies an explicit objectFit value to the media child', () => {
 	const { locator } = render(
-		<AspectRatio inlineSize="16rem" objectFit="contain" ratio="16 / 9">
+		<AspectRatio style={{ inlineSize: '16rem' }} objectFit="contain" ratio="16 / 9">
 			<img alt="Ocean" data-testid="media" height="180" src={blankPixel} width="240" />
 		</AspectRatio>,
 	);
@@ -77,7 +77,7 @@ test('applies an explicit objectFit value to the media child', () => {
 test('applies the chosen ratio to a caller-owned root', () => {
 	const { locator } = render(
 		<AspectRatio
-			inlineSize="16rem"
+			style={{ inlineSize: '16rem' }}
 			ratio="21 / 9"
 			renderRoot={(domProps) => <figure {...domProps} data-testid="custom-ratio" />}
 		/>,
@@ -105,12 +105,17 @@ test('media frame ratios and objectFit values', { tags: ['visual'] }, async () =
 		const { locator: scene } = render(
 			<div style={{ display: 'grid', gap: vars.space['16'] }}>
 				{ratios.map((ratio) => (
-					<AspectRatio inlineSize="18rem" key={ratio} ratio={ratio}>
+					<AspectRatio style={{ inlineSize: '18rem' }} key={ratio} ratio={ratio}>
 						<img alt={`Ratio ${ratio}`} src={mediaSrc} />
 					</AspectRatio>
 				))}
 				{objectFits.map((objectFit) => (
-					<AspectRatio inlineSize="18rem" key={objectFit} objectFit={objectFit} ratio="16 / 9">
+					<AspectRatio
+						style={{ inlineSize: '18rem' }}
+						key={objectFit}
+						objectFit={objectFit}
+						ratio="16 / 9"
+					>
 						<img alt={`objectFit ${objectFit}`} src={mediaSrc} />
 					</AspectRatio>
 				))}

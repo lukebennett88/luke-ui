@@ -52,6 +52,6 @@ test('Bleed rejects margin props and Box appearance utilities', () => {
 
 test('Bleed accepts ordinary non-margin layout props', () => {
 	expectTypeOf<{ inline: 'space.16'; padding: 'space.8' }>().toExtend<BleedProps>();
-	expectTypeOf<{ inlineSize: '100%'; maxInlineSize: '20rem' }>().toExtend<BleedProps>();
+	expectTypeOf<{ inlineSize: '100%'; maxInlineSize: 'container.672' }>().toExtend<BleedProps>();
 	expectTypeOf<{ position: 'relative'; insetInlineStart: '0' }>().toExtend<BleedProps>();
 });

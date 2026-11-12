@@ -5,7 +5,7 @@ import { Lockup, LockupBody, LockupRail } from '@luke-ui/react/lockup';
 
 export default () => {
 	return (
-		<Box maxInlineSize="18rem">
+		<Box style={{ maxInlineSize: '18rem' }}>
 			<Heading level={2}>
 				<Lockup elementType="span" gap="space.8">
 					<LockupRail>

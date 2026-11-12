@@ -12,7 +12,7 @@ function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
 export default () => {
 	return (
 		<Form onSubmit={handleSubmit}>
-			<Stack gap="space.16" maxInlineSize="20rem">
+			<Stack gap="space.16" style={{ maxInlineSize: '20rem' }}>
 				<fieldset style={{ border: 'none', margin: 0, minInlineSize: 0, padding: 0 }}>
 					<legend>Email notifications</legend>
 					<Stack gap="space.12" paddingBlockStart="space.12">
