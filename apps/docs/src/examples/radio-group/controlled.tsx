@@ -7,7 +7,7 @@ export default () => {
 	const [alignment, setAlignment] = useState('left');
 
 	return (
-		<Stack gap="space.16" maxInlineSize="20rem">
+		<Stack gap="space.16">
 			<RadioGroup label="Text alignment" onChange={setAlignment} value={alignment}>
 				<RadioField label="Left" value="left" />
 				<RadioField label="Centre" value="centre" />

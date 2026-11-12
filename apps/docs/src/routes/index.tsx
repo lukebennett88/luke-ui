@@ -7,6 +7,7 @@ import { createFileRoute } from '@tanstack/react-router';
 import type { SoftwareSourceCode, WithContext } from 'schema-dts';
 import { license } from '../../../../packages/@luke-ui/react/package.json';
 import { CodeBlock } from '../components/code-block/code-block.js';
+import { installCommand } from '../components/home-install.css.js';
 import { HomeSectionLinks } from '../components/home-section-links.js';
 import { HomeShowcase, SearchShortcut } from '../components/home-showcase.js';
 import { withBasePath } from '../lib/base-path.js';
@@ -57,7 +58,6 @@ function Home() {
 		<SiteFrame>
 			<Box
 				marginInline="auto"
-				maxInlineSize="72rem"
 				paddingBlock={{
 					initial: 'space.64',
 					bp768: 'space.96',
@@ -68,6 +68,7 @@ function Home() {
 					bp768: 'space.32',
 					bp1024: 'space.48',
 				}}
+				style={{ maxInlineSize: '72rem' }}
 			>
 				<HeadingLevels base={1}>
 					<Grid
@@ -86,12 +87,7 @@ function Home() {
 							<Text color="secondary" elementType="p" typography="lead">
 								{HOME_INTRO}
 							</Text>
-							<Box
-								maxInlineSize={{
-									initial: '100%',
-									bp768: '28rem',
-								}}
-							>
+							<Box className={installCommand}>
 								<CodeBlock code={INSTALL_COMMAND} title="Terminal" />
 							</Box>
 							<SearchShortcut />

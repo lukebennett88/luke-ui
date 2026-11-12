@@ -7,7 +7,7 @@ export default () => {
 	return (
 		<Comparison>
 			<ComparisonItem label="First line">
-				<Box maxInlineSize="18rem">
+				<Box style={{ maxInlineSize: '18rem' }}>
 					<Lockup gap="space.8" railAlignment="firstLine">
 						<LockupRail>
 							<Icon name="checkCircle" />
@@ -19,7 +19,7 @@ export default () => {
 				</Box>
 			</ComparisonItem>
 			<ComparisonItem label="Center">
-				<Box maxInlineSize="18rem">
+				<Box style={{ maxInlineSize: '18rem' }}>
 					<Lockup gap="space.8" railAlignment="center">
 						<LockupRail>
 							<Icon name="checkCircle" />

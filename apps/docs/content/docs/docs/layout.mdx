@@ -32,7 +32,7 @@ Box is the general layout element. Use it to:
 ```tsx
 import { Box } from '@luke-ui/react/box';
 
-<Box maxInlineSize="42rem" padding="space.24">
+<Box maxInlineSize="container.672" padding="space.24">
 	{children}
 </Box>;
 ```
@@ -87,7 +87,17 @@ content can adapt without a breakpoint.
 
 Padding, gap, and margin accept `0` plus value-based spacing keys such as `space.16` and `space.24`.
 The number in each key reflects its value at the default 16px root and is emitted as `rem`. Margin
-also accepts `auto`. Sizing and grid-placement properties accept their CSS values.
+also accepts `auto`. Insets accept the same spacing keys, `0`, and `auto`.
+
+Sizing properties accept `0`, `auto`, `100%`, `min-content`, `max-content`, and `fit-content`.
+Maximum sizes accept `none` instead of `auto`, and `maxInlineSize` also accepts the `container.*`
+presets. Use `flexGrow`, `flexShrink`, and `flexBasis` for flex items. There is no `flex` shorthand.
+Write zero as the string `"0"` everywhere except `order`, which takes a number. Grid-placement
+properties accept their CSS values.
+
+There is no length scale. Put a one-off length on `style`. When a size changes at a breakpoint,
+write it in CSS with a `@container` query built from `breakpoints` and pass it as `className`. Read
+[Styling](/docs/styling#size-elements-outside-the-utility-values).
 
 Use logical properties such as `paddingInline`, `marginBlockStart`, and `maxInlineSize`. They work
 in both writing directions without a second layout rule.

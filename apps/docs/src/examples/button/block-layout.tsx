@@ -1,10 +1,5 @@
 import { Button } from '@luke-ui/react/button';
-import { Stack } from '@luke-ui/react/stack';
 
 export default () => {
-	return (
-		<Stack maxInlineSize="20rem">
-			<Button inlineSize="full">Continue</Button>
-		</Stack>
-	);
+	return <Button inlineSize="full">Continue</Button>;
 };

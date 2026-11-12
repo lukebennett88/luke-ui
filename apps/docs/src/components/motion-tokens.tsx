@@ -173,26 +173,27 @@ function MotionSample({ dotClassName, style }: { dotClassName: string; style: CS
 	return (
 		<Box
 			alignItems="center"
-			blockSize={styles.MOTION_DOT_SIZE}
 			display="flex"
-			inlineSize={styles.MOTION_TRACK_SIZE}
 			position="relative"
+			style={{ blockSize: styles.MOTION_DOT_SIZE, inlineSize: styles.MOTION_TRACK_SIZE }}
 		>
 			<Box
 				backgroundColor="neutral.subtle"
-				blockSize="0.25rem"
 				borderRadius="full"
 				inlineSize="100%"
+				style={{ blockSize: '0.25rem' }}
 			/>
 			<Box
 				backgroundColor="accent.solid"
-				blockSize={styles.MOTION_DOT_SIZE}
 				borderRadius="full"
 				className={dotClassName}
-				inlineSize={styles.MOTION_DOT_SIZE}
 				insetInlineStart="0"
 				position="absolute"
-				style={style}
+				style={{
+					blockSize: styles.MOTION_DOT_SIZE,
+					inlineSize: styles.MOTION_DOT_SIZE,
+					...style,
+				}}
 			/>
 		</Box>
 	);

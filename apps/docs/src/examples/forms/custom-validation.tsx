@@ -22,7 +22,7 @@ function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
 export default () => {
 	return (
 		<Form onSubmit={handleSubmit}>
-			<Stack gap="space.16" maxInlineSize="20rem">
+			<Stack gap="space.16">
 				<TextInputField
 					defaultValue="admin"
 					label="Username"

@@ -24,9 +24,11 @@ export function SpaceTokens() {
 						sample={
 							<Box
 								backgroundColor="accent.solid"
-								blockSize={vars.space['12']}
 								borderRadius="detail"
-								style={{ inlineSize: `var(${token.variable})` }}
+								style={{
+									blockSize: vars.space['12'],
+									inlineSize: `var(${token.variable})`,
+								}}
 							/>
 						}
 						sampleInlineSize="6rem"
@@ -59,12 +61,14 @@ export function RadiusTokens() {
 						sample={
 							<Box
 								backgroundColor="accent.subtle"
-								blockSize={RADIUS_SAMPLE_SIZE}
 								borderColor="decorative"
 								borderStyle="solid"
 								borderWidth="thin"
-								inlineSize={RADIUS_SAMPLE_SIZE}
-								style={{ borderRadius: `var(${token.variable})` }}
+								style={{
+									blockSize: RADIUS_SAMPLE_SIZE,
+									borderRadius: `var(${token.variable})`,
+									inlineSize: RADIUS_SAMPLE_SIZE,
+								}}
 							/>
 						}
 						sampleInlineSize={RADIUS_SAMPLE_SIZE}
@@ -91,19 +95,20 @@ export function ShadowAndFinishTokens() {
 							<Box
 								alignItems="center"
 								backgroundColor="surface.subdued"
-								blockSize="4rem"
 								borderRadius="detail"
 								display="flex"
-								inlineSize={SHADOW_FINISH_SAMPLE_SIZE}
 								justifyContent="center"
 								padding="space.8"
+								style={{ blockSize: '4rem', inlineSize: SHADOW_FINISH_SAMPLE_SIZE }}
 							>
 								<Box
 									backgroundColor="surface.base"
-									blockSize="2.75rem"
 									borderRadius="surface"
-									inlineSize="85%"
-									style={{ boxShadow: `var(${token.variable})` }}
+									style={{
+										blockSize: '2.75rem',
+										boxShadow: `var(${token.variable})`,
+										inlineSize: '85%',
+									}}
 								/>
 							</Box>
 						}
@@ -119,10 +124,12 @@ export function ShadowAndFinishTokens() {
 						sample={
 							<Box
 								backgroundColor="neutral.solid"
-								blockSize={vars.controlSize['40']}
 								borderRadius="control"
-								inlineSize={SHADOW_FINISH_SAMPLE_SIZE}
-								style={{ backgroundImage: `var(${token.variable})` }}
+								style={{
+									backgroundImage: `var(${token.variable})`,
+									blockSize: vars.controlSize['40'],
+									inlineSize: SHADOW_FINISH_SAMPLE_SIZE,
+								}}
 							/>
 						}
 						sampleInlineSize={SHADOW_FINISH_SAMPLE_SIZE}
@@ -149,8 +156,7 @@ export function SizingTokens() {
 								borderRadius="control"
 								borderStyle="solid"
 								borderWidth="thin"
-								inlineSize="4rem"
-								style={{ blockSize: `var(${token.variable})` }}
+								style={{ blockSize: `var(${token.variable})`, inlineSize: '4rem' }}
 							/>
 						}
 						sampleInlineSize="4rem"
@@ -191,14 +197,16 @@ function SampleControl({ label, opacity }: { label: string; opacity?: string }) 
 		<Box
 			alignItems="center"
 			backgroundColor="neutral.subtle"
-			blockSize={vars.controlSize['32']}
 			borderColor="control"
 			borderRadius="control"
 			borderStyle="solid"
 			borderWidth="thin"
 			display="flex"
 			paddingInline="space.8"
-			style={opacity === undefined ? undefined : { opacity }}
+			style={{
+				blockSize: vars.controlSize['32'],
+				...(opacity === undefined ? {} : { opacity }),
+			}}
 		>
 			<Text fontWeight="label" typography="caption">
 				{label}

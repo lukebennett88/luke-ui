@@ -3,7 +3,7 @@ import { Box } from '@luke-ui/react/box';
 import type { TextElementProps } from '@luke-ui/react/text';
 import { Text } from '@luke-ui/react/text';
 import { cx } from '@luke-ui/react/utils';
-import type { ComponentProps, HTMLAttributes, ReactNode } from 'react';
+import type { ComponentProps, CSSProperties, HTMLAttributes, ReactNode } from 'react';
 import * as styles from './reference-table.css.js';
 
 /**
@@ -153,11 +153,19 @@ export function TableHeaderCell({
 /** A `<col>` width hint. Hidden in the stacked layout with the columns it sizes. */
 export function TableColumn({
 	className,
+	style,
 	...boxProps
 }: TableElementBoxProps & {
 	className?: string;
+	/** Sets widths Box utility props do not cover, such as `inlineSize: '30%'`. */
+	style?: CSSProperties;
 }) {
 	return (
-		<Box {...boxProps} className={className} renderRoot={(domProps) => <col {...domProps} />} />
+		<Box
+			{...boxProps}
+			className={className}
+			renderRoot={(domProps) => <col {...domProps} />}
+			style={style}
+		/>
 	);
 }

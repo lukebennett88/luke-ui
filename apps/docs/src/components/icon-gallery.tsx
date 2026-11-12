@@ -113,7 +113,7 @@ export function IconGallery(): JSX.Element {
 			>
 				<LockupBody>
 					<Cluster gap="space.12">
-						<Box flexBasis="14rem" flexGrow="1" minInlineSize="12rem">
+						<Box flexGrow="1" style={{ flexBasis: '14rem', minInlineSize: '12rem' }}>
 							<TextInputField
 								aria-label="Filter icons by name"
 								inputRef={inputRef}
@@ -238,10 +238,10 @@ function IconGalleryCell({ copyStatus, name, onCopy, previewSize }: IconGalleryC
 			<Stack alignItems="center" gap="space.4" padding="space.8">
 				<Box
 					alignItems="center"
-					blockSize="5rem"
 					display="flex"
 					inlineSize="100%"
 					justifyContent="center"
+					style={{ blockSize: '5rem' }}
 				>
 					<Icon name={name} size={previewSize} />
 				</Box>
@@ -302,7 +302,6 @@ function CopyButton({ copyStatus, kind, name, onCopy }: CopyButtonProps) {
 			display="flex"
 			gap="space.4"
 			justifyContent="center"
-			minBlockSize={vars.space['32']}
 			minInlineSize="0"
 			padding="0"
 			renderRoot={(domProps) => (
@@ -314,6 +313,7 @@ function CopyButton({ copyStatus, kind, name, onCopy }: CopyButtonProps) {
 					}}
 				/>
 			)}
+			style={{ minBlockSize: vars.space['32'] }}
 		>
 			<Text fontWeight="label" typography="caption">
 				{label}

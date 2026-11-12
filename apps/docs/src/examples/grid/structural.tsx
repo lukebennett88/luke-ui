@@ -7,8 +7,8 @@ export default () => {
 			areas={['a a', 'b c', 'd d']}
 			columns="1fr 1fr"
 			gap="space.12"
-			minBlockSize="16rem"
 			rows="auto 1fr auto"
+			style={{ minBlockSize: '16rem' }}
 		>
 			<ExampleItem gridArea="a">Area A</ExampleItem>
 			<ExampleItem gridArea="b">Area B</ExampleItem>

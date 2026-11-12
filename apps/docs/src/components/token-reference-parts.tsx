@@ -230,8 +230,7 @@ export function TokenRow({ note, sample, sampleInlineSize, token }: TokenRowProp
 				aria-hidden
 				display="flex"
 				gridArea="sample"
-				inlineSize={sampleInlineSize}
-				minBlockSize={vars.space['32']}
+				style={{ inlineSize: sampleInlineSize, minBlockSize: vars.space['32'] }}
 			>
 				{sample}
 			</Box>

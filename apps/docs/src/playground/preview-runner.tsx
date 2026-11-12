@@ -59,7 +59,7 @@ export default function PreviewRunner() {
 	if (!run) return null;
 
 	return (
-		<Stack className={styles.previewRunner} minBlockSize="100dvh">
+		<Stack className={styles.previewRunner} style={{ minBlockSize: '100dvh' }}>
 			<StoryWrapper>
 				<ErrorBoundary fallback={null} key={run.runId} onError={reportError}>
 					<run.UserComponent />

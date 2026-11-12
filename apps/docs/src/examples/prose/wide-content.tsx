@@ -10,8 +10,8 @@ export default () => {
 			borderRadius="detail"
 			borderStyle="solid"
 			borderWidth="thin"
-			maxInlineSize="18rem"
 			padding="space.12"
+			style={{ maxInlineSize: '18rem' }}
 		>
 			<Prose>
 				<Text elementType="p">Import each component from its own entry point.</Text>

@@ -6,13 +6,13 @@ export default () => {
 	return (
 		<Cluster gap="space.8">
 			<LoadingSkeleton>
-				<Box blockSize="3rem" borderRadius="full" inlineSize="3rem" />
+				<Box borderRadius="full" style={{ blockSize: '3rem', inlineSize: '3rem' }} />
 			</LoadingSkeleton>
 			<LoadingSkeleton>
-				<Box blockSize="3rem" borderRadius="full" inlineSize="3rem" />
+				<Box borderRadius="full" style={{ blockSize: '3rem', inlineSize: '3rem' }} />
 			</LoadingSkeleton>
 			<LoadingSkeleton>
-				<Box blockSize="3rem" borderRadius="full" inlineSize="3rem" />
+				<Box borderRadius="full" style={{ blockSize: '3rem', inlineSize: '3rem' }} />
 			</LoadingSkeleton>
 		</Cluster>
 	);

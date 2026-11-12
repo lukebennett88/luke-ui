@@ -25,17 +25,17 @@ export function EditorSkeleton({ code, showPill }: { code: string; showPill: boo
 				<Cluster
 					aria-hidden
 					alignItems="center"
-					blockSize="20px"
 					data-line
 					flexWrap="nowrap"
 					key={index}
+					style={{ blockSize: '20px' }}
 				>
 					<Box
 						className={styles.skeletonLineNumber}
 						data-line-number
 						elementType="span"
 						flexShrink="0"
-						inlineSize="3ch"
+						style={{ inlineSize: '3ch' }}
 					>
 						{index + 1}
 					</Box>
@@ -45,7 +45,7 @@ export function EditorSkeleton({ code, showPill }: { code: string; showPill: boo
 						flexBasis="auto"
 						flexGrow="1"
 						flexShrink="1"
-						minInlineSize={0}
+						minInlineSize="0"
 						overflow="hidden"
 						paddingInlineEnd="space.16"
 					>

@@ -6,9 +6,10 @@ source: packages/@luke-ui/react/src/exports/container.ts
 
 `Container` fills its available inline size up to `maxInlineSize` and centres itself. Pass a
 `container.*` preset for a fixed maximum in `rem`. Its numeric suffix is the maximum in CSS pixels
-at a 16px root. The maximum scales with the root font size. For arbitrary widths, use
-[Box](/components/layout/box) with `maxInlineSize`, such as `"80ch"`. Pass `marginInline` to change
-the centring. Read [Layout](/docs/layout#choose-a-layout-component) to choose a layout component.
+at a 16px root. The maximum scales with the root font size. For other widths, set the maximum on a
+[Box](/components/layout/box) `style`, such as `style={{ maxInlineSize: '80ch' }}`. Pass
+`marginInline` to change the centring. Read [Layout](/docs/layout#choose-a-layout-component) to
+choose a layout component.
 
 <ExampleBlock src="container/basic" title="Container: Basic" />
 

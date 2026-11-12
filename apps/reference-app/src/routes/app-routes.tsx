@@ -92,8 +92,8 @@ function ErrorPage({
 			elementType="main"
 			gap="space.16"
 			marginInline="auto"
-			maxInlineSize="32rem"
 			padding="space.32"
+			style={{ maxInlineSize: '32rem' }}
 		>
 			<title>{title}</title>
 			<Heading level={1} shouldDisableTrim typography="heading3">

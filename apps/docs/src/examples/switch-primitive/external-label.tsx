@@ -11,7 +11,7 @@ import { Stack } from '@luke-ui/react/stack';
 export default () => {
 	return (
 		<SwitchRoot>
-			<Box alignItems="center" display="flex" gap="space.12" maxInlineSize="24rem">
+			<Box alignItems="center" display="flex" gap="space.12" style={{ maxInlineSize: '24rem' }}>
 				<Stack flexGrow="1" gap="space.4">
 					<FieldLabel>Example setting</FieldLabel>
 					<FieldDescription>The row draws this label and description.</FieldDescription>

@@ -37,10 +37,10 @@ export function ExampleCodePreview({
 				<Box
 					display="flex"
 					insetBlockEnd="space.8"
-					insetInlineStart="50%"
 					justifyContent="center"
 					position="absolute"
 					style={{
+						insetInlineStart: '50%',
 						transform: 'translateX(-50%)',
 						zIndex: 1,
 					}}

@@ -47,7 +47,7 @@ export function TypeStyleTable() {
 						</caption>
 						<colgroup>
 							<TableColumn />
-							<TableColumn inlineSize="13rem" />
+							<TableColumn style={{ inlineSize: '13rem' }} />
 						</colgroup>
 						<Box className={styles.typeHead} renderRoot={(domProps) => <thead {...domProps} />}>
 							<tr>

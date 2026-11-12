@@ -21,12 +21,38 @@ gap, flex, and grid-child properties. It does not set grid tracks or areas. Use
 	display="flex"
 	alignItems="center"
 	gap="space.12"
-	maxInlineSize="42rem"
+	maxInlineSize="container.672"
 	paddingInline="space.24"
 >
 	{children}
 </Box>
 ```
+
+## Sizing, inset, and flex values
+
+Sizing props accept `"0"`, `auto`, `100%`, `min-content`, `max-content`, and `fit-content`.
+`maxInlineSize` and `maxBlockSize` accept `none` in place of `auto`, and `maxInlineSize` also
+accepts the `container.*` presets, such as `container.672`. Insets, such as `insetBlockEnd`, accept
+spacing keys, `"0"`, and `auto`. Write zero as the string `"0"`.
+
+Box has no `flex` shorthand. Set the behaviour you need with `flexGrow`, `flexShrink`, and
+`flexBasis`. `flexBasis` accepts the sizing keywords plus `content`, and `order` takes a number.
+
+```tsx
+// Usually enough
+<Box flexGrow="1" />
+
+// Share space regardless of content
+<Box flexGrow="1" flexBasis="0" />
+
+// Keep the intrinsic size
+<Box flexShrink="0" />
+```
+
+Other lengths are not Box values. Put a fixed size on `style`, such as
+`style={{ inlineSize: '15rem' }}`. Write a size that changes at a breakpoint in your own CSS and
+pass it as `className`. Read [Styling](/docs/styling#size-elements-outside-the-utility-values) for
+an example.
 
 ## Responsive values
 

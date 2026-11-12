@@ -61,7 +61,7 @@ export function DocsArticle({
 					<Box
 						className={styles.article}
 						elementType="article"
-						maxInlineSize={ARTICLE_MAX_INLINE_SIZE}
+						style={{ maxInlineSize: ARTICLE_MAX_INLINE_SIZE }}
 					>
 						<Stack
 							className={styles.header}

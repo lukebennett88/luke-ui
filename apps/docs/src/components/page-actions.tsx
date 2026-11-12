@@ -38,12 +38,11 @@ export function PageActions({
 					href={reactAriaUrl}
 					icon={
 						<Box
-							blockSize={vars.space['16']}
 							flexShrink="0"
-							inlineSize={vars.space['16']}
 							renderRoot={({ className, style }) => (
 								<ReactAriaMark className={className} style={style} />
 							)}
+							style={{ blockSize: vars.space['16'], inlineSize: vars.space['16'] }}
 						/>
 					}
 					label="React Aria"
