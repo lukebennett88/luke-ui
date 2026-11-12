@@ -10,60 +10,22 @@ normal `div` when no supported layout property applies.
 
 <ExampleBlock src="box/basic" title="Box: Basic" />
 
-## Layout properties
+## Choose a layout
 
-Box supports display, logical margin and padding, inline and block sizing, positioning, overflow,
-gap, flex, and grid-child properties. It does not set grid tracks or areas. Use
-[Grid](/components/layout/grid) for a grid container.
+Use Box for a custom flex layout or to control an item within a flex or grid container. Use
+[Grid](/components/layout/grid) to define grid tracks or areas. Read
+[Layout](/docs/layout#choose-a-layout-component) to choose between layout components.
 
-```tsx
-<Box
-	display="flex"
-	alignItems="center"
-	gap="space.12"
-	maxInlineSize="container.672"
-	paddingInline="space.24"
->
-	{children}
-</Box>
-```
+## Size and space content
 
-## Sizing, inset, and flex values
+Use sizing and spacing props to constrain content and set gaps, padding, or margins. Read
+[Layout](/docs/layout#spacing-and-sizing) for the supported values. For a size outside those values,
+read [Styling](/docs/styling#size-elements-outside-the-utility-values).
 
-Sizing props accept `"0"`, `auto`, `100%`, `min-content`, `max-content`, and `fit-content`.
-`maxInlineSize` and `maxBlockSize` accept `none` in place of `auto`, and `maxInlineSize` also
-accepts the `container.*` presets, such as `container.672`. Insets, such as `insetBlockEnd`, accept
-spacing keys, `"0"`, and `auto`. Write zero as the string `"0"`.
+## Adapt to available space
 
-Box has no `flex` shorthand. Set the behaviour you need with `flexGrow`, `flexShrink`, and
-`flexBasis`. `flexBasis` accepts the sizing keywords plus `content`, and `order` takes a number.
-
-```tsx
-// Usually enough
-<Box flexGrow="1" />
-
-// Share space regardless of content
-<Box flexGrow="1" flexBasis="0" />
-
-// Keep the intrinsic size
-<Box flexShrink="0" />
-```
-
-Other lengths are not Box values. Put a fixed size on `style`, such as
-`style={{ inlineSize: '15rem' }}`. Write a size that changes at a breakpoint in your own CSS and
-pass it as `className`. Read [Styling](/docs/styling#size-elements-outside-the-utility-values) for
-an example.
-
-## Responsive values
-
-Pass a direct value when it does not change. Use an object keyed by breakpoint when it does. Read
-[Layout](/docs/layout#responsive-values) for the breakpoint list, the cascade from `initial`, and a
-worked example.
-
-## Spacing values
-
-Padding, gap, and margin accept value-based spacing keys. Read
-[Layout](/docs/layout#spacing-and-sizing) for the full scale and for logical property names.
+Pass responsive values when a layout needs to change with its container. Read
+[Layout](/docs/layout#responsive-values) for breakpoints and container behaviour.
 
 ## Choose the rendered element
 
