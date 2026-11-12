@@ -6,7 +6,7 @@ description: Validate a form field, and write the message that tells someone how
 Every Luke UI form field can report a problem. An invalid field takes the danger border colour and
 renders a message beneath the control.
 
-<ExampleBlock src="forms/validation" title="Validation: Invalid fields" previewWidth="narrow" />
+<ExampleBlock src="forms/validation" title="Validation: Invalid fields" />
 
 Pass `errorMessage` for a controlled error from a form library, your server, or your own state. The
 field is invalid as soon as you pass a non-empty message. When the field should generate its own
@@ -21,11 +21,7 @@ Set `isRequired` on a field or radio group to require a value before the form su
 Leave out `errorMessage`. The field renders the message the constraint produces. Constraint errors
 normally appear after someone blurs a field or submits the form.
 
-<ExampleBlock
-	src="forms/constraint-validation"
-	title="Validation: Constraint validation"
-	previewWidth="narrow"
-/>
+<ExampleBlock src="forms/constraint-validation" title="Validation: Constraint validation" />
 
 Native validation is the default. It prevents form submission when a field fails validation, so a
 form-library submit handler never runs.
@@ -55,7 +51,7 @@ function takes the value and returns the validation message, or `null` when the 
 Leave out `errorMessage`. The field renders the message `validate` returns. Those messages normally
 appear after blur or submit, not between keystrokes.
 
-<ExampleBlock src="forms/custom-validation" title="Validation: Custom rule" previewWidth="narrow" />
+<ExampleBlock src="forms/custom-validation" title="Validation: Custom rule" />
 
 Return one actionable message, even when several conditions could fail. Check the most important
 condition first so the next message appears once that one is fixed. The field joins multiple
@@ -102,11 +98,7 @@ A React Action can return those errors with the submitted values. Pass the Actio
 so values survive an unsuccessful response. After a successful Action, React resets uncontrolled
 fields. Pass the pending state to the submit [`Button`](/components/actions/button).
 
-<ExampleBlock
-	src="forms/server-validation"
-	title="Validation: Server errors"
-	previewWidth="narrow"
-/>
+<ExampleBlock src="forms/server-validation" title="Validation: Server errors" />
 
 Try the username `admin` to see a server error. Change the value and leave the field to clear it,
 then choose another name to submit successfully.

@@ -276,7 +276,9 @@ Use layout primitives for structure, not one-off wrappers.
   padding and borders. Do not add an empty `Box` just to group children. If a control needs to keep
   its intrinsic inline size inside a stretching `Stack`, wrap it in `Cluster` instead of stretching
   it.
-- Form-style examples usually sit in a `Stack` with `maxInlineSize="20rem"`.
+- Use `previewWidth="narrow"` for a narrow docs preview when the width is incidental to the example.
+  Define the width in the example source when it demonstrates the layout itself, such as a complete
+  form. For a fixed width, use `style={{ maxInlineSize: '20rem' }}`.
 - Do not set `inlineSize="100%"` to fill the preview. A block-level example root already fills it.
 - Use `ExampleItem` from `#docs` for placeholder children in a layout example, so each child's box
   is visible.
