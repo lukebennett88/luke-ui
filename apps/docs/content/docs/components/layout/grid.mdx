@@ -48,11 +48,12 @@ then arrange them from a wider breakpoint.
 `GridItem` places one child in its parent Grid and does nothing else. It renders a `div` and accepts
 `area`, `column`, `row`, and the root props `children`, `className`, `style`, `ref`, `elementType`,
 and `renderRoot`. The element form also accepts standard DOM attributes such as `id`, `aria-*`, and
-`data-*`. It does not accept Box layout or appearance props. Style the item through
-[`renderRoot`](#style-a-child).
+`data-*`. It accepts `className` and `style`, but not Luke UI styling utilities. Use
+[`renderRoot`](#style-a-child) to style it with a layout component.
 
 `area` takes the name of an area from the parent's `areas`. The value is a plain string, so a name
-the parent does not define compiles and places nothing. The type does not check it against `areas`.
+the parent does not define compiles. An unmatched name can create implicit grid tracks. The type
+does not check it against `areas`.
 
 `column` and `row` take a line placement: `auto`, a line number such as `"2"`, a span such as
 `"span 2"`, a start and end such as `"2 / 4"`, or a start and a span such as `"1 / span 2"`.
@@ -81,10 +82,10 @@ and the sidebar spans two rows.
 
 ## Style a child
 
-`GridItem` has no styling props. Pass `renderRoot` to render a [Box](/components/layout/box) or
-another layout component as the item. The callback receives the resolved `children`, `className`,
-`style`, and `ref`. Spread them onto the element you return, and the grid item is that element, with
-no extra wrapper. Put DOM attributes on the returned element.
+Pass `renderRoot` to render a [Box](/components/layout/box) or another layout component as the item.
+The callback receives the resolved `children`, `className`, `style`, and `ref`. Spread them onto the
+element you return, and the grid item is that element, with no extra wrapper. Put DOM attributes on
+the returned element.
 
 <ExampleBlock src="grid/styled-item" title="Grid: Style an item" />
 
@@ -98,25 +99,6 @@ of a grid item. The returned component is the item, so it takes part in the pare
 its own children.
 
 <ExampleBlock src="grid/nested-layout" title="Grid: Nested layouts" />
-
-## Migrate from Box placement props
-
-`Box` and the other layout components no longer accept `gridArea`, `gridColumn`, `gridColumnStart`,
-`gridColumnEnd`, `gridRow`, `gridRowStart`, or `gridRowEnd`. Replace the element with `GridItem`,
-and render the Box through `renderRoot` to keep its other props.
-
-- `gridArea="main"` becomes `area="main"`.
-- `gridArea="1 / 2 / 3 / 4"` becomes `row="1 / 3"` with `column="2 / 4"`.
-- `gridColumn="span 2"` becomes `column="span 2"`. `gridRow` becomes `row` the same way.
-- `gridColumnStart="2"` with `gridColumnEnd="4"` becomes `column="2 / 4"`. The same applies to
-  `gridRowStart` and `gridRowEnd` with `row`.
-- `gridColumnStart="2"` alone becomes `column="2"`, which starts at line 2 and ends automatically.
-  `gridRowStart` alone becomes `row="2"`.
-- `gridColumnEnd` or `gridRowEnd` alone, named lines, and other complex expressions move to a
-  `className` that sets the CSS `grid-*` value.
-
-To place a layout component, such as a `Stack` with `gridColumn="span 2"`, pass it to `renderRoot`
-in the same way. See [Nest a layout](#nest-a-layout).
 
 ## Alignment
 
@@ -135,8 +117,8 @@ Grid uses
 ## Accessibility
 
 Grid placement changes visual position only. Reading order and focus order follow the DOM order.
-This applies to `area`, `column`, `row`, and `order`. Arrange areas and placements so the visual
-order matches the DOM order at every breakpoint.
+This applies to `area`, `column`, and `row`. Arrange areas and placements so the visual order
+matches the DOM order at every breakpoint.
 
 ## API
 

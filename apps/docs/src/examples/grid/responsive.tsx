@@ -8,14 +8,14 @@ export default () => {
 			columns={{ initial: 1, bp768: '10rem 1fr 1fr' }}
 			gap="space.12"
 		>
-			<GridItem area="a" renderRoot={(props) => <ExampleItem {...props} />}>
-				Area A
+			<GridItem area="a">
+				<ExampleItem>Area A</ExampleItem>
 			</GridItem>
-			<GridItem area="b" renderRoot={(props) => <ExampleItem {...props} />}>
-				Area B
+			<GridItem area="b">
+				<ExampleItem>Area B</ExampleItem>
 			</GridItem>
-			<GridItem area="c" renderRoot={(props) => <ExampleItem {...props} />}>
-				Area C
+			<GridItem area="c">
+				<ExampleItem>Area C</ExampleItem>
 			</GridItem>
 		</Grid>
 	);

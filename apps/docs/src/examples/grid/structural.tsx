@@ -10,17 +10,17 @@ export default () => {
 			rows="auto 1fr auto"
 			style={{ minBlockSize: '16rem' }}
 		>
-			<GridItem area="a" renderRoot={(props) => <ExampleItem {...props} />}>
-				Area A
+			<GridItem area="a">
+				<ExampleItem>Area A</ExampleItem>
 			</GridItem>
-			<GridItem area="b" renderRoot={(props) => <ExampleItem {...props} />}>
-				Area B
+			<GridItem area="b">
+				<ExampleItem>Area B</ExampleItem>
 			</GridItem>
-			<GridItem area="c" renderRoot={(props) => <ExampleItem {...props} />}>
-				Area C
+			<GridItem area="c">
+				<ExampleItem>Area C</ExampleItem>
 			</GridItem>
-			<GridItem area="d" renderRoot={(props) => <ExampleItem {...props} />}>
-				Area D
+			<GridItem area="d">
+				<ExampleItem>Area D</ExampleItem>
 			</GridItem>
 		</Grid>
 	);
