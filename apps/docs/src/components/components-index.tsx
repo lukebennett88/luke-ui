@@ -8,7 +8,7 @@ import { componentIndexGroups } from '../generated/components-index.generated.js
 import { DocsCard } from './docs-card.js';
 
 const subsequentGroupStyle = {
-	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
+	borderBlockStart: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 } as const satisfies CSSProperties;
 
 /**

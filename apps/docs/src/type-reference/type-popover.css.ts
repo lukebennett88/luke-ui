@@ -64,7 +64,7 @@ export const popover = style({
 				properties: ['opacity', 'translate'],
 				rule: {
 					backgroundColor: vars.color.background.surface.raised,
-					border: `1px solid ${vars.color.border.decorative}`,
+					border: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 					borderRadius: vars.radius.surface,
 					boxShadow: vars.shadow.floating,
 					maxInlineSize: 'min(36rem, calc(100vw - 2rem))',

@@ -8,5 +8,5 @@ export const comboboxSectionScopeClassName = style({}, 'combobox-section');
 globalStyleInLayer(
 	'recipes',
 	`${classSelector(comboboxSectionScopeClassName)} + ${classSelector(comboboxSectionScopeClassName)}`,
-	{ borderBlockStart: `1px solid ${vars.color.border.decorative}` },
+	{ borderBlockStart: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}` },
 );

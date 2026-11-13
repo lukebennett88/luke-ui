@@ -7,7 +7,7 @@ export const codeAppearance = {
 	// and colour mode, which a surface tint alone does not. The fill sets its own foreground context,
 	// so code on a solid fill reads the neutral hierarchy rather than the solid's on-solid colour.
 	...surfaceStyle('neutral.subtle'),
-	border: `1px solid ${vars.color.border.decorative}`,
+	border: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.control,
 	fontFamily: vars.font.family.code,
 	// Monospace reads large at the same nominal size. Use `em` so the correction tracks the

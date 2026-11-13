@@ -480,7 +480,22 @@ function FontPreview({ path, segments, varName }: LeafPreviewProps) {
  * Typed as `Record<Family, …>` rather than `Partial`, so a new top-level family added to
  * `contract.ts` is a type error here until this board grows a renderer for it too.
  */
+function BorderWidthPreview({ path, varName }: LeafPreviewProps) {
+	return (
+		<span
+			aria-label={`${path} sample`}
+			role="img"
+			style={{
+				display: 'inline-block',
+				inlineSize: '3rem',
+				borderBlockStart: `var(${varName}) solid ${vars.color.foreground.primary}`,
+			}}
+		/>
+	);
+}
+
 const familyPreviews: Record<Family, PreviewRenderer> = {
+	borderWidth: BorderWidthPreview,
 	color: ColorPreview,
 	controlFinish: FinishPreview,
 	controlSize: SizePreview,

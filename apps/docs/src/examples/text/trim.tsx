@@ -7,7 +7,7 @@ import { useState } from 'react';
 
 const lineBoxStyle = {
 	backgroundColor: vars.color.background.surface.subdued,
-	borderBlock: `1px dashed ${vars.color.border.decorative}`,
+	borderBlock: `${vars.borderWidth.thin} dashed ${vars.color.border.decorative}`,
 } as const;
 
 export default () => {

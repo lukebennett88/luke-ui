@@ -15,7 +15,7 @@ export const frame = style({
 export const frameHeader = style({
 	'@layer': {
 		components: {
-			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
+			borderBlockEnd: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 			borderStartEndRadius: INNER_RADIUS,
 			borderStartStartRadius: INNER_RADIUS,
 		},

@@ -300,7 +300,7 @@ export const breadcrumbChevron = style({
 export const nestedResult = style({
 	'@layer': {
 		components: {
-			borderInlineStart: `1px solid ${vars.color.border.decorative}`,
+			borderInlineStart: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 			marginInlineStart: vars.space['8'],
 			paddingBlock: vars.space['8'],
 			paddingInlineStart: vars.space['12'],

@@ -15,7 +15,7 @@ import * as styles from './docs-article.css.js';
 const TOC_LABEL = 'On this page';
 
 const tocListBorder = {
-	borderInlineStart: `1px solid ${vars.color.border.decorative}`,
+	borderInlineStart: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 } as const satisfies CSSProperties;
 
 const tocLinkPaddingInlineStart = {

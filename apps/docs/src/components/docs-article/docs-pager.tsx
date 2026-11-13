@@ -44,7 +44,7 @@ export function DocsPager({ tree }: { tree: Root }) {
 }
 
 const footerRule = {
-	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
+	borderBlockStart: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 } as const satisfies CSSProperties;
 
 function findNeighbours(tree: Root, pathname: string): { next?: Item; previous?: Item } {

@@ -117,6 +117,12 @@ describe('buildTheme defaults', () => {
 		typography: testTypography,
 	};
 
+	it('emits shared border widths', () => {
+		const css = buildTheme(minimalFoundation);
+		expect(css).toContain('--luke-border-width-thin: 1px');
+		expect(css).toContain('--luke-border-width-thick: 2px');
+	});
+
 	it('fills omitted optional fields with the documented defaults', () => {
 		const explicitFoundation: ThemeFoundation = {
 			dark: minimalFoundation.dark,

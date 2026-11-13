@@ -39,7 +39,7 @@ export const article = style({
 export const header = style({
 	'@layer': {
 		components: {
-			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
+			borderBlockEnd: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 		},
 	},
 });
@@ -75,7 +75,7 @@ export const tocBar = style({
 	'@layer': {
 		components: {
 			backgroundColor: vars.color.background.surface.base,
-			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
+			borderBlockEnd: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 			insetBlockStart: SITE_HEADER_BLOCK_SIZE,
 			position: 'sticky',
 			zIndex: 5,
@@ -137,7 +137,7 @@ export const tocBarPanel = style({
 	'@layer': {
 		components: {
 			backgroundColor: vars.color.background.surface.raised,
-			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
+			borderBlockEnd: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 			boxShadow: vars.shadow.floating,
 			insetBlockStart: '100%',
 			insetInline: 0,

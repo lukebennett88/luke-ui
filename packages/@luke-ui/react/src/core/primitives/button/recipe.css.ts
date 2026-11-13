@@ -101,7 +101,7 @@ export const buttonRecipeInternal = recipe({
 						backgroundColor: 'ButtonFace',
 						backgroundImage: 'none',
 						borderColor: 'ButtonText',
-						borderWidth: '1px',
+						borderWidth: vars.borderWidth.thin,
 						boxShadow: 'none',
 						color: 'ButtonText',
 						forcedColorAdjust: 'auto',

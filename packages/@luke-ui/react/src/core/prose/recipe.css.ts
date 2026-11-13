@@ -131,7 +131,7 @@ proseStyle(
 // inside it takes the block's colours and draws no chip of its own.
 proseStyle('pre', {
 	...surfaceStyle('neutral.subtle'),
-	border: `1px solid ${vars.color.border.decorative}`,
+	border: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.control,
 	fontFamily: vars.font.family.code,
 	// Label matches inline `Code` at body size (`0.875em` of 16px) without the monospace optical
@@ -170,7 +170,7 @@ proseStyle('ol[type="I" s]', { listStyleType: 'upper-roman' });
 proseStyle('hr', {
 	blockSize: 0,
 	border: 'none',
-	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
+	borderBlockStart: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 });
 // A table scrolls inside its own box only as a block, so a narrow table takes its content width
 // instead of filling the line. `fit-content` rather than `max-content`, so a table of wrapping text
@@ -186,12 +186,12 @@ proseStyle('table', {
 proseStyle('th, td', { paddingBlock: vars.space['8'], paddingInline: vars.space['12'] });
 proseStyle('caption, th', { textAlign: 'start' });
 proseStyle('thead th', {
-	borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
+	borderBlockEnd: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 	verticalAlign: 'bottom',
 });
 proseStyle('tbody td', { verticalAlign: 'baseline' });
 proseStyle('tbody tr + tr, tfoot', {
-	borderBlockStart: `1px solid ${vars.color.border.decorative}`,
+	borderBlockStart: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 });
 
 // Plain headings and paragraphs get the type style `Heading` and `Text` give them, trim included.

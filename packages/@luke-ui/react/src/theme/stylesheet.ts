@@ -99,6 +99,8 @@ function buildIdentityValues(foundation: ThemeFoundation): { [Path in IdentityPa
 	const fonts = resolveFontRoles(foundation.typography.fonts);
 	return {
 		...CONTROL_SIZE_VALUES,
+		'borderWidth.thin': '1px',
+		'borderWidth.thick': '2px',
 		...FONT_VALUES,
 		...typeStyleValues('fontFamily', (style) => fonts[typeStyleFontRole[style]].family),
 		...typeStyleValues('fontWeight', (style) => resolvedWeights[typeStyleWeightRole[style]]),

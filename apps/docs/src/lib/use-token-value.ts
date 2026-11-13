@@ -105,6 +105,7 @@ function valueKindOf(token: ThemeToken): ValueKind {
 			return 'shadow';
 		case 'controlFinish':
 			return 'finish';
+		case 'borderWidth':
 		case 'radius':
 		case 'space':
 		case 'controlSize':
