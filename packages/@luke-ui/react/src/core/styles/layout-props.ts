@@ -6,6 +6,8 @@ const layoutPropertyNames = [
 	'blockSize',
 	'borderBlockStartWidth',
 	'borderBlockEndWidth',
+	'borderInlineStartWidth',
+	'borderInlineEndWidth',
 	'flexBasis',
 	'flexGrow',
 	'flexShrink',

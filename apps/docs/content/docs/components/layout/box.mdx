@@ -80,10 +80,11 @@ focus. When a custom element that is not a Box needs a colour, radius, or shadow
 from `@luke-ui/react/theme`. Read [Styling](/docs/styling#use-semantic-variables-for-custom-ui) for
 when to reach for `vars`, and the [token reference](/docs/token-reference) for the contract.
 
-Set `borderBlockStartWidth` or `borderBlockEndWidth` to `none`, `thin`, or `thick` to control a
-logical block edge. These props override `borderWidth` on that edge, including with responsive
-values. Set `borderStyle` as well: a width alone does not make a border visible when the style is
-`none`. The block edges follow the writing mode.
+Set `borderBlockStartWidth`, `borderBlockEndWidth`, `borderInlineStartWidth`, or
+`borderInlineEndWidth` to `none`, `thin`, or `thick` to control a logical edge. These props override
+`borderWidth` on that edge, including with responsive values. Set `borderStyle` as well: a width
+alone does not make a border visible when the style is `none`. The edges follow the writing mode and
+text direction.
 
 <ExampleBlock src="box/visual-styles" title="Box: Visual styles" />
 

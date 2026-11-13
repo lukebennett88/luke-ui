@@ -395,13 +395,17 @@ test('spacing props keep namespaced tokens and string zero without arbitrary len
 	assertType<UtilityProps>({ padding: 'sp16' });
 });
 
-test('block border widths accept only the responsive border scale', () => {
+test('logical border widths accept only the responsive border scale', () => {
 	assertType<UtilityProps>({
 		borderBlockStartWidth: { initial: 'thin', bp768: 'thick' },
 		borderBlockEndWidth: 'none',
+		borderInlineStartWidth: { bp768: 'thin', bp1024: 'none' },
+		borderInlineEndWidth: 'thick',
 	});
 	// @ts-expect-error — arbitrary lengths are not supported
 	assertType<UtilityProps>({ borderBlockStartWidth: '1px' });
-	// @ts-expect-error — inline sides are not supported
-	assertType<UtilityProps>({ borderInlineStartWidth: 'thin' });
+	// @ts-expect-error — physical sides are not supported
+	assertType<UtilityProps>({ borderLeftWidth: 'thin' });
+	// @ts-expect-error — logical axis shorthands are not supported
+	assertType<UtilityProps>({ borderInlineWidth: 'thin' });
 });

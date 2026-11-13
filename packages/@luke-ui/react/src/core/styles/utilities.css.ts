@@ -333,9 +333,11 @@ type ResponsiveValue<Value> =
 			[Condition in BreakpointName]?: Value | null;
 	  };
 
-const blockBorderProperties = {
+const logicalBorderProperties = {
 	borderBlockStartWidth: borderWidthScale,
 	borderBlockEndWidth: borderWidthScale,
+	borderInlineStartWidth: borderWidthScale,
+	borderInlineEndWidth: borderWidthScale,
 } as const;
 
 /**
@@ -343,7 +345,7 @@ const blockBorderProperties = {
  * so public declarations and docs do not depend on the styling engine's config.
  */
 type UtilityScales = typeof dynamicProperties &
-	typeof blockBorderProperties &
+	typeof logicalBorderProperties &
 	Record<'backgroundColor', Record<(typeof backgroundColorTokens)[number], string>>;
 
 type SprinklesPropsShape = {
@@ -399,7 +401,7 @@ export const createSprinkles: CreateSprinkles = defineSprinkles(
 			]),
 		),
 		defaultCondition: 'initial',
-		dynamicProperties: blockBorderProperties,
+		dynamicProperties: logicalBorderProperties,
 	}),
 	{
 		config: {

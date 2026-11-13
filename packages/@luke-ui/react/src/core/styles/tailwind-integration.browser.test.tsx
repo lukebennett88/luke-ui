@@ -159,11 +159,19 @@ for (const scenario of scenarios) {
 
 		test('Preflight supplies a solid border style for a block width', () => {
 			loadCss(scenario.css);
-			mount(<Box data-testid="border" borderWidth="none" borderBlockStartWidth="thin" />);
+			mount(
+				<Box
+					data-testid="border"
+					borderWidth="none"
+					borderBlockStartWidth="thin"
+					borderInlineEndWidth="thick"
+				/>,
+			);
 			const border = getComputedStyle(byTestId('border'));
 			expect(border.borderTopStyle).toBe('solid');
 			expect(border.borderTopWidth).toBe('1px');
 			expect(border.borderBottomWidth).toBe('0px');
+			expect(border.borderRightWidth).toBe('2px');
 		});
 
 		test('Box utility props override conflicting recipe styles', () => {

@@ -7,6 +7,7 @@ export default () => (
 		borderStyle="solid"
 		borderWidth="none"
 		borderBlockEndWidth="thin"
+		borderInlineStartWidth="thick"
 		padding="space.16"
 	>
 		<Text>A section with a separator</Text>
