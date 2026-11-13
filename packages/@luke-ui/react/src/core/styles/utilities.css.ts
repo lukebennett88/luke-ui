@@ -187,13 +187,6 @@ const dynamicProperties = {
 	flexShrink: { '0': '0', '1': '1' },
 	flexWrap: { nowrap: 'nowrap', wrap: 'wrap', 'wrap-reverse': 'wrap-reverse' },
 	gap: spaceScale,
-	gridArea: true,
-	gridColumn: true,
-	gridColumnEnd: true,
-	gridColumnStart: true,
-	gridRow: true,
-	gridRowEnd: true,
-	gridRowStart: true,
 	inlineSize: sizeScale,
 	inset: insetScale,
 	insetBlock: insetScale,
@@ -290,17 +283,20 @@ const dynamicProperties = {
 } as const;
 
 /**
- * Placement utilities that stay registered so `GridItem` can emit them. Box and the layout
- * components do not expose them.
+ * Placement utilities. They are registered with the others, but kept out of `UtilityScales` so Box
+ * and the layout components do not expose them. Only `GridItem` passes them to `createSprinkles`.
  */
-type GridPlacementProperty =
-	| 'gridArea'
-	| 'gridColumn'
-	| 'gridColumnEnd'
-	| 'gridColumnStart'
-	| 'gridRow'
-	| 'gridRowEnd'
-	| 'gridRowStart';
+const gridPlacementProperties = {
+	gridArea: true,
+	gridColumn: true,
+	gridColumnEnd: true,
+	gridColumnStart: true,
+	gridRow: true,
+	gridRowEnd: true,
+	gridRowStart: true,
+} as const;
+
+type GridPlacementProperty = keyof typeof gridPlacementProperties;
 
 /** Properties whose public value type is narrower than their csstype value. */
 type ValueOverrides = {
@@ -341,7 +337,7 @@ type UtilityScales = typeof dynamicProperties &
 	Record<'backgroundColor', Record<(typeof backgroundColorTokens)[number], string>>;
 
 type SprinklesPropsShape = {
-	[Property in Exclude<keyof UtilityScales, GridPlacementProperty>]?: ResponsiveValue<
+	[Property in keyof UtilityScales]?: ResponsiveValue<
 		ScaleValue<Property, UtilityScales[Property]>
 	>;
 };
@@ -381,7 +377,7 @@ export const createSprinkles: CreateSprinkles = defineSprinkles(
 		'@layer': layers.utilities,
 		conditions: responsiveConditions,
 		defaultCondition: 'initial',
-		dynamicProperties,
+		dynamicProperties: { ...dynamicProperties, ...gridPlacementProperties },
 	}),
 	{
 		config: {

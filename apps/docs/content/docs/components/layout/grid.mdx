@@ -47,7 +47,8 @@ then arrange them from a wider breakpoint.
 
 `GridItem` places one child in its parent Grid and does nothing else. It renders a `div` and accepts
 `area`, `column`, `row`, and the root props `children`, `className`, `style`, `ref`, `elementType`,
-and `renderRoot`. It does not accept Box layout or appearance props. Style the item through
+and `renderRoot`. The element form also accepts standard DOM attributes such as `id`, `aria-*`, and
+`data-*`. It does not accept Box layout or appearance props. Style the item through
 [`renderRoot`](#style-a-child).
 
 `area` takes the name of an area from the parent's `areas`. The value is a plain string, so a name
@@ -73,8 +74,8 @@ together.
 
 ## Explicit lines
 
-Place an item between grid lines with `column` and `row`. Items without a placement fill the
-remaining cells in order.
+Place an item between grid lines with `column` and `row`. Each item in the example has a placement,
+and the sidebar spans two rows.
 
 <ExampleBlock src="grid/lines" title="Grid: Explicit lines" />
 
@@ -101,29 +102,18 @@ its own children.
 ## Migrate from Box placement props
 
 `Box` and the other layout components no longer accept `gridArea`, `gridColumn`, `gridColumnStart`,
-`gridColumnEnd`, `gridRow`, `gridRowStart`, or `gridRowEnd`. Wrap the element in `GridItem`, and
-render the Box through `renderRoot` to keep its other props.
+`gridColumnEnd`, `gridRow`, `gridRowStart`, or `gridRowEnd`. Replace the element with `GridItem`,
+and render the Box through `renderRoot` to keep its other props.
 
-| Removed prop                                  | Replacement                                    |
-| --------------------------------------------- | ---------------------------------------------- |
-| `gridArea="main"`                             | `area="main"`                                  |
-| `gridColumn="span 2"`                         | `column="span 2"`                              |
-| `gridColumnStart="2"` and `gridColumnEnd="4"` | `column="2 / 4"`                               |
-| `gridRow="span 2"`                            | `row="span 2"`                                 |
-| `gridRowStart="2"` and `gridRowEnd="4"`       | `row="2 / 4"`                                  |
-| A named line or another complex expression    | A `className` that sets the CSS `grid-*` value |
-
-```tsx
-// Before
-<Box gridColumn="span 2" padding="space.16">
-	<Text>First</Text>
-</Box>
-
-// After
-<GridItem column="span 2" renderRoot={(props) => <Box {...props} padding="space.16" />}>
-	<Text>First</Text>
-</GridItem>
-```
+- `gridArea="main"` becomes `area="main"`.
+- `gridArea="1 / 2 / 3 / 4"` becomes `row="1 / 3"` with `column="2 / 4"`.
+- `gridColumn="span 2"` becomes `column="span 2"`. `gridRow` becomes `row` the same way.
+- `gridColumnStart="2"` with `gridColumnEnd="4"` becomes `column="2 / 4"`. The same applies to
+  `gridRowStart` and `gridRowEnd` with `row`.
+- `gridColumnStart="2"` alone becomes `column="2"`, which starts at line 2 and ends automatically.
+  `gridRowStart` alone becomes `row="2"`.
+- `gridColumnEnd` or `gridRowEnd` alone, named lines, and other complex expressions move to a
+  `className` that sets the CSS `grid-*` value.
 
 To place a layout component, such as a `Stack` with `gridColumn="span 2"`, pass it to `renderRoot`
 in the same way. See [Nest a layout](#nest-a-layout).

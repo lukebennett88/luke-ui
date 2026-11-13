@@ -451,11 +451,7 @@ test('resolves responsive GridItem placement against nested size containers', as
 	await page.viewport(1024, 800);
 	const column = { initial: 'span 1', bp768: 'span 3' } as const;
 	const { locator } = render(
-		<Container
-			maxInlineSize="container.1280"
-			style={{ maxInlineSize: '100%' }}
-			paddingInline="space.16"
-		>
+		<Container maxInlineSize="container.1280" paddingInline="space.16">
 			<Grid columns={4} data-testid="outer" gap="space.8">
 				<GridItem column={column} data-testid="outer-item" style={{ blockSize: '1rem' }} />
 			</Grid>
@@ -574,13 +570,17 @@ test('GridItem composes with Box through renderRoot without a wrapper', () => {
 });
 
 test('GridItem composes with a nested Stack through renderRoot', () => {
-	const { locator } = render(
+	const ref = createRef<HTMLElement>();
+	const { locator, unmount } = render(
 		<Grid columns={2} data-testid="grid" gap="space.8" style={{ inlineSize: '20rem' }}>
 			<GridItem
+				className="consumer-class"
 				column="span 2"
+				ref={ref}
 				renderRoot={(props) => (
 					<Stack {...props} aria-label="Pair" elementType="section" gap="space.12" />
 				)}
+				style={{ backgroundColor: 'rgb(4, 5, 6)' }}
 			>
 				<span>First</span>
 				<span>Second</span>
@@ -593,11 +593,18 @@ test('GridItem composes with a nested Stack through renderRoot', () => {
 
 	expect(grid.children).toHaveLength(1);
 	expect(grid.firstElementChild).toBe(stack);
+	expect(stack.tagName).toBe('SECTION');
+	expect(stack).toHaveAttribute('aria-label', 'Pair');
+	expect(stack).toHaveClass('consumer-class');
 	expect(style.display).toBe('flex');
 	expect(style.flexDirection).toBe('column');
 	expect(style.rowGap).toBe('12px');
 	expect(style.gridColumnStart).toBe('span 2');
+	expect(style.backgroundColor).toBe('rgb(4, 5, 6)');
 	expect(stack.getBoundingClientRect().width).toBeCloseTo(grid.getBoundingClientRect().width, 0);
+	expect(ref.current).toBe(stack);
+	unmount();
+	expect(ref.current).toBeNull();
 });
 
 test('GridItem preserves callback ref cleanup through renderRoot', () => {
