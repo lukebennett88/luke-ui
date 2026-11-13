@@ -4,6 +4,7 @@ import type { BoxProps } from '@luke-ui/react/box';
 import type { ClusterProps } from '@luke-ui/react/cluster';
 import type { ContainerProps } from '@luke-ui/react/container';
 import type { GridProps } from '@luke-ui/react/grid';
+import type { LockupBodyProps, LockupProps, LockupRailProps } from '@luke-ui/react/lockup';
 import type { StackProps } from '@luke-ui/react/stack';
 import { createElement } from 'react';
 import type { HTMLAttributes, ReactElement, RefCallback } from 'react';
@@ -76,4 +77,49 @@ test('Container keeps its required container-only maxInlineSize', () => {
 	assertType<ContainerProps>({ maxInlineSize: 'none' });
 	// @ts-expect-error — Container requires a preset
 	assertType<ContainerProps>({});
+});
+
+type PlacementProp =
+	| 'gridArea'
+	| 'gridColumn'
+	| 'gridColumnEnd'
+	| 'gridColumnStart'
+	| 'gridRow'
+	| 'gridRowEnd'
+	| 'gridRowStart';
+
+type PropNames<Props> = Props extends unknown ? keyof Props : never;
+
+test('Box rejects each removed grid-placement prop', () => {
+	// @ts-expect-error — placement moved to GridItem
+	assertType<BoxProps>({ gridArea: 'a' });
+	// @ts-expect-error — placement moved to GridItem
+	assertType<BoxProps>({ gridColumn: 'span 2' });
+	// @ts-expect-error — placement moved to GridItem
+	assertType<BoxProps>({ gridColumnEnd: '3' });
+	// @ts-expect-error — placement moved to GridItem
+	assertType<BoxProps>({ gridColumnStart: '1' });
+	// @ts-expect-error — placement moved to GridItem
+	assertType<BoxProps>({ gridRow: 'span 2' });
+	// @ts-expect-error — placement moved to GridItem
+	assertType<BoxProps>({ gridRowEnd: '3' });
+	// @ts-expect-error — placement moved to GridItem
+	assertType<BoxProps>({ gridRowStart: '1' });
+});
+
+test('shared layout components do not expose grid-placement props', () => {
+	expectTypeOf<Extract<PropNames<BoxProps>, PlacementProp>>().toEqualTypeOf<never>();
+	expectTypeOf<Extract<PropNames<AspectRatioProps>, PlacementProp>>().toEqualTypeOf<never>();
+	expectTypeOf<Extract<PropNames<BleedProps>, PlacementProp>>().toEqualTypeOf<never>();
+	expectTypeOf<Extract<PropNames<ClusterProps>, PlacementProp>>().toEqualTypeOf<never>();
+	expectTypeOf<Extract<PropNames<ContainerProps>, PlacementProp>>().toEqualTypeOf<never>();
+	expectTypeOf<Extract<PropNames<GridProps>, PlacementProp>>().toEqualTypeOf<never>();
+	expectTypeOf<Extract<PropNames<StackProps>, PlacementProp>>().toEqualTypeOf<never>();
+	expectTypeOf<Extract<PropNames<LockupProps>, PlacementProp>>().toEqualTypeOf<never>();
+	expectTypeOf<Extract<PropNames<LockupRailProps>, PlacementProp>>().toEqualTypeOf<never>();
+	expectTypeOf<Extract<PropNames<LockupBodyProps>, PlacementProp>>().toEqualTypeOf<never>();
+	// @ts-expect-error — placement moved to GridItem
+	assertType<StackProps>({ gridColumn: 'span 2' });
+	// @ts-expect-error — placement moved to GridItem
+	assertType<GridProps>({ columns: 2, gridArea: 'a' });
 });

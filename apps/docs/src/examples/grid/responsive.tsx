@@ -1,4 +1,4 @@
-import { Grid } from '@luke-ui/react/grid';
+import { Grid, GridItem } from '@luke-ui/react/grid';
 import { ExampleItem } from '#docs';
 
 export default () => {
@@ -8,9 +8,15 @@ export default () => {
 			columns={{ initial: 1, bp768: '10rem 1fr 1fr' }}
 			gap="space.12"
 		>
-			<ExampleItem gridArea="a">Area A</ExampleItem>
-			<ExampleItem gridArea="b">Area B</ExampleItem>
-			<ExampleItem gridArea="c">Area C</ExampleItem>
+			<GridItem area="a" renderRoot={(domProps) => <ExampleItem {...domProps} />}>
+				Area A
+			</GridItem>
+			<GridItem area="b">
+				<ExampleItem>Area B</ExampleItem>
+			</GridItem>
+			<GridItem area="c">
+				<ExampleItem>Area C</ExampleItem>
+			</GridItem>
 		</Grid>
 	);
 };

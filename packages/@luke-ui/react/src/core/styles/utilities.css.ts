@@ -187,13 +187,6 @@ const dynamicProperties = {
 	flexShrink: { '0': '0', '1': '1' },
 	flexWrap: { nowrap: 'nowrap', wrap: 'wrap', 'wrap-reverse': 'wrap-reverse' },
 	gap: spaceScale,
-	gridArea: true,
-	gridColumn: true,
-	gridColumnEnd: true,
-	gridColumnStart: true,
-	gridRow: true,
-	gridRowEnd: true,
-	gridRowStart: true,
 	inlineSize: sizeScale,
 	inset: insetScale,
 	insetBlock: insetScale,
@@ -289,6 +282,22 @@ const dynamicProperties = {
 	rowGap: spaceScale,
 } as const;
 
+/**
+ * Placement utilities. They are registered with the others, but kept out of `UtilityScales` so Box
+ * and the layout components do not expose them. Only `GridItem` passes them to `createSprinkles`.
+ */
+const gridPlacementProperties = {
+	gridArea: true,
+	gridColumn: true,
+	gridColumnEnd: true,
+	gridColumnStart: true,
+	gridRow: true,
+	gridRowEnd: true,
+	gridRowStart: true,
+} as const;
+
+type GridPlacementProperty = keyof typeof gridPlacementProperties;
+
 /** Properties whose public value type is narrower than their csstype value. */
 type ValueOverrides = {
 	order: number;
@@ -333,6 +342,11 @@ type SprinklesPropsShape = {
 	>;
 };
 
+/** Placement props that only `GridItem` passes to `createSprinkles`. */
+export type GridPlacementSprinklesProps = {
+	[Property in GridPlacementProperty]?: ResponsiveValue<ScaleValue<Property, true>>;
+};
+
 /**
  * Layout and appearance props accepted by `createSprinkles` and `Box`. Package-internal so public
  * declarations do not require a styling-engine package for type checking.
@@ -342,7 +356,7 @@ export type SprinklesProps = Prettify<SprinklesPropsShape>;
 type CreateSprinklesResult<Props extends object> = {
 	className: string;
 	style: Record<string, string>;
-} & Omit<Props, keyof SprinklesProps | 'className' | 'style'>;
+} & Omit<Props, keyof SprinklesProps | GridPlacementProperty | 'className' | 'style'>;
 
 /**
  * Package-internal sprinkles contract used by `Box` and layout components. `properties` is
@@ -351,8 +365,10 @@ type CreateSprinklesResult<Props extends object> = {
  * names.
  */
 type CreateSprinkles = {
-	<Props extends SprinklesProps>(props: Props): CreateSprinklesResult<Props>;
-	readonly properties: ReadonlySet<keyof SprinklesProps>;
+	<Props extends SprinklesProps & GridPlacementSprinklesProps>(
+		props: Props,
+	): CreateSprinklesResult<Props>;
+	readonly properties: ReadonlySet<keyof SprinklesProps | GridPlacementProperty>;
 };
 
 /** Package-internal utilities, including paired background classes. */
@@ -361,7 +377,7 @@ export const createSprinkles: CreateSprinkles = defineSprinkles(
 		'@layer': layers.utilities,
 		conditions: responsiveConditions,
 		defaultCondition: 'initial',
-		dynamicProperties,
+		dynamicProperties: { ...dynamicProperties, ...gridPlacementProperties },
 	}),
 	{
 		config: {

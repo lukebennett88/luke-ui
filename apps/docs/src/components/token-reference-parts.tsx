@@ -1,7 +1,7 @@
 import { Box } from '@luke-ui/react/box';
 import { Cluster } from '@luke-ui/react/cluster';
 import { Code } from '@luke-ui/react/code';
-import { Grid } from '@luke-ui/react/grid';
+import { Grid, GridItem } from '@luke-ui/react/grid';
 import { IconButton } from '@luke-ui/react/icon-button';
 import { Stack } from '@luke-ui/react/stack';
 import type { TextElementProps } from '@luke-ui/react/text';
@@ -134,20 +134,20 @@ export function TokenColumnHeader({
 			paddingInline="space.16"
 		>
 			{hasSample ? (
-				<Box gridArea="sample">
+				<GridItem area="sample">
 					<VisuallyHidden>Sample</VisuallyHidden>
-				</Box>
+				</GridItem>
 			) : null}
-			<Box gridArea="name">
+			<GridItem area="name">
 				<Text color="secondary" fontWeight="label" typography="label">
 					Token
 				</Text>
-			</Box>
-			<Box gridArea="value">
+			</GridItem>
+			<GridItem area="value">
 				<Text color="secondary" fontWeight="label" typography="label">
 					Value
 				</Text>
-			</Box>
+			</GridItem>
 		</Grid>
 	);
 }
@@ -225,16 +225,20 @@ export function TokenRow({ note, sample, sampleInlineSize, token }: TokenRowProp
 			paddingInline="space.16"
 			rowGap={{ initial: 'space.12', bp768: 'space.4' }}
 		>
-			<Box
-				alignItems="center"
-				aria-hidden
-				display="flex"
-				gridArea="sample"
+			<GridItem
+				area="sample"
+				renderRoot={(domProps) => (
+					<Box {...domProps} alignItems="center" aria-hidden display="flex" />
+				)}
 				style={{ inlineSize: sampleInlineSize, minBlockSize: vars.space['32'] }}
 			>
 				{sample}
-			</Box>
-			<Box className={styles.tokenIdentification} gridArea="name" minInlineSize="0">
+			</GridItem>
+			<GridItem
+				area="name"
+				className={styles.tokenIdentification}
+				renderRoot={(domProps) => <Box {...domProps} minInlineSize="0" />}
+			>
 				<Stack gap="space.4">
 					<Cluster alignItems="center" gap="space.8">
 						<TokenName elementType="p" token={token} typography="label" />
@@ -246,10 +250,10 @@ export function TokenRow({ note, sample, sampleInlineSize, token }: TokenRowProp
 						</Text>
 					) : null}
 				</Stack>
-			</Box>
-			<Box gridArea="value" minInlineSize="0">
+			</GridItem>
+			<GridItem area="value" renderRoot={(domProps) => <Box {...domProps} minInlineSize="0" />}>
 				<TokenValue elementType="p" token={token} typography="label" />
-			</Box>
+			</GridItem>
 		</Grid>
 	);
 }

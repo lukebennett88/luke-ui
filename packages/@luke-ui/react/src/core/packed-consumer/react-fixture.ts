@@ -339,14 +339,20 @@ process.stdout.write(JSON.stringify({ packages: [...packages].sort(), sources: [
 
 /** Representative typed usage. \`all-entries.ts\` covers the rest of the declaration graph. */
 const TYPED_APP = `
+import type { AspectRatioProps } from '@luke-ui/react/aspect-ratio';
 import { Blockquote } from '@luke-ui/react/blockquote';
+import type { BleedProps } from '@luke-ui/react/bleed';
 import { Box, type BoxProps } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { CheckboxGroup, type CheckboxGroupProps } from '@luke-ui/react/checkbox-group';
-import { Container } from '@luke-ui/react/container';
+import type { ClusterProps } from '@luke-ui/react/cluster';
+import { Container, type ContainerProps } from '@luke-ui/react/container';
+import { Grid, GridItem, type GridItemProps, type GridProps } from '@luke-ui/react/grid';
 import { Heading, type HeadingProps } from '@luke-ui/react/heading';
 import { createIcon, type CustomIconProps, iconSizeVars } from '@luke-ui/react/icon';
+import type { LockupBodyProps, LockupProps, LockupRailProps } from '@luke-ui/react/lockup';
+import { Stack, type StackProps } from '@luke-ui/react/stack';
 import { Text, type TextProps } from '@luke-ui/react/text';
 import { interactionState } from '@luke-ui/react/utils';
 import { TextInputField } from '@luke-ui/react/text-input-field';
@@ -515,6 +521,92 @@ export const rejectedFlexString = <Box flex="1">Content</Box>;
 // @ts-expect-error — the flex shorthand is removed; use flexGrow, flexShrink, and flexBasis
 export const rejectedFlexAuto = <Box flex="auto">Content</Box>;
 
+// Grid placement lives on GridItem. Box and the layout components do not expose it.
+export const supportedGridItems: Array<GridItemProps> = [
+	{ area: 'sidebar' },
+	{ area: 'space.32' },
+	{ column: 'span 2', row: '1 / 3' },
+	{ column: '1 / -1', row: 'auto' },
+	{ column: '2', row: '2 / span 2' },
+	{ area: { initial: 'a', bp768: 'b' }, column: { initial: 'span 1', bp768: 'span 3' } },
+	{ row: { initial: 'auto', bp1024: '1 / 3' } },
+];
+// @ts-expect-error — column takes line placements, not tokens
+export const rejectedColumnToken: GridItemProps = { column: 'space.32' };
+// @ts-expect-error — row takes line placements, not tokens
+export const rejectedRowToken: GridItemProps = { row: 'space.32' };
+// @ts-expect-error — named lines use className
+export const rejectedNamedLines: GridItemProps = { column: 'content-start / content-end' };
+// @ts-expect-error — a span needs a count
+export const rejectedBareSpan: GridItemProps = { column: 'span' };
+// @ts-expect-error — numbers are not placements, use a string
+export const rejectedNumericColumn: GridItemProps = { column: 2 };
+// @ts-expect-error — responsive values use the same grammar
+export const rejectedResponsiveColumn: GridItemProps = { column: { initial: 'space.32' } };
+// @ts-expect-error — a span needs a count
+export const rejectedSpanWord: GridItemProps = { column: 'span two' };
+// @ts-expect-error — the empty string is not a placement
+export const rejectedEmptyRow: GridItemProps = { row: '' };
+// @ts-expect-error — three-part placements are not supported
+export const rejectedThreePartRow: GridItemProps = { row: '1 / 2 / 3' };
+// @ts-expect-error — unknown responsive conditions are rejected
+export const rejectedResponsiveKey: GridItemProps = { column: { bp100: 'span 2' } };
+// @ts-expect-error — DOM attributes belong on the caller-owned element
+export const rejectedRenderRootId: GridItemProps = { id: 'root', renderRoot: () => <section /> };
+// @ts-expect-error — only supported structural elements are accepted
+export const rejectedGridItemElement: GridItemProps = { elementType: 'button' };
+// @ts-expect-error — GridItem does not define tracks
+export const rejectedGridItemColumns: GridItemProps = { columns: 2 };
+// @ts-expect-error — GridItem is placement only, so Box styling goes through renderRoot
+export const rejectedGridItemPadding: GridItemProps = { padding: 'space.16' };
+// @ts-expect-error — GridItem is placement only, so Box styling goes through renderRoot
+export const rejectedGridItemBackground = <GridItem backgroundColor="surface.base" />;
+export const composedGridItems = (
+	<Grid areas={['a a', 'b c']} columns={2}>
+		<GridItem area="a" renderRoot={(domProps) => <Box {...domProps} padding="space.16" />} />
+		<GridItem column="span 2" renderRoot={(domProps) => <Stack {...domProps} gap="space.12" />}>
+			Stacked
+		</GridItem>
+	</Grid>
+);
+// @ts-expect-error — gridArea moved to GridItem
+export const removedBoxGridArea = <Box gridArea="a">Content</Box>;
+// @ts-expect-error — gridColumn moved to GridItem
+export const removedBoxGridColumn = <Box gridColumn="span 2">Content</Box>;
+// @ts-expect-error — gridColumnStart moved to GridItem
+export const removedBoxGridColumnStart = <Box gridColumnStart="1">Content</Box>;
+// @ts-expect-error — gridColumnEnd moved to GridItem
+export const removedBoxGridColumnEnd = <Box gridColumnEnd="3">Content</Box>;
+// @ts-expect-error — gridRow moved to GridItem
+export const removedBoxGridRow = <Box gridRow="span 2">Content</Box>;
+// @ts-expect-error — gridRowStart moved to GridItem
+export const removedBoxGridRowStart = <Box gridRowStart="1">Content</Box>;
+// @ts-expect-error — gridRowEnd moved to GridItem
+export const removedBoxGridRowEnd = <Box gridRowEnd="3">Content</Box>;
+type PlacementProp =
+	| 'gridArea'
+	| 'gridColumn'
+	| 'gridColumnEnd'
+	| 'gridColumnStart'
+	| 'gridRow'
+	| 'gridRowEnd'
+	| 'gridRowStart';
+type PropNames<Props> = Props extends unknown ? keyof Props : never;
+type WithoutPlacement<Props> = [Extract<PropNames<Props>, PlacementProp>] extends [never]
+	? true
+	: Extract<PropNames<Props>, PlacementProp>;
+// None of the seven placement props remains on Box or a layout component.
+export const boxWithoutPlacement: WithoutPlacement<BoxProps> = true;
+export const aspectRatioWithoutPlacement: WithoutPlacement<AspectRatioProps> = true;
+export const bleedWithoutPlacement: WithoutPlacement<BleedProps> = true;
+export const clusterWithoutPlacement: WithoutPlacement<ClusterProps> = true;
+export const containerWithoutPlacement: WithoutPlacement<ContainerProps> = true;
+export const gridWithoutPlacement: WithoutPlacement<GridProps> = true;
+export const stackWithoutPlacement: WithoutPlacement<StackProps> = true;
+export const lockupWithoutPlacement: WithoutPlacement<LockupProps> = true;
+export const lockupRailWithoutPlacement: WithoutPlacement<LockupRailProps> = true;
+export const lockupBodyWithoutPlacement: WithoutPlacement<LockupBodyProps> = true;
+
 export const fullButton = <Button inlineSize="full">Continue</Button>;
 // @ts-expect-error — text actions do not accept inline sizing
 export const textButtonWidth = <Button appearance="text" inlineSize="full">Continue</Button>;
@@ -598,6 +690,8 @@ const textRenderRoot: NonNullable<TextProps['renderRoot']> = (domProps, state) =
 
 // @ts-expect-error — renderRoot owns its element and excludes elementType
 export const conflictingRoot: BoxProps = { elementType: 'section', renderRoot };
+// @ts-expect-error — renderRoot owns its element and excludes elementType
+export const conflictingGridItemRoot: GridItemProps = { elementType: 'section', renderRoot };
 // @ts-expect-error — Box exposes no public render state properties
 export const invalidRenderState: Parameters<typeof renderRoot>[1] = { isHovered: true };
 // @ts-expect-error — Text renderRoot excludes elementType

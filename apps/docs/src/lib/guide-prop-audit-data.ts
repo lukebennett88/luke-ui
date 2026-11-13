@@ -246,6 +246,13 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		'rowGap',
 		'rows',
 	],
+	'layout/grid.mdx::packages/@luke-ui/react/src/core/grid/grid-item.tsx::GridItemProps': [
+		'area',
+		'column',
+		'elementType',
+		'renderRoot',
+		'row',
+	],
 	'layout/scroll-fade.mdx::packages/@luke-ui/react/src/core/scroll-fade/scroll-fade.tsx::ScrollFadeProps':
 		['aria-label', 'aria-labelledby', 'axis'],
 	'layout/stack.mdx::packages/@luke-ui/react/src/core/stack/stack.tsx::StackProps': [
