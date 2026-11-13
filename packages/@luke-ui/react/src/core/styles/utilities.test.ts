@@ -4,7 +4,7 @@ import { vars } from '../../theme/contract.css.js';
 import { SEMANTIC_ROLES } from '../../theme/contrast-policy.js';
 import { containerMaxInlineSizeTokens } from './container-tokens.js';
 import { createSprinkles } from './utilities.css.js';
-import type { SprinklesProps } from './utilities.css.js';
+import type { GridPlacementSprinklesProps, SprinklesProps } from './utilities.css.js';
 
 type UtilityProps = NonNullable<BoxProps>;
 
@@ -355,7 +355,9 @@ test('order accepts numbers only', () => {
 });
 
 test('createSprinkles.properties is a read-only Set contract', () => {
-	expectTypeOf(createSprinkles.properties).toEqualTypeOf<ReadonlySet<keyof SprinklesProps>>();
+	expectTypeOf(createSprinkles.properties).toEqualTypeOf<
+		ReadonlySet<keyof SprinklesProps | keyof GridPlacementSprinklesProps>
+	>();
 	// @ts-expect-error — the type is read-only; mutation APIs are not part of the contract
 	createSprinkles.properties.add('display');
 });

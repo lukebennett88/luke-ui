@@ -1,4 +1,5 @@
 import { Box } from '@luke-ui/react/box';
+import { GridItem } from '@luke-ui/react/grid';
 import { Heading } from '@luke-ui/react/heading';
 import { Prose } from '@luke-ui/react/prose';
 import { Stack } from '@luke-ui/react/stack';
@@ -44,7 +45,10 @@ export function DocsArticle({
 
 	return (
 		<AnchorProvider toc={toc}>
-			<Box elementType="main" gridArea="main" minInlineSize="0">
+			<GridItem
+				area="main"
+				renderRoot={(props) => <Box {...props} elementType="main" minInlineSize="0" />}
+			>
 				{hasToc ? <DocsTocBar toc={toc} /> : null}
 				<Box
 					paddingBlockEnd={{
@@ -97,7 +101,7 @@ export function DocsArticle({
 						<DocsPager tree={tree} />
 					</Box>
 				</Box>
-			</Box>
+			</GridItem>
 			{hasToc ? <DocsTocColumn toc={toc} /> : null}
 		</AnchorProvider>
 	);

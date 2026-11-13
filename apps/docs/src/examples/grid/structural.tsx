@@ -1,4 +1,4 @@
-import { Grid } from '@luke-ui/react/grid';
+import { Grid, GridItem } from '@luke-ui/react/grid';
 import { ExampleItem } from '#docs';
 
 export default () => {
@@ -10,10 +10,18 @@ export default () => {
 			rows="auto 1fr auto"
 			style={{ minBlockSize: '16rem' }}
 		>
-			<ExampleItem gridArea="a">Area A</ExampleItem>
-			<ExampleItem gridArea="b">Area B</ExampleItem>
-			<ExampleItem gridArea="c">Area C</ExampleItem>
-			<ExampleItem gridArea="d">Area D</ExampleItem>
+			<GridItem area="a" renderRoot={(props) => <ExampleItem {...props} />}>
+				Area A
+			</GridItem>
+			<GridItem area="b" renderRoot={(props) => <ExampleItem {...props} />}>
+				Area B
+			</GridItem>
+			<GridItem area="c" renderRoot={(props) => <ExampleItem {...props} />}>
+				Area C
+			</GridItem>
+			<GridItem area="d" renderRoot={(props) => <ExampleItem {...props} />}>
+				Area D
+			</GridItem>
 		</Grid>
 	);
 };

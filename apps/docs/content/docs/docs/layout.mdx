@@ -26,7 +26,7 @@ Box is the general layout element. Use it to:
 
 - Provide spacing to child elements.
 - Impose sizing constraints on content.
-- Control layout behaviour within flex and grid containers.
+- Control layout behaviour within flex containers.
 - Hide content responsively.
 
 ```tsx
@@ -92,8 +92,8 @@ also accepts `auto`. Insets accept the same spacing keys, `0`, and `auto`.
 Sizing properties accept `0`, `auto`, `100%`, `min-content`, `max-content`, and `fit-content`.
 Maximum sizes accept `none` instead of `auto`, and `maxInlineSize` also accepts the `container.*`
 presets. Use `flexGrow`, `flexShrink`, and `flexBasis` for flex items. There is no `flex` shorthand.
-Write zero as the string `"0"` everywhere except `order`, which takes a number. Grid-placement
-properties accept their CSS values.
+Write zero as the string `"0"` everywhere except `order`, which takes a number. Place a child in a
+`Grid` with [`GridItem`](/components/layout/grid#place-a-child), not with Box props.
 
 There is no length scale. Put a one-off length on `style`. When a size changes at a breakpoint,
 write it in CSS with a `@container` query built from `breakpoints` and pass it as `className`. Read

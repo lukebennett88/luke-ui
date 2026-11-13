@@ -289,6 +289,19 @@ const dynamicProperties = {
 	rowGap: spaceScale,
 } as const;
 
+/**
+ * Placement utilities that stay registered so `GridItem` can emit them. Box and the layout
+ * components do not expose them.
+ */
+type GridPlacementProperty =
+	| 'gridArea'
+	| 'gridColumn'
+	| 'gridColumnEnd'
+	| 'gridColumnStart'
+	| 'gridRow'
+	| 'gridRowEnd'
+	| 'gridRowStart';
+
 /** Properties whose public value type is narrower than their csstype value. */
 type ValueOverrides = {
 	order: number;
@@ -328,9 +341,14 @@ type UtilityScales = typeof dynamicProperties &
 	Record<'backgroundColor', Record<(typeof backgroundColorTokens)[number], string>>;
 
 type SprinklesPropsShape = {
-	[Property in keyof UtilityScales]?: ResponsiveValue<
+	[Property in Exclude<keyof UtilityScales, GridPlacementProperty>]?: ResponsiveValue<
 		ScaleValue<Property, UtilityScales[Property]>
 	>;
+};
+
+/** Placement props that only `GridItem` passes to `createSprinkles`. */
+export type GridPlacementSprinklesProps = {
+	[Property in GridPlacementProperty]?: ResponsiveValue<ScaleValue<Property, true>>;
 };
 
 /**
@@ -342,7 +360,7 @@ export type SprinklesProps = Prettify<SprinklesPropsShape>;
 type CreateSprinklesResult<Props extends object> = {
 	className: string;
 	style: Record<string, string>;
-} & Omit<Props, keyof SprinklesProps | 'className' | 'style'>;
+} & Omit<Props, keyof SprinklesProps | GridPlacementProperty | 'className' | 'style'>;
 
 /**
  * Package-internal sprinkles contract used by `Box` and layout components. `properties` is
@@ -351,8 +369,10 @@ type CreateSprinklesResult<Props extends object> = {
  * names.
  */
 type CreateSprinkles = {
-	<Props extends SprinklesProps>(props: Props): CreateSprinklesResult<Props>;
-	readonly properties: ReadonlySet<keyof SprinklesProps>;
+	<Props extends SprinklesProps & GridPlacementSprinklesProps>(
+		props: Props,
+	): CreateSprinklesResult<Props>;
+	readonly properties: ReadonlySet<keyof SprinklesProps | GridPlacementProperty>;
 };
 
 /** Package-internal utilities, including paired background classes. */

@@ -27,7 +27,8 @@ the minimum column size in `min(…, 100%)` so a parent narrower than the minimu
 ## Tracks and named areas
 
 `columns` and `rows` also accept a CSS value such as `"1fr 1fr"`. `areas` takes one string per row.
-Name each cell, use `.` for an empty cell, and place a child in an area with Box's `gridArea` prop.
+Name each cell, use `.` for an empty cell, and place a child in an area with the `area` prop of
+[`GridItem`](#place-a-child).
 
 Without `columns`, columns from `areas` size to their content. Each named area must form one filled
 rectangle.
@@ -42,16 +43,90 @@ then arrange them from a wider breakpoint.
 
 <ExampleBlock src="grid/responsive" title="Grid: Responsive areas" />
 
+## Place a child
+
+`GridItem` places one child in its parent Grid and does nothing else. It renders a `div` and accepts
+`area`, `column`, `row`, and the root props `children`, `className`, `style`, `ref`, `elementType`,
+and `renderRoot`. It does not accept Box layout or appearance props. Style the item through
+[`renderRoot`](#style-a-child).
+
+`area` takes the name of an area from the parent's `areas`. The value is a plain string, so a name
+the parent does not define compiles and places nothing. The type does not check it against `areas`.
+
+`column` and `row` take a line placement: `auto`, a line number such as `"2"`, a span such as
+`"span 2"`, a start and end such as `"2 / 4"`, or a start and a span such as `"1 / span 2"`.
+Negative lines count from the end, so `"1 / -1"` covers every explicit column. The types use
+`${number}`, which accepts any numeric string. It does not check for an integer or a valid track.
+Pass named lines and other complex placements through `className`.
+
+All three props accept a responsive object.
+
 ## Spanning columns
 
-Child placement belongs to the child. Use Box grid-placement props such as `gridColumn` when an item
-should span more than one column. `Grid` itself does not expose a span API.
+Use `column="span 2"` when an item should cover more than one column.
 
 When `columns` is a number, keep each span within the active column count at every breakpoint. A
 span that fits at `bp768` can overflow a smaller `initial` column count, so change both values
 together.
 
 <ExampleBlock src="grid/spanning" title="Grid: Spanning columns" />
+
+## Explicit lines
+
+Place an item between grid lines with `column` and `row`. Items without a placement fill the
+remaining cells in order.
+
+<ExampleBlock src="grid/lines" title="Grid: Explicit lines" />
+
+## Style a child
+
+`GridItem` has no styling props. Pass `renderRoot` to render a [Box](/components/layout/box) or
+another layout component as the item. The callback receives the resolved `children`, `className`,
+`style`, and `ref`. Spread them onto the element you return, and the grid item is that element, with
+no extra wrapper. Put DOM attributes on the returned element.
+
+<ExampleBlock src="grid/styled-item" title="Grid: Style an item" />
+
+Read [Box](/components/layout/box#own-the-rendered-element) for the `renderRoot` contract.
+`elementType` and `renderRoot` are mutually exclusive.
+
+## Nest a layout
+
+Return a `Stack`, a `Grid`, or any other layout component from `renderRoot` to lay out the contents
+of a grid item. The returned component is the item, so it takes part in the parent grid and lays out
+its own children.
+
+<ExampleBlock src="grid/nested-layout" title="Grid: Nested layouts" />
+
+## Migrate from Box placement props
+
+`Box` and the other layout components no longer accept `gridArea`, `gridColumn`, `gridColumnStart`,
+`gridColumnEnd`, `gridRow`, `gridRowStart`, or `gridRowEnd`. Wrap the element in `GridItem`, and
+render the Box through `renderRoot` to keep its other props.
+
+| Removed prop                                  | Replacement                                    |
+| --------------------------------------------- | ---------------------------------------------- |
+| `gridArea="main"`                             | `area="main"`                                  |
+| `gridColumn="span 2"`                         | `column="span 2"`                              |
+| `gridColumnStart="2"` and `gridColumnEnd="4"` | `column="2 / 4"`                               |
+| `gridRow="span 2"`                            | `row="span 2"`                                 |
+| `gridRowStart="2"` and `gridRowEnd="4"`       | `row="2 / 4"`                                  |
+| A named line or another complex expression    | A `className` that sets the CSS `grid-*` value |
+
+```tsx
+// Before
+<Box gridColumn="span 2" padding="space.16">
+	<Text>First</Text>
+</Box>
+
+// After
+<GridItem column="span 2" renderRoot={(props) => <Box {...props} padding="space.16" />}>
+	<Text>First</Text>
+</GridItem>
+```
+
+To place a layout component, such as a `Stack` with `gridColumn="span 2"`, pass it to `renderRoot`
+in the same way. See [Nest a layout](#nest-a-layout).
 
 ## Alignment
 
@@ -70,9 +145,18 @@ Grid uses
 ## Accessibility
 
 Grid placement changes visual position only. Reading order and focus order follow the DOM order.
-This applies to named areas, `gridColumn`, `gridRow`, and `order`. Arrange areas and placements so
-the visual order matches the DOM order at every breakpoint.
+This applies to `area`, `column`, `row`, and `order`. Arrange areas and placements so the visual
+order matches the DOM order at every breakpoint.
 
 ## API
 
+### GridProps
+
 <component-props-table path="packages/@luke-ui/react/src/core/grid/grid.tsx" name="GridProps" />
+
+### GridItemProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/grid/grid-item.tsx"
+	name="GridItemProps"
+/>
