@@ -10,7 +10,8 @@ import { expect, test } from 'vite-plus/test';
 // for the focus rings inside it, which adds 315 bytes. The built-in icon masks add 1,728 bytes: the
 // stylesheet carries every icon's SVG source, since no separate icon asset ships. The measured size
 // with them is 18,874 bytes.
-const maximumGzipBytes = 19_074;
+// Four responsive logical border-width utilities bring the measured size to 19,100 bytes.
+const maximumGzipBytes = 19_300;
 
 test('keeps the public stylesheet within its size budget', async () => {
 	const stylesheet = await readFile(new URL('../../../dist/stylesheet.css', import.meta.url));
