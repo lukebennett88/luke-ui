@@ -389,6 +389,7 @@ export const identityClassName: string = getThemeClassName(theme.name);
 export const validationIssues: ReadonlyArray<{ message: string; path: string; theme: string }> =
 	new ThemeValidationError([]).issues;
 export const fullMetrics: Partial<FontMetrics> = metrics;
+export const borderWidths: string[] = [vars.borderWidth.thin, vars.borderWidth.thick];
 export const textColor: string = vars.color.foreground.primary;
 export const mobileBreakpoint: number = breakpoints.bp640;
 export const interactionHoverStyle = interactionState('hover');

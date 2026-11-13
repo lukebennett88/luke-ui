@@ -57,7 +57,7 @@ export const textInputRecipe = recipe({
 		borderColor: vars.color.border.control.rest,
 		borderRadius: vars.radius.control,
 		borderStyle: 'solid',
-		borderWidth: '1px',
+		borderWidth: vars.borderWidth.thin,
 		boxShadow: vars.shadow.inset,
 		fontFamily: vars.font.family.body,
 		transitionDuration: vars.motion.feedback.duration,

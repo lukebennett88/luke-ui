@@ -131,7 +131,7 @@ export const mobileHeaderLink = style({
 
 export const panel = style({
 	background: vars.color.background.surface.base,
-	border: `1px solid color-mix(in oklab, ${vars.color.border.decorative} 85%, transparent)`,
+	border: `${vars.borderWidth.thin} solid color-mix(in oklab, ${vars.color.border.decorative} 85%, transparent)`,
 	borderRadius: vars.radius.surface,
 	overflow: 'hidden',
 });
@@ -143,7 +143,7 @@ export const settingsRow = style({
 		},
 	},
 	alignItems: 'center',
-	borderBlockEnd: `1px solid color-mix(in oklab, ${vars.color.border.decorative} 85%, transparent)`,
+	borderBlockEnd: `${vars.borderWidth.thin} solid color-mix(in oklab, ${vars.color.border.decorative} 85%, transparent)`,
 	display: 'flex',
 	gap: vars.space['12'],
 	paddingBlock: vars.space['12'],
@@ -170,7 +170,7 @@ export const avatar = style({
 	alignItems: 'center',
 	background: `color-mix(in oklab, ${vars.color.foreground.primary} 10%, transparent)`,
 	blockSize: avatarSize,
-	border: `1px solid ${vars.color.border.decorative}`,
+	border: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.full,
 	display: 'inline-flex',
 	flexShrink: 0,
@@ -251,7 +251,7 @@ export const avatarOverlay = style({
 
 export const menuPopover = style({
 	background: vars.color.background.surface.raised,
-	border: `1px solid ${vars.color.border.decorative}`,
+	border: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.surface,
 	boxShadow: vars.shadow.floating,
 	fontFamily: vars.font.family.body,
@@ -290,7 +290,7 @@ export const emailEditButton = style({
 	appearance: 'none',
 	background: vars.color.background.surface.base,
 	blockSize: '1.75rem',
-	border: `1px solid ${vars.color.border.decorative}`,
+	border: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.full,
 	color: vars.color.foreground.secondary,
 	display: 'inline-flex',
@@ -364,7 +364,7 @@ export const dialogOverlay = style({
 
 export const dialogModal = style({
 	background: vars.color.background.surface.raised,
-	border: `1px solid ${vars.color.border.decorative}`,
+	border: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 	borderRadius: vars.radius.surface,
 	boxShadow: vars.shadow.overlay,
 	fontFamily: vars.font.family.body,

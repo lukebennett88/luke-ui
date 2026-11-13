@@ -78,7 +78,7 @@ export const cell = style({
 export const ruled = style({
 	'@layer': {
 		components: {
-			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
+			borderBlockEnd: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 			selectors: {
 				'tbody:last-child > tr:last-child > &': {
 					borderBlockEnd: 'none',
@@ -102,7 +102,7 @@ globalStyle(`${ruled}${rowEnd}`, {
 		components: {
 			'@container': {
 				[NARROW]: {
-					borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
+					borderBlockEnd: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 				},
 			},
 		},

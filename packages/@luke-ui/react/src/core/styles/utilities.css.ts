@@ -51,7 +51,11 @@ const maxInlineSizeScale = { ...maxSizeScale, ...containerMaxInlineSizeTokens } 
 const flexBasisScale = { ...sizeScale, content: 'content' } as const;
 
 /** Border widths offered by the design system. */
-const borderWidthScale = { none: '0', thin: '1px', thick: '2px' } as const;
+const borderWidthScale = {
+	none: '0',
+	thin: vars.borderWidth.thin,
+	thick: vars.borderWidth.thick,
+} as const;
 
 type SemanticRole = (typeof SEMANTIC_ROLES)[number];
 

@@ -9,7 +9,7 @@ const TOKEN_REFERENCE_PANEL_HEADER_INSET = SITE_HEADER_BLOCK_SIZE;
 /** Viewport width below the token row's `bp768` grid. */
 const BELOW_TABLET = `(max-width: ${breakpoints.bp768 - 1}px)`;
 
-const PANEL_BORDER = `1px solid ${vars.color.border.decorative}`;
+const PANEL_BORDER = `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`;
 
 // DS gap: Box has no overflowWrap prop. A long token path may break anywhere rather
 // than push the column wider than the page.
@@ -93,7 +93,7 @@ export const group = style({
 		components: {
 			selectors: {
 				'& + &': {
-					borderBlockStart: `1px solid ${vars.color.border.decorative}`,
+					borderBlockStart: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 				},
 			},
 		},
@@ -108,7 +108,7 @@ export const row = style({
 			scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${vars.space['24']})`,
 			selectors: {
 				'& + &': {
-					borderBlockStart: `1px solid ${vars.color.border.decorative}`,
+					borderBlockStart: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 				},
 			},
 		},
@@ -187,7 +187,7 @@ export const typeGroup = style({
 export const typeSpecimen = style({
 	'@layer': {
 		components: {
-			borderBlockStart: `1px solid ${vars.color.border.decorative}`,
+			borderBlockStart: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 			paddingBlock: vars.space['12'],
 			textAlign: 'start',
 			'@container': {
@@ -220,7 +220,7 @@ export const typeRow = style({
 		components: {
 			'@container': {
 				[TYPE_NARROW]: {
-					borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
+					borderBlockEnd: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 					display: 'block',
 					selectors: {
 						'&:last-child': {
@@ -237,7 +237,7 @@ export const typeRow = style({
 export const typeCell = style({
 	'@layer': {
 		components: {
-			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
+			borderBlockEnd: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 			scrollMarginBlockStart: `calc(${SITE_HEADER_BLOCK_SIZE} + ${vars.space['24']})`,
 			textAlign: 'start',
 			verticalAlign: 'middle',

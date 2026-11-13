@@ -163,6 +163,8 @@ export const themeContractTree = {
 			emphasis: null,
 		},
 	},
+	/** Shared border widths. */
+	borderWidth: { thin: null, thick: null },
 	/** Corner radii for details, controls, surfaces, overlays, and full rounding. */
 	radius: {
 		detail: null,

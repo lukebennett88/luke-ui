@@ -26,7 +26,9 @@ export default () => {
 						</Text>
 						<Box
 							elementType="dd"
-							style={{ borderBlockEnd: `1px dashed ${vars.color.border.decorative}` }}
+							style={{
+								borderBlockEnd: `${vars.borderWidth.thin} dashed ${vars.color.border.decorative}`,
+							}}
 						>
 							<Text elementType="div" typography={typography}>
 								Aa

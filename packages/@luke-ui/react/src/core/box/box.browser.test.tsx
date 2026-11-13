@@ -20,6 +20,25 @@ import { render, visualAppearances } from '../test-utils/render.js';
 import { pairedColors, resolvedColor, surfaceColors } from '../test-utils/surface-colors.js';
 import { captureVisualAppearance } from '../test-utils/visual.js';
 
+test('resolves semantic border widths in both themes', () => {
+	for (const theme of ['tactile', 'paper'] as const) {
+		const { locator, unmount } = render(
+			<>
+				<Box borderStyle="solid" borderWidth="thin">
+					Thin
+				</Box>
+				<Box borderStyle="solid" borderWidth="thick">
+					Thick
+				</Box>
+			</>,
+			{ appearance: { mode: 'light', theme } },
+		);
+		expect(getComputedStyle(locator.getByText('Thin').element()).borderTopWidth).toBe('1px');
+		expect(getComputedStyle(locator.getByText('Thick').element()).borderTopWidth).toBe('2px');
+		unmount();
+	}
+});
+
 test('Box forwards className, data attributes, id, and ref to its element', () => {
 	const ref = createRef<HTMLElement>();
 	const { container } = render(

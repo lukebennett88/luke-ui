@@ -135,6 +135,7 @@ const SCALE_PREFIXES = [
 	['motion.enter.', 'motionEnter'],
 	['motion.exit.', 'motionExit'],
 	['motion.feedback.', 'motionFeedback'],
+	['borderWidth.', 'borderWidth'],
 	['controlFinish.', 'controlFinish'],
 	['controlSize.', 'controlSize'],
 	['interaction.', 'interaction'],
@@ -296,6 +297,7 @@ function buildScales(tokens: ReadonlyArray<ThemeToken>): Readonly<Record<ScaleId
 	}
 
 	return {
+		borderWidth: scaleFor('borderWidth'),
 		controlFinish: scaleFor('controlFinish'),
 		controlSize: scaleFor('controlSize'),
 		shadow: scaleFor('shadow'),

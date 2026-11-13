@@ -79,7 +79,7 @@ export const choiceIndicator = {
 	blockSize: indicatorSize,
 	borderColor: vars.color.border.control.rest,
 	borderStyle: 'solid',
-	borderWidth: '1px',
+	borderWidth: vars.borderWidth.thin,
 	display: 'inline-flex',
 	inlineSize: indicatorSize,
 	justifyContent: 'center',

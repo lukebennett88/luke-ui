@@ -40,6 +40,31 @@ export function SpaceTokens() {
 	);
 }
 
+/** Shared border widths, shown as lines at their resolved width. */
+export function BorderWidthTokens() {
+	return (
+		<TokenPanel sampleInlineSize="4rem">
+			<TokenList>
+				{scales.borderWidth.tokens.map((token) => (
+					<TokenRow
+						key={token.path}
+						sample={
+							<Box
+								style={{
+									inlineSize: '4rem',
+									borderBlockStart: `var(${token.variable}) solid ${vars.color.foreground.primary}`,
+								}}
+							/>
+						}
+						sampleInlineSize="4rem"
+						token={token}
+					/>
+				))}
+			</TokenList>
+		</TokenPanel>
+	);
+}
+
 /** What each radius rounds. */
 const RADIUS_NOTES: Record<string, string> = {
 	'radius.control': 'A button, input, or select',

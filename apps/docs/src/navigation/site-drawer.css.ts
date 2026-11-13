@@ -129,7 +129,7 @@ export const group = style({
 export const footer = style({
 	'@layer': {
 		components: {
-			borderBlockStart: `1px solid ${vars.color.border.decorative}`,
+			borderBlockStart: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 			paddingBlockStart: vars.space['16'],
 		},
 	},
@@ -140,7 +140,7 @@ export const switcher = style({
 	'@layer': {
 		components: {
 			backgroundColor: vars.color.background.surface.subdued,
-			border: `1px solid ${vars.color.border.decorative}`,
+			border: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 			borderRadius: vars.radius.control,
 			display: 'grid',
 			gap: vars.space['4'],

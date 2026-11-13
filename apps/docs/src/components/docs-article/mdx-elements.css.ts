@@ -102,7 +102,7 @@ export const image = style({
 export const tableScroll = style({
 	'@layer': {
 		components: {
-			border: `1px solid ${vars.color.border.decorative}`,
+			border: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 			borderRadius: vars.radius.surface,
 			marginBlockStart: vars.space['40'],
 			selectors: {
@@ -129,7 +129,7 @@ export const table = style({
 globalStyle(`${table} th, ${table} td`, {
 	'@layer': {
 		components: {
-			borderBlockEnd: `1px solid ${vars.color.border.decorative}`,
+			borderBlockEnd: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
 			verticalAlign: 'top',
 		},
 	},

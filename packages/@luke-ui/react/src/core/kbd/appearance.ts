@@ -10,7 +10,7 @@ export const kbdAppearance = {
 	borderColor: vars.color.border.decorative,
 	borderRadius: vars.radius.control,
 	borderStyle: 'solid',
-	borderWidth: '1px',
+	borderWidth: vars.borderWidth.thin,
 	display: 'inline-flex',
 	flexShrink: 0,
 	fontFamily: vars.font.family.body,
