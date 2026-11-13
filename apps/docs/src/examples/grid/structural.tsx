@@ -13,11 +13,11 @@ export default () => {
 			<GridItem area="a">
 				<ExampleItem>Area A</ExampleItem>
 			</GridItem>
-			<GridItem area="b">
-				<ExampleItem>Area B</ExampleItem>
+			<GridItem area="b" renderRoot={(domProps) => <ExampleItem {...domProps} />}>
+				Area B
 			</GridItem>
-			<GridItem area="c">
-				<ExampleItem>Area C</ExampleItem>
+			<GridItem area="c" renderRoot={(domProps) => <ExampleItem {...domProps} />}>
+				Area C
 			</GridItem>
 			<GridItem area="d">
 				<ExampleItem>Area D</ExampleItem>

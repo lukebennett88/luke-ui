@@ -7,8 +7,12 @@ export default () => {
 			<GridItem column="1 / -1">
 				<ExampleItem>Header</ExampleItem>
 			</GridItem>
-			<GridItem column="1" row="2 / span 2">
-				<ExampleItem>Sidebar</ExampleItem>
+			<GridItem
+				column="1"
+				renderRoot={(domProps) => <ExampleItem {...domProps} />}
+				row="2 / span 2"
+			>
+				Sidebar
 			</GridItem>
 			<GridItem column="2 / 5">
 				<ExampleItem>Main</ExampleItem>
