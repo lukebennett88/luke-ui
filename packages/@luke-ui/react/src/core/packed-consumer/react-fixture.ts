@@ -720,4 +720,12 @@ export function App() {
 		</Box>
 	);
 }
+export const blockBorderBox: BoxProps = {
+	borderBlockStartWidth: { initial: 'thin', bp768: 'thick' },
+	borderBlockEndWidth: 'none',
+};
+export const blockBorderStack: StackProps = { borderBlockEndWidth: 'thin' };
+// @ts-expect-error — arbitrary widths are not supported
+export const invalidBlockBorder: BoxProps = { borderBlockStartWidth: '1px' };
+
 `;

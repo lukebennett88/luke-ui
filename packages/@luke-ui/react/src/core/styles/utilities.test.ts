@@ -394,3 +394,14 @@ test('spacing props keep namespaced tokens and string zero without arbitrary len
 	// @ts-expect-error — spacing tokens use the public namespace
 	assertType<UtilityProps>({ padding: 'sp16' });
 });
+
+test('block border widths accept only the responsive border scale', () => {
+	assertType<UtilityProps>({
+		borderBlockStartWidth: { initial: 'thin', bp768: 'thick' },
+		borderBlockEndWidth: 'none',
+	});
+	// @ts-expect-error — arbitrary lengths are not supported
+	assertType<UtilityProps>({ borderBlockStartWidth: '1px' });
+	// @ts-expect-error — inline sides are not supported
+	assertType<UtilityProps>({ borderInlineStartWidth: 'thin' });
+});
