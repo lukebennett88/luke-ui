@@ -227,7 +227,9 @@ export function TokenRow({ note, sample, sampleInlineSize, token }: TokenRowProp
 		>
 			<GridItem
 				area="sample"
-				renderRoot={(props) => <Box {...props} alignItems="center" aria-hidden display="flex" />}
+				renderRoot={(domProps) => (
+					<Box {...domProps} alignItems="center" aria-hidden display="flex" />
+				)}
 				style={{ inlineSize: sampleInlineSize, minBlockSize: vars.space['32'] }}
 			>
 				{sample}
@@ -235,7 +237,7 @@ export function TokenRow({ note, sample, sampleInlineSize, token }: TokenRowProp
 			<GridItem
 				area="name"
 				className={styles.tokenIdentification}
-				renderRoot={(props) => <Box {...props} minInlineSize="0" />}
+				renderRoot={(domProps) => <Box {...domProps} minInlineSize="0" />}
 			>
 				<Stack gap="space.4">
 					<Cluster alignItems="center" gap="space.8">
@@ -249,7 +251,7 @@ export function TokenRow({ note, sample, sampleInlineSize, token }: TokenRowProp
 					) : null}
 				</Stack>
 			</GridItem>
-			<GridItem area="value" renderRoot={(props) => <Box {...props} minInlineSize="0" />}>
+			<GridItem area="value" renderRoot={(domProps) => <Box {...domProps} minInlineSize="0" />}>
 				<TokenValue elementType="p" token={token} typography="label" />
 			</GridItem>
 		</Grid>

@@ -47,7 +47,7 @@ export function DocsArticle({
 		<AnchorProvider toc={toc}>
 			<GridItem
 				area="main"
-				renderRoot={(props) => <Box {...props} elementType="main" minInlineSize="0" />}
+				renderRoot={(domProps) => <Box {...domProps} elementType="main" minInlineSize="0" />}
 			>
 				{hasToc ? <DocsTocBar toc={toc} /> : null}
 				<Box

@@ -7,8 +7,13 @@ export default () => {
 		<Grid columns={3} gap="space.12">
 			<GridItem
 				column="span 2"
-				renderRoot={(props) => (
-					<Box {...props} backgroundColor="info.subtle" borderRadius="detail" padding="space.16" />
+				renderRoot={(domProps) => (
+					<Box
+						{...domProps}
+						backgroundColor="info.subtle"
+						borderRadius="detail"
+						padding="space.16"
+					/>
 				)}
 			>
 				Featured

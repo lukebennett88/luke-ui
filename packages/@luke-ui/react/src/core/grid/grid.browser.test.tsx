@@ -537,9 +537,9 @@ test('GridItem composes with Box through renderRoot without a wrapper', () => {
 				className="consumer-class"
 				column="span 2"
 				ref={ref}
-				renderRoot={(props) => (
+				renderRoot={(domProps) => (
 					<Box
-						{...props}
+						{...domProps}
 						aria-label="Summary"
 						data-testid="item"
 						elementType="section"
@@ -577,8 +577,8 @@ test('GridItem composes with a nested Stack through renderRoot', () => {
 				className="consumer-class"
 				column="span 2"
 				ref={ref}
-				renderRoot={(props) => (
-					<Stack {...props} aria-label="Pair" elementType="section" gap="space.12" />
+				renderRoot={(domProps) => (
+					<Stack {...domProps} aria-label="Pair" elementType="section" gap="space.12" />
 				)}
 				style={{ backgroundColor: 'rgb(4, 5, 6)' }}
 			>
@@ -619,7 +619,9 @@ test('GridItem preserves callback ref cleanup through renderRoot', () => {
 						cleanups += 1;
 					};
 				}}
-				renderRoot={(props) => <Box {...props} aria-label="Owned root" elementType="section" />}
+				renderRoot={(domProps) => (
+					<Box {...domProps} aria-label="Owned root" elementType="section" />
+				)}
 			/>
 		</Grid>,
 	);
