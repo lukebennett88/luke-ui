@@ -76,16 +76,6 @@ export const panelBody = style({
 	},
 });
 
-// DS gap: Box has no listStyle prop. Token lists are lists for assistive technology, without
-// markers.
-export const list = style({
-	'@layer': {
-		components: {
-			listStyle: 'none',
-		},
-	},
-});
-
 // DS gap: Box has no per-side border props or sibling selectors. A rule separates each group of a
 // panel from the one before it.
 export const group = style({

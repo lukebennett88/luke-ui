@@ -1,8 +1,8 @@
 import { style } from '@vanilla-extract/css';
 
 /**
- * UA list markers and indent. Docs chrome and layout examples that use `ul`/`ol` for structure
- * need this locally now that Tailwind Preflight is gone. Box has no `listStyle` prop.
+ * UA list markers and indent. Cluster and Grid have no `listStyle` prop, and some app code still
+ * styles lists directly, so this class resets them. Box and Stack use `listStyle="none"`.
  */
 export const plainList = style({
 	'@layer': {

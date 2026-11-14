@@ -35,6 +35,7 @@ const layoutPropertyNames = [
 	'overflow',
 	'overflowX',
 	'overflowY',
+	'overscrollBehavior',
 	'padding',
 	'paddingBlock',
 	'paddingBlockEnd',

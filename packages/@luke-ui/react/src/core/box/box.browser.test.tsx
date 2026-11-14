@@ -579,3 +579,74 @@ test('logical border widths override responsive all-side widths and follow writi
 	expect(get('default').borderTopWidth).toBe('0px');
 	expect(get('stack').borderBottomWidth).toBe('1px');
 });
+
+test('overscrollBehavior applies on a scroll container and responds to breakpoints', () => {
+	const { container } = render(
+		<div style={{ containerType: 'inline-size', inlineSize: '800px' }}>
+			<Box
+				data-testid="scroller"
+				overflowY="auto"
+				overscrollBehavior="contain"
+				style={{ blockSize: '4rem' }}
+			>
+				<div style={{ blockSize: '16rem' }} />
+			</Box>
+			<Box data-testid="responsive" overscrollBehavior={{ initial: 'auto', bp768: 'contain' }} />
+			<Box data-testid="narrow" overscrollBehavior={{ initial: 'auto', bp1024: 'contain' }} />
+			<Stack data-testid="stack" overscrollBehavior="contain" />
+		</div>,
+	);
+	const get = (id: string) => {
+		const element = container.querySelector(`[data-testid="${id}"]`);
+		if (!(element instanceof HTMLElement)) throw new Error(`Missing ${id}`);
+		expect(element.hasAttribute('overscrollbehavior')).toBe(false);
+		return element;
+	};
+	const scroller = get('scroller');
+	expect(getComputedStyle(scroller).overflowY).toBe('auto');
+	expect(getComputedStyle(scroller).overscrollBehaviorY).toBe('contain');
+	expect(scroller.scrollHeight).toBeGreaterThan(scroller.clientHeight);
+	expect(getComputedStyle(get('responsive')).overscrollBehaviorY).toBe('contain');
+	expect(getComputedStyle(get('narrow')).overscrollBehaviorY).toBe('auto');
+	expect(getComputedStyle(get('stack')).overscrollBehaviorY).toBe('contain');
+});
+
+const unsupportedListStyle = { listStyle: 'none' } as object;
+
+test('listStyle none removes markers from Box and Stack lists and keeps list semantics', () => {
+	const { container, locator } = render(
+		<>
+			<Box aria-label="Plain Box" elementType="ul" listStyle="none">
+				<li>Box item</li>
+			</Box>
+			<Stack aria-label="Plain Stack" elementType="ul" listStyle="none">
+				<li>Stack item</li>
+			</Stack>
+			<Box aria-label="Default Box" elementType="ul">
+				<li>Default item</li>
+			</Box>
+			<Cluster aria-label="Cluster" elementType="ul" {...unsupportedListStyle}>
+				<li>Cluster item</li>
+			</Cluster>
+			<Grid aria-label="Grid" columns={1} elementType="ul" {...unsupportedListStyle}>
+				<li>Grid item</li>
+			</Grid>
+		</>,
+	);
+	for (const name of ['Plain Box', 'Plain Stack'] as const) {
+		const list = locator.getByRole('list', { name }).element();
+		expect(list.tagName).toBe('UL');
+		expect(list.hasAttribute('liststyle')).toBe(false);
+		expect(getComputedStyle(list).listStyleType).toBe('none');
+		expect(getComputedStyle(list.querySelector('li') as HTMLElement).listStyleType).toBe('none');
+	}
+	const defaultList = locator.getByRole('list', { name: 'Default Box' }).element();
+	expect(getComputedStyle(defaultList).listStyleType).toBe('disc');
+	// Cluster and Grid drop the prop at runtime, even when a type cast lets it through.
+	for (const name of ['Cluster', 'Grid'] as const) {
+		const list = locator.getByRole('list', { name }).element();
+		expect(getComputedStyle(list).listStyleType).toBe('disc');
+		expect(list.hasAttribute('liststyle')).toBe(false);
+	}
+	expect(container.querySelectorAll('[liststyle]')).toHaveLength(0);
+});

@@ -174,6 +174,22 @@ for (const scenario of scenarios) {
 			expect(border.borderRightWidth).toBe('2px');
 		});
 
+		test('Box overscrollBehavior applies alongside Preflight', () => {
+			loadCss(scenario.css);
+			mount(<Box data-testid="scroller" overflowY="auto" overscrollBehavior="contain" />);
+
+			expect(getComputedStyle(byTestId('scroller')).overscrollBehaviorY).toBe('contain');
+		});
+
+		test(`a Tailwind list utility ${scenario.isTailwindAboveLukeUi ? 'overrides' : 'loses to'} Box listStyle`, () => {
+			loadCss(scenario.css);
+			mount(<Box className="list-disc" data-testid="list" elementType="ul" listStyle="none" />);
+
+			expect(getComputedStyle(byTestId('list')).listStyleType).toBe(
+				scenario.isTailwindAboveLukeUi ? 'disc' : 'none',
+			);
+		});
+
 		test('Box utility props override conflicting recipe styles', () => {
 			loadCss(scenario.css);
 			renderHost();

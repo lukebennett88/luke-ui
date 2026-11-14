@@ -461,6 +461,11 @@ value keeps responsive object support. The scales live in `core/styles/utilities
 Sprinkles `dynamicProperties`, so each property still emits one class per condition and the value
 lands in inline style. Narrowing a scale changes types, not emitted CSS.
 
+`overscrollBehavior` accepts `auto` and `contain` with responsive values, and every shared layout
+component accepts it. `listStyle` accepts only `none`, emits one class with no responsive
+conditions, and only `Box` and `Stack` accept it. Box and Stack leave list markers unchanged unless
+you set `listStyle="none"`, which removes them. `Prose` keeps its own list styles.
+
 There is no `flex` shorthand prop. The shorthand silently resets basis and shrink, so state the
 behaviour you need with the longhands. `flexGrow="1"` is usually enough. Add `flexBasis="0"` only
 when items must share space regardless of their content, and `flexShrink="0"` to stop an item

@@ -39,6 +39,16 @@ The supported elements are `article`, `aside`, `dd`, `div`, `dl`, `dt`, `figcapt
 
 <ExampleBlock src="box/semantic-element" title="Box: Semantic element" />
 
+## Remove list markers
+
+Set `listStyle="none"` on a `ul` or `ol` Box to remove its markers. The element keeps its list
+semantics. Browsers do not reset a list's margin and padding, so set them to `"0"` when the list
+should not be indented. Safari with VoiceOver (WebKit) can drop list semantics when CSS removes the
+markers, and adding `role="list"` restores them. Box and Stack never add the role for you.
+`listStyle` accepts only `none` and has no responsive values. Stack accepts it too.
+
+<ExampleBlock src="box/list-style" title="Box: List markers" />
+
 ## Own the rendered element
 
 Use `renderRoot` when the callback must own the element and its DOM attributes. The callback
@@ -53,6 +63,15 @@ behaviour.
 
 Read [Composition](/docs/composition#render-a-different-dom-component) for the general `elementType`
 and `renderRoot` rule.
+
+## Contain scrolling
+
+Set `overscrollBehavior="contain"` on a Box that scrolls, such as one with `overflowY="auto"`, to
+stop the scroll from continuing to the page behind it once the Box reaches its end. The other value
+is `auto`, the browser default. The prop accepts responsive values and works on the shared layout
+components.
+
+<ExampleBlock src="box/scroll-container" title="Box: Scroll container" />
 
 ## Visual styles
 
