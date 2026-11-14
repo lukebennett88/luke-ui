@@ -517,3 +517,65 @@ for (const appearance of visualAppearances) {
 		});
 	});
 }
+
+test('logical border widths override responsive all-side widths and follow writing mode', () => {
+	const { container } = render(
+		<div style={{ containerType: 'inline-size', inlineSize: '800px' }}>
+			<Box
+				data-testid="start"
+				borderWidth={{ initial: 'none', bp768: 'none' }}
+				borderBlockStartWidth={{ initial: 'thin', bp768: 'thick' }}
+				borderStyle="solid"
+			/>
+			<Box
+				data-testid="end"
+				borderBlockEndWidth="thin"
+				borderWidth={{ initial: 'none', bp768: 'none' }}
+				borderStyle="solid"
+				style={{ writingMode: 'vertical-rl', direction: 'rtl' }}
+			/>
+			<Box
+				data-testid="inline-rtl"
+				borderWidth={{ initial: 'none', bp768: 'none' }}
+				borderInlineStartWidth="thin"
+				borderInlineEndWidth={{ initial: 'thin', bp768: 'thick' }}
+				borderStyle="solid"
+				style={{ direction: 'rtl' }}
+			/>
+			<Box
+				data-testid="inline-vertical"
+				borderInlineEndWidth="thick"
+				borderInlineStartWidth="thin"
+				borderWidth={{ initial: 'none', bp768: 'none' }}
+				borderStyle="solid"
+				style={{ writingMode: 'vertical-rl', direction: 'rtl' }}
+			/>
+			<Box
+				data-testid="inline-none"
+				borderStyle="solid"
+				borderWidth="thick"
+				borderInlineEndWidth={{ initial: 'thin', bp768: 'none' }}
+			/>
+			<Box data-testid="default" borderBlockStartWidth="thin" />
+			<Stack data-testid="stack" borderBlockEndWidth="thin" style={{ borderStyle: 'solid' }} />
+		</div>,
+	);
+	const get = (id: string) => {
+		const element = container.querySelector(`[data-testid="${id}"]`);
+		if (!(element instanceof HTMLElement)) throw new Error(`Missing ${id}`);
+		expect(element.hasAttribute('borderblockstartwidth')).toBe(false);
+		return getComputedStyle(element);
+	};
+	expect(get('start').borderTopWidth).toBe('2px');
+	expect(get('start').borderBottomWidth).toBe('0px');
+	expect(get('end').borderLeftWidth).toBe('1px');
+	expect(get('end').borderRightWidth).toBe('0px');
+	expect(get('inline-rtl').borderRightWidth).toBe('1px');
+	expect(get('inline-rtl').borderLeftWidth).toBe('2px');
+	expect(get('inline-vertical').borderBottomWidth).toBe('1px');
+	expect(get('inline-vertical').borderTopWidth).toBe('2px');
+	expect(get('inline-none').borderRightWidth).toBe('0px');
+	expect(get('inline-none').borderLeftWidth).toBe('2px');
+	expect(get('default').borderTopWidth).toBe('0px');
+	expect(get('stack').borderBottomWidth).toBe('1px');
+});

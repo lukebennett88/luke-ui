@@ -333,11 +333,19 @@ type ResponsiveValue<Value> =
 			[Condition in BreakpointName]?: Value | null;
 	  };
 
+const logicalBorderProperties = {
+	borderBlockStartWidth: borderWidthScale,
+	borderBlockEndWidth: borderWidthScale,
+	borderInlineStartWidth: borderWidthScale,
+	borderInlineEndWidth: borderWidthScale,
+} as const;
+
 /**
  * Every utility's scale. Background values select paired classes. Keep their token keys here
  * so public declarations and docs do not depend on the styling engine's config.
  */
 type UtilityScales = typeof dynamicProperties &
+	typeof logicalBorderProperties &
 	Record<'backgroundColor', Record<(typeof backgroundColorTokens)[number], string>>;
 
 type SprinklesPropsShape = {
@@ -382,6 +390,18 @@ export const createSprinkles: CreateSprinkles = defineSprinkles(
 		conditions: responsiveConditions,
 		defaultCondition: 'initial',
 		dynamicProperties: { ...dynamicProperties, ...gridPlacementProperties },
+	}),
+	// Side widths must beat the all-sides shorthand even across responsive conditions.
+	defineProperties({
+		'@layer': layers.utilities,
+		conditions: Object.fromEntries(
+			typedEntries(responsiveConditions).map(([name, condition]) => [
+				name,
+				{ ...condition, selector: '&&' },
+			]),
+		),
+		defaultCondition: 'initial',
+		dynamicProperties: logicalBorderProperties,
 	}),
 	{
 		config: {
