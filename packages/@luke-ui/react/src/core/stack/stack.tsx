@@ -15,7 +15,7 @@ export type StackProps = Prettify<_StackElementProps | _StackRenderProps>;
 export function Stack({ alignItems = 'stretch', gap, ...props }: StackProps): JSX.Element {
 	return (
 		<Box
-			{...omitUnsupportedSprinklesProps(props, layoutProperties)}
+			{...omitUnsupportedSprinklesProps(props, stackProperties)}
 			alignItems={withResponsiveDefault(alignItems, 'stretch')}
 			display="flex"
 			flexDirection="column"
@@ -24,7 +24,10 @@ export function Stack({ alignItems = 'stretch', gap, ...props }: StackProps): JS
 	);
 }
 
-interface _StackLayoutProps {
+const stackProperties = new Set(layoutProperties);
+stackProperties.add('listStyle');
+
+interface _StackLayoutProps extends Pick<SprinklesProps, 'listStyle'> {
 	/**
 	 * Alignment of children on the inline axis.
 	 * @default stretch

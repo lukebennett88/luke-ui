@@ -9,3 +9,9 @@ test('Stack rejects the props it does not support', () => {
 	// @ts-expect-error — Stack has no display prop
 	assertType<StackProps>({ display: 'grid' });
 });
+
+test('Stack accepts listStyle none and nothing else', () => {
+	assertType<StackProps>({ listStyle: 'none' });
+	// @ts-expect-error — only none is supported
+	assertType<StackProps>({ listStyle: 'disc' });
+});

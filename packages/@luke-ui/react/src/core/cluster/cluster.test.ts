@@ -9,3 +9,8 @@ test('Cluster rejects the props it does not support', () => {
 	// @ts-expect-error — Cluster has no display prop
 	assertType<ClusterProps>({ display: 'grid', gap: 'space.8' });
 });
+
+test('Cluster does not accept listStyle', () => {
+	// @ts-expect-error — listStyle is only available on Box and Stack
+	assertType<ClusterProps>({ listStyle: 'none', gap: 'space.8' });
+});

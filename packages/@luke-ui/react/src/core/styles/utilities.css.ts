@@ -261,6 +261,10 @@ const dynamicProperties = {
 		scroll: 'scroll',
 		visible: 'visible',
 	},
+	overscrollBehavior: {
+		auto: 'auto',
+		contain: 'contain',
+	},
 	padding: spaceScale,
 	paddingBlock: spaceScale,
 	paddingBlockEnd: spaceScale,
@@ -340,6 +344,11 @@ const logicalBorderProperties = {
 	borderInlineEndWidth: borderWidthScale,
 } as const;
 
+/** Single-value utilities. They have no responsive conditions, so each emits one class. */
+const singleValueProperties = {
+	listStyle: { none: 'none' },
+} as const;
+
 /**
  * Every utility's scale. Background values select paired classes. Keep their token keys here
  * so public declarations and docs do not depend on the styling engine's config.
@@ -352,6 +361,8 @@ type SprinklesPropsShape = {
 	[Property in keyof UtilityScales]?: ResponsiveValue<
 		ScaleValue<Property, UtilityScales[Property]>
 	>;
+} & {
+	[Property in keyof typeof singleValueProperties]?: keyof (typeof singleValueProperties)[Property];
 };
 
 /** Placement props that only `GridItem` passes to `createSprinkles`. */
@@ -402,6 +413,10 @@ export const createSprinkles: CreateSprinkles = defineSprinkles(
 		),
 		defaultCondition: 'initial',
 		dynamicProperties: logicalBorderProperties,
+	}),
+	defineProperties({
+		'@layer': layers.utilities,
+		dynamicProperties: singleValueProperties,
 	}),
 	{
 		config: {

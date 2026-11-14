@@ -174,6 +174,22 @@ for (const scenario of scenarios) {
 			expect(border.borderRightWidth).toBe('2px');
 		});
 
+		test('Box overscrollBehavior and listStyle apply alongside Preflight', () => {
+			loadCss(scenario.css);
+			mount(
+				<Box
+					data-testid="list"
+					elementType="ul"
+					listStyle="none"
+					overflowY="auto"
+					overscrollBehavior="contain"
+				/>,
+			);
+			const list = getComputedStyle(byTestId('list'));
+			expect(list.listStyleType).toBe('none');
+			expect(list.overscrollBehaviorY).toBe('contain');
+		});
+
 		test('Box utility props override conflicting recipe styles', () => {
 			loadCss(scenario.css);
 			renderHost();

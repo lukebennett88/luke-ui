@@ -182,13 +182,7 @@ export function TokenGroup({
 /** A list of token rows, without list markers. */
 export function TokenList({ children, labelledBy }: { children: ReactNode; labelledBy?: string }) {
 	return (
-		<Box
-			aria-labelledby={labelledBy}
-			className={styles.list}
-			elementType="ul"
-			margin="0"
-			padding="0"
-		>
+		<Box aria-labelledby={labelledBy} elementType="ul" listStyle="none" margin="0" padding="0">
 			{children}
 		</Box>
 	);

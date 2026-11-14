@@ -409,3 +409,22 @@ test('logical border widths accept only the responsive border scale', () => {
 	// @ts-expect-error — logical axis shorthands are not supported
 	assertType<UtilityProps>({ borderInlineWidth: 'thin' });
 });
+
+test('overscrollBehavior accepts auto and contain, responsively', () => {
+	assertType<UtilityProps>({ overscrollBehavior: 'contain' });
+	assertType<UtilityProps>({ overscrollBehavior: { initial: 'auto', bp768: 'contain' } });
+	// @ts-expect-error — scroll chaining keywords other than auto and contain are not supported
+	assertType<UtilityProps>({ overscrollBehavior: 'none' });
+	// @ts-expect-error — scroll is not an overscroll behaviour
+	assertType<UtilityProps>({ overscrollBehavior: 'scroll' });
+	expect(createSprinkles.properties).toContain('overscrollBehavior');
+});
+
+test('listStyle accepts only a single none value', () => {
+	assertType<UtilityProps>({ listStyle: 'none' });
+	// @ts-expect-error — other list styles are not supported
+	assertType<UtilityProps>({ listStyle: 'disc' });
+	// @ts-expect-error — listStyle has no responsive values
+	assertType<UtilityProps>({ listStyle: { initial: 'none' } });
+	expect(createSprinkles({ listStyle: 'none' }).className).not.toBe('');
+});

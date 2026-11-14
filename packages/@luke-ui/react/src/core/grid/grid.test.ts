@@ -25,3 +25,8 @@ test('Grid accepts its alignment props and rejects the props it does not support
 		justifyItems: 'center';
 	}>().toExtend<GridProps>();
 });
+
+test('Grid does not accept listStyle', () => {
+	// @ts-expect-error — listStyle is only available on Box and Stack
+	assertType<GridProps>({ listStyle: 'none', columns: 2 });
+});

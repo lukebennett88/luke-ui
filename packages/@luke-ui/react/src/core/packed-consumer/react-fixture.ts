@@ -729,5 +729,13 @@ export const blockBorderBox: BoxProps = {
 export const blockBorderStack: StackProps = { borderBlockEndWidth: 'thin', borderInlineStartWidth: 'thick' };
 // @ts-expect-error — arbitrary widths are not supported
 export const invalidBlockBorder: BoxProps = { borderBlockStartWidth: '1px' };
+export const scrollContainerBox: BoxProps = {
+	overflowY: 'auto',
+	overscrollBehavior: { initial: 'auto', bp768: 'contain' },
+};
+export const plainListBox: BoxProps = { elementType: 'ul', listStyle: 'none' };
+export const plainListStack: StackProps = { elementType: 'ul', listStyle: 'none' };
+// @ts-expect-error — only none is supported
+export const invalidListStyle: BoxProps = { listStyle: 'disc' };
 
 `;
