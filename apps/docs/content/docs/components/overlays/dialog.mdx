@@ -1,0 +1,75 @@
+---
+title: Dialog
+description: A modal dialog with a title, an optional description, and content you provide.
+source: packages/@luke-ui/react/src/exports/dialog.ts
+reactAria: https://react-spectrum.adobe.com/react-aria/Modal.html
+---
+
+Use `Dialog` for a focused task or message that needs a response before someone returns to the page.
+It renders a title, an optional description, and your content in a modal over a backdrop. You own
+the open state and the button that opens it. Use the
+[dialog primitives](/components/primitives/dialog) when you need an uncontrolled trigger or custom
+anatomy.
+
+<ExampleBlock src="dialog/basic" layout="centered" title="Dialog: Basic" />
+
+## Best practices
+
+| Guidance | Practices                                                                                |
+| -------- | ---------------------------------------------------------------------------------------- |
+| Do       | Write a title that names the task or question, such as "Delete item?".                   |
+| Do       | Give the dialog a way to close, such as a `Button` with `slot="close"`.                  |
+| Don't    | Pass block content to `description`. It renders in a `<p>`, so pass inline content only. |
+| Don't    | Use a dialog for a message that does not need a response. Show it in the page instead.   |
+
+## Open state
+
+`Dialog` is controlled. Pass `isOpen` and `onOpenChange`. `onOpenChange` receives `false` when a
+close button, Escape, or a press outside the dialog asks it to close, and the dialog stays open
+until you change `isOpen`.
+
+A `Button` with `slot="close"` inside the dialog calls `onOpenChange(false)`.
+
+## Dismissal
+
+Escape closes the dialog. A press outside the dialog closes it only when you set `isDismissable`.
+Set `isKeyboardDismissDisabled` to stop Escape from closing it.
+
+## Alert dialog
+
+Set `role="alertdialog"` for an urgent confirmation that needs a response, such as a destructive
+action. Pair it with a `danger` tone on the confirming button, and keep the outside press off.
+
+<ExampleBlock src="dialog/alert-dialog" layout="centered" title="Dialog: Alert dialog" />
+
+## Pending actions
+
+While an action runs, stop every way to close the dialog. Set `isDismissable` to `false` and
+`isKeyboardDismissDisabled` to `true`, because Escape closes the dialog even when `isDismissable` is
+`false`. A close button is not blocked by these props, so disable it as well.
+
+<ExampleBlock src="dialog/pending" layout="centered" title="Dialog: Pending" />
+
+## Forms
+
+Put a [`Form`](/components/forms/form) inside the dialog for input. Controls inside a dialog default
+to the `medium` size and do not inherit the `controlSize` of a `Form` outside it. Set `controlSize`
+on a `Form` inside the dialog to change it.
+
+## Accessibility
+
+The `title` names the dialog and the `description` describes it, for both `dialog` and
+`alertdialog`. Focus moves into the dialog when it opens and returns to the previously focused
+element when it closes. Focus stays inside the dialog while it is open. Render your own opening
+`Button` so it is the element that regains focus.
+
+The dialog follows the document's colour mode, because it renders in `<body>` outside the trigger's
+colour scope. Its entrance fades and rises, and reduced motion keeps only the fade. In forced
+colours mode the surface keeps a system-colour border.
+
+## API
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/dialog/dialog.tsx"
+	name="DialogProps"
+/>

@@ -1,17 +1,14 @@
 import { Button } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
-import { Heading } from '@luke-ui/react/heading';
+import { Dialog } from '@luke-ui/react/dialog';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useId, useState } from 'react';
-import { Dialog, DialogTrigger } from 'react-aria-components/Dialog';
-import { Modal, ModalOverlay } from 'react-aria-components/Modal';
+import { useState } from 'react';
 import { DEFAULT_SETTINGS } from '../schemas.js';
 import { settingsApi } from '../settings-api.js';
 import { settingsQueryKey } from '../settings-query.js';
 import { SettingsRow, SettingsSection, SettingsStatus } from '../settings-section.js';
-import * as styles from '../settings.css.js';
 
 const CLEAR_MUTATION_KEY = [...settingsQueryKey, 'clear'] as const;
 
@@ -21,7 +18,6 @@ type ClearSavedSettingsSectionProps = {
 
 export function ClearSavedSettingsSection({ onCleared }: ClearSavedSettingsSectionProps) {
 	const queryClient = useQueryClient();
-	const descriptionId = useId();
 	const [isOpen, setIsOpen] = useState(false);
 	const isOtherMutationPending =
 		useIsMutating({
@@ -68,64 +64,48 @@ export function ClearSavedSettingsSection({ onCleared }: ClearSavedSettingsSecti
 					hint="Remove your profile and preferences from this browser."
 					label="Saved settings"
 				>
-					<DialogTrigger isOpen={isOpen} onOpenChange={changeOpen}>
-						<Button isDisabled={isOtherMutationPending} tone="danger">
-							Clear saved settings
-						</Button>
-						<ModalOverlay
-							className={styles.dialogOverlay}
-							isDismissable={!isPending}
-							isKeyboardDismissDisabled={isPending}
-						>
-							<Modal className={styles.dialogModal}>
-								<Dialog
-									aria-describedby={descriptionId}
-									aria-label="Clear saved settings?"
-									className={styles.dialog}
-									role="alertdialog"
+					<Button
+						isDisabled={isOtherMutationPending}
+						onPress={() => changeOpen(true)}
+						tone="danger"
+					>
+						Clear saved settings
+					</Button>
+					<Dialog
+						description="Your profile and preferences will be removed from this browser. This cannot be undone."
+						isDismissable={!isPending}
+						isKeyboardDismissDisabled={isPending}
+						isOpen={isOpen}
+						onOpenChange={changeOpen}
+						role="alertdialog"
+						title="Clear saved settings?"
+					>
+						<Stack gap={error || isPending || isOtherMutationPending ? 'space.8' : '0'}>
+							<Text
+								color={error ? 'danger' : 'secondary'}
+								elementType="p"
+								fontWeight="body"
+								role={error ? 'alert' : 'status'}
+								shouldDisableTrim
+								typography="label"
+							>
+								{error ?? (isOtherMutationPending ? 'Saving…' : pendingMessage)}
+							</Text>
+							<Cluster gap="space.8" justifyContent="flex-end">
+								<Button isDisabled={isPending} prominence="low" slot="close">
+									Cancel
+								</Button>
+								<Button
+									isPending={isPending}
+									onPress={() => void clearSettings()}
+									prominence="high"
+									tone="danger"
 								>
-									<Stack gap="space.16">
-										<Heading level={2} shouldDisableTrim typography="heading3">
-											Clear saved settings?
-										</Heading>
-										<Text color="secondary" elementType="p" id={descriptionId}>
-											Your profile and preferences will be removed from this browser. This cannot be
-											undone.
-										</Text>
-										<Stack gap={error || isPending || isOtherMutationPending ? 'space.8' : '0'}>
-											<Text
-												color={error ? 'danger' : 'secondary'}
-												elementType="p"
-												fontWeight="body"
-												role={error ? 'alert' : 'status'}
-												shouldDisableTrim
-												typography="label"
-											>
-												{error ?? (isOtherMutationPending ? 'Saving…' : pendingMessage)}
-											</Text>
-											<Cluster gap="space.8" justifyContent="flex-end">
-												<Button
-													isDisabled={isPending}
-													onPress={() => changeOpen(false)}
-													prominence="low"
-												>
-													Cancel
-												</Button>
-												<Button
-													isPending={isPending}
-													onPress={() => void clearSettings()}
-													prominence="high"
-													tone="danger"
-												>
-													Clear settings
-												</Button>
-											</Cluster>
-										</Stack>
-									</Stack>
-								</Dialog>
-							</Modal>
-						</ModalOverlay>
-					</DialogTrigger>
+									Clear settings
+								</Button>
+							</Cluster>
+						</Stack>
+					</Dialog>
 				</SettingsRow>
 			</SettingsSection>
 			<SettingsStatus tone={mutation.isSuccess ? 'success' : undefined}>

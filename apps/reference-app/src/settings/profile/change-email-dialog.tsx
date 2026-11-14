@@ -2,6 +2,12 @@ import { Button } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
 import { Heading } from '@luke-ui/react/heading';
 import { Icon } from '@luke-ui/react/icon';
+import {
+	DialogContent,
+	DialogOverlay,
+	DialogSurface,
+	DialogTrigger,
+} from '@luke-ui/react/primitives/dialog';
 import { Prose } from '@luke-ui/react/prose';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
@@ -10,8 +16,6 @@ import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-quer
 import type { SubmitEvent } from 'react';
 import { useId, useRef, useState } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
-import { Dialog, DialogTrigger } from 'react-aria-components/Dialog';
-import { Modal, ModalOverlay } from 'react-aria-components/Modal';
 import { settingsApi, settingsMutationErrorMessage } from '../settings-api.js';
 import { settingsQueryKey } from '../settings-query.js';
 import * as styles from '../settings.css.js';
@@ -72,20 +76,12 @@ export function ChangeEmailDialog({ email }: { email: string }) {
 			<RacButton aria-label="Change email" className={styles.emailEditButton}>
 				<Icon aria-hidden="true" name="edit" size="xsmall" />
 			</RacButton>
-			<ModalOverlay
-				className={styles.dialogOverlay}
-				isDismissable={!isSaving}
-				isKeyboardDismissDisabled={isSaving}
-			>
-				<Modal className={styles.dialogModal}>
-					<Dialog
-						aria-describedby={descriptionId}
-						aria-label="Change email"
-						className={styles.dialog}
-					>
+			<DialogOverlay isDismissable={!isSaving} isKeyboardDismissDisabled={isSaving}>
+				<DialogSurface>
+					<DialogContent aria-describedby={descriptionId}>
 						<form onSubmit={save}>
 							<Stack gap="space.16">
-								<Heading level={2} shouldDisableTrim typography="heading3">
+								<Heading level={2} slot="title" typography="heading3">
 									Change email
 								</Heading>
 								<Prose id={descriptionId}>
@@ -131,11 +127,7 @@ export function ChangeEmailDialog({ email }: { email: string }) {
 										{isSaving ? 'Saving…' : null}
 									</Text>
 									<Cluster gap="space.8" justifyContent="flex-end">
-										<Button
-											isDisabled={isSaving}
-											onPress={() => handleOpenChange(false)}
-											prominence="low"
-										>
+										<Button isDisabled={isSaving} prominence="low" slot="close">
 											Cancel
 										</Button>
 										<Button isPending={isSaving} prominence="high" type="submit">
@@ -145,9 +137,9 @@ export function ChangeEmailDialog({ email }: { email: string }) {
 								</Stack>
 							</Stack>
 						</form>
-					</Dialog>
-				</Modal>
-			</ModalOverlay>
+					</DialogContent>
+				</DialogSurface>
+			</DialogOverlay>
 		</DialogTrigger>
 	);
 }

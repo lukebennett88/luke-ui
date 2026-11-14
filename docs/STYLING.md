@@ -116,7 +116,8 @@ Overlays portal to `<body>`, outside the trigger's scope. `copyScopeColorMode` i
 Select popover, the Combobox popover, and the Combobox tray when the overlay element is created.
 Popovers read the trigger from React Aria's `PopoverContext.triggerRef`. The tray reads the combobox
 input group from `ComboboxInputGroupContext`, because the group inside an open tray sits in the
-tray's own portal.
+tray's own portal. Dialog overlays follow the document colour mode and do not copy a trigger's
+scope.
 
 ## Global styles
 
@@ -493,9 +494,8 @@ the nearest inherited default, then `medium`. Composed components must pass an o
 until the owning primitive resolves it. Control-specific contexts preserve explicit part overrides
 and carry resolved sizes through Select and Combobox portals.
 
-Independent Dialog surfaces must establish their own default, normally `medium`, when implemented in
-[#799](https://github.com/lukebennett88/luke-ui/issues/799). They must not inherit a trigger's
-control-size default accidentally.
+`DialogSurface` provides `medium`, so controls inside a dialog do not inherit a trigger's or
+`Form`'s control-size default.
 
 `vars.controlSize` tokens use numeric keys that reference CSS pixels at a 16px root. Their `rem`
 values scale with the root font size. Build literal scales with `literalScale` in

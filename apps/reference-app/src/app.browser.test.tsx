@@ -146,6 +146,30 @@ test('change email validates, keeps the dialog open on failure, and restores foc
 	expect((await settingsApi.getSettings()).profile.email).toBe('sam@example.com');
 });
 
+test('change email ignores Escape and backdrop presses while saving, then closes on success', async () => {
+	const app = await renderApp(['/settings/profile']);
+	const trigger = app.locator.getByRole('button', { name: 'Change email' });
+	await app.user.click(trigger);
+	const dialog = page.getByRole('dialog', { name: 'Change email' });
+	const gate = deferMutation(settingsApi.updateProfile.bind(settingsApi));
+	vi.spyOn(settingsApi, 'updateProfile').mockImplementationOnce(gate.run);
+	await app.user.fill(
+		dialog.getByRole('textbox', { name: 'New email address' }),
+		'sam@example.com',
+	);
+	await app.user.click(dialog.getByRole('button', { name: 'Check for existing account' }));
+	await expect.element(dialog.getByRole('status')).toHaveTextContent('Saving…');
+
+	await app.user.keyboard('{Escape}');
+	await pressBackdrop(dialog.element());
+
+	await expect.element(dialog).toBeVisible();
+	await expect.element(dialog.getByRole('button', { name: 'Cancel' })).toBeDisabled();
+	gate.release();
+	await expect.element(dialog).not.toBeInTheDocument();
+	await expect.element(trigger).toHaveFocus();
+});
+
 test('profile picture rejects invalid files, retries a failed save, and can be removed', async () => {
 	const app = await renderApp(['/settings/profile']);
 	const avatar = app.locator.getByRole('button', { name: 'BJ Profile picture', exact: true });
@@ -288,6 +312,7 @@ test('clearing saved settings waits for saves, cancels, retries failures, and re
 
 	await app.user.click(trigger);
 	const dialog = page.getByRole('alertdialog', { name: 'Clear saved settings?' });
+	await expect.element(dialog).toHaveAccessibleDescription(/cannot be undone/);
 	const confirm = dialog.getByRole('button', { name: 'Clear settings', exact: true });
 	settingsApi.setNextFailure('server');
 	await app.user.click(confirm);
@@ -298,6 +323,8 @@ test('clearing saved settings waits for saves, cancels, retries failures, and re
 	vi.spyOn(settingsApi, 'clearLocalSettings').mockImplementationOnce(clearGate.run);
 	await app.user.click(confirm);
 	await app.user.keyboard('{Escape}');
+	await expect.element(dialog).toBeVisible();
+	await pressBackdrop(dialog.element());
 	await expect.element(dialog).toBeVisible();
 	await expect.element(dialog.getByRole('button', { name: 'Cancel' })).toBeDisabled();
 	clearGate.release();
@@ -335,6 +362,13 @@ test('home, settings pages, and portalled dialogs have no axe violations', async
 	await expect.element(page.getByRole('dialog', { name: 'Change email' })).toBeVisible();
 	await expectAccessible(app.container);
 	await app.user.keyboard('{Escape}');
+	await act(() => app.router.navigate('/settings/security'));
+	await app.user.click(app.locator.getByRole('button', { name: 'Clear saved settings' }));
+	await expect
+		.element(page.getByRole('alertdialog', { name: 'Clear saved settings?' }))
+		.toBeVisible();
+	await expectAccessible(app.container);
+	await app.user.keyboard('{Escape}');
 	await act(() => app.router.navigate('/settings/preferences'));
 	await chooseOption(app, 'Theme', 'Dark');
 	await expect.poll(() => document.documentElement.dataset.colorMode).toBe('dark');
@@ -350,6 +384,13 @@ test('home, settings pages, and portalled dialogs have no axe violations', async
 type App = Awaited<ReturnType<typeof renderApp>>;
 const SMALL_PNG =
 	'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=';
+
+async function pressBackdrop(dialog: Element) {
+	// The overlay is the dialog's surface's parent. A press near its corner lands outside the surface.
+	const overlay = dialog.parentElement?.parentElement;
+	if (overlay == null) throw new Error('Expected the dialog to sit in a surface and an overlay.');
+	await page.elementLocator(overlay).click({ position: { x: 5, y: 5 } });
+}
 
 async function editName(app: App, value: string) {
 	const input = app.locator.getByRole('textbox', { name: 'Full name' });

@@ -33,3 +33,4 @@ import '../grid/recipe.css.js';
 import '../scroll-fade/recipe.css.js';
 import '../bleed/recipe.css.js';
 import '../primitives/switch/styles.css.js';
+import '../dialog/primitive/styles.css.js';
