@@ -1,0 +1,86 @@
+---
+title: Dialog primitives
+description: Lower-level parts for composing a modal dialog.
+source: packages/@luke-ui/react/src/exports/primitives/dialog.ts
+reactAria: https://react-spectrum.adobe.com/react-aria/Modal.html
+---
+
+Use these primitives when [`Dialog`](/components/overlays/dialog) does not fit. Choose them for a
+trigger that owns its own open state and focus restoration, an uncontrolled dialog, a description
+made of several paragraphs, or custom anatomy.
+
+<ExampleBlock src="dialog-primitive/basic" layout="centered" title="Dialog primitives: Basic" />
+
+## Anatomy
+
+`DialogTrigger` connects a pressable trigger, such as a `Button`, to the `DialogOverlay` after it.
+It renders no element and returns focus to the trigger when the dialog closes. `DialogOverlay`
+portals the dialog to `<body>`, paints the backdrop, and owns dismissal. `DialogSurface` is the
+raised panel inside it. `DialogContent` is the semantic dialog inside the surface.
+
+Inside `DialogContent`, a `Heading` with `slot="title"` names the dialog, a `Text` with
+`slot="description"` describes it, and a `Button` with `slot="close"` closes it.
+
+## Open state
+
+`DialogTrigger` is uncontrolled by default. Pass `defaultOpen`, or control it with `isOpen` and
+`onOpenChange`.
+
+Without a `DialogTrigger`, a `DialogOverlay` takes `isOpen` and `onOpenChange` itself.
+
+## Dismissal
+
+Escape closes the dialog. Set `isDismissable` on `DialogOverlay` to close it with a press outside
+the surface, and `isKeyboardDismissDisabled` to stop Escape from closing it. Both props have no
+effect on a `Button` with `slot="close"`.
+
+## Alert dialog
+
+Set `role="alertdialog"` on `DialogContent` for an urgent confirmation that needs a response.
+
+## Description
+
+`Text` with `slot="description"` describes the dialog for both roles. To describe it with richer
+content, such as several paragraphs, pass your own `aria-describedby` to `DialogContent`. An
+explicit `aria-labelledby` or `aria-describedby` wins over the slots.
+
+<ExampleBlock
+	src="dialog-primitive/described-by"
+	layout="centered"
+	title="Dialog primitives: Described by"
+/>
+
+## Size
+
+Controls inside `DialogSurface` default to `medium`. They do not inherit the `controlSize` of a
+`Form` outside the dialog.
+
+## API
+
+### DialogTriggerProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/dialog/primitive/trigger.tsx"
+	name="DialogTriggerProps"
+/>
+
+### DialogOverlayProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/dialog/primitive/overlay.tsx"
+	name="DialogOverlayProps"
+/>
+
+### DialogSurfaceProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/dialog/primitive/surface.tsx"
+	name="DialogSurfaceProps"
+/>
+
+### DialogContentProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/dialog/primitive/content.tsx"
+	name="DialogContentProps"
+/>

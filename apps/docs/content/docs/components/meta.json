@@ -32,6 +32,8 @@
 		"layout/scroll-fade",
 		"layout/stack",
 		"layout/visually-hidden",
+		"---Overlays---",
+		"overlays/dialog",
 		"---Typography---",
 		"typography/blockquote",
 		"typography/code",
@@ -53,6 +55,7 @@
 		"primitives/radio",
 		"primitives/text-input",
 		"primitives/combobox",
+		"primitives/dialog",
 		"primitives/select",
 		"primitives/switch"
 	]
