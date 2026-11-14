@@ -43,9 +43,9 @@ The supported elements are `article`, `aside`, `dd`, `div`, `dl`, `dt`, `figcapt
 
 Set `listStyle="none"` on a `ul` or `ol` Box to remove its markers. The element keeps its list
 semantics. Browsers do not reset a list's margin and padding, so set them to `"0"` when the list
-should not be indented. Safari with VoiceOver can stop announcing a list once its markers are
-removed, so check a navigation or content list there. `listStyle` accepts only `none` and has no
-responsive values. Stack accepts it too.
+should not be indented. Safari with VoiceOver (WebKit) can drop list semantics when CSS removes the
+markers, and adding `role="list"` restores them. Box and Stack never add the role for you.
+`listStyle` accepts only `none` and has no responsive values. Stack accepts it too.
 
 <ExampleBlock src="box/list-style" title="Box: List markers" />
 
