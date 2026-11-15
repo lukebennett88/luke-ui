@@ -1,0 +1,124 @@
+name: Visual review publish
+
+# Publishes a pull request's visual-regression-diff artefact for the visual review app and
+# links it from one sticky comment.
+#
+# `workflow_run` starts this workflow from the default branch with secrets, after the untrusted
+# `Visual regression` run has finished. The artefact is data produced by pull request code:
+# `visual-review.ts prepare` validates it and rebuilds the site from an allow-list.
+
+on:
+  workflow_run:
+    workflows: ['Visual regression']
+    types: [completed]
+
+permissions: {}
+
+# Runs for one pull request serialise. A run in progress finishes its deploy and its comment
+# together, so the comment never points at a half-published report, and GitHub keeps only the
+# newest queued run. The newest data wins because `resolve-pr` publishes only when the run's
+# commit is still the pull request head, so an older run that finishes late does nothing.
+concurrency:
+  group: >-
+    visual-review-publish-${{ github.event.workflow_run.head_repository.full_name }}-${{
+    github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: publish
+    # Inert until the Pages project is configured. `vars` here must be a repository variable:
+    # environment variables are not available to a job-level `if`.
+    if: >-
+      github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion ==
+      'success' && vars.VISUAL_REVIEW_PAGES_PROJECT != ''
+    runs-on: ubuntu-latest
+    # The Cloudflare secrets live in this environment, restricted to `main`, so a workflow edited
+    # in a pull request cannot read them.
+    environment: visual-review
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: write
+    steps:
+      # This checks out the default branch, which is the trusted code that handles the secrets.
+      # Never check out the pull request head here: its scripts would run with those secrets.
+      - name: Checkout default branch
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: package.json
+
+      # Every `github.event.*` value reaches the scripts through `env`, never interpolated into
+      # shell text, so a branch name cannot inject commands.
+      - name: Resolve pull request
+        id: pr
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HEAD_REPOSITORY: ${{ github.event.workflow_run.head_repository.full_name }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          RUN_EVENT: ${{ github.event.workflow_run.event }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: node .github/scripts/visual-review.ts resolve-pr
+
+      # Downloaded outside the workspace so nothing in the artefact can shadow repository files.
+      # `resolve-pr` has already confirmed the run uploaded it: prose-only pull requests skip the
+      # compare job and stop at `publish=false`.
+      - name: Download diff artefact
+        if: steps.pr.outputs.publish == 'true'
+        uses: actions/download-artifact@v8
+        with:
+          name: visual-regression-diff
+          path: ${{ runner.temp }}/visual-review-artifact
+          github-token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Prepare site
+        if: steps.pr.outputs.publish == 'true'
+        env:
+          ARTIFACT_DIR: ${{ runner.temp }}/visual-review-artifact
+          HEAD_SHA: ${{ steps.pr.outputs.sha }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          SITE_DIR: ${{ runner.temp }}/visual-review-deploy/site
+          RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: node .github/scripts/visual-review.ts prepare "$ARTIFACT_DIR" "$SITE_DIR"
+
+      # Wrangler runs from a directory that holds only the prepared site. Run from the repository
+      # root, `pages deploy` would bundle the root `functions/` directory (the docs site's Pages
+      # Functions) into this deployment, and the action would try to install Wrangler into the
+      # pnpm workspace.
+      #
+      # Always pass an explicit `--branch=pr-<number>`. A deploy without it can land on the
+      # production branch and overwrite the viewer app.
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        if: steps.pr.outputs.publish == 'true'
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: ${{ runner.temp }}/visual-review-deploy
+          packageManager: npm
+          wranglerVersion: '4'
+          command: >-
+            pages deploy site --project-name=${{ vars.VISUAL_REVIEW_PAGES_PROJECT }} --branch=pr-${{
+            steps.pr.outputs.number }} --commit-hash=${{ steps.pr.outputs.sha }} --commit-dirty=true
+
+      - name: Comment on the pull request
+        if: steps.pr.outputs.publish == 'true'
+        env:
+          APP_URL: >-
+            ${{ vars.VISUAL_REVIEW_APP_URL || format('https://{0}.pages.dev',
+            vars.VISUAL_REVIEW_PAGES_PROJECT) }}
+          DEPLOYMENT_URL: ${{ steps.deploy.outputs.deployment-url }}
+          GITHUB_TOKEN: ${{ github.token }}
+          HEAD_SHA: ${{ steps.pr.outputs.sha }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          SUMMARY_FILE: ${{ runner.temp }}/visual-review-deploy/site/summary.json
+        run: node .github/scripts/visual-review.ts comment "$SUMMARY_FILE"

@@ -1,0 +1,78 @@
+name: Visual review deploy
+
+# Deploys the visual review app to the production branch of the Cloudflare Pages project.
+# Pull request data is published beside it by `visual-review-publish.yml`.
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - apps/visual-review/**
+      - packages/@luke-ui/**
+      - pnpm-lock.yaml
+      - .github/workflows/visual-review-deploy.yml
+  workflow_dispatch:
+
+permissions: {}
+
+# A deploy in progress finishes, and GitHub keeps only the newest queued run, so the newest
+# commit is always the last one deployed.
+concurrency:
+  group: visual-review-deploy
+  cancel-in-progress: false
+
+env:
+  TURBO_TELEMETRY_DISABLED: '1'
+
+jobs:
+  deploy:
+    name: deploy
+    # Inert until the Pages project is configured. `vars` here must be a repository variable:
+    # environment variables are not available to a job-level `if`.
+    if: github.ref == 'refs/heads/main' && vars.VISUAL_REVIEW_PAGES_PROJECT != ''
+    runs-on: ubuntu-latest
+    environment: visual-review
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v7
+
+      - name: Setup tooling
+        uses: pnpm/setup@v3
+        with:
+          cache: true
+          install: false
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --no-runtime
+
+      - name: Build the visual review app
+        env:
+          VITE_VISUAL_REVIEW_DATA_URL_TEMPLATE: >-
+            https://pr-{pr}.${{ vars.VISUAL_REVIEW_PAGES_PROJECT }}.pages.dev
+          VITE_VISUAL_REVIEW_REPOSITORY: ${{ github.repository }}
+        run: pnpm exec turbo run build --filter=visual-review
+
+      - name: Create an empty Wrangler working directory
+        env:
+          DEPLOY_DIR: ${{ runner.temp }}/visual-review-deploy
+        run: mkdir -p "$DEPLOY_DIR"
+
+      # Wrangler runs from an empty directory outside the checkout and deploys `dist` by absolute
+      # path. Run from the repository root, `pages deploy` would bundle the root `functions/`
+      # directory (the docs site's Pages Functions) into this deployment. Run from a workspace
+      # directory, the action would try to install Wrangler into the pnpm workspace.
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: ${{ runner.temp }}/visual-review-deploy
+          packageManager: npm
+          wranglerVersion: '4'
+          command: >-
+            pages deploy ${{ github.workspace }}/apps/visual-review/dist --project-name=${{
+            vars.VISUAL_REVIEW_PAGES_PROJECT }} --branch=main --commit-hash=${{ github.sha }}
+            --commit-dirty=true

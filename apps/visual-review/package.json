@@ -1,0 +1,40 @@
+{
+	"name": "visual-review",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "vp build",
+		"check:format": "vp fmt . --check",
+		"check:lint": "vp lint .",
+		"check:lint:types": "vp lint . --type-aware --tsconfig tsconfig.json",
+		"check:types": "tsc --noEmit",
+		"clean:build": "rm -rf dist",
+		"dev": "vp dev",
+		"fix:format": "vp fmt . --write",
+		"fix:lint": "vp lint . --fix",
+		"fix:lint:types": "vp lint . --type-aware --tsconfig tsconfig.json --fix",
+		"fix:lint:types:unsafe": "vp lint . --type-aware --tsconfig tsconfig.json --fix --fix-suggestions --fix-dangerously",
+		"fix:lint:unsafe": "vp lint . --fix --fix-suggestions --fix-dangerously",
+		"preview": "vp preview",
+		"test": "vp test run"
+	},
+	"dependencies": {
+		"@luke-ui/react": "workspace:*",
+		"@luke-ui/theme-tactile": "workspace:*",
+		"@vanilla-extract/css": "catalog:",
+		"react": "catalog:",
+		"react-aria-components": "catalog:",
+		"react-dom": "catalog:",
+		"zod": "catalog:"
+	},
+	"devDependencies": {
+		"@types/node": "catalog:",
+		"@types/react": "catalog:",
+		"@types/react-dom": "catalog:",
+		"@vanilla-extract/vite-plugin": "catalog:",
+		"@vitejs/plugin-react": "catalog:",
+		"typescript": "catalog:",
+		"vite": "catalog:",
+		"vite-plus": "catalog:"
+	}
+}

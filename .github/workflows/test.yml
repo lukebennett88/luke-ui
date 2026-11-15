@@ -141,5 +141,6 @@ jobs:
             --filter=./packages/** \
             --filter=!@luke-ui/react \
             --filter=./.github/scripts \
-            --filter=reference-app
+            --filter=reference-app \
+            --filter=visual-review
           pnpm exec turbo run test:integration --filter=@luke-ui/theme-build

@@ -15,7 +15,8 @@
 		"fix:lint:unsafe": "vp lint . --fix --fix-suggestions --fix-dangerously",
 		"test": "vp test run",
 		"visual-ci": "tsx visual-ci.ts",
-		"visual-local": "tsx visual-local.ts"
+		"visual-local": "tsx visual-local.ts",
+		"visual-review": "tsx visual-review.ts"
 	},
 	"devDependencies": {
 		"@types/node": "catalog:",

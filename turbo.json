@@ -277,6 +277,18 @@
 			"cache": false,
 			"dependsOn": ["^build", "generate"],
 			"passThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH"]
+		},
+		"visual-review#build": {
+			"dependsOn": ["^build"],
+			"env": ["VITE_VISUAL_REVIEW_DATA_URL_TEMPLATE", "VITE_VISUAL_REVIEW_REPOSITORY"],
+			"inputs": ["$TURBO_DEFAULT$", ".env*"],
+			"outputs": ["dist/**"]
+		},
+		"visual-review#dev": {
+			"cache": false,
+			"dependsOn": ["^build"],
+			"persistent": true,
+			"with": ["@luke-ui/react#dev"]
 		}
 	}
 }

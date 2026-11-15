@@ -88,6 +88,59 @@ Configure branch protection to require `visual-regression`. The workflow cannot 
 mandatory in repository settings. `Visual baseline` regenerates the authoritative baseline on `main`
 after merge.
 
+## Visual review app
+
+`apps/visual-review` shows a comparison's expected, actual, and diff images in the browser. Its
+[README](../apps/visual-review/README.md) describes the interface and its URLs. The app and every
+pull request's report live in one Cloudflare Pages project that takes direct uploads:
+
+- The `Visual review deploy` workflow builds the app from `main` and deploys it to the project's
+  production branch. A pull request cannot change the deployed app.
+- The `Visual review publish` workflow deploys a pull request's report to the `pr-<number>` branch
+  of the same project, at `https://pr-<number>.<project>.pages.dev`. A report is `summary.json` and
+  the differing captures' PNGs. The baseline stays in the `visual-baseline` artefact.
+
+`Visual review publish` then writes one comment on the pull request and updates it on each run. The
+comment links to the review and shows the images inline when six or fewer captures differ. A report
+with no differences is still published, so the app can tell "no visual changes" from "no report".
+
+To review a local comparison, run `pnpm test:visual`, then `pnpm dev:visual-review`, and open
+`http://localhost:5175/?source=local`.
+
+### Trust boundary
+
+`Visual regression` runs pull request code, so it holds no publishing credentials.
+`Visual review publish` starts from `workflow_run`, runs only the scripts on `main`, and treats the
+`visual-regression-diff` artefact as hostile data:
+
+- `visual-review resolve-pr` finds the pull request from the run's head commit through the GitHub
+  API. It publishes only when that commit is still the pull request's head, and never reads a pull
+  request number from the artefact.
+- `visual-review prepare` validates `summary.json` and builds the upload from an allow-list: the
+  PNGs each validated capture id implies, checked as regular files with a PNG signature. Nothing
+  else in the artefact is published, so it cannot add Pages control files such as `_worker.js`.
+- Wrangler runs from an empty directory, so the deployment never includes the repository's
+  `functions/` directory.
+
+Never check out or run pull request code in `Visual review publish`.
+
+### Configuration
+
+Both workflows skip their job until `VISUAL_REVIEW_PAGES_PROJECT` is set.
+
+| Setting                                            | Where                                      | Value                                                                           |
+| -------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------- |
+| Pages project                                      | Cloudflare                                 | A direct upload project with the production branch `main`                       |
+| `VISUAL_REVIEW_PAGES_PROJECT`                      | Repository variable                        | The Pages project's name                                                        |
+| `VISUAL_REVIEW_APP_URL`                            | Repository variable, optional              | The app's origin. Defaults to `https://<project>.pages.dev`                     |
+| `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` | Secrets of the `visual-review` environment | A token with the account's Cloudflare Pages edit permission, and its account id |
+
+Restrict the `visual-review` environment's deployment branches to `main`. A workflow edited in a
+pull request then cannot read the Cloudflare secrets. The token can edit every Pages project in its
+account, because Cloudflare does not scope a token to one project.
+
+Cloudflare keeps a closed pull request's deployments. Nothing removes them.
+
 ## Capture freeze
 
 `freezeMotionForCapture` finishes transitions and animations before applying reduced-motion and
