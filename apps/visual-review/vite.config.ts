@@ -47,14 +47,13 @@ export default defineConfig({
  * builds have no local source: pull requests publish their own data.
  */
 function localReport(): Plugin {
-	// Browser tests review a small committed report through the same route.
-	const defaultDirectory = process.env.VITEST
-		? './src/test/fixtures/report'
-		: '../../.artifacts/visual-regression';
-	const directory = path.resolve(
-		process.env.VISUAL_REVIEW_LOCAL_DIR ??
-			fileURLToPath(new URL(defaultDirectory, import.meta.url)),
-	);
+	// Browser tests always review the small committed report, through the same route.
+	const directory = process.env.VITEST
+		? fileURLToPath(new URL('./src/test/fixtures/report', import.meta.url))
+		: path.resolve(
+				process.env.VISUAL_REVIEW_LOCAL_DIR ??
+					fileURLToPath(new URL('../../.artifacts/visual-regression', import.meta.url)),
+			);
 	return {
 		apply: 'serve',
 		configureServer(server) {

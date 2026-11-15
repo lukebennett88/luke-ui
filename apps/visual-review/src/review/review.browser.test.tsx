@@ -199,11 +199,18 @@ test('a deep link restores the capture, view, and zoom', async () => {
 	await expect.poll(() => diff.element().getBoundingClientRect().width).toBe(400);
 });
 
-test('the comparison is a labelled region the keyboard can focus and scroll', async () => {
+test('the keyboard can focus the comparison and scroll it', async () => {
 	const app = await renderApp('?source=local&zoom=4');
-
 	const stage = app.locator.getByRole('region', { name: 'Screenshots' });
-	await expect.element(stage).toHaveAttribute('tabindex', '0');
+	await expect
+		.element(app.locator.getByRole('img', { name: `Actual screenshot of ${PRIMARY}` }))
+		.toBeVisible();
+
+	stage.element().focus();
+	await expect.element(stage).toHaveFocus();
+	await app.user.keyboard('{End}');
+
+	await expect.poll(() => stage.element().scrollTop).toBeGreaterThan(0);
 });
 
 test('the review has one top-level heading and no axe violations', async () => {
