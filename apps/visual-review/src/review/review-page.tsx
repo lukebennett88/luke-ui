@@ -3,6 +3,7 @@ import { Heading } from '@luke-ui/react/heading';
 import { Link } from '@luke-ui/react/link';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
+import type { ReactNode } from 'react';
 import { use, useCallback, useMemo, useRef, useState } from 'react';
 import { commitUrl, pullRequestUrl } from '../config.js';
 import { hrefWithParams, navigate, useLocationSearch } from '../navigation/location.js';
@@ -20,6 +21,7 @@ import {
 	VIEW_MODES,
 } from './review-params.js';
 import * as styles from './review.css.js';
+import { useShortcutsEnabled } from './shortcuts-preference.js';
 import type { ReviewShortcuts } from './use-review-shortcuts.js';
 import { useReviewShortcuts } from './use-review-shortcuts.js';
 
@@ -31,7 +33,10 @@ export function ReviewPage({ source }: { source: ReportSource }) {
 	if (result.report.captures.length === 0) {
 		return (
 			<Message title="No visual changes">
-				<ReportSummary report={result.report} source={source} />
+				<Text elementType="p">
+					<ReportTitle report={result.report} source={source} />
+				</Text>
+				<ReportCounts report={result.report} />
 			</Message>
 		);
 	}
@@ -45,6 +50,7 @@ function Review({ baseUrl, report, source }: ReviewProps) {
 	const params = parseReviewParams(search);
 	const [opacity, setOpacity] = useState(50);
 	const filterRef = useRef<HTMLDivElement>(null);
+	const areShortcutsEnabled = useShortcutsEnabled();
 
 	const captures = useMemo(
 		() => filterCaptures(report.captures, { query: params.query, status: params.status }),
@@ -52,6 +58,7 @@ function Review({ baseUrl, report, source }: ReviewProps) {
 	);
 	const selected = captures.find((capture) => capture.id === params.capture) ?? captures[0];
 	const selectedId = selected?.id;
+	const isComparable = selected?.status === 'changed';
 	const { highlight, view, zoom } = params;
 
 	const setParams = useCallback(
@@ -72,19 +79,24 @@ function Review({ baseUrl, report, source }: ReviewProps) {
 			'+': () => setZoom(stepZoom(zoom, 1)),
 			'=': () => setZoom(stepZoom(zoom, 1)),
 			'0': () => setZoom('fit'),
-			'1': () => setParams({ view: undefined }),
-			'2': () => setParams({ view: VIEW_MODES[1] }),
-			'3': () => setParams({ view: VIEW_MODES[2] }),
-			f: () => {
-				if (view !== 'overlay') setParams({ view: 'overlay' });
-				setOpacity((current) => (current < 50 ? 100 : 0));
-			},
+			// An added or removed capture has one image, so it has no views to switch between.
+			...(isComparable
+				? {
+						'1': () => setParams({ view: undefined }),
+						'2': () => setParams({ view: VIEW_MODES[1] }),
+						'3': () => setParams({ view: VIEW_MODES[2] }),
+						f: () => {
+							if (view !== 'overlay') setParams({ view: 'overlay' });
+							setOpacity((current) => (current < 50 ? 100 : 0));
+						},
+					}
+				: null),
 			h: () => setParams({ highlight: highlight ? 'off' : undefined }),
 			j: () => step(1),
 			k: () => step(-1),
 		};
-	}, [captures, highlight, selectedId, setParams, view, zoom]);
-	useReviewShortcuts(shortcuts);
+	}, [captures, highlight, isComparable, selectedId, setParams, view, zoom]);
+	useReviewShortcuts(shortcuts, areShortcutsEnabled);
 
 	return (
 		<>
@@ -104,10 +116,14 @@ function Review({ baseUrl, report, source }: ReviewProps) {
 				paddingBlock="space.12"
 				paddingInline="space.16"
 			>
-				<ReportSummary report={report} source={source} />
+				<Heading level={1} typography="body">
+					<ReportTitle report={report} source={source} />
+				</Heading>
+				<ReportCounts report={report} />
 			</Box>
 			<div className={styles.layout}>
 				<CaptureList
+					areShortcutsEnabled={areShortcutsEnabled}
 					allCaptures={report.captures}
 					captures={captures}
 					filterRef={filterRef}
@@ -130,38 +146,41 @@ function Review({ baseUrl, report, source }: ReviewProps) {
 						position={{ index: captures.indexOf(selected), total: captures.length }}
 					/>
 				) : (
-					<Message title="No captures match the filter" />
+					<Message headingLevel={2} title="No captures match the filter" />
 				)}
 			</div>
 		</>
 	);
 }
 
-function ReportSummary({ report, source }: { report: Report; source: ReportSource }) {
-	const { added, changed, removed, unchanged } = report.counts;
+function ReportTitle({ report, source }: { report: Report; source: ReportSource }) {
 	return (
 		<>
-			<Text fontWeight="label">
-				{source.kind === 'pull-request' ? (
-					<Link href={pullRequestUrl(source.number)} target="_blank">
-						{sourceLabel(source)}
+			{source.kind === 'pull-request' ? (
+				<Link href={pullRequestUrl(source.number)} target="_blank">
+					{sourceLabel(source)}
+				</Link>
+			) : (
+				sourceLabel(source)
+			)}
+			{report.meta ? (
+				<>
+					{' at '}
+					<Link href={commitUrl(report.meta.headSha)} target="_blank">
+						{report.meta.headSha.slice(0, 7)}
 					</Link>
-				) : (
-					sourceLabel(source)
-				)}
-				{report.meta ? (
-					<>
-						{' at '}
-						<Link href={commitUrl(report.meta.headSha)} target="_blank">
-							{report.meta.headSha.slice(0, 7)}
-						</Link>
-					</>
-				) : null}
-			</Text>
-			<Text color="secondary" typography="caption">
-				{`${changed} changed · ${added} added · ${removed} removed · ${unchanged} unchanged`}
-			</Text>
+				</>
+			) : null}
 		</>
+	);
+}
+
+function ReportCounts({ report }: { report: Report }) {
+	const { added, changed, removed, unchanged } = report.counts;
+	return (
+		<Text color="secondary" typography="caption">
+			{`${changed} changed · ${added} added · ${removed} removed · ${unchanged} unchanged`}
+		</Text>
 	);
 }
 
@@ -195,10 +214,12 @@ function unavailableReason(source: ReportSource, status: UnavailableStatus) {
 		: 'The comparison may still be running, or the pull request may change only documentation.';
 }
 
-function Message({ children, title }: { children?: React.ReactNode; title: string }) {
+type MessageProps = { children?: ReactNode; headingLevel?: 1 | 2; title: string };
+
+function Message({ children, headingLevel = 1, title }: MessageProps) {
 	return (
 		<Stack className={styles.message} gap="space.16">
-			<Heading level={1} typography="heading3">
+			<Heading level={headingLevel} typography="heading3">
 				{title}
 			</Heading>
 			{children}

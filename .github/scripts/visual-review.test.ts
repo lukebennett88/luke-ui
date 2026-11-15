@@ -1,6 +1,6 @@
 import { tmpdir } from 'node:os';
 import path from 'node:path';
-import { mkdir, mkdtemp, readdir, readFile, symlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, open, readdir, readFile, symlink, writeFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 import type {
 	IssueComment,
@@ -16,9 +16,8 @@ import {
 	decidePublish,
 	findStickyComment,
 	MAX_IMAGE_BYTES,
-	MAX_INLINE_CAPTURES,
-	MAX_LISTED_CAPTURES,
-	MAX_RESULTS,
+	MAX_PUBLISHED_BYTES,
+	MAX_PUBLISHED_FILES,
 	MAX_SUMMARY_BYTES,
 	parseArtifactSummary,
 	parseMeta,
@@ -55,7 +54,7 @@ async function createArtifact(summary: string, files: Record<string, Buffer | st
 			await writeFile(target, content);
 		}),
 	);
-	return { artifactDir, outDir: path.join(root, 'site'), root };
+	return { artifactDir, outDir: path.join(root, 'deploy', 'site'), root };
 }
 
 async function listFiles(directory: string): Promise<Array<string>> {
@@ -107,6 +106,16 @@ test('matches a fork pull request by the fork repository', () => {
 	]);
 	expect(decision).toEqual({ number: 4, publish: true });
 });
+
+for (const number of [0, -1, 1.5, Number.MAX_SAFE_INTEGER + 1, Number.NaN, '12\npublish=true']) {
+	test(`does not publish for the pull request number ${JSON.stringify(number)}`, () => {
+		// The API response is typed, not validated, so the number is checked before it is written.
+		const candidate = { ...pull(12, HEAD_SHA), number: number as number };
+		const decision = decidePublish(run, [candidate]);
+		expect(decision.publish).toBe(false);
+		expect(!decision.publish && decision.reason).toContain('invalid pull request number');
+	});
+}
 
 for (const event of ['push', 'workflow_dispatch', '']) {
 	test(`does not publish a run triggered by ${JSON.stringify(event)}`, () => {
@@ -234,14 +243,6 @@ for (const raw of ['', 'not json', '[]', 'null', '{"counts":{"unchanged":0}}', '
 test('rejects an oversized summary before parsing it', () => {
 	const raw = artifactSummary([], { padding: 'x'.repeat(MAX_SUMMARY_BYTES) });
 	expect(() => parseArtifactSummary(raw)).toThrow(/larger than/);
-});
-
-test('rejects more results than the cap', () => {
-	const results = Array.from({ length: MAX_RESULTS + 1 }, (_, index) => ({
-		id: `button/case-${index}`,
-		status: 'unchanged',
-	}));
-	expect(() => parseArtifactSummary(artifactSummary(results))).toThrow(/more than/);
 });
 
 test('reads run metadata from the environment', () => {
@@ -383,7 +384,7 @@ test('fails when the summary is missing', async () => {
 	const root = await mkdtemp(path.join(tmpdir(), 'visual-review-'));
 
 	await expect(
-		prepareSite({ artifactDir: root, meta, outDir: path.join(root, 'site') }),
+		prepareSite({ artifactDir: root, meta, outDir: path.join(root, 'deploy', 'site') }),
 	).rejects.toThrow('Required file summary.json is missing.');
 });
 
@@ -438,9 +439,9 @@ test('rejects a symlinked summary', async () => {
 	await writeFile(path.join(root, 'elsewhere.json'), artifactSummary([]));
 	await symlink(path.join(root, 'elsewhere.json'), path.join(artifactDir, 'summary.json'));
 
-	await expect(prepareSite({ artifactDir, meta, outDir: path.join(root, 'site') })).rejects.toThrow(
-		/not a regular file/,
-	);
+	await expect(
+		prepareSite({ artifactDir, meta, outDir: path.join(root, 'deploy', 'site') }),
+	).rejects.toThrow(/not a regular file/);
 });
 
 test('rejects an image over the size cap', async () => {
@@ -460,17 +461,84 @@ test('rejects an oversized summary file without reading it', async () => {
 	await expect(prepareSite({ artifactDir, meta, outDir })).rejects.toThrow(/larger than/);
 });
 
-test('refuses to write into a directory that already has content', async () => {
+test('refuses a deploy directory that already exists, even an empty one', async () => {
 	const { artifactDir, outDir } = await createArtifact(artifactSummary([]));
-	await mkdir(outDir);
-	await writeFile(path.join(outDir, '_worker.js'), 'export default {};');
+	const deployDir = path.dirname(outDir);
+	await mkdir(deployDir);
 
-	await expect(prepareSite({ artifactDir, meta, outDir })).rejects.toThrow(/not empty/);
-	expect(await listFiles(outDir)).toEqual(['_worker.js']);
+	await expect(prepareSite({ artifactDir, meta, outDir })).rejects.toThrow(/already exists/);
+	expect(await listFiles(deployDir)).toEqual([]);
+});
+
+test('leaves a deploy directory that holds Wrangler inputs untouched', async () => {
+	const { artifactDir, outDir } = await createArtifact(artifactSummary([]));
+	const deployDir = path.dirname(outDir);
+	await mkdir(path.join(deployDir, 'functions'), { recursive: true });
+	await writeFile(path.join(deployDir, 'functions', '_middleware.js'), 'export {};');
+
+	await expect(prepareSite({ artifactDir, meta, outDir })).rejects.toThrow(/already exists/);
+	expect(await listFiles(deployDir)).toEqual(['functions/_middleware.js']);
+});
+
+test('creates the deploy directory with the site as its only entry', async () => {
+	const { artifactDir, outDir } = await createArtifact(
+		artifactSummary([{ id: 'card/new', status: 'added' }]),
+		{ 'diff/card/new.actual.png': PNG },
+	);
+
+	await prepareSite({ artifactDir, meta, outDir });
+
+	expect(await readdir(path.dirname(outDir))).toEqual(['site']);
+});
+
+/** A PNG signature followed by a hole, so a large file costs almost no disk. */
+async function writeSparsePng(file: string, size: number) {
+	await mkdir(path.dirname(file), { recursive: true });
+	const handle = await open(file, 'w');
+	try {
+		await handle.write(PNG);
+		await handle.truncate(size);
+	} finally {
+		await handle.close();
+	}
+}
+
+test('rejects a report over the total size budget before writing anything', async () => {
+	// Every image is within the per-file cap. Only their sum breaks the budget.
+	const imagesNeeded = Math.floor(MAX_PUBLISHED_BYTES / MAX_IMAGE_BYTES) + 1;
+	const results = Array.from({ length: Math.ceil(imagesNeeded / 3) }, (_, index) => ({
+		id: `button/case-${index}`,
+		status: 'changed',
+	}));
+	const { artifactDir, outDir } = await createArtifact(artifactSummary(results));
+	await Promise.all(
+		results.flatMap((result) => {
+			return ['expected', 'actual', 'diff'].map((kind) => {
+				const file = path.join(artifactDir, 'diff', `${result.id}.${kind}.png`);
+				return writeSparsePng(file, MAX_IMAGE_BYTES);
+			});
+		}),
+	);
+
+	await expect(prepareSite({ artifactDir, meta, outDir })).rejects.toThrow(
+		`Refusing to publish more than ${MAX_PUBLISHED_BYTES} bytes.`,
+	);
+	await expect(readdir(path.dirname(outDir))).rejects.toThrow(/ENOENT/);
+});
+
+test('rejects a report with more files than the cap', async () => {
+	const results = Array.from({ length: Math.ceil(MAX_PUBLISHED_FILES / 3) + 1 }, (_, index) => ({
+		id: `button/case-${index}`,
+		status: 'changed',
+	}));
+	const { artifactDir, outDir } = await createArtifact(artifactSummary(results));
+
+	await expect(prepareSite({ artifactDir, meta, outDir })).rejects.toThrow(
+		`Refusing to publish more than ${MAX_PUBLISHED_FILES} files.`,
+	);
 });
 
 const APP_URL = 'https://luke-ui-visual-review.pages.dev';
-const DEPLOYMENT_URL = 'https://0a1b2c3d.luke-ui-visual-review.pages.dev';
 
 function publishedSummary(results: Array<PublishedResult>, unchanged = 30): PublishedSummary {
 	const counts = { added: 0, changed: 0, removed: 0, unchanged };
@@ -478,117 +546,52 @@ function publishedSummary(results: Array<PublishedResult>, unchanged = 30): Publ
 	return { counts, meta, results, schemaVersion: 1 };
 }
 
-const changedResults = (length: number): Array<PublishedResult> => {
-	return Array.from({ length }, (_, index) => ({
-		id: `button/case-${String(index).padStart(2, '0')}`,
-		status: 'changed',
-	}));
-};
-
-test('embeds each capture when only a few differ', () => {
+test('reports the counts, the commit, and a link to the review app', () => {
 	const markdown = commentMarkdown({
 		appUrl: APP_URL,
-		deploymentUrl: DEPLOYMENT_URL,
 		summary: publishedSummary([
 			{ id: 'button/hover', status: 'changed' },
+			{ id: 'button/idle', status: 'changed' },
 			{ id: 'card/new', status: 'added' },
-			{ id: 'text/sizes', status: 'removed' },
 		]),
 	});
 
-	expect(markdown.startsWith(`${COMMENT_MARKER}\n## Visual changes\n`)).toBe(true);
-	expect(markdown).toContain('| changed | added | removed | unchanged |');
-	expect(markdown).toContain('| 1 | 1 | 1 | 30 |');
-	expect(markdown).toContain(`**[Review in the visual review app](${APP_URL}/?pr=12)**`);
-	expect(markdown).toContain('Report for `aaaaaaa`.');
-	expect(markdown).not.toContain(HEAD_SHA);
-
-	// The capture name links to the app, with the id encoded as one query value.
-	expect(markdown).toContain(
-		`<summary>changed: <a href="${APP_URL}/?pr=12&amp;capture=button%2Fhover"><code>button/hover</code></a></summary>`,
+	expect(markdown).toBe(
+		[
+			COMMENT_MARKER,
+			'## Visual changes',
+			'',
+			'| changed | added | removed | unchanged |',
+			'| --- | --- | --- | --- |',
+			'| 2 | 1 | 0 | 30 |',
+			'',
+			`**[Review in the visual review app](${APP_URL}/?pr=12)**`,
+			'',
+			'Report for `aaaaaaa`.',
+			'',
+		].join('\n'),
 	);
-	// Images come from the immutable deployment, with a fixed width.
-	for (const kind of ['expected', 'actual', 'diff']) {
-		expect(markdown).toContain(
-			`<img src="${DEPLOYMENT_URL}/diff/button/hover.${kind}.png" alt="${kind}: button/hover" width="260">`,
-		);
-	}
-	expect(markdown.match(/<details>/g)).toHaveLength(3);
-
-	// An added capture has no expected or diff image, and a removed one has only expected.
-	expect(markdown).toContain('/diff/card/new.actual.png');
-	expect(markdown).not.toContain('/diff/card/new.expected.png');
-	expect(markdown).not.toContain('/diff/card/new.diff.png');
-	expect(markdown).toContain('/diff/text/sizes.expected.png');
-	expect(markdown).not.toContain('/diff/text/sizes.actual.png');
-});
-
-test(`embeds images for exactly ${MAX_INLINE_CAPTURES} captures and lists beyond that`, () => {
-	const options = { appUrl: APP_URL, deploymentUrl: DEPLOYMENT_URL };
-	const atLimit = commentMarkdown({
-		...options,
-		summary: publishedSummary(changedResults(MAX_INLINE_CAPTURES)),
-	});
-	const overLimit = commentMarkdown({
-		...options,
-		summary: publishedSummary(changedResults(MAX_INLINE_CAPTURES + 1)),
-	});
-
-	expect(atLimit.match(/<details>/g)).toHaveLength(MAX_INLINE_CAPTURES);
-	expect(overLimit).not.toContain('<details>');
-	expect(overLimit).not.toContain('<img');
-	expect(overLimit).toContain(
-		`- changed: [\`button/case-06\`](${APP_URL}/?pr=12&capture=button%2Fcase-06)`,
-	);
-	expect(overLimit).not.toContain('more in the visual review app');
-});
-
-test('lists the first captures and counts the rest when many differ', () => {
-	const markdown = commentMarkdown({
-		appUrl: APP_URL,
-		deploymentUrl: DEPLOYMENT_URL,
-		summary: publishedSummary(changedResults(MAX_LISTED_CAPTURES + 15)),
-	});
-
-	expect(markdown).toContain('## Visual changes');
-	expect(markdown).toContain(`| ${MAX_LISTED_CAPTURES + 15} | 0 | 0 | 30 |`);
-	expect(markdown).toContain(`**[Review in the visual review app](${APP_URL}/?pr=12)**`);
-	expect(markdown.match(/^- changed: /gm)).toHaveLength(MAX_LISTED_CAPTURES);
-	expect(markdown).toContain('`button/case-19`');
-	expect(markdown).not.toContain('`button/case-20`');
-	expect(markdown).toContain('…and 15 more in the visual review app.');
 });
 
 test('reports no visual changes in one line', () => {
-	const markdown = commentMarkdown({
-		appUrl: APP_URL,
-		deploymentUrl: DEPLOYMENT_URL,
-		summary: publishedSummary([]),
-	});
+	const markdown = commentMarkdown({ appUrl: APP_URL, summary: publishedSummary([]) });
 
 	expect(markdown).toBe(`${COMMENT_MARKER}\nNo visual changes for \`aaaaaaa\`.\n`);
 });
 
-test('uses only the origin of the configured URLs', () => {
+test('uses only the origin of the configured app URL', () => {
 	const markdown = commentMarkdown({
-		appUrl: `${APP_URL}/`,
-		deploymentUrl: `${DEPLOYMENT_URL}/some/path?x=1`,
+		appUrl: `${APP_URL}/some/path?x=1`,
 		summary: publishedSummary([{ id: 'card/new', status: 'added' }]),
 	});
 
 	expect(markdown).toContain(`](${APP_URL}/?pr=12)`);
-	expect(markdown).toContain(`src="${DEPLOYMENT_URL}/diff/card/new.actual.png"`);
 });
 
 for (const url of ['', 'not a url', 'http://insecure.example', 'javascript:alert(1)']) {
-	test(`rejects the URL ${JSON.stringify(url)}`, () => {
+	test(`rejects the app URL ${JSON.stringify(url)}`, () => {
 		const summary = publishedSummary([{ id: 'card/new', status: 'added' }]);
-		expect(() => commentMarkdown({ appUrl: url, deploymentUrl: DEPLOYMENT_URL, summary })).toThrow(
-			/APP_URL/,
-		);
-		expect(() => commentMarkdown({ appUrl: APP_URL, deploymentUrl: url, summary })).toThrow(
-			/DEPLOYMENT_URL/,
-		);
+		expect(() => commentMarkdown({ appUrl: url, summary })).toThrow(/APP_URL/);
 	});
 }
 

@@ -14,6 +14,13 @@ import { loadOpenPullRequests } from './open-pull-requests.js';
 import type { ReportState } from './report-state.js';
 import { reportState } from './report-state.js';
 
+const STATE_LABELS = {
+	'no-differences': 'No visual changes',
+	'no-report': 'No report',
+	'out-of-date': 'Report is for an older commit',
+	unconfigured: 'No data source',
+} as const satisfies Record<Exclude<ReportState['kind'], 'differences'>, string>;
+
 export function DashboardPage() {
 	const result = use(loadOpenPullRequests());
 
@@ -102,13 +109,6 @@ function PullRequestReport({ pullRequest }: { pullRequest: PullRequest }) {
 		</Cluster>
 	);
 }
-
-const STATE_LABELS = {
-	'no-differences': 'No visual changes',
-	'no-report': 'No report',
-	'out-of-date': 'Waiting for the latest commit',
-	unconfigured: 'No data source',
-} as const satisfies Record<Exclude<ReportState['kind'], 'differences'>, string>;
 
 function describePullRequest(pullRequest: PullRequest) {
 	const parts = [pullRequest.head.ref];

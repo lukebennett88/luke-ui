@@ -13,7 +13,8 @@ published and how the app is deployed.
 
 A review keeps its state in the query string, so every view is a link: the selected capture, the
 view (`side`, `overlay`, or `diff`), the zoom, the filter, and whether differences are outlined. The
-sidebar lists the keyboard shortcuts.
+sidebar lists the single-key shortcuts and has a checkbox that turns them off. That choice is saved
+in the browser.
 
 The app reads a report over HTTP: `summary.json`, and one PNG per image at
 `diff/<capture id>.<expected|actual|diff>.png`. `src/report/schema.ts` validates that contract with
@@ -39,6 +40,9 @@ pnpm run dev:visual-review
 pnpm exec turbo run test --filter=visual-review
 pnpm run check
 ```
+
+The browser tests in `src/review/review.browser.test.tsx` review the small report in
+`src/test/fixtures/report` through the same `?source=local` route.
 
 `pnpm test:visual` writes the comparison that `http://localhost:5175/?source=local` reviews. Set
 `VISUAL_REVIEW_LOCAL_DIR` to review a comparison in another directory.

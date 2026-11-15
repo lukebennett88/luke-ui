@@ -32,12 +32,15 @@ jobs:
     # environment variables are not available to a job-level `if`.
     if: github.ref == 'refs/heads/main' && vars.VISUAL_REVIEW_PAGES_PROJECT != ''
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment: visual-review
     permissions:
       contents: read
     steps:
       - name: Checkout repo
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup tooling
         uses: pnpm/setup@v3
@@ -55,23 +58,28 @@ jobs:
           VITE_VISUAL_REVIEW_REPOSITORY: ${{ github.repository }}
         run: pnpm exec turbo run build --filter=visual-review
 
+      # Plain `mkdir` fails if the directory already exists, so Wrangler's working directory is
+      # known to be empty.
       - name: Create an empty Wrangler working directory
         env:
           DEPLOY_DIR: ${{ runner.temp }}/visual-review-deploy
-        run: mkdir -p "$DEPLOY_DIR"
+        run: mkdir "$DEPLOY_DIR"
 
-      # Wrangler runs from an empty directory outside the checkout and deploys `dist` by absolute
+      # Wrangler runs from that empty directory outside the checkout and deploys `dist` by absolute
       # path. Run from the repository root, `pages deploy` would bundle the root `functions/`
       # directory (the docs site's Pages Functions) into this deployment. Run from a workspace
       # directory, the action would try to install Wrangler into the pnpm workspace.
+      #
+      # The action and Wrangler are pinned to exact versions because this job holds the Cloudflare
+      # secrets.
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v4
+        uses: cloudflare/wrangler-action@953926a2e2182532811c01a25e53647d93bf07c0 # v4.1.3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: ${{ runner.temp }}/visual-review-deploy
           packageManager: npm
-          wranglerVersion: '4'
+          wranglerVersion: '4.162.0'
           command: >-
             pages deploy ${{ github.workspace }}/apps/visual-review/dist --project-name=${{
             vars.VISUAL_REVIEW_PAGES_PROJECT }} --branch=main --commit-hash=${{ github.sha }}

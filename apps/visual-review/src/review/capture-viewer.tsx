@@ -27,6 +27,9 @@ const IMAGE_LABELS = {
 	expected: 'Expected',
 } as const satisfies Record<ImageKind, string>;
 
+/** Width over height from which a capture counts as wide. */
+const WIDE_ASPECT_RATIO = 2;
+
 const ZOOM_ITEMS = ZOOM_LEVELS.map((zoom) => ({
 	id: zoom,
 	label: zoom === 'fit' ? 'Fit' : `${Number(zoom) * 100}%`,
@@ -54,7 +57,7 @@ export function CaptureViewer(props: CaptureViewerProps) {
 		<section aria-label="Comparison" className={styles.viewer}>
 			<div className={styles.toolbar}>
 				<Stack gap="space.8" minInlineSize="0">
-					<Heading level={1} typography="heading4">
+					<Heading level={2} typography="heading4">
 						{capture.id}
 					</Heading>
 					<Text color="secondary" typography="caption">
@@ -115,7 +118,6 @@ export function CaptureViewer(props: CaptureViewerProps) {
 						<IconButton
 							aria-label="Previous capture"
 							icon="chevronUp"
-							isDisabled={position.index === 0}
 							onPress={() => onStep(-1)}
 							prominence="low"
 							size="small"
@@ -126,7 +128,6 @@ export function CaptureViewer(props: CaptureViewerProps) {
 						<IconButton
 							aria-label="Next capture"
 							icon="chevronDown"
-							isDisabled={position.index === position.total - 1}
 							onPress={() => onStep(1)}
 							prominence="low"
 							size="small"
@@ -134,8 +135,9 @@ export function CaptureViewer(props: CaptureViewerProps) {
 					</Cluster>
 				</Cluster>
 			</div>
-			{/* Browsers make a scrolling region focusable, so the keyboard can scroll a large comparison. */}
-			<div className={styles.stage}>
+			{/* Focusable so the keyboard can scroll a comparison larger than the stage in every browser. */}
+			{/* oxlint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
+			<div aria-label="Screenshots" className={styles.stage} role="region" tabIndex={0}>
 				<Comparison
 					baseUrl={baseUrl}
 					capture={capture}
@@ -165,12 +167,13 @@ function Comparison(props: ComparisonProps) {
 
 	if (capture.status === 'added') return <LabelledImage {...image} kind="actual" />;
 	if (capture.status === 'removed') return <LabelledImage {...image} kind="expected" />;
-	if (view === 'diff') return <LabelledImage {...image} kind="diff" shouldRevealRegion />;
+	if (view === 'diff') return <LabelledImage {...image} kind="diff" />;
 	if (view === 'overlay') {
 		return (
 			<div className={styles.overlay}>
-				<CaptureImage {...image} kind="expected" shouldRevealRegion />
-				<CaptureImage {...image} kind="actual" opacity={opacity / 100} shouldHighlight={false} />
+				<CaptureImage {...image} kind="expected" shouldHighlight={false} />
+				{/* The top layer carries the outlines, so they stay visible at every opacity. */}
+				<CaptureImage {...image} kind="actual" opacity={opacity / 100} />
 			</div>
 		);
 	}
@@ -182,7 +185,7 @@ function Comparison(props: ComparisonProps) {
 				isWide(capture) && styles.sideBySideStacked,
 			)}
 		>
-			<LabelledImage {...image} kind="expected" shouldRevealRegion />
+			<LabelledImage {...image} kind="expected" />
 			<LabelledImage {...image} kind="actual" />
 		</div>
 	);
@@ -192,10 +195,9 @@ type CaptureImageProps = {
 	baseUrl: string;
 	capture: Capture;
 	kind: ImageKind;
+	/** Fades the image, not the outlines drawn over it. */
 	opacity?: number;
 	shouldHighlight: boolean;
-	/** Scrolls the first differing region into view. Set on one image per view. */
-	shouldRevealRegion?: boolean;
 	zoom: Zoom;
 };
 
@@ -211,10 +213,10 @@ function LabelledImage(props: CaptureImageProps) {
 }
 
 function CaptureImage(props: CaptureImageProps) {
-	const { baseUrl, capture, kind, opacity, shouldHighlight, shouldRevealRegion, zoom } = props;
+	const { baseUrl, capture, kind, opacity, shouldHighlight, zoom } = props;
 	const scale = zoom === 'fit' ? undefined : Number(zoom);
 	return (
-		<div className={styles.imageFrame} style={{ opacity, zoom: scale }}>
+		<div className={styles.imageFrame} style={{ zoom: scale }}>
 			<img
 				alt={`${IMAGE_LABELS[kind]} screenshot of ${capture.id}`}
 				className={cx(
@@ -224,33 +226,30 @@ function CaptureImage(props: CaptureImageProps) {
 				)}
 				draggable={false}
 				src={imageUrl(baseUrl, capture.id, kind)}
+				style={{ opacity }}
 			/>
 			{shouldHighlight && capture.status === 'changed' ? (
 				<Suspense>
-					<RegionOutlines
-						diffUrl={imageUrl(baseUrl, capture.id, 'diff')}
-						shouldReveal={shouldRevealRegion}
-					/>
+					<RegionOutlines diffUrl={imageUrl(baseUrl, capture.id, 'diff')} />
 				</Suspense>
 			) : null}
 		</div>
 	);
 }
 
-/** Outlines each differing region. The first image on the stage also scrolls its first region in. */
-function RegionOutlines({ diffUrl, shouldReveal }: { diffUrl: string; shouldReveal?: boolean }) {
+/** Outlines each differing region of the image it is drawn over. */
+function RegionOutlines({ diffUrl }: { diffUrl: string }) {
 	const diff = use(loadDiffRegions(diffUrl));
 	if (!diff) return null;
 	const { height, regions, width } = diff;
 	// A difference covering the whole image, such as a size change, needs no outline.
 	if (regions.some((region) => region.width * region.height > width * height * 0.8)) return null;
 
-	return regions.map((region, index) => (
+	return regions.map((region) => (
 		<span
 			aria-hidden
 			className={styles.region}
 			key={`${region.x}-${region.y}`}
-			ref={shouldReveal && index === 0 ? revealRegion : undefined}
 			style={{
 				blockSize: `${(region.height / height) * 100}%`,
 				inlineSize: `${(region.width / width) * 100}%`,
@@ -261,10 +260,6 @@ function RegionOutlines({ diffUrl, shouldReveal }: { diffUrl: string; shouldReve
 	));
 }
 
-function revealRegion(element: HTMLSpanElement | null) {
-	element?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-}
-
 /**
  * A wide, short capture loses most of its detail in half the stage, so its two images stack. Each
  * keeps the full width and the difference sits directly above and below.
@@ -273,8 +268,6 @@ function isWide(capture: Capture) {
 	if (capture.width === undefined || capture.height === undefined) return false;
 	return capture.width >= capture.height * WIDE_ASPECT_RATIO;
 }
-
-const WIDE_ASPECT_RATIO = 2;
 
 function describeCapture(capture: Capture) {
 	const parts: Array<string> = [STATUS_LABELS[capture.status]];

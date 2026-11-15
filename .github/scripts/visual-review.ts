@@ -1,6 +1,7 @@
 // Visual review publishing helpers. Subcommands keep the YAML thin without a CI framework:
 //   resolve-pr — find the open pull request a finished Visual regression run belongs to
-//   prepare    — rebuild a publishable site from the untrusted visual-regression-diff artefact
+//   prepare    — rebuild a publishable site from the untrusted visual-regression-diff artefact,
+//                in a deploy directory it creates itself
 //   comment    — create or update the sticky pull request comment
 //
 // The publish workflow runs this file with plain `node` and no install, so it imports Node
@@ -10,20 +11,11 @@
 import { constants } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
-import {
-	appendFile,
-	lstat,
-	mkdir,
-	open,
-	readdir,
-	readFile,
-	realpath,
-	writeFile,
-} from 'node:fs/promises';
+import { appendFile, lstat, mkdir, open, readFile, realpath, writeFile } from 'node:fs/promises';
 
 export type VisualStatus = 'added' | 'changed' | 'removed' | 'unchanged';
 export type PublishedStatus = Exclude<VisualStatus, 'unchanged'>;
-export type ImageKind = 'expected' | 'actual' | 'diff';
+type ImageKind = 'expected' | 'actual' | 'diff';
 
 export type PublishedResult = {
 	id: string;
@@ -86,26 +78,28 @@ export type CommentAction =
 /** Hidden marker that identifies the one sticky comment this script owns. */
 export const COMMENT_MARKER = '<!-- luke-ui-visual-review -->';
 
-/** Up to this many differing captures are embedded in the comment as images. */
-export const MAX_INLINE_CAPTURES = 6;
-
-/** Beyond the inline limit, this many capture ids are listed as links. */
-export const MAX_LISTED_CAPTURES = 20;
-
+/** Also bounds how many results the artefact can list, since each one costs bytes. */
 export const MAX_SUMMARY_BYTES = 5 * 1024 * 1024;
-export const MAX_RESULTS = 5_000;
 
 /** Cloudflare Pages rejects files over 25 MiB. Stay clear of that limit. */
 export const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 
-/** Cloudflare Pages allows 20,000 files in one deployment. Stay well under it. */
-export const MAX_PUBLISHED_FILES = 10_000;
+/**
+ * Cloudflare Pages allows 20,000 files in one deployment. The suite has about 320 captures, so
+ * a report where every one changed is under 1,000 files.
+ */
+export const MAX_PUBLISHED_FILES = 3_000;
+
+/**
+ * Budget for one report. The whole capture set is about 11 MB and a report where every capture
+ * changed is about 35 MB, so this only stops an artefact built to waste storage and upload time.
+ */
+export const MAX_PUBLISHED_BYTES = 300 * 1024 * 1024;
 
 const DIFF_ARTIFACT_NAME = 'visual-regression-diff';
 const COMMENT_AUTHOR = 'github-actions[bot]';
 const SUMMARY_FILE = 'summary.json';
 const DIFF_DIR = 'diff';
-const IMAGE_WIDTH = 260;
 const SHORT_SHA_LENGTH = 7;
 const API_PAGE_SIZE = 100;
 const MAX_COMMENT_PAGES = 50;
@@ -116,21 +110,12 @@ const VIEWPORT_PATTERN = /^\d{1,5}x\d{1,5}$/;
 const SHA_PATTERN = /^[0-9a-f]{40}$/;
 const POSITIVE_INTEGER_PATTERN = /^[1-9]\d{0,14}$/;
 const REPOSITORY_PATTERN = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
-const HTML_SPECIAL_PATTERN = /[&<>"']/g;
 
 /** The PNGs each status publishes. Nothing else is ever copied out of the artefact. */
 const IMAGE_KINDS: Record<PublishedStatus, ReadonlyArray<ImageKind>> = {
 	added: ['actual'],
 	changed: ['expected', 'actual', 'diff'],
 	removed: ['expected'],
-};
-
-const HTML_ENTITIES: Record<string, string> = {
-	'"': '&quot;',
-	'&': '&amp;',
-	"'": '&#39;',
-	'<': '&lt;',
-	'>': '&gt;',
 };
 
 /**
@@ -161,6 +146,11 @@ export function decidePublish(
 		};
 	}
 
+	// The number is written to GITHUB_OUTPUT and into the deploy command, so prove its shape.
+	if (!Number.isSafeInteger(match.number) || match.number <= 0) {
+		return { publish: false, reason: 'GitHub returned an invalid pull request number.' };
+	}
+
 	return { number: match.number, publish: true };
 }
 
@@ -187,9 +177,6 @@ export function parseArtifactSummary(raw: string): ArtifactSummary {
 	const unchanged = requireCount(data.counts.unchanged, 'counts.unchanged');
 
 	if (!Array.isArray(data.results)) throw new Error(`${SUMMARY_FILE} results must be an array.`);
-	if (data.results.length > MAX_RESULTS) {
-		throw new Error(`${SUMMARY_FILE} lists more than ${MAX_RESULTS} results.`);
-	}
 
 	const seen = new Set<string>();
 	const results: Array<PublishedResult> = [];
@@ -228,6 +215,10 @@ export function parseMeta(
  * The output is an allow-list: the rewritten `summary.json` and the PNGs each validated result
  * implies. Anything else in the artefact, such as `_worker.js`, `_redirects`, `_headers`,
  * `_routes.json`, a `functions` directory, or HTML, is never read and so can never be published.
+ *
+ * Wrangler runs from the parent of `outDir`, where it would pick up a `functions` directory or
+ * a Wrangler configuration file. This function creates that parent itself and refuses one that
+ * already exists, so the directory is known to hold the site and nothing else.
  */
 export async function prepareSite(options: {
 	artifactDir: string;
@@ -235,11 +226,6 @@ export async function prepareSite(options: {
 	meta: PublishedMeta;
 }): Promise<PublishedSummary> {
 	const { artifactDir, outDir, meta } = options;
-
-	const existing = await readdir(outDir).catch(() => []);
-	if (existing.length > 0) {
-		throw new Error(`Refusing to write into ${outDir} because it is not empty.`);
-	}
 
 	const artifactRoot = await realpath(artifactDir);
 	const rawSummary = await readContainedFile({
@@ -250,30 +236,47 @@ export async function prepareSite(options: {
 	});
 	const { results, unchanged } = parseArtifactSummary(rawSummary.toString('utf8'));
 
+	const diffRoot = path.join(artifactRoot, DIFF_DIR);
 	const images = results.flatMap((result) => {
-		return IMAGE_KINDS[result.status].map((kind) => imagePath(result.id, kind));
+		return IMAGE_KINDS[result.status].map((kind) => {
+			const label = imagePath(result.id, kind);
+			return {
+				file: path.join(artifactDir, ...label.split('/')),
+				label,
+				maxBytes: MAX_IMAGE_BYTES,
+				root: diffRoot,
+			};
+		});
 	});
 	// One more file for summary.json itself.
 	if (images.length + 1 > MAX_PUBLISHED_FILES) {
 		throw new Error(`Refusing to publish more than ${MAX_PUBLISHED_FILES} files.`);
 	}
 
-	await mkdir(outDir, { recursive: true });
-	const diffRoot = path.join(artifactRoot, DIFF_DIR);
+	// Check every file and the total size before writing anything.
+	const sizes = await Promise.all(images.map((image) => containedFileSize(image)));
+	let expectedBytes = 0;
+	for (const size of sizes) expectedBytes = addToBudget(expectedBytes, size);
+
+	const deployDir = path.dirname(outDir);
+	await mkdir(deployDir).catch((error: NodeJS.ErrnoException) => {
+		if (error.code !== 'EEXIST') throw error;
+		throw new Error(`Refusing to deploy from ${deployDir} because it already exists.`);
+	});
+	await mkdir(outDir);
+
+	let publishedBytes = 0;
 	for (const image of images) {
 		// Sequential: at most one screenshot is held in memory at a time.
 		// oxlint-disable-next-line no-await-in-loop
-		const bytes = await readContainedFile({
-			file: path.join(artifactDir, ...image.split('/')),
-			label: image,
-			maxBytes: MAX_IMAGE_BYTES,
-			root: diffRoot,
-		});
+		const bytes = await readContainedFile(image);
 		if (!bytes.subarray(0, PNG_SIGNATURE.length).equals(PNG_SIGNATURE)) {
-			throw new Error(`${image} is not a PNG.`);
+			throw new Error(`${image.label} is not a PNG.`);
 		}
+		// Counts the bytes actually read, in case a file changed after the size check.
+		publishedBytes = addToBudget(publishedBytes, bytes.length);
 
-		const destination = path.join(outDir, ...image.split('/'));
+		const destination = path.join(outDir, ...image.label.split('/'));
 		// oxlint-disable-next-line no-await-in-loop
 		await mkdir(path.dirname(destination), { recursive: true });
 		// oxlint-disable-next-line no-await-in-loop
@@ -286,32 +289,27 @@ export async function prepareSite(options: {
 		counts: countResults(results, unchanged),
 		results,
 	};
-	await writeFile(path.join(outDir, SUMMARY_FILE), `${JSON.stringify(summary, null, '\t')}\n`);
+	const summaryJson = `${JSON.stringify(summary, null, '\t')}\n`;
+	addToBudget(publishedBytes, Buffer.byteLength(summaryJson));
+	await writeFile(path.join(outDir, SUMMARY_FILE), summaryJson);
 	return summary;
 }
 
-/** The sticky comment body for a prepared summary. */
+/** The sticky comment body for a prepared summary: the counts and a link to the review app. */
 export function commentMarkdown(options: {
 	summary: PublishedSummary;
 	/** Viewer origin, for example `https://luke-ui-visual-review.pages.dev`. */
 	appUrl: string;
-	/** Immutable per-deployment origin that serves this report's images. */
-	deploymentUrl: string;
 }): string {
-	const { summary } = options;
+	const { counts, meta, results } = options.summary;
 	const appUrl = requireHttpsOrigin(options.appUrl, 'APP_URL');
-	const deploymentUrl = requireHttpsOrigin(options.deploymentUrl, 'DEPLOYMENT_URL');
-	const { pullRequest } = summary.meta;
-	const shortSha = summary.meta.headSha.slice(0, SHORT_SHA_LENGTH);
+	const shortSha = meta.headSha.slice(0, SHORT_SHA_LENGTH);
 
-	if (summary.results.length === 0) {
+	if (results.length === 0) {
 		return `${COMMENT_MARKER}\nNo visual changes for \`${shortSha}\`.\n`;
 	}
 
-	const { counts } = summary;
-	const captureUrl = (id: string) =>
-		`${appUrl}/?pr=${pullRequest}&capture=${encodeURIComponent(id)}`;
-	const lines = [
+	return [
 		COMMENT_MARKER,
 		'## Visual changes',
 		'',
@@ -319,28 +317,11 @@ export function commentMarkdown(options: {
 		'| --- | --- | --- | --- |',
 		`| ${counts.changed} | ${counts.added} | ${counts.removed} | ${counts.unchanged} |`,
 		'',
-		`**[Review in the visual review app](${appUrl}/?pr=${pullRequest})**`,
+		`**[Review in the visual review app](${appUrl}/?pr=${meta.pullRequest})**`,
 		'',
 		`Report for \`${shortSha}\`.`,
 		'',
-	];
-
-	if (summary.results.length <= MAX_INLINE_CAPTURES) {
-		for (const result of summary.results) {
-			lines.push(captureDetails(result, captureUrl(result.id), deploymentUrl), '');
-		}
-		return lines.join('\n');
-	}
-
-	for (const result of summary.results.slice(0, MAX_LISTED_CAPTURES)) {
-		lines.push(`- ${result.status}: [\`${result.id}\`](${captureUrl(result.id)})`);
-	}
-	const remaining = summary.results.length - MAX_LISTED_CAPTURES;
-	if (remaining > 0) {
-		lines.push('', `…and ${remaining} more in the visual review app.`);
-	}
-	lines.push('');
-	return lines.join('\n');
+	].join('\n');
 }
 
 /** Finds the sticky comment: it must carry the marker and come from the Actions bot. */
@@ -440,16 +421,20 @@ function imagePath(id: string, kind: ImageKind): string {
 	return `${DIFF_DIR}/${id}.${kind}.png`;
 }
 
-/**
- * Reads one artefact file after proving it is a regular file, within the size cap, that
- * resolves inside `root`. A symlink anywhere on the path fails one of those checks.
- */
-async function readContainedFile(options: {
+type ContainedFile = {
 	file: string;
+	/** Artefact-relative name used in error messages. */
 	label: string;
 	maxBytes: number;
+	/** Resolved directory the file must stay inside. */
 	root: string;
-}): Promise<Buffer> {
+};
+
+/**
+ * Proves an artefact file is a regular file, within its size cap, that resolves inside `root`,
+ * and returns its size. A symlink anywhere on the path fails one of those checks.
+ */
+async function containedFileSize(options: ContainedFile): Promise<number> {
 	const { file, label, maxBytes, root } = options;
 
 	const stats = await lstat(file).catch(() => undefined);
@@ -461,9 +446,16 @@ async function readContainedFile(options: {
 	if (!resolved.startsWith(`${root}${path.sep}`)) {
 		throw new Error(`${label} resolves outside the artefact.`);
 	}
+	return stats.size;
+}
+
+/** Reads one artefact file after the {@link containedFileSize} checks. */
+async function readContainedFile(options: ContainedFile): Promise<Buffer> {
+	const { file, label, maxBytes } = options;
+	await containedFileSize(options);
 
 	// O_NOFOLLOW closes the gap between the checks above and the read.
-	const handle = await open(resolved, constants.O_RDONLY | constants.O_NOFOLLOW);
+	const handle = await open(await realpath(file), constants.O_RDONLY | constants.O_NOFOLLOW);
 	try {
 		const opened = await handle.stat();
 		if (!opened.isFile()) throw new Error(`${label} is not a regular file.`);
@@ -472,6 +464,15 @@ async function readContainedFile(options: {
 	} finally {
 		await handle.close();
 	}
+}
+
+/** Adds `bytes` to a running total and fails once the report exceeds its size budget. */
+function addToBudget(total: number, bytes: number): number {
+	const next = total + bytes;
+	if (next > MAX_PUBLISHED_BYTES) {
+		throw new Error(`Refusing to publish more than ${MAX_PUBLISHED_BYTES} bytes.`);
+	}
+	return next;
 }
 
 function requireHttpsOrigin(value: string, name: string): string {
@@ -483,39 +484,6 @@ function requireHttpsOrigin(value: string, name: string): string {
 	}
 	if (url.protocol !== 'https:') throw new Error(`${name} must be an https URL.`);
 	return url.origin;
-}
-
-function escapeHtml(value: string): string {
-	return value.replace(HTML_SPECIAL_PATTERN, (character) => HTML_ENTITIES[character] ?? character);
-}
-
-function imageUrl(deploymentUrl: string, id: string, kind: ImageKind): string {
-	const encoded = imagePath(id, kind).split('/').map(encodeURIComponent).join('/');
-	return `${deploymentUrl}/${encoded}`;
-}
-
-function captureDetails(result: PublishedResult, captureUrl: string, deploymentUrl: string) {
-	const kinds = IMAGE_KINDS[result.status];
-	const id = escapeHtml(result.id);
-	const headings = kinds.map((kind) => `<th>${kind}</th>`).join('');
-	const cells = kinds
-		.map((kind) => {
-			const source = escapeHtml(imageUrl(deploymentUrl, result.id, kind));
-			return `<td><img src="${source}" alt="${kind}: ${id}" width="${IMAGE_WIDTH}"></td>`;
-		})
-		.join('');
-
-	return [
-		'<details>',
-		`<summary>${result.status}: <a href="${escapeHtml(captureUrl)}"><code>${id}</code></a></summary>`,
-		'',
-		'<table>',
-		`<tr>${headings}</tr>`,
-		`<tr>${cells}</tr>`,
-		'</table>',
-		'',
-		'</details>',
-	].join('\n');
 }
 
 function requireEnv(name: string): string {
@@ -683,11 +651,7 @@ async function comment(summaryPath: string | undefined) {
 		fail('The prepared summary does not match PR_NUMBER and HEAD_SHA.');
 	}
 
-	const body = commentMarkdown({
-		appUrl: requireEnv('APP_URL'),
-		deploymentUrl: requireEnv('DEPLOYMENT_URL'),
-		summary,
-	});
+	const body = commentMarkdown({ appUrl: requireEnv('APP_URL'), summary });
 	await writeStepSummary(body);
 
 	const existing = findStickyComment(await listComments(token, repository, pullRequest));

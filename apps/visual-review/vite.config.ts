@@ -6,6 +6,7 @@ import react from '@vitejs/plugin-react';
 import { stat } from 'node:fs/promises';
 import type { Plugin } from 'vite-plus';
 import { defineConfig } from 'vite-plus';
+import { playwright } from 'vite-plus/test/browser-playwright';
 
 const LOCAL_REPORT_ROUTE = '/__local-report';
 const LOCAL_REPORT_FILE_PATTERN =
@@ -17,7 +18,26 @@ export default defineConfig({
 		port: 5175,
 	},
 	test: {
-		include: ['src/**/*.test.ts'],
+		projects: [
+			{
+				extends: true,
+				test: { include: ['src/**/*.test.ts'], name: 'unit' },
+			},
+			{
+				extends: true,
+				test: {
+					browser: {
+						enabled: true,
+						headless: true,
+						instances: [{ browser: 'chromium' }],
+						provider: playwright({}),
+					},
+					include: ['src/**/*.browser.test.tsx'],
+					name: 'browser',
+					setupFiles: ['./src/test/browser-setup.ts'],
+				},
+			},
+		],
 	},
 });
 
@@ -27,9 +47,13 @@ export default defineConfig({
  * builds have no local source: pull requests publish their own data.
  */
 function localReport(): Plugin {
+	// Browser tests review a small committed report through the same route.
+	const defaultDirectory = process.env.VITEST
+		? './src/test/fixtures/report'
+		: '../../.artifacts/visual-regression';
 	const directory = path.resolve(
 		process.env.VISUAL_REVIEW_LOCAL_DIR ??
-			fileURLToPath(new URL('../../.artifacts/visual-regression', import.meta.url)),
+			fileURLToPath(new URL(defaultDirectory, import.meta.url)),
 	);
 	return {
 		apply: 'serve',

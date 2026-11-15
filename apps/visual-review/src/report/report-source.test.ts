@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vite-plus/test';
-import { parseReportSource, reportBaseUrl } from './report-source.js';
+import { parseReportSource, pullRequestDataUrl } from './report-source.js';
 
 describe('parseReportSource', () => {
 	test('reads a pull request number', () => {
@@ -17,17 +17,8 @@ describe('parseReportSource', () => {
 	}
 });
 
-describe('reportBaseUrl', () => {
-	test('fills the pull request number into the data URL template', () => {
-		const url = reportBaseUrl(
-			{ kind: 'pull-request', number: 12 },
-			'https://pr-{pr}.example.pages.dev/',
-		);
-
-		expect(url).toBe('https://pr-12.example.pages.dev');
-	});
-
-	test('has no pull request URL without a template', () => {
-		expect(reportBaseUrl({ kind: 'pull-request', number: 12 }, undefined)).toBeUndefined();
-	});
+test('pullRequestDataUrl fills the number into the template and drops a trailing slash', () => {
+	expect(pullRequestDataUrl('https://pr-{pr}.example.pages.dev/', 12)).toBe(
+		'https://pr-12.example.pages.dev',
+	);
 });

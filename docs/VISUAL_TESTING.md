@@ -101,8 +101,8 @@ pull request's report live in one Cloudflare Pages project that takes direct upl
   the differing captures' PNGs. The baseline stays in the `visual-baseline` artefact.
 
 `Visual review publish` then writes one comment on the pull request and updates it on each run. The
-comment links to the review and shows the images inline when six or fewer captures differ. A report
-with no differences is still published, so the app can tell "no visual changes" from "no report".
+comment gives the counts and links to the review. A report with no differences is still published,
+so the app can tell "no visual changes" from "no report".
 
 To review a local comparison, run `pnpm test:visual`, then `pnpm dev:visual-review`, and open
 `http://localhost:5175/?source=local`.
@@ -119,8 +119,18 @@ To review a local comparison, run `pnpm test:visual`, then `pnpm dev:visual-revi
 - `visual-review prepare` validates `summary.json` and builds the upload from an allow-list: the
   PNGs each validated capture id implies, checked as regular files with a PNG signature. Nothing
   else in the artefact is published, so it cannot add Pages control files such as `_worker.js`.
-- Wrangler runs from an empty directory, so the deployment never includes the repository's
-  `functions/` directory.
+- `visual-review prepare` refuses a report over 3,000 files, 300 MiB in total, or 20 MiB in one
+  image.
+- Wrangler runs from a directory that `prepare` creates and that must not exist beforehand, so the
+  deployment never includes the repository's `functions/` directory or a file planted beside the
+  upload.
+
+The two jobs that hold the Cloudflare token pin `cloudflare/wrangler-action` to a commit and
+`wranglerVersion` to an exact release. Renovate does not update `wranglerVersion`. Raise it by hand
+in both workflows.
+
+A pull request controls its own comparison, so its report and comment describe what that pull
+request chose to publish. Read them as a review aid, not as a gate.
 
 Never check out or run pull request code in `Visual review publish`.
 

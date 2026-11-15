@@ -1,3 +1,4 @@
+import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { Icon } from '@luke-ui/react/icon';
 import { Kbd } from '@luke-ui/react/kbd';
 import { SelectField, SelectItem } from '@luke-ui/react/select-field';
@@ -12,6 +13,7 @@ import type { Capture, CaptureStatus } from '../report/schema.js';
 import type { ReviewParams, StatusFilter } from './review-params.js';
 import { STATUS_FILTERS, STATUS_LABELS } from './review-params.js';
 import * as styles from './review.css.js';
+import { setShortcutsEnabled } from './shortcuts-preference.js';
 
 const STATUS_COLORS = {
 	added: 'success',
@@ -29,6 +31,7 @@ const SHORTCUTS = [
 ] as const;
 
 type CaptureListProps = {
+	areShortcutsEnabled: boolean;
 	/** Every differing capture, before filtering. Counts in the status filter come from here. */
 	allCaptures: ReadonlyArray<Capture>;
 	captures: ReadonlyArray<Capture>;
@@ -40,7 +43,8 @@ type CaptureListProps = {
 };
 
 export function CaptureList(props: CaptureListProps) {
-	const { allCaptures, captures, filterRef, onParamsChange, params, search, selectedId } = props;
+	const { allCaptures, areShortcutsEnabled, captures, filterRef, onParamsChange, params } = props;
+	const { search, selectedId } = props;
 	const scrollRef = useRef<HTMLDivElement>(null);
 
 	// Keyboard stepping can select a capture outside the scrolled region.
@@ -128,7 +132,13 @@ export function CaptureList(props: CaptureListProps) {
 				)}
 			</nav>
 			<div className={styles.shortcuts}>
-				{SHORTCUTS.map((shortcut) => (
+				<CheckboxField
+					isSelected={areShortcutsEnabled}
+					label="Keyboard shortcuts"
+					onChange={setShortcutsEnabled}
+					size="small"
+				/>
+				{(areShortcutsEnabled ? SHORTCUTS : []).map((shortcut) => (
 					<Text color="secondary" key={shortcut.label} typography="caption">
 						{shortcut.keys.map((key) => (
 							<Kbd key={key}>{key}</Kbd>

@@ -18,12 +18,16 @@ export function parseReportSource(search: string): ReportSource | undefined {
 }
 
 /** Where a source's `summary.json` and images live, or `undefined` when this build cannot reach it. */
-export function reportBaseUrl(
-	source: ReportSource,
-	template: string | undefined = dataUrlTemplate,
-): string | undefined {
+export function reportBaseUrl(source: ReportSource): string | undefined {
 	if (source.kind === 'local') return isLocalSourceAvailable ? LOCAL_REPORT_URL : undefined;
-	return template?.replace('{pr}', String(source.number)).replace(TRAILING_SLASH_PATTERN, '');
+	return dataUrlTemplate === undefined
+		? undefined
+		: pullRequestDataUrl(dataUrlTemplate, source.number);
+}
+
+/** Fills a pull request's number into the data URL template, without a trailing slash. */
+export function pullRequestDataUrl(template: string, number: number): string {
+	return template.replace('{pr}', String(number)).replace(TRAILING_SLASH_PATTERN, '');
 }
 
 export function reportSourceKey(source: ReportSource): string {
