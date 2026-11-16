@@ -15,6 +15,7 @@ const BASELINE = 'b'.repeat(40);
 
 function externalId(overrides: Record<string, unknown> = {}): string {
 	return JSON.stringify({
+		baselineRunAttempt: 1,
 		baselineRunId: 456,
 		baselineSha: BASELINE,
 		kind: 'review',
@@ -39,7 +40,12 @@ function run(overrides: Partial<CheckRunSnapshot> = {}): CheckRunSnapshot {
 
 describe('parseExternalId', () => {
 	test('reads a v1 external id', () => {
-		expect(parseExternalId(externalId({ baselineRunId: null, baselineSha: null }))).toEqual({
+		expect(
+			parseExternalId(
+				externalId({ baselineRunAttempt: null, baselineRunId: null, baselineSha: null }),
+			),
+		).toEqual({
+			baselineRunAttempt: null,
 			baselineRunId: null,
 			baselineSha: null,
 			kind: 'review',
@@ -47,6 +53,17 @@ describe('parseExternalId', () => {
 			runAttempt: 1,
 			runId: 123,
 			v: 1,
+		});
+	});
+
+	test('reads an external id written before baseline attempts as an unverified attempt', () => {
+		const { baselineRunAttempt: _, ...earlier } = JSON.parse(externalId()) as Record<
+			string,
+			unknown
+		>;
+		expect(parseExternalId(JSON.stringify(earlier))).toMatchObject({
+			baselineRunAttempt: null,
+			baselineRunId: 456,
 		});
 	});
 
@@ -58,6 +75,7 @@ describe('parseExternalId', () => {
 		['an unknown reason', externalId({ reasons: ['flaky'] })],
 		['a fractional run id', externalId({ runId: 1.5 })],
 		['a short baseline sha', externalId({ baselineSha: 'abc' })],
+		['a fractional baseline attempt', externalId({ baselineRunAttempt: 1.5 })],
 	] as const;
 	for (const [description, value] of rejected) {
 		test(`rejects ${description}`, () => {
@@ -69,6 +87,7 @@ describe('parseExternalId', () => {
 describe('reviewFromCheckRun', () => {
 	test('maps an undecided review', () => {
 		expect(reviewFromCheckRun(run())).toEqual({
+			baselineRunAttempt: 1,
 			baselineRunId: 456,
 			baselineSha: BASELINE,
 			checkUrl: 'https://github.com/octo/widgets/runs/900',
@@ -87,6 +106,7 @@ describe('reviewFromCheckRun', () => {
 		['review', 'failure', 'Changes requested by @mona-l', 'changes-requested', 'mona-l'],
 		['clean', 'success', 'No visual changes', 'clean', null],
 		['failed', 'failure', 'Comparison did not finish', 'failed', null],
+		['failed', 'failure', 'Baseline is out of date', 'failed', null],
 		['pending', null, 'Comparing', 'comparing', null],
 		['pending', 'action_required', 'Comparing', 'comparing', null],
 		['pending', 'success', 'Approved by @luke', 'comparing', null],

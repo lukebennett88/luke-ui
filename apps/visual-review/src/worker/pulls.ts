@@ -18,6 +18,7 @@ import {
 	reviewFromCheckRun,
 	rewriteCommentStatus,
 	rewriteSummary,
+	sameExternalId,
 	shaSchema,
 	statusLine,
 } from './review.js';
@@ -260,7 +261,11 @@ export async function decide(context: Context, number: number): Promise<Response
 	if (externalId.runId !== body.runId || externalId.runAttempt !== body.runAttempt) {
 		throw staleComparison();
 	}
-	if (externalId.baselineSha === null || externalId.baselineRunId === null) {
+	if (
+		externalId.baselineSha === null ||
+		externalId.baselineRunId === null ||
+		externalId.baselineRunAttempt === null
+	) {
 		throw new ApiError(
 			409,
 			'unverified-baseline',
@@ -268,7 +273,11 @@ export async function decide(context: Context, number: number): Promise<Response
 		);
 	}
 	const baseline = await latestBaseline(context);
-	if (baseline?.id !== externalId.baselineRunId || baseline.head_sha !== externalId.baselineSha) {
+	if (
+		baseline?.id !== externalId.baselineRunId ||
+		baseline.run_attempt !== externalId.baselineRunAttempt ||
+		baseline.head_sha !== externalId.baselineSha
+	) {
 		throw new ApiError(
 			409,
 			'stale-baseline',
@@ -297,49 +306,116 @@ export async function decide(context: Context, number: number): Promise<Response
 		status: 'completed',
 	});
 
-	// GitHub has no conditional write for check runs, so read the latest comparison again. A
-	// re-run requested since the pre-check makes this decision stale, and the check run goes back
-	// to pending for the newer run, as the publish workflow writes it when a comparison starts.
-	// When the comparison cannot be read, the decision is undone so it never passes unchecked.
-	const latest = await latestComparison(context, body.headSha).catch(() => undefined);
-	if (!latest) {
-		await patchCheckRun(context, run.id, {
-			completed_at: now.toISOString(),
-			conclusion: 'action_required',
-			output: {
-				summary: run.output.summary ?? statusLine(NEEDS_REVIEW_STATUS),
-				text: prependHistory(
-					decided.output.text,
-					historyEntry(
-						now,
-						`Decision by @${login} undone: the comparison could not be checked`,
-						undefined,
-					),
-				),
-				title: run.output.title ?? NEEDS_REVIEW_STATUS,
-			},
-			status: 'completed',
-		});
-		throw upstream('GitHub did not confirm the comparison. The decision was undone. Try again.');
-	}
-	if (!isComparison(latest, externalId)) {
-		await patchCheckRun(context, run.id, pendingCheckRun(latest, decided.output.text, now));
-		await updateCommentStatus(context, number, COMPARING_STATUS).catch(() => undefined);
-		throw staleComparison();
-	}
-
-	// The check run is the record of the decision. The comment only mirrors it, so a failure here
-	// does not fail a decision that has already been written.
-	await updateCommentStatus(context, number, status).catch(() => undefined);
+	// GitHub has no conditional write for check runs, so the decision is checked again after it is
+	// written. The check also runs through `waitUntil`, so a client that disconnects cannot cancel a
+	// repair halfway.
+	const check = confirmDecision(context, {
+		decided,
+		externalId,
+		headSha: body.headSha,
+		login,
+		now,
+		number,
+		run,
+		status,
+	});
+	context.waitUntil(check.catch(() => undefined));
+	await check;
 
 	const review = reviewFromCheckRun(snapshot(context, decided));
 	if (!review) throw upstream('GitHub sent back a check run without its external id.');
 	return json({ review });
 }
 
+interface WrittenDecision {
+	/** The check run as the decision's write returned it. */
+	decided: RestCheckRun;
+	/** The external id the decision was validated against. */
+	externalId: ExternalId;
+	headSha: string;
+	login: string;
+	now: Date;
+	number: number;
+	/** The check run as it was read before the decision. */
+	run: RestCheckRun;
+	status: string;
+}
+
+/**
+ * Confirms that a written decision still applies to the latest comparison, and repairs the check
+ * run when it does not:
+ *
+ * - The write's response carries the check run's current `external_id`. When it differs from the
+ *   validated one, the publish workflow wrote in between, so the check run goes back to pending
+ *   for the comparison it names, without waiting for the runs list.
+ * - A re-run requested since the pre-check makes the decision stale, and the check run goes back
+ *   to pending for the newer run, as the publish workflow writes it when a comparison starts.
+ * - When the latest comparison cannot be read, the decision is undone so it never passes
+ *   unchecked.
+ *
+ * It throws `409 stale` or `502 upstream` after a repair. Otherwise it mirrors the decision in the
+ * sticky comment.
+ */
+async function confirmDecision(context: Context, written: WrittenDecision): Promise<void> {
+	const { decided, externalId, now, number, run } = written;
+	const current = parseExternalId(decided.external_id);
+	let stale: Comparison | undefined;
+	if (current && sameExternalId(current, externalId)) {
+		const latest = await latestComparison(context, written.headSha).catch(() => undefined);
+		if (!latest) return undoDecision(context, written);
+		if (!isComparison(latest, externalId)) stale = comparisonOf(latest);
+	} else if (current) {
+		stale = comparisonOf(current);
+	} else {
+		const latest = await latestComparison(context, written.headSha).catch(() => undefined);
+		if (!latest) return undoDecision(context, written);
+		stale = comparisonOf(latest);
+	}
+	if (stale) {
+		await patchCheckRun(context, run.id, pendingCheckRun(stale, decided.output.text, now));
+		await updateCommentStatus(context, number, COMPARING_STATUS).catch(() => undefined);
+		throw staleComparison();
+	}
+	// The check run is the record of the decision. The comment only mirrors it, so a failure here
+	// does not fail a decision that has already been written.
+	await updateCommentStatus(context, number, written.status).catch(() => undefined);
+}
+
+/** Puts the check run back to `Needs review` and fails the request. */
+async function undoDecision(context: Context, written: WrittenDecision): Promise<never> {
+	const { decided, login, now, run } = written;
+	await patchCheckRun(context, run.id, {
+		completed_at: now.toISOString(),
+		conclusion: 'action_required',
+		output: {
+			summary: run.output.summary ?? statusLine(NEEDS_REVIEW_STATUS),
+			text: prependHistory(
+				decided.output.text,
+				historyEntry(
+					now,
+					`Decision by @${login} undone: the comparison could not be checked`,
+					undefined,
+				),
+			),
+			title: run.output.title ?? NEEDS_REVIEW_STATUS,
+		},
+		status: 'completed',
+	});
+	throw upstream('GitHub did not confirm the comparison. The decision was undone. Try again.');
+}
+
+/** The comparison run and attempt of an external id or a workflow run. */
+function comparisonOf(source: ExternalId | WorkflowRun): Comparison {
+	return 'v' in source
+		? { runAttempt: source.runAttempt, runId: source.runId }
+		: { runAttempt: source.run_attempt, runId: source.id };
+}
+
 function staleComparison(): ApiError {
 	return new ApiError(409, 'stale', 'A newer comparison ran on this commit. Reload the review.');
 }
+
+type Comparison = Pick<ExternalId, 'runAttempt' | 'runId'>;
 
 /** Whether a workflow run is the comparison run and attempt an external id records. */
 function isComparison(
@@ -354,17 +430,18 @@ function isComparison(
  * `completed` back to `in_progress`, so the run stays completed with `action_required`, which still
  * blocks merging. Readers take the state from the external id's `pending` kind.
  */
-function pendingCheckRun(run: WorkflowRun, history: string | null, now: Date) {
+function pendingCheckRun(comparison: Comparison, history: string | null, now: Date) {
 	return {
 		completed_at: now.toISOString(),
 		conclusion: 'action_required',
 		external_id: JSON.stringify({
+			baselineRunAttempt: null,
 			baselineRunId: null,
 			baselineSha: null,
 			kind: 'pending',
 			reasons: [],
-			runAttempt: run.run_attempt,
-			runId: run.id,
+			runAttempt: comparison.runAttempt,
+			runId: comparison.runId,
 			v: 1,
 		}),
 		output: {
@@ -373,7 +450,7 @@ function pendingCheckRun(run: WorkflowRun, history: string | null, now: Date) {
 				history,
 				historyEntry(
 					now,
-					`Comparison run ${run.id} (attempt ${run.run_attempt}) started`,
+					`Comparison run ${comparison.runId} (attempt ${comparison.runAttempt}) started`,
 					undefined,
 				),
 			),

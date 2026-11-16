@@ -102,16 +102,23 @@ Requesting a re-run makes the earlier attempt stale at once. The backend refuses
 - `not-reviewable`: the check run is not a completed comparison with changes to review.
 - `stale`: the pull request has a newer commit, or the check run's comparison is not the latest
   comparison or did not succeed.
-- `unverified-baseline`: the comparison has no verified baseline. Re-run the comparison.
-- `stale-baseline`: the comparison's baseline is not the newest successful `Visual baseline` run on
-  `main` from a push or a manual dispatch in this repository. Update the branch, or re-run the
+- `unverified-baseline`: the comparison has no verified baseline run and attempt. Re-run the
   comparison.
+- `stale-baseline`: the comparison's baseline run and attempt are not the newest successful
+  `Visual baseline` run on `main` from a push or a manual dispatch in this repository. A re-run of
+  that baseline also makes it stale. Update the branch, or re-run the comparison.
 
-GitHub has no conditional write for check runs, so the backend reads the latest comparison again
-after it writes a decision. When a re-run was requested in between, it sets the check run back to
-`Comparing` for the newer run and answers `409 stale`. When that read fails, it sets the check run
-back to `Needs review` and answers `502 upstream`. GitHub keeps a completed check run completed, so
-a `Comparing` check run has the `action_required` conclusion, and its state comes from the `pending`
-kind in its `external_id`.
+GitHub has no conditional write for check runs, so the backend checks a decision again after it
+writes it, and keeps that check running through `waitUntil` if the reviewer disconnects:
+
+- When the write's response shows that the publish workflow changed the check run's `external_id` in
+  between, the backend sets the check run back to `Comparing` for the comparison it names and
+  answers `409 stale`.
+- Otherwise it reads the latest comparison again. When a re-run was requested in between, it sets
+  the check run back to `Comparing` for the newer run and answers `409 stale`.
+- When that read fails, it sets the check run back to `Needs review` and answers `502 upstream`.
+
+GitHub keeps a completed check run completed, so a `Comparing` check run has the `action_required`
+conclusion, and its state comes from the `pending` kind in its `external_id`.
 
 The unit tests in `src/worker/` run the request handler against a stubbed `fetch`.

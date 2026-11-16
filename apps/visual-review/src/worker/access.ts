@@ -13,6 +13,8 @@ export interface Context {
 	github: GitHubApp;
 	request: Request;
 	url: URL;
+	/** Keeps work running after the response, so a client that disconnects cannot cancel it. */
+	waitUntil: (promise: Promise<unknown>) => void;
 }
 
 const REVIEW_ROLES = new Set(['admin', 'maintain', 'write']);
