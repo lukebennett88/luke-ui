@@ -11,8 +11,10 @@ export function reviewStatusText(review: Review | null): string {
 			return review.decidedBy ? `Changes requested by @${review.decidedBy}` : 'Changes requested';
 		case 'clean':
 			return 'No visual changes';
+		case 'comparing':
+			return 'Comparing';
 		case 'failed':
-			return 'Comparison did not finish';
+			return 'Comparison failed';
 		case 'needs-review':
 			return 'Needs review';
 	}
@@ -43,5 +45,11 @@ export function decisionErrorMessage(failure: ApiFailure): string {
 	if (failure.status === 401) return 'Your sign-in has ended. Sign in again to review.';
 	if (failure.code === 'forbidden') return 'Reviewing needs write access to the repository.';
 	if (failure.code === 'not-reviewable') return 'This comparison has nothing to review.';
+	if (failure.code === 'unverified-baseline') {
+		return 'The baseline for this comparison could not be verified. Re-run the comparison.';
+	}
+	if (failure.code === 'stale-baseline') {
+		return 'The baseline on main has changed. Update the branch to compare against it.';
+	}
 	return 'The decision could not be saved. Try again.';
 }

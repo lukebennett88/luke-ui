@@ -26,6 +26,7 @@ const STATUS_COLORS = {
 	approved: 'success',
 	'changes-requested': 'danger',
 	clean: 'secondary',
+	comparing: 'secondary',
 	failed: 'danger',
 	'needs-review': 'warning',
 } as const satisfies Record<Review['state'], string>;

@@ -16,11 +16,11 @@ const reviewSchema = z.object({
 	checkUrl: z.url({ protocol: /^https$/ }),
 	decidedBy: z.string().nullable(),
 	headSha: sha,
-	kind: z.enum(['clean', 'failed', 'review']),
+	kind: z.enum(['clean', 'failed', 'pending', 'review']),
 	reasons: z.array(z.enum(['infrastructure', 'visual'])),
 	runAttempt: positiveInteger,
 	runId: positiveInteger,
-	state: z.enum(['approved', 'changes-requested', 'clean', 'failed', 'needs-review']),
+	state: z.enum(['approved', 'changes-requested', 'clean', 'comparing', 'failed', 'needs-review']),
 });
 
 const sessionSchema = z.union([

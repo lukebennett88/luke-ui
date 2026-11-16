@@ -23,6 +23,7 @@ test('labels each review state, and a pull request without one', () => {
 	expect(reviewChip(review('changes-requested')).label).toBe('Changes requested');
 	expect(reviewChip(review('clean')).label).toBe('No visual changes');
 	expect(reviewChip(review('failed')).label).toBe('Comparison failed');
+	expect(reviewChip(review('comparing')).label).toBe('Comparing');
 	expect(reviewChip(null).label).toBe('No report');
 });
 

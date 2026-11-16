@@ -40,8 +40,9 @@ test('describes reviews without a decision', () => {
 	expect(reviewStatusText(REVIEW)).toBe('Needs review');
 	expect(reviewStatusText({ ...REVIEW, kind: 'clean', state: 'clean' })).toBe('No visual changes');
 	expect(reviewStatusText({ ...REVIEW, kind: 'failed', state: 'failed' })).toBe(
-		'Comparison did not finish',
+		'Comparison failed',
 	);
+	expect(reviewStatusText({ ...REVIEW, kind: 'pending', state: 'comparing' })).toBe('Comparing');
 	expect(reviewStatusText(null)).toBe('Not compared yet');
 });
 
@@ -63,6 +64,14 @@ const FAILURES = [
 	[{ code: 'forbidden', status: 403 }, 'Reviewing needs write access to the repository.'],
 	[{ code: 'bad-origin', status: 403 }, 'The decision could not be saved. Try again.'],
 	[{ code: 'upstream', status: 502 }, 'The decision could not be saved. Try again.'],
+	[
+		{ code: 'unverified-baseline', status: 409 },
+		'The baseline for this comparison could not be verified. Re-run the comparison.',
+	],
+	[
+		{ code: 'stale-baseline', status: 409 },
+		'The baseline on main has changed. Update the branch to compare against it.',
+	],
 ] as const;
 
 for (const [failure, message] of FAILURES) {

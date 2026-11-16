@@ -12,6 +12,7 @@ const REVIEW_CHIPS = {
 	approved: { color: 'success', label: 'Approved' },
 	'changes-requested': { color: 'danger', label: 'Changes requested' },
 	clean: { color: 'secondary', label: 'No visual changes' },
+	comparing: { color: 'secondary', label: 'Comparing' },
 	failed: { color: 'danger', label: 'Comparison failed' },
 	'needs-review': { color: 'warning', label: 'Needs review' },
 } as const satisfies Record<Review['state'], { color: ChipColor; label: string }>;

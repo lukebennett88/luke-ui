@@ -51,10 +51,9 @@ tests stub `fetch` for `/api/*`, and serve that report with a `meta` block as a 
 
 ## Reviewing in the app
 
-A pull request's review shows its status under the header: needs review, approved or changes
-requested by a reviewer, no visual changes, or the comparison did not finish. It links to the
-`visual-review` check on GitHub, and says when the pull request changes visual testing
-infrastructure.
+A pull request's review shows its status under the header: comparing, needs review, approved or
+changes requested by a reviewer, no visual changes, or failed. It links to the `visual-review` check
+on GitHub, and says when the pull request changes visual testing infrastructure.
 
 Sign in with GitHub from that bar to review. A reviewer with write access can approve, or request
 changes with a note of up to 500 characters, and can change an earlier decision. A decision applies
