@@ -1,6 +1,6 @@
 // Visual review publishing helpers. Subcommands keep the YAML thin without a CI framework:
-//   resolve-pr — find the open pull request a Visual regression run belongs to, and confirm the
-//                run is still the latest comparison for its commit
+//   resolve-pr — find the open pull request for an event's commit, and decide what to record from
+//                that commit's latest comparison, whichever event arrived
 //   prepare    — rebuild a publishable site from the untrusted visual-regression-diff artefact,
 //                in a deploy directory it creates itself
 //   review     — record the `visual-review` check run for the commit and update the sticky pull
@@ -79,23 +79,21 @@ export type CommentAction =
 	| { type: 'update'; commentId: number }
 	| { type: 'skip' };
 
-/** The `workflow_run` activity this workflow subscribes to. */
-export type RunAction = 'requested' | 'in_progress' | 'completed';
-
 /**
- * What a Visual regression run means for review:
- * - `pending`: the comparison started, so any earlier decision on the commit no longer applies
+ * What the latest Visual regression run for a commit means for review:
+ * - `pending`: the comparison has not finished, so any earlier decision on the commit no longer
+ *   applies
  * - `report`: the comparison ran and uploaded a report
- * - `skipped`: the run passed without comparing, because nothing visual could have changed
- * - `failed`: the run failed or timed out, so there is nothing trustworthy to review
+ * - `skipped`: the `compare` job was skipped, because nothing visual could have changed
+ * - `failed`: the run failed or timed out, or `compare` succeeded without uploading a report
  * - `cancelled`: the run was cancelled
- * - `none`: nothing to record, for example a run a newer comparison superseded
+ * - `none`: nothing to record, for example because the result is already recorded
  */
 export type RunOutcome = 'pending' | 'report' | 'skipped' | 'failed' | 'cancelled' | 'none';
 
 /**
  * What `review` records. `publish-failed` comes from the workflow, not the run: a step after the
- * App token failed, so the report may be missing or out of date.
+ * App token failed or the job was cancelled, so the report may be missing or out of date.
  */
 export type ReviewOutcome = Exclude<RunOutcome, 'none'> | 'publish-failed';
 
@@ -109,10 +107,16 @@ export type ReviewKind = 'pending' | 'review' | 'clean' | 'failed';
 export type ReviewReason = 'visual' | 'infrastructure';
 
 /** Why a check run failed. Each one has its own title. */
-export type FailureReason = 'unfinished' | 'cancelled' | 'publish-failed' | 'unverified-baseline';
+export type FailureReason =
+	| 'unfinished'
+	| 'cancelled'
+	| 'publish-failed'
+	| 'unverified-baseline'
+	| 'outdated-baseline';
 
 export const FAILURE_TITLES: Record<FailureReason, string> = {
 	cancelled: 'Comparison was cancelled',
+	'outdated-baseline': 'Baseline is out of date',
 	'publish-failed': 'Publishing the report failed',
 	unfinished: 'Comparison did not finish',
 	'unverified-baseline': 'Baseline could not be verified',
@@ -134,6 +138,8 @@ export type CheckState = {
 	runId: number;
 	runAttempt: number;
 	baselineRunId: number | null;
+	/** The baseline run's attempt when it was verified, so a re-run of it counts as a new baseline. */
+	baselineRunAttempt: number | null;
 	baselineSha: string | null;
 	kind: ReviewKind;
 	reasons: Array<ReviewReason>;
@@ -170,10 +176,17 @@ export type ExistingCheckRun = {
 };
 
 /** The newest `Visual regression` pull request run for a commit, from the GitHub API. */
-export type LatestComparison = { id: number; run_attempt: number; status?: string | null };
+export type LatestComparison = {
+	id: number;
+	run_attempt: number;
+	status?: string | null;
+	conclusion?: string | null;
+};
 
 /** The fields of a workflow run that decide whether it is a trustworthy baseline. */
 export type BaselineRun = {
+	id?: number;
+	run_attempt?: number;
 	path?: string | null;
 	head_branch?: string | null;
 	head_sha?: string | null;
@@ -286,6 +299,9 @@ const BASELINE_WORKFLOW_PATH = '.github/workflows/visual-baseline.yml';
 const BASELINE_BRANCH = 'main';
 const BASELINE_EVENTS: ReadonlySet<string> = new Set(['push', 'workflow_dispatch']);
 const COMPARISON_WORKFLOW_FILE = 'visual-regression.yml';
+const COMPARE_JOB_NAME = 'compare';
+/** Enough successful `main` runs to find the newest one that passes verification. */
+const BASELINE_RUN_PAGE_SIZE = 20;
 const MAX_FILE_PAGES = MAX_LISTED_PULL_FILES / 100;
 const MAX_LISTED_INFRASTRUCTURE_FILES = 20;
 const MAX_TITLE_LENGTH = 100;
@@ -529,29 +545,23 @@ export async function prepareSite(options: {
 }
 
 /**
- * Whether the comparison `(runId, runAttempt)` is the latest comparison for its commit. `latest` is
- * the newest `Visual regression` pull request run for the commit. A re-run keeps the run id and
- * raises `run_attempt` as soon as it is requested, so it makes the earlier attempt stale at once.
+ * Decides what a Visual regression run means for review. A successful run skipped comparing only
+ * when its `compare` job was skipped. A `compare` job that succeeded without uploading a report did
+ * not finish, so a missing artefact alone never passes the check.
  */
-export function isLatestComparison(
-	latest: LatestComparison | undefined,
-	runId: number,
-	runAttempt: number,
-): boolean {
-	return latest !== undefined && latest.id === runId && latest.run_attempt === runAttempt;
-}
-
-/** Decides what a Visual regression run event means for review. */
-export function decideRunOutcome(
-	action: string,
-	conclusion: string,
-	hasArtifact: boolean,
-): RunOutcome {
-	if (action === 'requested' || action === 'in_progress') return 'pending';
-	if (action !== 'completed') return 'none';
-	switch (conclusion) {
+export function decideRunOutcome(options: {
+	status: string | null | undefined;
+	conclusion: string | null | undefined;
+	/** The conclusion of the run attempt's `compare` job, or `undefined` when it has none. */
+	compareConclusion: string | null | undefined;
+	hasArtifact: boolean;
+}): RunOutcome {
+	if (options.status !== 'completed') return 'pending';
+	switch (options.conclusion) {
 		case 'success':
-			return hasArtifact ? 'report' : 'skipped';
+			if (options.compareConclusion === 'skipped') return 'skipped';
+			if (options.compareConclusion === 'success' && options.hasArtifact) return 'report';
+			return 'failed';
 		case 'failure':
 		case 'timed_out':
 			return 'failed';
@@ -560,6 +570,126 @@ export function decideRunOutcome(
 		default:
 			return 'none';
 	}
+}
+
+/** The `external_id` of a check run, or `undefined` when it is not one this workflow wrote. */
+export function recordedState(run: ExistingCheckRun | undefined): Partial<CheckState> | undefined {
+	if (run === undefined) return undefined;
+	let state: unknown;
+	try {
+		state = JSON.parse(run.external_id ?? '');
+	} catch {
+		return undefined;
+	}
+	return isRecord(state) && state.v === 1 ? (state as Partial<CheckState>) : undefined;
+}
+
+/**
+ * Whether the check run already records this comparison, so writing it again would change nothing
+ * or would discard a decision. A recorded failure is written again, so a failed publication is
+ * retried by the next event.
+ */
+export function isAlreadyRecorded(options: {
+	recorded: ExistingCheckRun | undefined;
+	runId: number;
+	runAttempt: number;
+	outcome: RunOutcome;
+}): boolean {
+	const state = recordedState(options.recorded);
+	if (state === undefined) return false;
+	if (state.runId !== options.runId || state.runAttempt !== options.runAttempt) return false;
+	if (options.outcome === 'pending') return state.kind === 'pending';
+	return state.kind === 'review' || state.kind === 'clean';
+}
+
+/**
+ * Whether a failed publication can be recorded when `resolve-pr` failed and the pull request may
+ * be unknown. Best effort: only on a commit the App already checks, or one that is still an open
+ * pull request's head, so a failure never adds a check run to an unrelated commit.
+ */
+export function canRecordFailedPublication(options: {
+	pullRequest: number | undefined;
+	recorded: ExistingCheckRun | undefined;
+}): boolean {
+	return options.pullRequest !== undefined || options.recorded !== undefined;
+}
+
+export type ReconcilePlan =
+	| { outcome: Exclude<RunOutcome, 'none'>; runId: number; runAttempt: number }
+	| { outcome: 'none'; reason: string };
+
+/**
+ * What to record for a commit, from its latest comparison rather than the event that started this
+ * workflow. A dropped, late, or duplicated event is then harmless: whichever event arrives next
+ * records the latest comparison's state, and one that finds it already recorded writes nothing.
+ */
+export function planReconcile(options: {
+	latest: LatestComparison | undefined;
+	compareConclusion: string | null | undefined;
+	hasArtifact: boolean;
+	recorded: ExistingCheckRun | undefined;
+}): ReconcilePlan {
+	const { latest } = options;
+	if (latest === undefined) {
+		return { outcome: 'none', reason: 'The commit has no Visual regression pull request run.' };
+	}
+	const runId = latest.id;
+	const runAttempt = latest.run_attempt;
+	if (!Number.isSafeInteger(runId) || runId <= 0) {
+		throw new Error('GitHub returned an invalid run id.');
+	}
+	if (!Number.isSafeInteger(runAttempt) || runAttempt <= 0) {
+		throw new Error('GitHub returned an invalid run attempt.');
+	}
+
+	const outcome = decideRunOutcome({
+		compareConclusion: options.compareConclusion,
+		conclusion: latest.conclusion,
+		hasArtifact: options.hasArtifact,
+		status: latest.status,
+	});
+	if (outcome === 'none') {
+		return {
+			outcome,
+			reason: `Run ${runId} attempt ${runAttempt} concluded ${JSON.stringify(latest.conclusion)}.`,
+		};
+	}
+	if (isAlreadyRecorded({ outcome, recorded: options.recorded, runAttempt, runId })) {
+		return {
+			outcome: 'none',
+			reason: `Run ${runId} attempt ${runAttempt} is already recorded.`,
+		};
+	}
+	return { outcome, runAttempt, runId };
+}
+
+/**
+ * The newest successful `Visual baseline` run of this repository's `main`, from a list of
+ * successful `main` runs, newest first. Runs that fail {@link verifiedBaselineSha} are skipped.
+ */
+export function newestBaselineRun(
+	runs: ReadonlyArray<BaselineRun>,
+	repository: string,
+): BaselineRun | undefined {
+	return runs.find((run) => verifiedBaselineSha(run, repository) !== null);
+}
+
+/**
+ * Whether the baseline a report was compared against is still the newest one, both by run and by
+ * attempt. A dispatch or a re-run of `Visual baseline` replaces it without any change to `main`.
+ */
+export function isCurrentBaseline(
+	newest: BaselineRun | undefined,
+	baselineRunId: number | null,
+	baselineRunAttempt: number | null,
+): boolean {
+	return (
+		newest !== undefined &&
+		baselineRunId !== null &&
+		baselineRunAttempt !== null &&
+		newest.id === baselineRunId &&
+		newest.run_attempt === baselineRunAttempt
+	);
 }
 
 /**
@@ -734,6 +864,8 @@ export function decideReview(options: {
 	infrastructureFiles: ReadonlyArray<string>;
 	/** The verified baseline commit, or `null` when the report's baseline is missing or unverified. */
 	baselineSha: string | null;
+	/** Whether the verified baseline is still the newest successful `Visual baseline` run. */
+	baselineCurrent: boolean;
 }): ReviewDecision {
 	const { outcome } = options;
 	switch (outcome) {
@@ -754,6 +886,9 @@ export function decideReview(options: {
 		case 'report': {
 			if (options.baselineSha === null) {
 				return { failure: 'unverified-baseline', kind: 'failed', reasons: [] };
+			}
+			if (!options.baselineCurrent) {
+				return { failure: 'outdated-baseline', kind: 'failed', reasons: [] };
 			}
 			const reasons: Array<ReviewReason> = [];
 			if (options.differing > 0) reasons.push('visual');
@@ -810,30 +945,6 @@ export function capText(text: string, max: number): string {
 	return `${text.slice(0, max - note.length)}${note}`;
 }
 
-/**
- * Whether the check run already records `pending` for this exact comparison. The external id
- * decides, not the status: a pending check run written over an existing one is `completed`.
- */
-export function isPendingFor(
-	run: ExistingCheckRun | undefined,
-	runId: number,
-	runAttempt: number,
-): boolean {
-	if (run === undefined) return false;
-	let state: unknown;
-	try {
-		state = JSON.parse(run.external_id ?? '');
-	} catch {
-		return false;
-	}
-	return (
-		isRecord(state) &&
-		state.kind === 'pending' &&
-		state.runId === runId &&
-		state.runAttempt === runAttempt
-	);
-}
-
 function countParts(counts: Record<VisualStatus, number>): Array<string> {
 	return (['changed', 'added', 'removed'] as const)
 		.filter((status) => counts[status] > 0)
@@ -863,7 +974,8 @@ export function checkRunPayload(options: {
 	/** Why a `failed` check failed. */
 	failure?: FailureReason;
 	headSha: string;
-	pullRequest: number;
+	/** Unknown only when a failed publication is recorded before the pull request was resolved. */
+	pullRequest: number | undefined;
 	repository: string;
 	/** Present when the run published a report. */
 	summary: PublishedSummary | undefined;
@@ -876,7 +988,8 @@ export function checkRunPayload(options: {
 }): CheckRunPayload {
 	const { state, summary, infrastructureFiles, now } = options;
 	const appUrl = requireHttpsOrigin(options.appUrl, 'APP_URL');
-	const detailsUrl = `${appUrl}/?pr=${options.pullRequest}`;
+	const detailsUrl =
+		options.pullRequest === undefined ? `${appUrl}/` : `${appUrl}/?pr=${options.pullRequest}`;
 	const runUrl = `https://github.com/${options.repository}/actions/runs/${state.runId}`;
 	const status = statusText(state.kind, options.failure);
 	const run = `Comparison run ${state.runId} (attempt ${state.runAttempt})`;
@@ -923,7 +1036,7 @@ export function checkRunPayload(options: {
 			: `baseline run [${state.baselineRunId}](https://github.com/${options.repository}/actions/runs/${state.baselineRunId})${
 					state.baselineSha === null
 						? ' (unverified)'
-						: ` from \`main@${state.baselineSha.slice(0, SHORT_SHA_LENGTH)}\``
+						: ` (attempt ${state.baselineRunAttempt ?? '?'}) from \`main@${state.baselineSha.slice(0, SHORT_SHA_LENGTH)}\``
 				}`;
 
 	const lines = [`**Status:** ${status}`, ''];
@@ -1300,12 +1413,59 @@ async function doNotPublish(reason: string) {
 	await writeOutput('outcome', 'none');
 }
 
-async function resolvePr() {
-	const run: WorkflowRunHead = {
-		event: process.env.RUN_EVENT ?? '',
-		headRepository: process.env.HEAD_REPOSITORY ?? '',
-		headSha: process.env.HEAD_SHA ?? '',
+/** Finds the open pull request whose head is exactly the event's commit, from the event's head. */
+async function findPullRequest(options: {
+	token: string;
+	repository: string;
+	run: WorkflowRunHead;
+	headBranch: string;
+}): Promise<PublishDecision> {
+	const { token, repository, run, headBranch } = options;
+	const pullsUrl = new URL(`https://api.github.com/repos/${repository}/pulls`);
+	pullsUrl.searchParams.set('state', 'open');
+	pullsUrl.searchParams.set('head', `${run.headRepository.split('/')[0]}:${headBranch}`);
+	pullsUrl.searchParams.set('per_page', String(API_PAGE_SIZE));
+	const pulls = await githubRequest<Array<PullRequestCandidate>>({ token, url: pullsUrl });
+	return decidePublish(run, pulls);
+}
+
+/** The visual review App's own `visual-review` check run on a commit, if any. */
+async function findAppCheckRun(options: {
+	appToken: string;
+	appSlug: string;
+	repository: string;
+	headSha: string;
+}): Promise<ExistingCheckRun | undefined> {
+	const { appToken, appSlug, repository, headSha } = options;
+	const url = new URL(`https://api.github.com/repos/${repository}/commits/${headSha}/check-runs`);
+	url.searchParams.set('check_name', CHECK_NAME);
+	url.searchParams.set('filter', 'all');
+	url.searchParams.set('per_page', String(API_PAGE_SIZE));
+	const { check_runs: checkRuns } = await githubRequest<{ check_runs: Array<ExistingCheckRun> }>({
+		token: appToken,
+		url,
+	});
+	return findOwnCheckRun(checkRuns, appSlug);
+}
+
+/** The event's head, read from the workflow environment. */
+function eventHead(): { run: WorkflowRunHead; headBranch: string } {
+	return {
+		headBranch: process.env.HEAD_BRANCH ?? '',
+		run: {
+			event: process.env.RUN_EVENT ?? '',
+			headRepository: process.env.HEAD_REPOSITORY ?? '',
+			headSha: process.env.HEAD_SHA ?? '',
+		},
 	};
+}
+
+/**
+ * Resolves the pull request for the event's commit, then reconciles from that commit's latest
+ * comparison, whichever event started this workflow.
+ */
+async function resolvePr() {
+	const { run, headBranch } = eventHead();
 
 	// Decide the non-pull-request case before touching the API.
 	if (run.event !== 'pull_request') {
@@ -1315,38 +1475,25 @@ async function resolvePr() {
 	}
 
 	if (!SHA_PATTERN.test(run.headSha)) fail('HEAD_SHA must be a 40-character commit SHA.');
-	const headBranch = process.env.HEAD_BRANCH ?? '';
 	if (headBranch === '' || !REPOSITORY_PATTERN.test(run.headRepository)) {
 		// A deleted fork leaves the run without a head repository.
 		await doNotPublish('The run has no head branch or head repository.');
 		return;
 	}
 
-	const action = process.env.RUN_ACTION ?? '';
-	if (action !== 'requested' && action !== 'in_progress' && action !== 'completed') {
-		await doNotPublish(`The run event action ${JSON.stringify(action)} records nothing.`);
-		return;
-	}
-
 	const token = requireEnv('GITHUB_TOKEN');
 	const repository = requireRepository();
-	const runId = requirePositiveInteger(process.env.RUN_ID, 'RUN_ID');
-	const runAttempt = requirePositiveInteger(process.env.RUN_ATTEMPT, 'RUN_ATTEMPT');
 
-	const pullsUrl = new URL(`https://api.github.com/repos/${repository}/pulls`);
-	pullsUrl.searchParams.set('state', 'open');
-	pullsUrl.searchParams.set('head', `${run.headRepository.split('/')[0]}:${headBranch}`);
-	pullsUrl.searchParams.set('per_page', String(API_PAGE_SIZE));
-	const pulls = await githubRequest<Array<PullRequestCandidate>>({ token, url: pullsUrl });
-
-	const decision = decidePublish(run, pulls);
+	// The pull request's head must still be the event's commit, so the commit reconciled below is
+	// the pull request's current head. An event for an older commit records nothing.
+	const decision = await findPullRequest({ headBranch, repository, run, token });
 	if (!decision.publish) {
 		await doNotPublish(decision.reason);
 		return;
 	}
 
 	// The latest comparison is the one source of truth for freshness that the review backend
-	// shares, so a superseded run or attempt never overwrites a newer state.
+	// shares. A re-run keeps the run id and raises `run_attempt` as soon as it is requested.
 	const runsUrl = new URL(
 		`https://api.github.com/repos/${repository}/actions/workflows/${COMPARISON_WORKFLOW_FILE}/runs`,
 	);
@@ -1357,38 +1504,57 @@ async function resolvePr() {
 		workflow_runs: Array<LatestComparison>;
 	}>({ token, url: runsUrl });
 	const latest = latestRuns[0];
-	if (!isLatestComparison(latest, runId, runAttempt)) {
-		await doNotPublish(
-			`Run ${runId} attempt ${runAttempt} is not the latest comparison for ${run.headSha}.`,
-		);
-		return;
-	}
-	if (action !== 'completed' && latest?.status === 'completed') {
-		// A start event delivered after the run finished must not reopen its result.
-		await doNotPublish(`Run ${runId} attempt ${runAttempt} has already finished.`);
-		return;
-	}
 
-	const conclusion = process.env.RUN_CONCLUSION ?? '';
+	let compareConclusion: string | null | undefined;
 	let hasArtifact = false;
-	if (action === 'completed' && conclusion === 'success') {
-		// Prose-only pull requests skip the compare job, so their runs upload no artefact.
-		const artifactsUrl = new URL(
-			`https://api.github.com/repos/${repository}/actions/runs/${runId}/artifacts`,
+	if (latest?.status === 'completed' && latest.conclusion === 'success') {
+		// Only the `compare` job says whether the run skipped comparing. A missing artefact alone
+		// could also mean a comparison that never uploaded its report.
+		const jobsUrl = new URL(
+			`https://api.github.com/repos/${repository}/actions/runs/${latest.id}/attempts/${latest.run_attempt}/jobs`,
 		);
-		artifactsUrl.searchParams.set('name', DIFF_ARTIFACT_NAME);
-		const artifacts = await githubRequest<{ total_count: number }>({ token, url: artifactsUrl });
-		hasArtifact = artifacts.total_count > 0;
+		jobsUrl.searchParams.set('per_page', String(API_PAGE_SIZE));
+		const { jobs } = await githubRequest<{
+			jobs: Array<{ name: string; conclusion: string | null }>;
+		}>({ token, url: jobsUrl });
+		compareConclusion = jobs.find((job) => job.name === COMPARE_JOB_NAME)?.conclusion;
+
+		if (compareConclusion === 'success') {
+			const artifactsUrl = new URL(
+				`https://api.github.com/repos/${repository}/actions/runs/${latest.id}/artifacts`,
+			);
+			artifactsUrl.searchParams.set('name', DIFF_ARTIFACT_NAME);
+			const artifacts = await githubRequest<{ total_count: number }>({
+				token,
+				url: artifactsUrl,
+			});
+			hasArtifact = artifacts.total_count > 0;
+		}
 	}
 
-	const outcome = decideRunOutcome(action, conclusion, hasArtifact);
+	// Check runs are readable only with the App token. Without it nothing is written anyway.
+	const appToken = process.env.APP_TOKEN ?? '';
+	const appSlug = process.env.APP_SLUG ?? '';
+	const recorded =
+		appToken !== '' && APP_SLUG_PATTERN.test(appSlug)
+			? await findAppCheckRun({ appSlug, appToken, headSha: run.headSha, repository })
+			: undefined;
+
+	const plan = planReconcile({ compareConclusion, hasArtifact, latest, recorded });
+	if (plan.outcome === 'none') {
+		await doNotPublish(plan.reason);
+		return;
+	}
+
 	info(
-		`Run ${runId} attempt ${runAttempt} for pull request #${decision.number} at ${run.headSha} (${action}, ${JSON.stringify(conclusion)}): ${outcome}.`,
+		`Pull request #${decision.number} at ${run.headSha}: run ${plan.runId} attempt ${plan.runAttempt} is ${plan.outcome}.`,
 	);
 	await writeOutput('number', decision.number);
 	await writeOutput('sha', run.headSha);
-	await writeOutput('outcome', outcome);
-	await writeOutput('publish', outcome === 'report');
+	await writeOutput('run-id', plan.runId);
+	await writeOutput('run-attempt', plan.runAttempt);
+	await writeOutput('outcome', plan.outcome);
+	await writeOutput('publish', plan.outcome === 'report');
 }
 
 async function prepare(artifactDir: string | undefined, outDir: string | undefined) {
@@ -1505,7 +1671,8 @@ async function pullInfrastructureChanges(options: {
 
 /**
  * Confirms through the GitHub API that the run the artefact names is a successful Visual baseline
- * run of this repository's `main`, and returns its commit. Anything else is unverified.
+ * run of this repository's `main`, and returns its commit and attempt. Anything else is
+ * unverified.
  */
 async function verifyBaseline(token: string, repository: string, runId: number) {
 	try {
@@ -1514,13 +1681,34 @@ async function verifyBaseline(token: string, repository: string, runId: number) 
 			url: `https://api.github.com/repos/${repository}/actions/runs/${runId}`,
 		});
 		const sha = verifiedBaselineSha(run, repository);
-		if (sha !== null) return sha;
+		const attempt = run.run_attempt;
+		if (sha !== null && Number.isSafeInteger(attempt) && attempt !== undefined && attempt > 0) {
+			return { attempt, sha };
+		}
 	} catch (error) {
 		const reason = error instanceof Error ? error.message : String(error);
 		info(`Could not read baseline run ${runId}: ${reason}`);
 	}
 	info(`Baseline run ${runId} is not a successful Visual baseline run of main.`);
 	return null;
+}
+
+/**
+ * The newest successful `Visual baseline` run of `main`, by the same filter as the review backend.
+ * Pushes and dispatches both count, so `event` is not filtered by the API.
+ */
+async function fetchNewestBaseline(token: string, repository: string) {
+	const url = new URL(
+		`https://api.github.com/repos/${repository}/actions/workflows/visual-baseline.yml/runs`,
+	);
+	url.searchParams.set('branch', BASELINE_BRANCH);
+	url.searchParams.set('status', 'success');
+	url.searchParams.set('per_page', String(BASELINE_RUN_PAGE_SIZE));
+	const { workflow_runs: runs } = await githubRequest<{ workflow_runs: Array<BaselineRun> }>({
+		token,
+		url,
+	});
+	return newestBaselineRun(runs, repository);
 }
 
 const REVIEW_OUTCOMES: ReadonlyArray<string> = [
@@ -1536,6 +1724,32 @@ function isReviewOutcome(value: string): value is ReviewOutcome {
 	return REVIEW_OUTCOMES.includes(value);
 }
 
+/**
+ * The pull request a failed publication belongs to. When `resolve-pr` failed it is unknown, so it
+ * is found again from the event's head, best effort.
+ */
+async function failedPublicationPullRequest(options: {
+	token: string;
+	repository: string;
+}): Promise<number | undefined> {
+	const { run, headBranch } = eventHead();
+	if (
+		run.event !== 'pull_request' ||
+		headBranch === '' ||
+		!REPOSITORY_PATTERN.test(run.headRepository)
+	) {
+		return undefined;
+	}
+	try {
+		const decision = await findPullRequest({ ...options, headBranch, run });
+		return decision.publish ? decision.number : undefined;
+	} catch (error) {
+		const reason = error instanceof Error ? error.message : String(error);
+		info(`Could not find the pull request for ${run.headSha}: ${reason}`);
+		return undefined;
+	}
+}
+
 async function review() {
 	const outcome = requireEnv('OUTCOME');
 	if (!isReviewOutcome(outcome)) {
@@ -1547,56 +1761,90 @@ async function review() {
 	if (!APP_SLUG_PATTERN.test(appSlug)) fail('APP_SLUG is not a GitHub App slug.');
 	const repository = requireRepository();
 	const appUrl = requireEnv('APP_URL');
-	const pullRequest = requirePositiveInteger(process.env.PR_NUMBER, 'PR_NUMBER');
 	const headSha = requireEnv('HEAD_SHA');
 	if (!SHA_PATTERN.test(headSha)) fail('HEAD_SHA must be a 40-character commit SHA.');
 	const runId = requirePositiveInteger(process.env.RUN_ID, 'RUN_ID');
 	const runAttempt = requirePositiveInteger(process.env.RUN_ATTEMPT, 'RUN_ATTEMPT');
 
+	const existing = await findAppCheckRun({ appSlug, appToken, headSha, repository });
+
+	// Only a failed publication may run without a resolved pull request: `resolve-pr` itself may
+	// have failed. It is then recorded only on a commit the App already checks or that is still an
+	// open pull request's head.
+	let pullRequest: number | undefined;
+	if (outcome === 'publish-failed' && (process.env.PR_NUMBER ?? '') === '') {
+		pullRequest = await failedPublicationPullRequest({ repository, token: githubToken });
+		if (!canRecordFailedPublication({ pullRequest, recorded: existing })) {
+			info(
+				`${headSha} has no ${CHECK_NAME} check run and no open pull request. Nothing to record.`,
+			);
+			return;
+		}
+	} else {
+		pullRequest = requirePositiveInteger(process.env.PR_NUMBER, 'PR_NUMBER');
+	}
+
+	if (
+		outcome === 'pending' &&
+		isAlreadyRecorded({ outcome, recorded: existing, runAttempt, runId })
+	) {
+		info(`${CHECK_NAME} check run ${existing?.id} already records run ${runId} as comparing.`);
+		return;
+	}
+
 	let summary: PublishedSummary | undefined;
 	if (outcome === 'report') {
 		// This file is the output of `prepare`, not artefact content.
 		summary = JSON.parse(await readFile(path.resolve(requireEnv('SUMMARY_FILE')), 'utf8'));
-		if (summary?.meta.pullRequest !== pullRequest || summary.meta.headSha !== headSha) {
+		if (
+			summary === undefined ||
+			summary.meta.pullRequest !== pullRequest ||
+			summary.meta.headSha !== headSha
+		) {
 			fail('The prepared summary does not match PR_NUMBER and HEAD_SHA.');
+		}
+		if (summary.meta.runId !== runId || summary.meta.runAttempt !== runAttempt) {
+			fail('The prepared summary does not match RUN_ID and RUN_ATTEMPT.');
 		}
 	}
 
 	// Only a comparison that may pass reads the changed files. Every other outcome fails or stays
 	// pending whatever they hold, so it makes no request that could stop it being recorded.
 	const infrastructureFiles =
-		outcome === 'report' || outcome === 'skipped'
+		pullRequest !== undefined && (outcome === 'report' || outcome === 'skipped')
 			? await pullInfrastructureChanges({ headSha, pullRequest, repository, token: githubToken })
 			: [];
 
 	const baselineRunId = summary?.meta.baselineRunId ?? null;
-	const baselineSha =
+	const baseline =
 		baselineRunId === null ? null : await verifyBaseline(githubToken, repository, baselineRunId);
+	const baselineSha = baseline?.sha ?? null;
+	const baselineRunAttempt = baseline?.attempt ?? null;
+	// Checked at record time: a newer baseline may have finished while the comparison ran.
+	const baselineCurrent =
+		baseline !== null &&
+		isCurrentBaseline(
+			await fetchNewestBaseline(githubToken, repository),
+			baselineRunId,
+			baselineRunAttempt,
+		);
 	const { failure, kind, reasons } = decideReview({
+		baselineCurrent,
 		baselineSha,
 		differing: summary?.results.length ?? 0,
 		infrastructureFiles,
 		outcome,
 	});
-	const state: CheckState = { baselineRunId, baselineSha, kind, reasons, runAttempt, runId, v: 1 };
-
-	const checkRunsUrl = new URL(
-		`https://api.github.com/repos/${repository}/commits/${headSha}/check-runs`,
-	);
-	checkRunsUrl.searchParams.set('check_name', CHECK_NAME);
-	checkRunsUrl.searchParams.set('filter', 'all');
-	checkRunsUrl.searchParams.set('per_page', String(API_PAGE_SIZE));
-	const { check_runs: checkRuns } = await githubRequest<{ check_runs: Array<ExistingCheckRun> }>({
-		token: appToken,
-		url: checkRunsUrl,
-	});
-	const existing = findOwnCheckRun(checkRuns, appSlug);
-
-	if (kind === 'pending' && isPendingFor(existing, runId, runAttempt)) {
-		// `requested` and `in_progress` both start a comparison. Record the start once.
-		info(`${CHECK_NAME} check run ${existing?.id} already records run ${runId} as comparing.`);
-		return;
-	}
+	const state: CheckState = {
+		baselineRunAttempt,
+		baselineRunId,
+		baselineSha,
+		kind,
+		reasons,
+		runAttempt,
+		runId,
+		v: 1,
+	};
 
 	const payload = checkRunPayload({
 		appUrl,
@@ -1611,9 +1859,13 @@ async function review() {
 		summary,
 		updatesExisting: existing !== undefined,
 	});
-	const createUrl = `https://api.github.com/repos/${repository}/check-runs`;
 	if (existing === undefined) {
-		await githubRequest({ body: payload, method: 'POST', token: appToken, url: createUrl });
+		await githubRequest({
+			body: payload,
+			method: 'POST',
+			token: appToken,
+			url: `https://api.github.com/repos/${repository}/check-runs`,
+		});
 		info(`Created the ${CHECK_NAME} check run for ${headSha}: ${payload.output.title}.`);
 	} else {
 		const { head_sha: _headSha, ...update } = payload;
@@ -1624,6 +1876,11 @@ async function review() {
 			url: `https://api.github.com/repos/${repository}/check-runs/${existing.id}`,
 		});
 		info(`Updated ${CHECK_NAME} check run ${existing.id} for ${headSha}: ${payload.output.title}.`);
+	}
+
+	if (pullRequest === undefined) {
+		info('The pull request is unknown, so no comment is updated.');
+		return;
 	}
 
 	const comments = await listComments(appToken, repository, pullRequest);

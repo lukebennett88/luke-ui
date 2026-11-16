@@ -5,13 +5,14 @@ name: Visual review publish
 # The check run and the comment belong to the visual review GitHub App, so its review backend can
 # update them when someone approves or requests changes.
 #
-# `workflow_run` starts this workflow from the default branch with secrets. When an untrusted
-# `Visual regression` run starts, it sets the check run to `Comparing`, so no earlier decision on
-# the commit keeps passing. When the run finishes, it publishes the result. The artefact is data
-# produced by pull request code: `visual-review.ts prepare` validates it and rebuilds the site from
-# an allow-list.
+# `workflow_run` starts this workflow from the default branch with secrets. Each event only names
+# a commit: the workflow records the state of that commit's latest `Visual regression` run. While
+# that run is going it sets the check run to `Comparing`, so no earlier decision on the commit keeps
+# passing. Once it finishes, it publishes the result. A dropped or late event is harmless, because
+# the next event records the same latest state. The artefact is data produced by pull request
+# code: `visual-review.ts prepare` validates it and rebuilds the site from an allow-list.
 #
-# GitHub sends no `requested` event for a re-run, so `in_progress` also marks a run as started.
+# GitHub sends no `requested` event for a re-run, so `in_progress` also starts a reconciliation.
 
 on:
   workflow_run:
@@ -22,9 +23,8 @@ permissions: {}
 
 # Runs for one pull request serialise. A run in progress finishes its deploy and its comment
 # together, so the comment never points at a half-published report, and GitHub keeps only the
-# newest queued run. The newest data wins because `resolve-pr` records a run only when its commit
-# is still the pull request head and it is the latest comparison for that commit, so a superseded
-# run or attempt that finishes late does nothing.
+# newest queued run. The newest data wins because `resolve-pr` reads the latest comparison for the
+# pull request's head when it runs, never the run the event describes.
 concurrency:
   group: >-
     visual-review-publish-${{ github.event.workflow_run.head_repository.full_name }}-${{
@@ -60,29 +60,13 @@ jobs:
         with:
           node-version-file: package.json
 
-      # Every `github.event.*` value reaches the scripts through `env`, never interpolated into
-      # shell text, so a branch name cannot inject commands.
-      - name: Resolve pull request
-        id: pr
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
-          HEAD_REPOSITORY: ${{ github.event.workflow_run.head_repository.full_name }}
-          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
-          RUN_ACTION: ${{ github.event.action }}
-          RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
-          RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
-          RUN_EVENT: ${{ github.event.workflow_run.event }}
-          RUN_ID: ${{ github.event.workflow_run.id }}
-        run: node .github/scripts/visual-review.ts resolve-pr
-
-      # Created before anything that can fail, so the last step can record a failed publication
-      # instead of leaving the previous state in place. The token can write check runs and pull
-      # request comments and nothing else. The App's private key lives in the `visual-review`
-      # environment with the Cloudflare secrets.
+      # Created first, so the last step can record a failed publication when anything after it
+      # fails, `resolve-pr` included. The token can write check runs and pull request comments and
+      # nothing else. The App's private key lives in the `visual-review` environment with the
+      # Cloudflare secrets.
       - name: Create a visual review App token
         id: app-token
-        if: steps.pr.outputs.outcome != 'none' && vars.VISUAL_REVIEW_APP_CLIENT_ID != ''
+        if: vars.VISUAL_REVIEW_APP_CLIENT_ID != ''
         uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           client-id: ${{ vars.VISUAL_REVIEW_APP_CLIENT_ID }}
@@ -90,6 +74,24 @@ jobs:
           repositories: ${{ github.event.repository.name }}
           permission-checks: write
           permission-pull-requests: write
+
+      # Every `github.event.*` value reaches the scripts through `env`, never interpolated into
+      # shell text, so a branch name cannot inject commands.
+      #
+      # The event only names a commit. `resolve-pr` reconciles from that commit's latest
+      # comparison, whichever event arrived, and outputs the run and attempt that every later step
+      # uses. The App token reads the check run, so a result already recorded is not written again.
+      - name: Resolve pull request
+        id: pr
+        env:
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          GITHUB_TOKEN: ${{ github.token }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HEAD_REPOSITORY: ${{ github.event.workflow_run.head_repository.full_name }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          RUN_EVENT: ${{ github.event.workflow_run.event }}
+        run: node .github/scripts/visual-review.ts resolve-pr
 
       # Downloaded outside the workspace so nothing in the artefact can shadow repository files.
       # `resolve-pr` has already confirmed the run uploaded it: started runs and prose-only pull
@@ -102,7 +104,7 @@ jobs:
           path: ${{ runner.temp }}/visual-review-artifact
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ steps.pr.outputs.run-id }}
 
       # `prepare` creates `visual-review-deploy` itself and fails if it already exists, so the
       # directory Wrangler runs in is known to hold the prepared site and nothing else.
@@ -113,8 +115,8 @@ jobs:
           HEAD_SHA: ${{ steps.pr.outputs.sha }}
           PR_NUMBER: ${{ steps.pr.outputs.number }}
           SITE_DIR: ${{ runner.temp }}/visual-review-deploy/site
-          RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
-          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_ATTEMPT: ${{ steps.pr.outputs.run-attempt }}
+          RUN_ID: ${{ steps.pr.outputs.run-id }}
         run: node .github/scripts/visual-review.ts prepare "$ARTIFACT_DIR" "$SITE_DIR"
 
       # Wrangler runs from the fresh directory `prepare` created. Run from the repository root,
@@ -144,7 +146,7 @@ jobs:
       # the App token, so the check run and comment belong to the App. Without a status function
       # this step runs only when every earlier step succeeded.
       - name: Record the review
-        if: steps.app-token.outcome == 'success'
+        if: steps.app-token.outcome == 'success' && steps.pr.outputs.outcome != 'none'
         env:
           APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
           APP_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -155,15 +157,18 @@ jobs:
           HEAD_SHA: ${{ steps.pr.outputs.sha }}
           OUTCOME: ${{ steps.pr.outputs.outcome }}
           PR_NUMBER: ${{ steps.pr.outputs.number }}
-          RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
-          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_ATTEMPT: ${{ steps.pr.outputs.run-attempt }}
+          RUN_ID: ${{ steps.pr.outputs.run-id }}
           SUMMARY_FILE: ${{ runner.temp }}/visual-review-deploy/site/summary.json
         run: node .github/scripts/visual-review.ts review
 
-      # Any failure after the App token, including the step above, fails the check, so a stale
-      # approval or report never stays in place.
+      # Any failure after the App token, including `resolve-pr` and the step above, and a
+      # cancelled job, such as one past `timeout-minutes`, fails the check, so a stale approval or
+      # report never stays in place. When `resolve-pr` failed, the run, commit, and pull request
+      # come from the event, and `review` records the failure only on a commit the App already
+      # checks or that is still an open pull request's head.
       - name: Record a failed publication
-        if: failure() && steps.app-token.outcome == 'success'
+        if: (failure() || cancelled()) && steps.app-token.outcome == 'success'
         env:
           APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
           APP_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -171,9 +176,12 @@ jobs:
             ${{ vars.VISUAL_REVIEW_APP_URL || format('https://{0}.pages.dev',
             vars.VISUAL_REVIEW_PAGES_PROJECT) }}
           GITHUB_TOKEN: ${{ github.token }}
-          HEAD_SHA: ${{ steps.pr.outputs.sha }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+          HEAD_REPOSITORY: ${{ github.event.workflow_run.head_repository.full_name }}
+          HEAD_SHA: ${{ steps.pr.outputs.sha || github.event.workflow_run.head_sha }}
           OUTCOME: publish-failed
           PR_NUMBER: ${{ steps.pr.outputs.number }}
-          RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
-          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_ATTEMPT: ${{ steps.pr.outputs.run-attempt || github.event.workflow_run.run_attempt }}
+          RUN_EVENT: ${{ github.event.workflow_run.event }}
+          RUN_ID: ${{ steps.pr.outputs.run-id || github.event.workflow_run.id }}
         run: node .github/scripts/visual-review.ts review

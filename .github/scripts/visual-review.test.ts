@@ -7,6 +7,7 @@ import type {
 	FileContent,
 	FileReader,
 	IssueComment,
+	LatestComparison,
 	PublishedMeta,
 	PublishedResult,
 	PublishedSummary,
@@ -15,6 +16,7 @@ import type {
 	RunMeta,
 } from './visual-review.js';
 import {
+	canRecordFailedPublication,
 	CHECK_NAME,
 	checkRunPayload,
 	COMMENT_MARKER,
@@ -30,8 +32,8 @@ import {
 	findStickyComment,
 	formatTimestamp,
 	infrastructureChanges,
-	isLatestComparison,
-	isPendingFor,
+	isAlreadyRecorded,
+	isCurrentBaseline,
 	MAX_HISTORY_CHARS,
 	MAX_HISTORY_ENTRIES,
 	MAX_IMAGE_BYTES,
@@ -39,11 +41,14 @@ import {
 	MAX_PUBLISHED_FILES,
 	MAX_SUMMARY_BYTES,
 	MAX_SUMMARY_CHARS,
+	newestBaselineRun,
 	parseArtifactSummary,
 	parseBaselineRunId,
 	parseMeta,
+	planReconcile,
 	prepareSite,
 	prependHistory,
+	recordedState,
 	replaceCommentStatus,
 	stripCatalogBlocks,
 	UNLISTED_FILES_ENTRY,
@@ -616,26 +621,129 @@ test('rejects a symlinked baseline file', async () => {
 	);
 });
 
-test('treats only the newest attempt of the newest run for the commit as current', () => {
-	expect(isLatestComparison({ id: 345, run_attempt: 2 }, 345, 2)).toBe(true);
-	// A newer push or manual run for the same commit superseded this run.
-	expect(isLatestComparison({ id: 400, run_attempt: 1 }, 345, 2)).toBe(false);
-	// A re-run of the same run raised the attempt.
-	expect(isLatestComparison({ id: 345, run_attempt: 3 }, 345, 2)).toBe(false);
-	expect(isLatestComparison(undefined, 345, 2)).toBe(false);
+const completedRun = (overrides: Partial<Parameters<typeof decideRunOutcome>[0]> = {}) => {
+	return decideRunOutcome({
+		compareConclusion: 'success',
+		conclusion: 'success',
+		hasArtifact: true,
+		status: 'completed',
+		...overrides,
+	});
+};
+
+test('treats a run that has not finished as pending', () => {
+	for (const status of ['queued', 'in_progress', 'waiting', 'requested', null]) {
+		expect(completedRun({ conclusion: null, status })).toBe('pending');
+	}
 });
 
-test('maps a run event to what it means for review', () => {
-	expect(decideRunOutcome('requested', '', false)).toBe('pending');
-	expect(decideRunOutcome('in_progress', '', false)).toBe('pending');
-	expect(decideRunOutcome('completed', 'success', true)).toBe('report');
-	expect(decideRunOutcome('completed', 'success', false)).toBe('skipped');
-	expect(decideRunOutcome('completed', 'failure', false)).toBe('failed');
-	expect(decideRunOutcome('completed', 'timed_out', true)).toBe('failed');
-	expect(decideRunOutcome('completed', 'cancelled', true)).toBe('cancelled');
-	expect(decideRunOutcome('completed', 'action_required', false)).toBe('none');
-	expect(decideRunOutcome('completed', '', false)).toBe('none');
-	expect(decideRunOutcome('', 'success', true)).toBe('none');
+test('maps a finished run to what it means for review', () => {
+	expect(completedRun()).toBe('report');
+	expect(completedRun({ conclusion: 'failure', compareConclusion: 'failure' })).toBe('failed');
+	expect(completedRun({ conclusion: 'timed_out', compareConclusion: null })).toBe('failed');
+	expect(completedRun({ conclusion: 'cancelled', compareConclusion: 'cancelled' })).toBe(
+		'cancelled',
+	);
+	expect(completedRun({ conclusion: 'action_required' })).toBe('none');
+	expect(completedRun({ conclusion: null })).toBe('none');
+});
+
+test('skips only when the compare job was skipped', () => {
+	expect(completedRun({ compareConclusion: 'skipped', hasArtifact: false })).toBe('skipped');
+	// A compare job that succeeded but uploaded nothing did not finish its comparison.
+	expect(completedRun({ hasArtifact: false })).toBe('failed');
+	// A run with no compare job, or one that ended any other way, never passes as skipped.
+	expect(completedRun({ compareConclusion: undefined, hasArtifact: false })).toBe('failed');
+	expect(completedRun({ compareConclusion: 'neutral', hasArtifact: true })).toBe('failed');
+});
+
+const recordedRun = (state: Partial<CheckState>) => ({
+	app: { slug: 'luke-ui-visual-review' },
+	external_id: JSON.stringify(checkState(state)),
+	id: 1,
+	status: 'completed',
+});
+
+const latestRun = (overrides: Partial<LatestComparison> = {}): LatestComparison => ({
+	conclusion: 'success',
+	id: 345,
+	run_attempt: 2,
+	status: 'completed',
+	...overrides,
+});
+
+const plan = (options: Partial<Parameters<typeof planReconcile>[0]>) => {
+	return planReconcile({
+		compareConclusion: 'success',
+		hasArtifact: true,
+		latest: latestRun(),
+		recorded: undefined,
+		...options,
+	});
+};
+
+test('reconciles from the latest comparison, not the event', () => {
+	expect(plan({})).toEqual({ outcome: 'report', runAttempt: 2, runId: 345 });
+	expect(plan({ latest: latestRun({ conclusion: null, status: 'in_progress' }) })).toEqual({
+		outcome: 'pending',
+		runAttempt: 2,
+		runId: 345,
+	});
+	expect(plan({ latest: undefined }).outcome).toBe('none');
+});
+
+test('records a newer attempt that finished after its start event was dropped', () => {
+	// Attempt 1 was approved. Attempt 2's start event never arrived, so its completion is the
+	// first event for it, and the approval must not survive.
+	const approvedFirstAttempt = recordedRun({ kind: 'review', runAttempt: 1 });
+
+	expect(plan({ recorded: approvedFirstAttempt })).toEqual({
+		outcome: 'report',
+		runAttempt: 2,
+		runId: 345,
+	});
+});
+
+test('writes nothing for an older attempt event once the newer attempt is recorded', () => {
+	// The event is for attempt 1, but the latest comparison is attempt 2, already recorded and
+	// possibly approved. Recording it again would discard the decision.
+	for (const kind of ['review', 'clean'] as const) {
+		const decision = plan({ recorded: recordedRun({ kind, runAttempt: 2 }) });
+		expect(decision.outcome).toBe('none');
+		expect(decision.outcome === 'none' && decision.reason).toContain('already recorded');
+	}
+});
+
+test('records the latest comparison again after a recorded failure', () => {
+	// A failed publication is recorded as failed, so the next event retries it.
+	expect(plan({ recorded: recordedRun({ kind: 'failed', runAttempt: 2 }) }).outcome).toBe('report');
+});
+
+test('records a start once, whatever the recorded check status', () => {
+	const running = latestRun({ conclusion: null, status: 'in_progress' });
+	const pending = recordedRun({ kind: 'pending', reasons: [] });
+
+	expect(plan({ latest: running, recorded: pending }).outcome).toBe('none');
+	// A finished run replaces the pending record.
+	expect(plan({ recorded: pending }).outcome).toBe('report');
+	expect(plan({ latest: running, recorded: recordedRun({ kind: 'review' }) }).outcome).toBe(
+		'pending',
+	);
+});
+
+test('reads the recorded state only from an external id this workflow wrote', () => {
+	expect(recordedState(undefined)).toBeUndefined();
+	expect(recordedState({ app: null, external_id: 'not json', id: 1 })).toBeUndefined();
+	expect(recordedState({ app: null, external_id: '{"v":2}', id: 1 })).toBeUndefined();
+	expect(recordedState({ app: null, external_id: null, id: 1 })).toBeUndefined();
+	expect(
+		isAlreadyRecorded({
+			outcome: 'report',
+			recorded: recordedRun({ kind: 'review', runId: 999 }),
+			runAttempt: 2,
+			runId: 345,
+		}),
+	).toBe(false);
 });
 
 const BASELINE_SHA = 'b'.repeat(40);
@@ -898,6 +1006,7 @@ test('strips each catalog block up to the next top-level key', () => {
 
 const reviewOf = (overrides: Partial<Parameters<typeof decideReview>[0]>) => {
 	return decideReview({
+		baselineCurrent: true,
 		baselineSha: BASELINE_SHA,
 		differing: 0,
 		infrastructureFiles: [],
@@ -938,6 +1047,41 @@ for (const differing of [0, 2]) {
 	});
 }
 
+for (const differing of [0, 2]) {
+	test(`fails a report with ${differing} differences against an out-of-date baseline`, () => {
+		expect(reviewOf({ baselineCurrent: false, differing })).toEqual({
+			failure: 'outdated-baseline',
+			kind: 'failed',
+			reasons: [],
+		});
+	});
+}
+
+test('finds the newest baseline that passes verification', () => {
+	const runs = [
+		// A fork's main is listed by `branch=main` too, and must be passed over.
+		{ ...baselineRun, head_repository: { full_name: 'mallory/luke-ui' }, id: 900, run_attempt: 1 },
+		{ ...baselineRun, id: 800, run_attempt: 2 },
+		{ ...baselineRun, id: 700, run_attempt: 1 },
+	];
+
+	expect(newestBaselineRun(runs, 'luke/luke-ui')?.id).toBe(800);
+	expect(newestBaselineRun(runs.slice(0, 1), 'luke/luke-ui')).toBeUndefined();
+});
+
+test('treats a baseline as current only at the newest run and attempt', () => {
+	const newest = { ...baselineRun, id: 800, run_attempt: 2 };
+
+	expect(isCurrentBaseline(newest, 800, 2)).toBe(true);
+	// A dispatch on main made a newer run.
+	expect(isCurrentBaseline(newest, 700, 1)).toBe(false);
+	// A re-run of the same baseline run made a newer attempt.
+	expect(isCurrentBaseline(newest, 800, 1)).toBe(false);
+	expect(isCurrentBaseline(newest, 800, null)).toBe(false);
+	expect(isCurrentBaseline(newest, null, null)).toBe(false);
+	expect(isCurrentBaseline(undefined, 800, 2)).toBe(false);
+});
+
 for (const [outcome, failure] of [
 	['failed', 'unfinished'],
 	['cancelled', 'cancelled'],
@@ -973,6 +1117,7 @@ const NOW = new Date('2026-11-16T03:22:45.000Z');
 
 function checkState(overrides: Partial<CheckState> = {}): CheckState {
 	return {
+		baselineRunAttempt: 1,
 		baselineRunId: 678,
 		baselineSha: 'b'.repeat(40),
 		kind: 'review',
@@ -1021,7 +1166,7 @@ test('asks for review of a report with differences', () => {
 	expect(payload.output.summary.split('\n')[0]).toBe('**Status:** Needs review');
 	expect(payload.output.summary).toContain('| 1 | 1 | 0 | 30 |');
 	expect(payload.output.summary).toContain(
-		'against baseline run [678](https://github.com/luke/luke-ui/actions/runs/678) from `main@bbbbbbb`.',
+		'against baseline run [678](https://github.com/luke/luke-ui/actions/runs/678) (attempt 1) from `main@bbbbbbb`.',
 	);
 	expect(payload.output.text).toBe(
 		[
@@ -1034,9 +1179,32 @@ test('asks for review of a report with differences', () => {
 });
 
 test('stores the comparison run and baseline in the external id', () => {
-	const state = checkState({ reasons: ['visual', 'infrastructure'] });
+	const state = checkState({ baselineRunAttempt: 3, reasons: ['visual', 'infrastructure'] });
 
-	expect(JSON.parse(payloadFor(state).external_id)).toEqual(state);
+	const recorded = JSON.parse(payloadFor(state).external_id);
+
+	expect(recorded).toEqual(state);
+	expect(recorded.baselineRunAttempt).toBe(3);
+});
+
+test('records a failed resolve only on a checked commit or an open pull request head', () => {
+	const checked = recordedRun({ kind: 'review' });
+
+	expect(canRecordFailedPublication({ pullRequest: 12, recorded: undefined })).toBe(true);
+	expect(canRecordFailedPublication({ pullRequest: undefined, recorded: checked })).toBe(true);
+	// A closed pull request or a commit that is no longer its head gets no new check run.
+	expect(canRecordFailedPublication({ pullRequest: undefined, recorded: undefined })).toBe(false);
+});
+
+test('links the details to the app root when the pull request is unknown', () => {
+	const payload = payloadFor(checkState({ kind: 'failed', reasons: [] }), {
+		failure: 'publish-failed',
+		pullRequest: undefined,
+		summary: undefined,
+	});
+
+	expect(payload.details_url).toBe(`${APP_URL}/`);
+	expect(payload.output.title).toBe('Publishing the report failed');
 });
 
 test('lists changed infrastructure and names it in the title', () => {
@@ -1069,6 +1237,7 @@ for (const [failure, title] of [
 	['cancelled', 'Comparison was cancelled'],
 	['publish-failed', 'Publishing the report failed'],
 	['unverified-baseline', 'Baseline could not be verified'],
+	['outdated-baseline', 'Baseline is out of date'],
 ] as const) {
 	test(`fails the check with the title "${title}"`, () => {
 		const failed = payloadFor(checkState({ kind: 'failed', reasons: [] }), {
@@ -1121,25 +1290,6 @@ test('completes an existing check run as action_required for a started compariso
 	expect(payload.output.title).toBe('Comparing');
 	expect(payload.output.summary).toBe('**Status:** Comparing\n');
 	expect(JSON.parse(payload.external_id)).toEqual(pendingState);
-});
-
-test('records a start once when both start events arrive', () => {
-	const pending = {
-		app: { slug: 'luke-ui-visual-review' },
-		external_id: JSON.stringify(checkState({ kind: 'pending', reasons: [] })),
-		id: 1,
-		status: 'in_progress',
-	};
-
-	expect(isPendingFor(pending, 345, 2)).toBe(true);
-	expect(isPendingFor(pending, 345, 3)).toBe(false);
-	// A pending check run written over an existing one is completed. The external id decides.
-	expect(isPendingFor({ ...pending, status: 'completed' }, 345, 2)).toBe(true);
-	expect(isPendingFor({ ...pending, external_id: JSON.stringify(checkState()) }, 345, 2)).toBe(
-		false,
-	);
-	expect(isPendingFor({ ...pending, external_id: 'not json' }, 345, 2)).toBe(false);
-	expect(isPendingFor(undefined, 345, 2)).toBe(false);
 });
 
 test(`caps the check run summary at ${MAX_SUMMARY_CHARS} characters`, () => {

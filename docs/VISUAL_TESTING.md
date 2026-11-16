@@ -101,10 +101,9 @@ pull request's report live in one Cloudflare Pages project that takes direct upl
   the differing captures' PNGs. The baseline stays in the `visual-baseline` artefact.
 
 `Visual review publish` then records the `visual-review` check run for the commit and writes one
-comment on the pull request, which it updates on each run. It also runs when a comparison starts, to
-set the check run to `Comparing`. The comment gives the review status and the counts, and links to
-the review. A report with no differences is still published, so the app can tell "no visual changes"
-from "no report".
+comment on the pull request, which it updates on each run. The comment gives the review status and
+the counts, and links to the review. A report with no differences is still published, so the app can
+tell "no visual changes" from "no report".
 
 To review a local comparison, run `pnpm test:visual`, then `pnpm dev:visual-review`, and open
 `http://localhost:5175/?source=local`.
@@ -115,33 +114,42 @@ The `visual-review` check run records whether a commit's visual changes are appr
 from `visual-regression`, which reports whether the comparison itself worked. The visual review
 GitHub App owns the check run, and each commit has exactly one:
 
-| Comparison                                                       | `visual-review`   | Title                            |
-| ---------------------------------------------------------------- | ----------------- | -------------------------------- |
-| Started or re-run                                                | See below         | `Comparing`                      |
-| No differences, or skipped because nothing visual changed        | `success`         | `No visual changes`              |
-| Differences, or a change to the visual testing infrastructure    | `action_required` | `Needs review: …`                |
-| Failed or timed out, or skipped despite an infrastructure change | `failure`         | `Comparison did not finish`      |
-| Cancelled                                                        | `failure`         | `Comparison was cancelled`       |
-| A report whose baseline is missing or could not be verified      | `failure`         | `Baseline could not be verified` |
-| `Visual review publish` failed after resolving the pull request  | `failure`         | `Publishing the report failed`   |
+| Latest comparison                                                     | `visual-review`   | Title                            |
+| --------------------------------------------------------------------- | ----------------- | -------------------------------- |
+| Not finished                                                          | See below         | `Comparing`                      |
+| No differences, or its `compare` job skipped                          | `success`         | `No visual changes`              |
+| Differences, or a change to the visual testing infrastructure         | `action_required` | `Needs review: …`                |
+| Failed, timed out, or `compare` uploaded no report                    | `failure`         | `Comparison did not finish`      |
+| Cancelled                                                             | `failure`         | `Comparison was cancelled`       |
+| A report whose baseline is missing or could not be verified           | `failure`         | `Baseline could not be verified` |
+| A report whose baseline is no longer the newest `Visual baseline` run | `failure`         | `Baseline is out of date`        |
+| `Visual review publish` failed or was cancelled                       | `failure`         | `Publishing the report failed`   |
 
-Only the latest comparison for a commit is recorded: the newest `Visual regression` pull request run
-for that commit, at its newest attempt. A re-run raises the attempt as soon as it is requested, so
-an earlier attempt or a superseded run that finishes late records nothing. The review backend uses
-the same rule before it accepts a decision. Every interleaving of the two writers ends with the
-check failing or in progress unless the latest comparison's verified result has a decision.
+`Visual review publish` runs when a `Visual regression` run is requested, starts, or completes, but
+it never records the run the event describes. It finds the open pull request whose head is the
+event's commit, then reads that commit's latest comparison: the newest `Visual regression` pull
+request run for it, at its newest attempt. It records that run's state: `Comparing` while it runs,
+and its result once it finishes. A dropped, duplicated, or late event is therefore harmless, because
+the next event records the same state. When the check run already records that run and attempt as
+`Comparing`, `Needs review`, or `No visual changes`, it writes nothing, so a decision on the latest
+result is never discarded. A recorded failure is written again, so the next event retries a failed
+publication. The review backend uses the same latest-comparison rule before it accepts a decision.
 
-GitHub sends no `requested` event for a re-run, so `Visual review publish` also treats the
-`in_progress` event as the start of a comparison. A start event that arrives after its run finished
-is ignored. A started comparison creates the check run in progress when the commit has none. GitHub
-ignores a change back to in progress on a completed check run, so an existing one becomes
-`action_required` with the title `Comparing` instead. Either way it cannot pass, and its external id
-records the `pending` kind that readers act on. Starting a comparison also updates the status of an
-existing comment to `Comparing`, and never creates one.
+A re-run raises the attempt as soon as it is requested, so it makes the earlier result stale at
+once. GitHub sends no `requested` event for a re-run, so the `in_progress` event also reconciles.
 
-A pull request needs a review even when nothing differs if it changes the visual testing
-infrastructure, because those files decide how its own comparison runs. `findInfrastructureChanges`
-in [`visual-review.ts`](../.github/scripts/visual-review.ts) decides which changes count:
+A run skipped comparing only when its `compare` job was skipped. A `compare` job that succeeded but
+uploaded no report did not finish.
+
+When no check run exists yet, `Comparing` creates one in progress. GitHub ignores a change back to
+in progress on a completed check run, so an existing one becomes `action_required` with the title
+`Comparing` instead. Either way it cannot pass, and its external id records the `pending` kind that
+readers act on. `Comparing` also updates the status of an existing comment, and never creates one.
+
+A pull request that changes the visual testing infrastructure needs a review even when nothing
+differs. This makes changes to how the comparison is set up visible to the reviewer. It does not
+stop tampering. `findInfrastructureChanges` in
+[`visual-review.ts`](../.github/scripts/visual-review.ts) decides which changes count:
 
 - A path in `INFRASTRUCTURE_PATHS` or with a name in `INFRASTRUCTURE_FILE_NAMES`. A renamed file
   counts under its old name too.
@@ -153,27 +161,37 @@ in [`visual-review.ts`](../.github/scripts/visual-review.ts) decides which chang
 
 A later comparison run on the same commit, such as a re-run, updates the same check run and resets
 it to its new result. The check run's text keeps the commit's history of comparisons and decisions,
-up to 50 entries and 60,000 characters. Its external id records the comparison run and the baseline
-run it was compared against. `Visual regression` writes the baseline run id to `baseline.json` in
-its artefact. `Visual review publish` confirms through the GitHub API that the id names a
-successful, completed `Visual baseline` run, pushed or dispatched on this repository's `main`,
-before recording its commit.
+up to 50 entries and 60,000 characters. Its external id records the comparison run and attempt, and
+the baseline run and attempt it was compared against. `Visual regression` writes the baseline run id
+to `baseline.json` in its artefact. `Visual review publish` confirms through the GitHub API that the
+id names a successful, completed `Visual baseline` run, pushed or dispatched on this repository's
+`main`. When it records the result, that run must also still be the newest such run, by run and by
+attempt. A push to `main`, a manual dispatch, or a re-run of `Visual baseline` replaces the
+baseline, so a report compared against an older one fails with `Baseline is out of date`. Re-run the
+comparison to record a new result.
 
 A new commit starts with no check run, so an approval never carries over to it. To make approval
 block merging, require `visual-review` in branch protection with the visual review App as its
 source, so a status with the same name from anywhere else does not count. Also require branches to
-be up to date before merging: the baseline only changes when `main` does, so an up-to-date branch is
-always compared against the current baseline.
+be up to date before merging. A new `Visual baseline` run on `main` usually means `main` moved, so
+an up-to-date branch gets a fresh comparison against the new baseline. A baseline that changes
+without `main` moving, through a dispatch or a re-run, is caught when the comparison is recorded or
+approved.
 
 ### Trust boundary
 
-`Visual regression` runs pull request code, so it holds no publishing credentials.
+`Visual regression` runs pull request code, so it holds no publishing credentials. Its comparison
+runs that code too: any test in a pull request can write files while the comparison runs, including
+the screenshots and `summary.json` it reports. A `clean` result is therefore the pull request's own
+claim. The `visual-review` check catches unintended visual changes. Code review must catch
+deliberate tampering.
+
 `Visual review publish` starts from `workflow_run`, runs only the scripts on `main`, and treats the
 `visual-regression-diff` artefact as hostile data:
 
-- `visual-review resolve-pr` finds the pull request from the run's head commit through the GitHub
-  API. It records a run only when that commit is still the pull request's head and the run is the
-  latest comparison for it, and never reads a pull request number from the artefact.
+- `visual-review resolve-pr` finds the pull request from the event's head commit through the GitHub
+  API, and records only that commit's latest comparison. It never reads a pull request number or a
+  run from the artefact.
 - `visual-review prepare` validates `summary.json` and builds the upload from an allow-list: the
   PNGs each validated capture id implies, checked as regular files with a PNG signature. Nothing
   else in the artefact is published, so it cannot add Pages control files such as `_worker.js`.
@@ -182,24 +200,24 @@ always compared against the current baseline.
 - Wrangler runs from a directory that `prepare` creates and that must not exist beforehand, so the
   deployment never includes the repository's `functions/` directory or a file planted beside the
   upload.
-- The App token is created straight after `resolve-pr`. When a later step fails, the last step
-  records `Publishing the report failed`, so a failed download, preparation, or deployment never
-  leaves an earlier result or approval in place.
+- The App token is created first. When any later step fails, or the job is cancelled, the last step
+  records `Publishing the report failed`, so a failed resolution, download, preparation, or
+  deployment never leaves an earlier result or approval in place. When `resolve-pr` itself failed,
+  the failure is recorded only on a commit that already has the check run or is still an open pull
+  request's head.
 - `visual-review review` writes the check run and the comment with a token for the visual review
-  App, limited to check runs and pull requests. It reads the pull request's changed files, their
-  `package.json` and `pnpm-workspace.yaml` contents, and the baseline run with the workflow token.
+  App, limited to check runs and pull requests. `resolve-pr` uses the same token to read the check
+  run. Everything else, such as the runs, jobs, changed files, and their `package.json` and
+  `pnpm-workspace.yaml` contents, is read with the workflow token.
 
 The two jobs that hold the Cloudflare token pin `cloudflare/wrangler-action` to a commit and
 `wranglerVersion` to an exact release. Renovate does not update `wranglerVersion`. Raise it by hand
 in both workflows.
 
-A pull request controls its own comparison, so its report and comment describe what that pull
-request chose to publish. A pull request that changes the visual testing infrastructure always needs
-a review for that reason. Review those changes as code, too.
-
-Dependency changes are not infrastructure: a pull request that only changes dependency ranges, the
-catalog, or `pnpm-lock.yaml` can pass with no visual differences. A malicious or broken dependency
-could still alter its own comparison, so review dependency and lockfile changes as code.
+Review every pull request's changes as code, whatever the check says. Dependency changes are not
+infrastructure: a pull request that only changes dependency ranges, the catalog, or `pnpm-lock.yaml`
+can pass with no visual differences, and a malicious or broken dependency could still alter its own
+comparison.
 
 Never check out or run pull request code in `Visual review publish`.
 
