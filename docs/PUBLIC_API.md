@@ -92,6 +92,13 @@ using `inputId` or a generated id, so the layout passes no ids.
 
 ### Primitives and composed components
 
+Primitives are sharp knives. Composed components provide the blessed composition. A composed
+component makes the common, accessible pattern easy with opinionated defaults, and need not support
+every composition its primitives allow. A primitive maximises flexibility, even when that lets a
+consumer misuse it. Do not add restrictions, defensive behaviour, or opinions to a primitive for a
+case its React Aria component allows, and do not duplicate accessibility logic that React Aria
+already provides.
+
 Primitives stay close to React Aria. Keep the wrapped component's state-aware `className` and
 `style`, events, refs, and `slot`, unless a prop conflicts with Luke UI's ownership rules. Do not
 expose root replacement on every RAC wrapper. Prefer recipes and state-aware styling. When Luke UI

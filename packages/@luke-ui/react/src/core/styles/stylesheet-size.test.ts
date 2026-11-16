@@ -12,8 +12,9 @@ import { expect, test } from 'vite-plus/test';
 // with them is 18,874 bytes.
 // Four responsive logical border-width utilities bring `gzip -9` to 19,011 bytes. The responsive
 // overscrollBehavior utility and the single-value listStyle utility bring it to 19,068 bytes.
-// Node gzipSync measures 19,161 bytes for the same stylesheet.
-const maximumGzipBytes = 19_361;
+// Node gzipSync measures 19,161 bytes for the same stylesheet. The Dialog overlay and its raised
+// surface pairing bring Node gzipSync to 19,474 bytes.
+const maximumGzipBytes = 19_674;
 
 test('keeps the public stylesheet within its size budget', async () => {
 	const stylesheet = await readFile(new URL('../../../dist/stylesheet.css', import.meta.url));

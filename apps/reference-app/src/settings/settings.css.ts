@@ -350,35 +350,6 @@ export const profileTextFieldControl = style({
 	},
 });
 
-export const dialogOverlay = style({
-	alignItems: 'center',
-	background: vars.color.background.backdrop,
-	display: 'flex',
-	inset: 0,
-	justifyContent: 'center',
-	overflowY: 'auto',
-	padding: vars.space['16'],
-	position: 'fixed',
-	zIndex: 40,
-});
-
-export const dialogModal = style({
-	background: vars.color.background.surface.raised,
-	border: `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`,
-	borderRadius: vars.radius.surface,
-	boxShadow: vars.shadow.overlay,
-	fontFamily: vars.font.family.body,
-	inlineSize: 'min(28rem, 100%)',
-	maxBlockSize: 'calc(100dvh - 2rem)',
-	outline: 'none',
-	overflowY: 'auto',
-});
-
-export const dialog = style({
-	outline: 'none',
-	padding: vars.space['24'],
-});
-
 export const settingsSelect = style({
 	'@container': {
 		[shellBelowBp768]: {
