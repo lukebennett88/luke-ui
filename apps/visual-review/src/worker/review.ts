@@ -18,6 +18,8 @@ export const shaSchema = z.string().regex(/^[0-9a-f]{40}$/);
 export const positiveIntegerSchema = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
 
 const externalIdSchema = z.object({
+	// Written since revision 2.1. An external id without it has an unverified baseline.
+	baselineRunAttempt: positiveIntegerSchema.nullable().default(null),
 	baselineRunId: positiveIntegerSchema.nullable(),
 	baselineSha: shaSchema.nullable(),
 	kind: z.enum(['clean', 'failed', 'pending', 'review']),
@@ -38,6 +40,7 @@ type ReviewState =
 	| 'needs-review';
 
 export interface Review {
+	baselineRunAttempt: number | null;
 	baselineRunId: number | null;
 	baselineSha: string | null;
 	checkUrl: string;
@@ -60,6 +63,19 @@ export interface CheckRunSnapshot {
 	title: string | null;
 }
 
+/** Whether two external ids record the same comparison, baseline and outcome. */
+export function sameExternalId(left: ExternalId, right: ExternalId): boolean {
+	return (
+		left.kind === right.kind &&
+		left.runId === right.runId &&
+		left.runAttempt === right.runAttempt &&
+		left.baselineRunId === right.baselineRunId &&
+		left.baselineRunAttempt === right.baselineRunAttempt &&
+		left.baselineSha === right.baselineSha &&
+		left.reasons.join() === right.reasons.join()
+	);
+}
+
 /** Parses the publish workflow's v1 `external_id`, or returns `undefined` for anything else. */
 export function parseExternalId(value: string | null): ExternalId | undefined {
 	if (!value) return undefined;
@@ -80,6 +96,7 @@ export function reviewFromCheckRun(run: CheckRunSnapshot): Review | null {
 	const state = reviewState(externalId.kind, run.conclusion);
 	const decided = state === 'approved' || state === 'changes-requested';
 	return {
+		baselineRunAttempt: externalId.baselineRunAttempt,
 		baselineRunId: externalId.baselineRunId,
 		baselineSha: externalId.baselineSha,
 		checkUrl: run.htmlUrl,

@@ -39,6 +39,7 @@ function checkRun(externalId: Record<string, unknown> = {}): CheckRun {
 		app: { id: 42 },
 		conclusion: 'action_required',
 		external_id: JSON.stringify({
+			baselineRunAttempt: 1,
 			baselineRunId: 456,
 			baselineSha: BASELINE,
 			kind: 'review',
@@ -128,6 +129,8 @@ function fakeGitHub() {
 		],
 		/** The latest comparison on each read, in order, or `'error'` for a 500. The last repeats. */
 		comparisons: [comparisonRun()] as Array<WorkflowRun | 'error'>,
+		/** The `external_id` a check run write returns, when the publisher wrote in between. */
+		externalIdAfterWrite: undefined as string | null | undefined,
 		/** The check run that `GET /api/pulls` lists for pull request 5. */
 		listedCheckRun: {
 			conclusion: 'SUCCESS',
@@ -181,7 +184,12 @@ function fakeGitHub() {
 			case `GET api.github.com/repos/octo/widgets/commits/${HEAD}/check-runs`:
 				return respond({ check_runs: state.checkRuns, total_count: state.checkRuns.length });
 			case 'PATCH api.github.com/repos/octo/widgets/check-runs/900':
-				return respond({ ...checkRun(), conclusion: null, ...(body as Partial<CheckRun>) });
+				return respond({
+					...checkRun(),
+					conclusion: null,
+					external_id: state.externalIdAfterWrite ?? checkRun().external_id,
+					...(body as Partial<CheckRun>),
+				});
 			case 'GET api.github.com/repos/octo/widgets/actions/workflows/visual-regression.yml/runs': {
 				const run = state.comparisons[Math.min(comparisonReads, state.comparisons.length - 1)];
 				comparisonReads += 1;
@@ -530,6 +538,7 @@ describe('pull requests', () => {
 					headSha: HEAD,
 					number: 5,
 					review: {
+						baselineRunAttempt: 1,
 						baselineRunId: 456,
 						baselineSha: BASELINE,
 						checkUrl: 'https://github.com/octo/widgets/runs/900',
@@ -738,6 +747,7 @@ describe('decisions', () => {
 			completed_at: '2026-11-16T03:40:00.000Z',
 			conclusion: 'action_required',
 			external_id: JSON.stringify({
+				baselineRunAttempt: null,
 				baselineRunId: null,
 				baselineSha: null,
 				kind: 'pending',
@@ -779,6 +789,67 @@ describe('decisions', () => {
 		});
 		// The comment never showed the decision, so it is left alone.
 		expect(rest).toEqual([]);
+	});
+
+	test('returns the check run to pending when the publisher wrote during the decision', async () => {
+		const { github, handle } = setup();
+		// The write's response shows the publisher already marked a re-run as started.
+		github.state.externalIdAfterWrite = checkRun({
+			baselineRunAttempt: null,
+			baselineRunId: null,
+			baselineSha: null,
+			kind: 'pending',
+			reasons: [],
+			runAttempt: 2,
+		}).external_id;
+		const response = await handle(await decisionRequest(APPROVE), env);
+
+		expect(response.status).toBe(409);
+		expect(await response.json()).toMatchObject({ error: 'stale' });
+		const [, pending] = patches(github.calls);
+		expect(pending?.body).toMatchObject({
+			conclusion: 'action_required',
+			external_id: github.state.externalIdAfterWrite,
+			output: { summary: '**Status:** Comparing\n', title: 'Comparing' },
+		});
+		// The repair does not wait for the runs list to show the re-run.
+		const comparisonReads = github.calls.filter((call) =>
+			call.url.includes('/visual-regression.yml/runs'),
+		);
+		expect(comparisonReads).toHaveLength(1);
+	});
+
+	test('returns the check run to pending for the latest comparison when the write loses its external id', async () => {
+		const { github, handle } = setup();
+		github.state.externalIdAfterWrite = 'legacy';
+		const response = await handle(await decisionRequest(APPROVE), env);
+
+		expect(response.status).toBe(409);
+		const [, pending] = patches(github.calls);
+		const written = pending?.body as { external_id?: string } | undefined;
+		expect(JSON.parse(String(written?.external_id))).toMatchObject({
+			kind: 'pending',
+			runAttempt: 1,
+			runId: 123,
+		});
+	});
+
+	test('keeps confirming the decision after the response through waitUntil', async () => {
+		const { github, handle } = setup();
+		github.state.comparisons = [
+			comparisonRun(),
+			comparisonRun({ conclusion: null, run_attempt: 2, status: 'queued' }),
+		];
+		const pending: Array<Promise<unknown>> = [];
+		const response = await handle(await decisionRequest(APPROVE), env, {
+			waitUntil: (promise) => pending.push(promise),
+		});
+
+		expect(response.status).toBe(409);
+		expect(pending).toHaveLength(1);
+		// The registered promise settles without rejecting, so the runtime never reports it.
+		await expect(pending[0]).resolves.toBeUndefined();
+		expect(patches(github.calls)[1]?.body).toMatchObject({ conclusion: 'action_required' });
 	});
 
 	test('reuses the installation token across requests', async () => {
@@ -920,6 +991,24 @@ describe('decisions', () => {
 			name: 'on a comparison without a verified baseline',
 			prepare: (github) => {
 				github.state.checkRuns = [checkRun({ baselineRunId: null, baselineSha: null })];
+			},
+			request: () => decisionRequest(APPROVE),
+			status: 409,
+		},
+		{
+			code: 'unverified-baseline',
+			name: 'on a comparison without a baseline attempt',
+			prepare: (github) => {
+				github.state.checkRuns = [checkRun({ baselineRunAttempt: null })];
+			},
+			request: () => decisionRequest(APPROVE),
+			status: 409,
+		},
+		{
+			code: 'stale-baseline',
+			name: 'when the baseline run was re-run',
+			prepare: (github) => {
+				github.state.baselineRuns = [baselineRun({ run_attempt: 2 })];
 			},
 			request: () => decisionRequest(APPROVE),
 			status: 409,
