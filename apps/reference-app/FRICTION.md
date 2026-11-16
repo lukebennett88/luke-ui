@@ -25,15 +25,18 @@ Luke UI primitives, React Aria Components (RAC), and app-owned Vanilla Extract (
 Saved settings, mutations, validation, drafts, upload limits, and fake persistence belong to the
 app. TanStack Query, Zod, and React Router own them, and none of them need design-system support.
 
-## Remaining gaps
+## Resolved gaps
 
 ### Dialog
 
 The dialogs for changing the email address and clearing saved settings use RAC `DialogTrigger`,
 `ModalOverlay`, `Modal`, and `Dialog`. RAC supplies focus containment, dismissal, and focus
 restoration. Luke UI `Heading`, `Text`, `TextInputField`, and `Button` fill the dialog, with app VE
-for the overlay and surface. Luke UI has no public dialog composition. Owner:
-[#711: Public composition surface](https://github.com/lukebennett88/luke-ui/issues/711).
+for the overlay and surface. Luke UI now provides a public `Dialog` and dialog primitives, so this
+composition is no longer a gap. The reference app retains its original implementation. The gap was
+tracked in [#711: Public composition surface](https://github.com/lukebennett88/luke-ui/issues/711).
+
+## Remaining gaps
 
 ### Menu
 

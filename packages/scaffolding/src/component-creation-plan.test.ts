@@ -14,7 +14,7 @@ const validAnswers = {
 	name: 'StatusBadge',
 } as const;
 
-const GROUPS_REQUIRING_ACCESSIBILITY = new Set(['actions', 'feedback', 'forms']);
+const GROUPS_REQUIRING_ACCESSIBILITY = new Set(['actions', 'feedback', 'forms', 'overlays']);
 
 describe('parseComponentAnswers', () => {
 	it('rejects invalid docs group answers', () => {
@@ -120,7 +120,7 @@ describe('createComponentPlan', () => {
 		expect(violations).toEqual([]);
 	});
 
-	it('includes Accessibility only for actions, feedback, and forms', () => {
+	it('includes Accessibility only for actions, feedback, forms, and overlays', () => {
 		const guides = DOC_GROUPS.map((docsGroup) => {
 			const plan = createComponentPlan({ docsGroup, name: 'StatusBadge' });
 			const guide = plan.files.find((file) =>
@@ -136,7 +136,7 @@ describe('createComponentPlan', () => {
 			guides
 				.filter(({ docsGroup }) => GROUPS_REQUIRING_ACCESSIBILITY.has(docsGroup))
 				.map(({ guide }) => guide.includes('## Accessibility\n\n## API')),
-		).toEqual([true, true, true]);
+		).toEqual([true, true, true, true]);
 		expect(
 			guides
 				.filter(({ docsGroup }) => !GROUPS_REQUIRING_ACCESSIBILITY.has(docsGroup))

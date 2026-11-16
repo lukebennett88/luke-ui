@@ -274,6 +274,7 @@ const GROUPS_REQUIRING_ACCESSIBILITY = new Set<(typeof DOC_GROUPS)[number]>([
 	'actions',
 	'feedback',
 	'forms',
+	'overlays',
 ]);
 
 function renderHostedDocsPage(input: {

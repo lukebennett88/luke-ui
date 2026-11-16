@@ -3,6 +3,11 @@ import { style } from '../styles/layered-style.css.js';
 import type { RecipeSelection } from '../styles/recipe-types.js';
 import { recipe } from '../styles/recipe.js';
 
+export const iconButtonSizes = {
+	medium: vars.controlSize['40'],
+	small: vars.controlSize['32'],
+};
+
 export const iconButtonReset = style({
 	paddingInline: 0,
 });
@@ -11,10 +16,10 @@ export const iconButtonRecipe = recipe({
 	variants: {
 		size: {
 			medium: {
-				inlineSize: vars.controlSize['40'],
+				inlineSize: iconButtonSizes.medium,
 			},
 			small: {
-				inlineSize: vars.controlSize['32'],
+				inlineSize: iconButtonSizes.small,
 			},
 		},
 	},
