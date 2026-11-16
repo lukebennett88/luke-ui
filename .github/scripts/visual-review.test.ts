@@ -4,7 +4,9 @@ import { mkdir, mkdtemp, open, readdir, readFile, symlink, writeFile } from 'nod
 import { expect, test } from 'vite-plus/test';
 import type {
 	BaselineArtifact,
+	CheckRunRequest,
 	CheckState,
+	ExistingCheckRun,
 	FileContent,
 	FileReader,
 	IssueComment,
@@ -15,6 +17,7 @@ import type {
 	PullFile,
 	PullRequestCandidate,
 	RunMeta,
+	SweepPresentation,
 } from './visual-review.js';
 import {
 	canRecordFailedPublication,
@@ -44,6 +47,7 @@ import {
 	MAX_PUBLISHED_FILES,
 	MAX_SUMMARY_BYTES,
 	MAX_SUMMARY_CHARS,
+	MAX_SWEEP_RESTORES,
 	newestBaselineRun,
 	parseArtifactSummary,
 	parseBaseline,
@@ -52,12 +56,16 @@ import {
 	planSweep,
 	prepareSite,
 	prependHistory,
+	presentationBody,
 	recordedState,
 	replaceCommentStatus,
+	restoredPresentation,
+	revalidateComparison,
 	stripCatalogBlocks,
 	SWEEP_GRACE_MS,
 	UNLISTED_FILES_ENTRY,
 	verifiedBaselineSha,
+	writeSweepPresentation,
 } from './visual-review.js';
 
 const HEAD_SHA = 'a'.repeat(40);
@@ -1475,7 +1483,7 @@ const currentBaseline = { ...baselineRun, id: 678, run_attempt: 1 };
 
 const sweepPlan = (options: Partial<Parameters<typeof planSweep>[0]> = {}) => {
 	return planSweep({
-		conclusion: 'action_required',
+		conclusion: 'success',
 		latest: latestRun(),
 		newestBaseline: currentBaseline,
 		now: NOW,
@@ -1493,25 +1501,6 @@ const finishedRun = (ago: number, overrides: Partial<LatestComparison> = {}) => 
 	});
 };
 
-test('leaves a recorded result against the current baseline alone', () => {
-	for (const kind of ['review', 'clean'] as const) {
-		expect(sweepPlan({ state: checkState({ kind }) }).action).toBe('none');
-	}
-});
-
-for (const kind of ['failed', undefined] as const) {
-	test(`never sweeps a failing check run that records ${JSON.stringify(kind)}`, () => {
-		const swept = sweepPlan({
-			conclusion: 'failure',
-			latest: finishedRun(SWEEP_GRACE_MS),
-			newestBaseline: undefined,
-			state: checkState({ kind }),
-		});
-		expect(swept.action).toBe('none');
-	});
-}
-
-const failedState = checkState({ kind: 'failed', reasons: ['visual'] });
 const pendingRecord = checkState({
 	baselineRunAttempt: null,
 	baselineRunId: null,
@@ -1520,62 +1509,358 @@ const pendingRecord = checkState({
 	reasons: [],
 });
 
-test('fails again a failed record whose check run passes, keeping what it recorded', () => {
-	// Whatever the latest comparison is: the record itself must stop passing.
-	for (const latest of [latestRun(), finishedRun(0), undefined]) {
-		expect(sweepPlan({ conclusion: 'success', latest, state: failedState })).toEqual({
-			action: 'write',
-			failure: 'publish-failed',
-			historyEntry: 'The check run passed on a failed result',
-			state: failedState,
-		});
+const notRecorded = (comparison: string) => ({
+	action: 'write',
+	conclusion: 'failure',
+	historyEntry: `${comparison} was not recorded`,
+	title: 'Publishing the report failed',
+});
+
+test('leaves a passing result of the latest comparison against the current baseline alone', () => {
+	for (const kind of ['review', 'clean'] as const) {
+		expect(sweepPlan({ state: checkState({ kind }) }).action).toBe('none');
 	}
 });
 
-test('fails a pending comparison that finished past the grace period without being recorded', () => {
-	for (const conclusion of ['action_required', 'success']) {
-		const swept = sweepPlan({
-			conclusion,
-			latest: finishedRun(SWEEP_GRACE_MS, { run_attempt: 2 }),
-			state: pendingRecord,
-		});
-		expect(swept).toEqual({
-			action: 'write',
-			failure: 'publish-failed',
-			historyEntry: 'Comparison run 345 (attempt 2) was not recorded',
-			state: { ...pendingRecord, kind: 'failed' },
-		});
-	}
-});
-
-test('leaves a pending comparison that is running or within the grace period alone', () => {
-	const running = latestRun({ conclusion: null, status: 'in_progress' });
-	const justFinished = finishedRun(SWEEP_GRACE_MS - 1, { run_attempt: 2 });
-	for (const latest of [running, justFinished]) {
-		expect(sweepPlan({ latest, state: pendingRecord }).action).toBe('none');
-	}
-});
-
-test('writes a pending record again when a decision made its check run pass', () => {
-	const running = latestRun({ conclusion: null, status: 'in_progress' });
-	const justFinished = finishedRun(SWEEP_GRACE_MS - 1, { run_attempt: 2 });
-	for (const latest of [running, justFinished]) {
-		expect(sweepPlan({ conclusion: 'success', latest, state: pendingRecord })).toEqual({
-			action: 'write',
-			state: pendingRecord,
-		});
-	}
-});
-
-test('treats a pending record of an older attempt like any other stale record', () => {
-	expect(sweepPlan({ latest: finishedRun(SWEEP_GRACE_MS), state: pendingRecord })).toMatchObject({
-		action: 'write',
-		failure: 'publish-failed',
-		historyEntry: 'Comparison run 345 (attempt 3) was not recorded',
+// A check run that does not pass already blocks merging, whatever went stale behind it.
+for (const conclusion of ['action_required', 'failure', 'neutral', null, undefined]) {
+	test(`leaves a check run that concludes ${JSON.stringify(conclusion)} alone`, () => {
+		for (const kind of ['review', 'clean', 'failed'] as const) {
+			const swept = sweepPlan({
+				conclusion,
+				latest: finishedRun(SWEEP_GRACE_MS),
+				newestBaseline: undefined,
+				state: checkState({ kind }),
+			});
+			expect(swept.action).toBe('none');
+		}
 	});
-	expect(
-		sweepPlan({ latest: latestRun({ run_attempt: 3, status: 'queued' }), state: pendingRecord }),
-	).toMatchObject({ action: 'write', state: { kind: 'pending', runAttempt: 3 } });
+}
+
+test('fails a comparison still shown as comparing long after it finished', () => {
+	const latest = finishedRun(SWEEP_GRACE_MS, { run_attempt: 2 });
+
+	expect(sweepPlan({ conclusion: 'action_required', latest, state: pendingRecord })).toEqual(
+		notRecorded('Comparison run 345 (attempt 2)'),
+	);
+});
+
+test('leaves a pending comparison alone until it has finished for the grace period', () => {
+	const pending = { conclusion: 'action_required', state: pendingRecord };
+	const running = latestRun({ conclusion: null, status: 'in_progress' });
+	const justFinished = finishedRun(SWEEP_GRACE_MS - 1, { run_attempt: 2 });
+	const newerAttempt = finishedRun(SWEEP_GRACE_MS);
+
+	for (const latest of [running, justFinished, newerAttempt, undefined]) {
+		expect(sweepPlan({ ...pending, latest }).action).toBe('none');
+	}
+	// Once failed, the next sweep writes nothing more.
+	const finished = finishedRun(SWEEP_GRACE_MS, { run_attempt: 2 });
+	expect(sweepPlan({ ...pending, conclusion: 'failure', latest: finished }).action).toBe('none');
+	// A new check run that is still in progress has no conclusion.
+	expect(sweepPlan({ ...pending, conclusion: null, latest: finished }).action).toBe('none');
+});
+
+for (const [kind, entry] of [
+	['failed', 'The check run passed on a failed result'],
+	['pending', 'The check run passed on an unfinished comparison'],
+	[undefined, 'The check run passed on a failed result'],
+] as const) {
+	test(`fails a passing check run that records ${JSON.stringify(kind)}`, () => {
+		// Whatever the latest comparison is: the record itself must stop passing.
+		for (const latest of [latestRun(), finishedRun(0), undefined]) {
+			expect(sweepPlan({ latest, state: checkState({ kind }) })).toEqual({
+				action: 'write',
+				conclusion: 'failure',
+				historyEntry: entry,
+				title: 'Publishing the report failed',
+			});
+		}
+	});
+}
+
+test('leaves a passing commit with no comparison alone', () => {
+	expect(sweepPlan({ latest: undefined }).action).toBe('none');
+});
+
+test('shows a newer comparison that is still running as comparing', () => {
+	const latest = latestRun({ conclusion: null, run_attempt: 3, status: 'queued' });
+
+	expect(sweepPlan({ latest })).toEqual({
+		action: 'write',
+		conclusion: 'action_required',
+		historyEntry: 'Comparison run 345 (attempt 3) started',
+		title: 'Comparing',
+	});
+});
+
+test('leaves a newer finished comparison to the publisher for the grace period', () => {
+	expect(sweepPlan({ latest: finishedRun(SWEEP_GRACE_MS - 1) }).action).toBe('none');
+});
+
+for (const [name, latest] of [
+	['at the end of the grace period', finishedRun(SWEEP_GRACE_MS)],
+	['long after it', finishedRun(SWEEP_GRACE_MS * 10)],
+	['with no finish time', finishedRun(0, { updated_at: null })],
+	['in a newer run', finishedRun(SWEEP_GRACE_MS, { id: 999, run_attempt: 1 })],
+] as const) {
+	test(`fails a newer finished comparison that was never recorded, ${name}`, () => {
+		expect(sweepPlan({ latest })).toEqual(
+			notRecorded(`Comparison run ${latest.id} (attempt ${latest.run_attempt})`),
+		);
+	});
+}
+
+for (const [name, newestBaseline] of [
+	['a newer baseline run', { ...baselineRun, id: 700, run_attempt: 1 }],
+	['a re-run of the recorded baseline', { ...baselineRun, id: 678, run_attempt: 2 }],
+	['no successful baseline at all', undefined],
+] as const) {
+	test(`fails a passing result after ${name}`, () => {
+		for (const kind of ['review', 'clean'] as const) {
+			expect(sweepPlan({ newestBaseline, state: checkState({ kind }) })).toEqual({
+				action: 'write',
+				conclusion: 'failure',
+				historyEntry: 'Baseline run 678 (attempt 1) is no longer current',
+				title: 'Baseline is out of date',
+			});
+		}
+	});
+}
+
+test('never fails a skipped comparison for its baseline, because it has none', () => {
+	const skipped = checkState({
+		baselineRunAttempt: null,
+		baselineRunId: null,
+		baselineSha: null,
+		kind: 'clean',
+		reasons: [],
+	});
+
+	expect(sweepPlan({ newestBaseline: undefined, state: skipped }).action).toBe('none');
+});
+
+const outdated: SweepPresentation = {
+	conclusion: 'failure',
+	historyEntry: 'Baseline run 678 (attempt 1) is no longer current',
+	title: 'Baseline is out of date',
+};
+
+const SWEPT_HISTORY = '### History\n\n- 2026-11-16 03:40 UTC · Approved by @luke\n';
+
+/** A check run as the API returns it, recording `state`. */
+const storedRun = (
+	state: Partial<CheckState> | string,
+	overrides: Partial<ExistingCheckRun> = {},
+): ExistingCheckRun => ({
+	app: { slug: 'luke-ui-visual-review' },
+	conclusion: 'success',
+	external_id: typeof state === 'string' ? state : JSON.stringify(checkState(state)),
+	id: 1,
+	output: {
+		summary: '**Status:** Approved by @luke\n\n| changed |\n| --- |\n| 2 |\n',
+		text: SWEPT_HISTORY,
+		title: 'Approved by @luke',
+	},
+	status: 'completed',
+	...overrides,
+});
+
+test('changes how a check run reads and never its record', () => {
+	const body = presentationBody({ existing: storedRun({}), now: NOW, presentation: outdated });
+
+	expect(body).toEqual({
+		completed_at: NOW.toISOString(),
+		conclusion: 'failure',
+		output: {
+			// The report table stays, under the new status.
+			summary: '**Status:** Baseline is out of date\n\n| changed |\n| --- |\n| 2 |\n',
+			text: '### History\n\n- 2026-11-16 03:22 UTC · Baseline run 678 (attempt 1) is no longer current\n- 2026-11-16 03:40 UTC · Approved by @luke\n',
+			title: 'Baseline is out of date',
+		},
+		status: 'completed',
+	});
+	for (const key of ['external_id', 'head_sha', 'name']) expect(body).not.toHaveProperty(key);
+});
+
+test('writes the status line alone when the summary has none', () => {
+	for (const output of [null, { summary: null }, { summary: 'No status here.\n' }]) {
+		const body = presentationBody({
+			existing: storedRun({}, { output }),
+			now: NOW,
+			presentation: outdated,
+		});
+		expect(body.output.summary).toBe('**Status:** Baseline is out of date\n');
+	}
+});
+
+/** Answers each request with the next response, and records every request. */
+function stubRequests(responses: Array<ExistingCheckRun>) {
+	const requests: Array<Parameters<CheckRunRequest>[0]> = [];
+	const remaining = [...responses];
+	const request: CheckRunRequest = async (options) => {
+		requests.push(options);
+		const next = remaining.shift();
+		if (next === undefined) throw new Error('More requests than stubbed responses.');
+		return next;
+	};
+	return { request, requests };
+}
+
+const patches = (requests: Array<Parameters<CheckRunRequest>[0]>) => {
+	return requests.flatMap((request) => (request.method === 'PATCH' ? [request.body] : []));
+};
+
+const sweepWrite = (planned: ExistingCheckRun, responses: Array<ExistingCheckRun>) => {
+	const stub = stubRequests(responses);
+	const result = writeSweepPresentation({
+		now: () => NOW,
+		planned,
+		presentation: outdated,
+		request: stub.request,
+	});
+	return { requests: stub.requests, result };
+};
+
+test('writes the planned presentation when the check run has not changed', async () => {
+	const planned = storedRun({});
+	// History added between the plan and the write is kept, because the body is built from the
+	// read made just before the write.
+	const fresh = storedRun({}, { output: { ...planned.output, text: '### History\n\n- newer\n' } });
+	const { requests, result } = sweepWrite(planned, [fresh, storedRun({})]);
+
+	await expect(result).resolves.toEqual({
+		restored: false,
+		title: 'Baseline is out of date',
+		written: true,
+	});
+	expect(requests.map((request) => request.method)).toEqual(['GET', 'PATCH']);
+	expect(patches(requests)[0]?.conclusion).toBe('failure');
+	expect(patches(requests)[0]?.output.text).toContain('- newer\n');
+});
+
+for (const [name, fresh] of [
+	['record', storedRun({ runAttempt: 3 })],
+	['conclusion', storedRun({}, { conclusion: 'action_required' })],
+] as const) {
+	test(`writes nothing when the ${name} changed after the plan`, async () => {
+		const { requests, result } = sweepWrite(storedRun({}), [fresh]);
+
+		await expect(result).resolves.toMatchObject({ written: false });
+		expect(requests.map((request) => request.method)).toEqual(['GET']);
+	});
+}
+
+for (const [landed, conclusion, title] of [
+	[{ kind: 'pending', runAttempt: 3 }, 'action_required', 'Comparing'],
+	[{ kind: 'review', runAttempt: 3 }, 'action_required', 'Needs review'],
+	[{ kind: 'clean', runAttempt: 3 }, 'success', 'No visual changes'],
+	[{ kind: 'failed', runAttempt: 3 }, 'failure', 'Comparison failed'],
+	['not json', 'failure', 'Comparison failed'],
+] as const) {
+	test(`restores a ${JSON.stringify(landed)} record a publication wrote under the sweep`, async () => {
+		const planned = storedRun({});
+		const overwritten = storedRun(landed, { conclusion: 'failure' });
+		const { requests, result } = sweepWrite(planned, [planned, overwritten, storedRun(landed)]);
+
+		await expect(result).resolves.toEqual({ restored: true, title, written: true });
+		const [, restore] = patches(requests);
+		expect(restore).toMatchObject({ conclusion, output: { title } });
+		expect(restore?.output.summary.split('\n')[0]).toBe(`**Status:** ${title}`);
+		expect(restore?.output.text).toContain(
+			'Sweep withdrawn: a newer result was recorded at the same time',
+		);
+		expect(restore?.output.text).toContain('- 2026-11-16 03:40 UTC · Approved by @luke');
+		for (const body of patches(requests)) expect(body).not.toHaveProperty('external_id');
+	});
+}
+
+test('restores a pending record with the status alone, and a result with where its report is', () => {
+	expect(restoredPresentation(storedRun({ kind: 'pending' })).summary).toBe(
+		'**Status:** Comparing\n',
+	);
+	expect(restoredPresentation(storedRun({ kind: 'review' })).summary).toBe(
+		'**Status:** Needs review\n\nA sweep written at the same moment replaced the report summary. The visual review app still has the report.\n',
+	);
+});
+
+test('writes success only to restore a clean result', async () => {
+	const planned = storedRun({});
+	for (const kind of ['pending', 'review', 'failed'] as const) {
+		const landed = storedRun({ kind, runAttempt: 3 });
+		const { requests, result } = sweepWrite(planned, [planned, landed, landed]);
+		// Sequential: each case reads its own stub.
+		// oxlint-disable-next-line no-await-in-loop
+		await result;
+		expect(patches(requests).map((body) => body.conclusion)).not.toContain('success');
+	}
+});
+
+test(`stops after ${MAX_SWEEP_RESTORES} restores and leaves the check needing action`, async () => {
+	const planned = storedRun({});
+	// Every write lands on yet another clean record.
+	const moving = Array.from({ length: MAX_SWEEP_RESTORES + 2 }, (_, index) => {
+		return storedRun({ kind: 'clean', runAttempt: 10 + index });
+	});
+	const { requests, result } = sweepWrite(planned, [planned, ...moving]);
+
+	await expect(result).resolves.toMatchObject({ restored: true, written: true });
+	expect(patches(requests).map((body) => body.conclusion)).toEqual([
+		'failure',
+		...Array.from({ length: MAX_SWEEP_RESTORES }, () => 'success'),
+		'action_required',
+	]);
+	// No request follows the final write.
+	expect(requests).toHaveLength(MAX_SWEEP_RESTORES + 3);
+});
+
+test('stops restoring as soon as a restore lands on the record it restored', async () => {
+	const planned = storedRun({});
+	const first = storedRun({ kind: 'review', runAttempt: 3 });
+	const second = storedRun({ kind: 'clean', runAttempt: 4 });
+	const { requests, result } = sweepWrite(planned, [planned, first, second, second]);
+
+	await expect(result).resolves.toEqual({
+		restored: true,
+		title: 'No visual changes',
+		written: true,
+	});
+	expect(patches(requests).map((body) => body.conclusion)).toEqual([
+		'failure',
+		'action_required',
+		'success',
+	]);
+});
+
+const revalidate = (latest: LatestComparison | undefined) => {
+	return revalidateComparison({ read: async () => latest, runAttempt: 2, runId: 345 });
+};
+
+test('records a comparison that is still the latest just before the write', async () => {
+	await expect(revalidate(latestRun())).resolves.toEqual({ write: true });
+});
+
+for (const [name, latest] of [
+	['a newer attempt', latestRun({ run_attempt: 3 })],
+	['a newer run', latestRun({ id: 999, run_attempt: 1 })],
+	['no comparison', undefined],
+] as const) {
+	test(`records nothing for a comparison superseded by ${name}`, async () => {
+		const decision = await revalidate(latest);
+
+		expect(decision.write).toBe(false);
+		expect(!decision.write && decision.reason).toContain('no longer the latest comparison');
+	});
+}
+
+test('fails rather than records when the latest comparison cannot be read', async () => {
+	const read = async () => {
+		throw new Error('GitHub API 502');
+	};
+
+	await expect(revalidateComparison({ read, runAttempt: 2, runId: 345 })).rejects.toThrow(
+		'GitHub API 502',
+	);
 });
 
 test('records a failed publication only when no newer result is recorded', () => {
@@ -1605,154 +1890,6 @@ test('records a failed publication only when no newer result is recorded', () =>
 			recorded: recordedRun({ runAttempt: 3 }),
 		}),
 	).toBe(false);
-});
-
-test('leaves a commit with no comparison alone', () => {
-	expect(sweepPlan({ latest: undefined }).action).toBe('none');
-});
-
-test('records a newer comparison that is still running as pending', () => {
-	const swept = sweepPlan({
-		latest: latestRun({ conclusion: null, run_attempt: 3, status: 'queued' }),
-	});
-
-	expect(swept).toEqual({
-		action: 'write',
-		state: checkState({
-			baselineRunAttempt: null,
-			baselineRunId: null,
-			baselineSha: null,
-			kind: 'pending',
-			reasons: [],
-			runAttempt: 3,
-		}),
-	});
-});
-
-test('leaves a newer finished comparison to the publisher for the grace period', () => {
-	expect(sweepPlan({ latest: finishedRun(SWEEP_GRACE_MS - 1) }).action).toBe('none');
-});
-
-for (const [name, latest] of [
-	['at the end of the grace period', finishedRun(SWEEP_GRACE_MS)],
-	['long after it', finishedRun(SWEEP_GRACE_MS * 10)],
-	['with no finish time', finishedRun(0, { updated_at: null })],
-	['in a newer run', finishedRun(SWEEP_GRACE_MS, { id: 999, run_attempt: 1 })],
-] as const) {
-	test(`fails a newer finished comparison that was never recorded, ${name}`, () => {
-		const swept = sweepPlan({ latest });
-
-		expect(swept).toEqual({
-			action: 'write',
-			failure: 'publish-failed',
-			historyEntry: `Comparison run ${latest.id} (attempt ${latest.run_attempt}) was not recorded`,
-			state: checkState({
-				baselineRunAttempt: null,
-				baselineRunId: null,
-				baselineSha: null,
-				kind: 'failed',
-				reasons: [],
-				runAttempt: latest.run_attempt,
-				runId: latest.id,
-			}),
-		});
-	});
-}
-
-for (const [name, newestBaseline] of [
-	['a newer baseline run', { ...baselineRun, id: 700, run_attempt: 1 }],
-	['a re-run of the recorded baseline', { ...baselineRun, id: 678, run_attempt: 2 }],
-	['no successful baseline at all', undefined],
-] as const) {
-	test(`fails a recorded result after ${name}, keeping what it recorded`, () => {
-		const state = checkState({ kind: 'clean', reasons: [] });
-		const swept = sweepPlan({ newestBaseline, state });
-
-		expect(swept).toEqual({
-			action: 'write',
-			failure: 'outdated-baseline',
-			historyEntry: 'Baseline run 678 (attempt 1) is no longer current',
-			state: { ...state, kind: 'failed' },
-		});
-	});
-}
-
-test('keeps the reasons of an outdated result that needed review', () => {
-	const state = checkState({ reasons: ['visual', 'infrastructure'] });
-	const swept = sweepPlan({ newestBaseline: undefined, state });
-
-	expect(swept.action === 'write' && swept.state.reasons).toEqual(['visual', 'infrastructure']);
-});
-
-test('never fails a skipped comparison for its baseline, because it has none', () => {
-	const skipped = checkState({
-		baselineRunAttempt: null,
-		baselineRunId: null,
-		baselineSha: null,
-		kind: 'clean',
-		reasons: [],
-	});
-
-	expect(sweepPlan({ newestBaseline: undefined, state: skipped }).action).toBe('none');
-});
-
-test('keeps the check run history when the sweep fails a result', () => {
-	const previousText = [
-		'### History',
-		'',
-		'- 2026-11-16 03:40 UTC · Approved by @luke',
-		'- 2026-11-16 03:22 UTC · Comparison run 345 (attempt 2): needs review',
-		'',
-	].join('\n');
-	const swept = sweepPlan({ newestBaseline: undefined });
-	if (swept.action !== 'write') throw new Error('Expected the sweep to write.');
-
-	const payload = payloadFor(swept.state, {
-		failure: swept.failure,
-		historyEntry: swept.historyEntry,
-		previousText,
-		summary: undefined,
-		updatesExisting: true,
-	});
-
-	expect(payload).toMatchObject({ conclusion: 'failure', status: 'completed' });
-	expect(payload.output.title).toBe('Baseline is out of date');
-	expect(JSON.parse(payload.external_id)).toEqual(swept.state);
-	expect(payload.output.text.split('\n').filter((line) => line.startsWith('- '))).toEqual([
-		'- 2026-11-16 03:22 UTC · Baseline run 678 (attempt 1) is no longer current',
-		'- 2026-11-16 03:40 UTC · Approved by @luke',
-		'- 2026-11-16 03:22 UTC · Comparison run 345 (attempt 2): needs review',
-	]);
-});
-
-test('keeps the check run history when the sweep records a newer comparison', () => {
-	const previousText = '### History\n\n- 2026-11-16 03:40 UTC · Approved by @luke\n';
-	const notRecorded = sweepPlan({ latest: finishedRun(SWEEP_GRACE_MS) });
-	const running = sweepPlan({
-		latest: latestRun({ conclusion: null, run_attempt: 3, status: 'in_progress' }),
-	});
-	if (notRecorded.action !== 'write' || running.action !== 'write') {
-		throw new Error('Expected the sweep to write.');
-	}
-
-	const failed = payloadFor(notRecorded.state, {
-		failure: notRecorded.failure,
-		historyEntry: notRecorded.historyEntry,
-		previousText,
-		summary: undefined,
-		updatesExisting: true,
-	});
-	const pending = payloadFor(running.state, { previousText, updatesExisting: true });
-
-	expect(failed.output.title).toBe('Publishing the report failed');
-	expect(failed.output.text).toBe(
-		'### History\n\n- 2026-11-16 03:22 UTC · Comparison run 345 (attempt 3) was not recorded\n- 2026-11-16 03:40 UTC · Approved by @luke\n',
-	);
-	// The publisher's own pending payload, which completes an existing check run as action_required.
-	expect(pending).toMatchObject({ conclusion: 'action_required', status: 'completed' });
-	expect(pending.output.text).toBe(
-		'### History\n\n- 2026-11-16 03:22 UTC · Comparison run 345 (attempt 3) started\n- 2026-11-16 03:40 UTC · Approved by @luke\n',
-	);
 });
 
 test('formats timestamps to the minute in UTC', () => {

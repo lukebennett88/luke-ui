@@ -140,6 +140,15 @@ the next event records the same state. When the check run already records that r
 result is never discarded. A recorded failure is written again, so the next event retries a failed
 publication. The review backend uses the same latest-comparison rule before it accepts a decision.
 
+The publisher reads the latest comparison again immediately before it writes the check run, because
+downloading and deploying a report takes minutes. When the comparison it prepared is no longer the
+latest, it writes nothing, and a later publisher run records the newer one. When that read fails,
+the step fails and the failure is recorded. It also reads the check run again and builds its write
+from that read, so history added in the meantime is kept. Publisher runs for one pull request are
+serialised, and each records only the comparison that is the latest just before its write, so an
+older comparison never replaces a newer result. What remains is a re-run requested in the instant
+after that read. The re-run's own `in_progress` event then resets the check run.
+
 A re-run raises the attempt as soon as it is requested, so it makes the earlier result stale at
 once. GitHub sends no `requested` event for a re-run, so the `in_progress` event also reconciles.
 
@@ -187,28 +196,49 @@ A `baseline.json` that names only the run records no exact baseline, so its resu
 `Baseline could not be verified`. A push to `main`, a manual dispatch, or a re-run of
 `Visual baseline` replaces the baseline. Re-run the comparison to record a new result.
 
-The `Visual review sweep` workflow covers what the publisher cannot see. It runs when a
-`Visual baseline` run completes, whatever its conclusion, every 30 minutes, and on demand. For each
-open pull request with a `visual-review` check run, it reads the latest comparison and the newest
-baseline:
+The `Visual review sweep` workflow stops a check run passing when the publisher did not record what
+changed. It runs when a `Visual baseline` run completes, whatever its conclusion, every 30 minutes,
+and on demand. For each open pull request with a `visual-review` check run, it reads the latest
+comparison and the newest baseline.
 
-- A newer comparison than the one recorded that is still running sets the check run to `Comparing`.
-- A newer comparison, or the recorded `Comparing` one, that finished at least 30 minutes ago and was
-  never recorded fails with `Publishing the report failed`. The 30 minutes leave the publisher time
-  to record it.
+A check run that does not pass already blocks merging, so the sweep leaves it alone. The one
+exception is a check run still `Comparing` for a comparison that finished at least 30 minutes ago:
+it fails with `Publishing the report failed`.
+
+For a check run that passes:
+
+- A record that is not a result, because it is a failure or `Comparing`, fails with
+  `Publishing the report failed`. A decision can land on a record the publisher wrote at the same
+  moment, and the review backend's repair of it can fail.
+- A newer comparison than the one recorded that is still running sets the check run to
+  `action_required` with the title `Comparing`.
+- A newer comparison that finished at least 30 minutes ago and was never recorded fails with
+  `Publishing the report failed`. The 30 minutes leave the publisher time to record it.
 - A recorded result whose baseline is no longer the newest fails with `Baseline is out of date`. A
   skipped comparison compared nothing, so its baseline never goes out of date.
-- A check run that passes on a recorded failure or on `Comparing` is written again as that record. A
-  decision can land on a record the publisher or the sweep wrote at the same moment, and the review
-  backend's repair of it can fail. A failure is written again as `Publishing the report failed`.
 
-The sweep only invalidates. It never writes a result that can pass, it keeps the check run's
-history, and it updates only the status of an existing comment. It reads no artefacts and runs no
-pull request code. When every publication of a completed comparison failed, an approval can stay
-passing until the first sweep that can create an App token at least 30 minutes after the comparison
-finished. A new commit never passes without a recorded result. In a race of milliseconds, the sweep
-can replace a result the publisher has just written with a failure. That fails closed, and a re-run
-of the comparison fixes it.
+Only the publisher writes the external id. The sweep and the review backend write how the check run
+reads and nothing else: its conclusion, title, summary, and history. The sweep keeps the summary's
+report and rewrites its status line, adds one history entry, and updates only the status of an
+existing comment. A check run the sweep failed therefore still records its `review` or `clean`
+result, with the conclusion `failure`. It reads no artefacts and runs no pull request code.
+
+GitHub has no conditional write, so the sweep guards its write on both sides. It reads the check run
+again immediately before the write, and skips the pull request when the external id or the
+conclusion has changed. Its write sends no external id, so the response names the record the write
+landed on. When that is not the record it planned against, a publication landed in between. The
+sweep then writes how that record reads: `Comparing`, `Needs review`, `No visual changes`, or
+`Comparison failed`. A result also says the review app still has the report. Restoring
+`No visual changes` is the only time the sweep writes `success`. It checks each such write the same
+way, and after three it leaves the check run `action_required`.
+
+The sweep uses the same GitHub App credentials as the publisher. It recovers from a transient
+failure of a publication: a failed step, a dropped event, or a brief API outage. It does not recover
+when the App cannot authenticate, because its key was revoked or rotated, it was uninstalled, or it
+lost a permission. Then neither workflow can write, and an approval already recorded on a commit can
+stay passing after a later comparison of that same commit. The failed `Visual review publish` and
+`Visual review sweep` runs are the signal. A new commit never passes without a recorded result, and
+while a re-run is in progress the required `visual-regression` gate is pending.
 
 A new commit starts with no check run, so an approval never carries over to it. To make approval
 block merging, require both `visual-regression` and `visual-review` in branch protection, with the
@@ -248,8 +278,8 @@ deliberate tampering.
   the failure is recorded only on a commit that already has the check run or is still an open pull
   request's head. A failed publication for an older comparison than a result the check run already
   records is not recorded, so it never replaces that result. When the latest comparison cannot be
-  read, the failure is recorded. When the App token cannot be created, nothing is recorded, and the
-  sweep fails the result once a token can be created again.
+  read, the failure is recorded. When the App token cannot be created, nothing is recorded. See
+  [Review check](#review-check) for what the sweep does and does not recover.
 - `visual-review review` writes the check run and the comment with a token for the visual review
   App, limited to check runs and pull requests. `resolve-pr` uses the same token to read the check
   run. Everything else, such as the runs, jobs, changed files, and their `package.json` and

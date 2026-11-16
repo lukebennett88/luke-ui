@@ -1,25 +1,35 @@
 name: Visual review sweep
 
-# Fails a pull request's passing `visual-review` check run when it no longer describes the latest
+# Stops a pull request's `visual-review` check run passing when it no longer describes the latest
 # comparison against the current baseline. `Visual review publish` keeps the check run current on
-# every comparison event. This catches what it cannot:
+# every comparison event. This catches what it left behind:
 #
-# - a comparison that finished while every run of the publisher failed, for example because the App
-#   token could not be created
+# - a comparison that finished while every publication of it failed, through a failed step, a
+#   dropped event, or a brief API outage
 # - a baseline that changed without `main` changing, through a dispatch or a re-run of
 #   `Visual baseline`
 # - a check run that passes on a failed or `Comparing` record, because a review decision landed on
 #   a record written at the same moment and the review backend could not repair it
 #
-# The sweep only invalidates. It never writes a result that can pass, never checks out or runs pull
-# request code, and reads no artefacts.
+# Only the publisher writes the check run's external id. The sweep writes how the check run reads
+# and nothing else, and sends no external id, so the response to its write names the record the
+# write landed on. When a publication landed in between, the sweep writes that record's own
+# presentation again. A concurrency group shared with the publisher would not do: a queued sweep
+# would replace a queued publisher run and drop a publication.
+#
+# The sweep uses the same App credentials as the publisher, so it does not recover when the App
+# cannot authenticate: a revoked or rotated key, an uninstalled App, or a missing permission. Then
+# neither workflow can write, an approval already recorded on a commit can stay passing after a
+# later comparison of that commit, and the failed runs of both workflows are the signal.
+#
+# The sweep never checks out or runs pull request code, and reads no artefacts.
 
 on:
   workflow_run:
     workflows: ['Visual baseline']
     # Any conclusion: a failed re-run also leaves no current baseline.
     types: [completed]
-  # Heals failed publications once the App works again.
+  # A publication can fail without leaving an event that would retry it.
   schedule:
     - cron: '*/30 * * * *'
   workflow_dispatch:
@@ -77,8 +87,5 @@ jobs:
         env:
           APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
           APP_TOKEN: ${{ steps.app-token.outputs.token }}
-          APP_URL: >-
-            ${{ vars.VISUAL_REVIEW_APP_URL || format('https://{0}.pages.dev',
-            vars.VISUAL_REVIEW_PAGES_PROJECT) }}
           GITHUB_TOKEN: ${{ github.token }}
         run: node .github/scripts/visual-review.ts sweep

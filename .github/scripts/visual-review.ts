@@ -180,7 +180,7 @@ export type ExistingCheckRun = {
 	status?: string | null;
 	conclusion?: string | null;
 	external_id?: string | null;
-	output?: { text?: string | null } | null;
+	output?: { title?: string | null; summary?: string | null; text?: string | null } | null;
 };
 
 /** The newest `Visual regression` pull request run for a commit, from the GitHub API. */
@@ -703,30 +703,34 @@ function requireRunIdentity(latest: LatestComparison): { runId: number; runAttem
 	return { runAttempt: latest.run_attempt, runId: latest.id };
 }
 
+/** What the sweep writes on a check run: how it reads, never the record in its `external_id`. */
+export type SweepPresentation = {
+	conclusion: CheckConclusion;
+	title: string;
+	historyEntry: string;
+	/** Replaces the whole summary. Without it, only the summary's status line changes. */
+	summary?: string;
+};
+
 export type SweepPlan =
 	| { action: 'none'; reason: string }
-	| {
-			action: 'write';
-			state: CheckState;
-			/** Present when `state.kind` is `failed`. */
-			failure?: FailureReason;
-			/** Says why the sweep wrote, in place of the publisher's own history entry. */
-			historyEntry?: string;
-	  };
+	| ({ action: 'write' } & SweepPresentation);
 
 /**
- * What the sweep writes for one passing check run. The sweep only invalidates: it never records a
- * result that can pass. It catches what the publisher cannot, because the publisher did not run or
- * every run of it failed:
+ * What the sweep writes for one check run. The sweep only invalidates: it stops a check run passing,
+ * and never changes the record, which only the publisher writes. It catches what the publisher
+ * cannot, because the publisher did not run or every run of it failed:
  *
- * - the latest comparison is not the one recorded, so the recorded result no longer applies. While
- *   it runs, it is recorded as pending. Once it has finished for {@link SWEEP_GRACE_MS} without being
- *   recorded, every publication of it is taken to have failed.
+ * - the check run passes on a record that is not a result
+ * - the latest comparison is not the one recorded, so the recorded result no longer applies. Once it
+ *   has finished for {@link SWEEP_GRACE_MS} without being recorded, every publication of it is taken
+ *   to have failed.
  * - the recorded baseline is no longer the newest one, because `Visual baseline` was dispatched or
- *   re-run without `main` changing.
- * - the check run passes on a failed or pending record. A review decision can land on a record the
- *   publisher or the sweep wrote at the same moment, and the backend's repair of it can fail.
- * - a pending comparison that finished for {@link SWEEP_GRACE_MS} without being recorded.
+ *   re-run without `main` changing
+ *
+ * A check run that does not pass already blocks merging, so it is left alone. That also makes the
+ * sweep idempotent. The one exception is a comparison still shown as `Comparing` long after it
+ * finished, which would otherwise never say that its publication failed.
  */
 export function planSweep(options: {
 	state: Partial<CheckState>;
@@ -737,44 +741,54 @@ export function planSweep(options: {
 	now: Date;
 }): SweepPlan {
 	const { state, latest } = options;
-	const passing = options.conclusion === 'success';
-	if (state.kind === 'failed') {
-		if (!passing) return { action: 'none', reason: 'The check run fails a failed result.' };
+	const latestRun = latest === undefined ? undefined : requireRunIdentity(latest);
+	const recordsLatest =
+		latestRun !== undefined &&
+		latestRun.runId === state.runId &&
+		latestRun.runAttempt === state.runAttempt;
+	// A missing or unreadable time counts as past the grace period, so it fails closed.
+	const finishedAt = Date.parse(latest?.updated_at ?? '');
+	const pastGrace =
+		latest?.status === 'completed' &&
+		!(Number.isFinite(finishedAt) && options.now.getTime() - finishedAt < SWEEP_GRACE_MS);
+	const run = `Comparison run ${latestRun?.runId} (attempt ${latestRun?.runAttempt})`;
+	const notRecorded: SweepPlan = {
+		action: 'write',
+		conclusion: 'failure',
+		historyEntry: `${run} was not recorded`,
+		title: FAILURE_TITLES['publish-failed'],
+	};
+
+	if (options.conclusion !== 'success') {
+		const stuck =
+			state.kind === 'pending' &&
+			options.conclusion === 'action_required' &&
+			recordsLatest &&
+			pastGrace;
+		if (stuck) return notRecorded;
+		return { action: 'none', reason: 'The check run does not pass.' };
+	}
+
+	if (state.kind !== 'review' && state.kind !== 'clean') {
 		return {
 			action: 'write',
-			failure: 'publish-failed',
-			historyEntry: 'The check run passed on a failed result',
-			state: restate(state, 'failed'),
+			conclusion: 'failure',
+			historyEntry: `The check run passed on ${state.kind === 'pending' ? 'an unfinished comparison' : 'a failed result'}`,
+			title: FAILURE_TITLES['publish-failed'],
 		};
-	}
-	// Any other kind is not one this workflow writes.
-	if (state.kind !== 'review' && state.kind !== 'clean' && state.kind !== 'pending') {
-		return { action: 'none', reason: `The check run records ${JSON.stringify(state.kind)}.` };
 	}
 	if (latest === undefined) {
 		return { action: 'none', reason: 'The commit has no Visual regression pull request run.' };
 	}
-	const { runId, runAttempt } = requireRunIdentity(latest);
-	const run = `Comparison run ${runId} (attempt ${runAttempt})`;
-	// A missing or unreadable time counts as past the grace period, so it fails closed.
-	const finishedAt = Date.parse(latest.updated_at ?? '');
-	const pastGrace =
-		latest.status === 'completed' &&
-		!(Number.isFinite(finishedAt) && options.now.getTime() - finishedAt < SWEEP_GRACE_MS);
-	const unrecorded = (kind: 'pending' | 'failed'): CheckState => ({
-		baselineRunAttempt: null,
-		baselineRunId: null,
-		baselineSha: null,
-		kind,
-		reasons: [],
-		runAttempt,
-		runId,
-		v: 1,
-	});
 
-	if (runId !== state.runId || runAttempt !== state.runAttempt) {
+	if (!recordsLatest) {
 		if (latest.status !== 'completed') {
-			return { action: 'write', state: unrecorded('pending') };
+			return {
+				action: 'write',
+				conclusion: 'action_required',
+				historyEntry: `${run} started`,
+				title: statusText('pending'),
+			};
 		}
 		if (!pastGrace) {
 			return {
@@ -782,26 +796,7 @@ export function planSweep(options: {
 				reason: `${run} finished less than ${SWEEP_GRACE_MS / 60_000} minutes ago, so the publisher may still be recording it.`,
 			};
 		}
-		return {
-			action: 'write',
-			failure: 'publish-failed',
-			historyEntry: `${run} was not recorded`,
-			state: unrecorded('failed'),
-		};
-	}
-
-	if (state.kind === 'pending') {
-		if (pastGrace) {
-			return {
-				action: 'write',
-				failure: 'publish-failed',
-				historyEntry: `${run} was not recorded`,
-				state: unrecorded('failed'),
-			};
-		}
-		// A decision landed on the pending record, so the check passes while the comparison runs.
-		if (passing) return { action: 'write', state: unrecorded('pending') };
-		return { action: 'none', reason: `${run} is still being compared or recorded.` };
+		return notRecorded;
 	}
 
 	// A clean result with no baseline is a skipped comparison, which compared nothing.
@@ -813,44 +808,166 @@ export function planSweep(options: {
 	) {
 		return {
 			action: 'write',
-			failure: 'outdated-baseline',
+			conclusion: 'failure',
 			historyEntry: `Baseline run ${baselineRunId} (attempt ${baselineRunAttempt ?? '?'}) is no longer current`,
-			state: {
-				baselineRunAttempt,
-				baselineRunId,
-				baselineSha: state.baselineSha ?? null,
-				kind: 'failed',
-				reasons: (state.reasons ?? []).filter((reason) => {
-					return reason === 'visual' || reason === 'infrastructure';
-				}),
-				runAttempt,
-				runId,
-				v: 1,
-			},
+			title: FAILURE_TITLES['outdated-baseline'],
 		};
 	}
 
 	return { action: 'none', reason: `${run} is recorded against the current baseline.` };
 }
 
-/** A recorded state again, with every field it records, as `kind`. */
-function restate(state: Partial<CheckState>, kind: ReviewKind): CheckState {
-	const { runId, runAttempt } = state;
-	if (typeof runId !== 'number' || typeof runAttempt !== 'number') {
-		throw new Error('The check run records no comparison run.');
-	}
-	requireRunIdentity({ id: runId, run_attempt: runAttempt });
+const STATUS_LINE_PATTERN = /^\*\*Status:\*\* .*$/m;
+
+/** The body of a presentation write. It carries no `external_id`, so the record is untouched. */
+export type PresentationBody = {
+	status: 'completed';
+	completed_at: string;
+	conclusion: CheckConclusion;
+	output: { title: string; summary: string; text: string };
+};
+
+/**
+ * A check run update that changes how the check reads and nothing else. The summary keeps the
+ * report it describes, with its status line rewritten, and the history gains one entry.
+ */
+export function presentationBody(options: {
+	existing: ExistingCheckRun;
+	presentation: SweepPresentation;
+	now: Date;
+}): PresentationBody {
+	const { existing, presentation, now } = options;
+	const statusLine = `**Status:** ${presentation.title}`;
+	const previous = existing.output?.summary ?? '';
+	const summary =
+		presentation.summary ??
+		(STATUS_LINE_PATTERN.test(previous)
+			? previous.replace(STATUS_LINE_PATTERN, () => statusLine)
+			: `${statusLine}\n`);
 	return {
-		baselineRunAttempt: state.baselineRunAttempt ?? null,
-		baselineRunId: state.baselineRunId ?? null,
-		baselineSha: state.baselineSha ?? null,
-		kind,
-		reasons: (state.reasons ?? []).filter((reason) => {
-			return reason === 'visual' || reason === 'infrastructure';
-		}),
-		runAttempt,
-		runId,
-		v: 1,
+		completed_at: now.toISOString(),
+		conclusion: presentation.conclusion,
+		output: {
+			summary: capText(summary, MAX_SUMMARY_CHARS),
+			text: prependHistory(
+				existing.output?.text,
+				`${formatTimestamp(now)} · ${presentation.historyEntry}`,
+			),
+			title: presentation.title.slice(0, MAX_TITLE_LENGTH),
+		},
+		status: 'completed',
+	};
+}
+
+const RESTORED_TITLES: Record<ReviewKind, string> = {
+	clean: 'No visual changes',
+	failed: 'Comparison failed',
+	pending: 'Comparing',
+	review: 'Needs review',
+};
+
+/**
+ * How a check run reads for the record it holds, written after a sweep landed on a record the
+ * publisher wrote at the same moment. The report summary the sweep replaced cannot be rebuilt here,
+ * so a result says where the report still is. A record that cannot be read fails.
+ */
+export function restoredPresentation(run: ExistingCheckRun): SweepPresentation {
+	const state = recordedState(run);
+	const kind: ReviewKind =
+		state?.kind === 'pending' || state?.kind === 'review' || state?.kind === 'clean'
+			? state.kind
+			: 'failed';
+	const title = RESTORED_TITLES[kind];
+	const note =
+		kind === 'pending'
+			? ''
+			: '\nA sweep written at the same moment replaced the report summary. The visual review app still has the report.\n';
+	return {
+		conclusion: kind === 'pending' ? 'action_required' : CONCLUSIONS[kind],
+		historyEntry: 'Sweep withdrawn: a newer result was recorded at the same time',
+		summary: `**Status:** ${title}\n${note}`,
+		title,
+	};
+}
+
+/** After this many restores that each landed on yet another record, the sweep stops trying. */
+export const MAX_SWEEP_RESTORES = 3;
+
+/** Reads the check run, or updates it and returns it as stored after the update. */
+export type CheckRunRequest = (
+	request: { method: 'GET' } | { method: 'PATCH'; body: PresentationBody },
+) => Promise<ExistingCheckRun>;
+
+export type SweepWrite =
+	| { written: false; reason: string }
+	| { written: true; restored: boolean; title: string };
+
+/**
+ * Writes a planned presentation without ever replacing a record. GitHub has no conditional write,
+ * so the sweep reads the check run again just before it writes, and skips when the record or the
+ * conclusion it planned against has changed. Its write sends no `external_id`, so the response
+ * names the record the write landed on. When that is not the planned one, a publication landed in
+ * between and the sweep overwrote how it reads: the sweep then writes that record's own
+ * presentation, and checks that response the same way. `success` is written only to restore a clean
+ * result. After {@link MAX_SWEEP_RESTORES} restores it leaves the check needing action, which cannot
+ * pass.
+ */
+export async function writeSweepPresentation(options: {
+	planned: ExistingCheckRun;
+	presentation: SweepPresentation;
+	request: CheckRunRequest;
+	now: () => Date;
+}): Promise<SweepWrite> {
+	const { planned, request, now } = options;
+	const fresh = await request({ method: 'GET' });
+	if (fresh.external_id !== planned.external_id || fresh.conclusion !== planned.conclusion) {
+		return { reason: 'The check run changed after it was read.', written: false };
+	}
+
+	let target = planned.external_id;
+	let presentation = options.presentation;
+	let stored = await request({
+		body: presentationBody({ existing: fresh, now: now(), presentation }),
+		method: 'PATCH',
+	});
+	for (let restores = 0; stored.external_id !== target; restores += 1) {
+		target = stored.external_id;
+		presentation = restoredPresentation(stored);
+		if (restores === MAX_SWEEP_RESTORES) presentation.conclusion = 'action_required';
+		// Sequential: each response decides whether another write is needed.
+		// oxlint-disable-next-line no-await-in-loop
+		stored = await request({
+			body: presentationBody({ existing: stored, now: now(), presentation }),
+			method: 'PATCH',
+		});
+		if (restores === MAX_SWEEP_RESTORES) break;
+	}
+	return {
+		restored: presentation !== options.presentation,
+		title: presentation.title,
+		written: true,
+	};
+}
+
+/**
+ * Whether the comparison a publisher run is about to record is still the commit's latest one. Read
+ * just before the check run write, so a run that spent minutes deploying an older comparison never
+ * replaces a newer result. A failed read rejects, which fails the step.
+ */
+export async function revalidateComparison(options: {
+	read: () => Promise<LatestComparison | undefined>;
+	runId: number;
+	runAttempt: number;
+}): Promise<{ write: true } | { write: false; reason: string }> {
+	const latest = await options.read();
+	if (latest?.id === options.runId && latest.run_attempt === options.runAttempt) {
+		return { write: true };
+	}
+	const newer =
+		latest === undefined ? 'no comparison' : `run ${latest.id} attempt ${latest.run_attempt}`;
+	return {
+		reason: `Run ${options.runId} attempt ${options.runAttempt} is no longer the latest comparison: the commit now has ${newer}. A later publisher run records it.`,
+		write: false,
 	};
 }
 
@@ -1233,8 +1350,6 @@ export function checkRunPayload(options: {
 	previousText: string | null | undefined;
 	/** Whether the commit already has this App's check run, which the payload then updates. */
 	updatesExisting: boolean;
-	/** The history entry after its timestamp, when the default would not say why it was written. */
-	historyEntry?: string;
 	now: Date;
 }): CheckRunPayload {
 	const { state, summary, infrastructureFiles, now } = options;
@@ -1254,10 +1369,7 @@ export function checkRunPayload(options: {
 			output: {
 				// Only the status, so no earlier report table describes a comparison still running.
 				summary: `**Status:** ${status}\n`,
-				text: prependHistory(
-					options.previousText,
-					`${formatTimestamp(now)} · ${options.historyEntry ?? `${run} started`}`,
-				),
+				text: prependHistory(options.previousText, `${formatTimestamp(now)} · ${run} started`),
 				title: status,
 			},
 		};
@@ -1308,7 +1420,7 @@ export function checkRunPayload(options: {
 		);
 	}
 
-	const entry = `${formatTimestamp(now)} · ${options.historyEntry ?? `${run}: ${status.toLowerCase()}`}`;
+	const entry = `${formatTimestamp(now)} · ${run}: ${status.toLowerCase()}`;
 
 	return {
 		completed_at: now.toISOString(),
@@ -2141,20 +2253,36 @@ async function review() {
 		v: 1,
 	};
 
+	// The reads above can take minutes, and a re-run or a newer run may have started meanwhile. A
+	// failed publication keeps its own rule above, so it is still recorded when this read would fail.
+	if (outcome !== 'publish-failed') {
+		const revalidation = await revalidateComparison({
+			read: () => fetchLatestComparison({ headSha, repository, token: githubToken }),
+			runAttempt,
+			runId,
+		});
+		if (!revalidation.write) {
+			info(`Nothing recorded. ${revalidation.reason}`);
+			return;
+		}
+	}
+
+	// Read again for the same reason: the write keeps history added since the first read.
+	const current = await findAppCheckRun({ appSlug, appToken, headSha, repository });
 	const payload = checkRunPayload({
 		appUrl,
 		failure,
 		headSha,
 		infrastructureFiles,
 		now: new Date(),
-		previousText: existing?.output?.text,
+		previousText: current?.output?.text,
 		pullRequest,
 		repository,
 		state,
 		summary,
-		updatesExisting: existing !== undefined,
+		updatesExisting: current !== undefined,
 	});
-	if (existing === undefined) {
+	if (current === undefined) {
 		await githubRequest({
 			body: payload,
 			method: 'POST',
@@ -2168,9 +2296,9 @@ async function review() {
 			body: update,
 			method: 'PATCH',
 			token: appToken,
-			url: `https://api.github.com/repos/${repository}/check-runs/${existing.id}`,
+			url: `https://api.github.com/repos/${repository}/check-runs/${current.id}`,
 		});
-		info(`Updated ${CHECK_NAME} check run ${existing.id} for ${headSha}: ${payload.output.title}.`);
+		info(`Updated ${CHECK_NAME} check run ${current.id} for ${headSha}: ${payload.output.title}.`);
 	}
 
 	if (pullRequest === undefined) {
@@ -2249,7 +2377,6 @@ async function sweepPull(options: {
 	githubToken: string;
 	appToken: string;
 	appSlug: string;
-	appUrl: string;
 	repository: string;
 	newestBaseline: BaselineRun | undefined;
 	pull: PullRequestCandidate;
@@ -2265,12 +2392,11 @@ async function sweepPull(options: {
 	const state = recordedState(existing);
 	if (existing === undefined || state === undefined) return;
 
-	const now = new Date();
 	const plan = planSweep({
 		conclusion: existing.conclusion,
 		latest: await fetchLatestComparison({ headSha, repository, token: githubToken }),
 		newestBaseline: options.newestBaseline,
-		now,
+		now: new Date(),
 		state,
 	});
 	if (plan.action === 'none') {
@@ -2278,36 +2404,28 @@ async function sweepPull(options: {
 		return;
 	}
 
-	const payload = checkRunPayload({
-		appUrl: options.appUrl,
-		failure: plan.failure,
-		headSha,
-		historyEntry: plan.historyEntry,
-		infrastructureFiles: [],
-		now,
-		previousText: existing.output?.text,
-		pullRequest: pull.number,
-		repository,
-		state: plan.state,
-		summary: undefined,
-		updatesExisting: true,
+	const checkRunUrl = `https://api.github.com/repos/${repository}/check-runs/${existing.id}`;
+	const result = await writeSweepPresentation({
+		now: () => new Date(),
+		planned: existing,
+		presentation: plan,
+		request: (request) => {
+			return githubRequest<ExistingCheckRun>({ ...request, token: appToken, url: checkRunUrl });
+		},
 	});
-	const { head_sha: _headSha, ...update } = payload;
-	await githubRequest({
-		body: update,
-		method: 'PATCH',
-		token: appToken,
-		url: `https://api.github.com/repos/${repository}/check-runs/${existing.id}`,
-	});
-	info(`#${pull.number}: updated ${CHECK_NAME} check run ${existing.id}: ${payload.output.title}.`);
+	if (!result.written) {
+		info(`#${pull.number}: ${result.reason} The next sweep plans again.`);
+		return;
+	}
+	info(`#${pull.number}: updated ${CHECK_NAME} check run ${existing.id}: ${result.title}.`);
+	// The publication that landed in between writes its own comment.
+	if (result.restored) return;
 
 	// Only the status changes, so the comment keeps describing the report it links to.
 	const comments = await listComments(appToken, repository, pull.number);
 	const sticky = findStickyComment(comments, `${appSlug}[bot]`);
 	const body =
-		sticky === undefined
-			? undefined
-			: replaceCommentStatus(sticky.body ?? '', statusText(plan.state.kind, plan.failure));
+		sticky === undefined ? undefined : replaceCommentStatus(sticky.body ?? '', result.title);
 	if (sticky === undefined || body === undefined) return;
 	await githubRequest({
 		body: { body },
@@ -2320,8 +2438,8 @@ async function sweepPull(options: {
 
 /**
  * Fails each open pull request's passing check run that no longer describes its latest comparison
- * against the current baseline. It never writes a result that can pass, so a race with the publisher
- * can only fail a check, which a re-run fixes.
+ * against the current baseline. It changes how a check run reads and never its record, so it cannot
+ * replace a result the publisher wrote.
  */
 async function sweep() {
 	const githubToken = requireEnv('GITHUB_TOKEN');
@@ -2329,7 +2447,6 @@ async function sweep() {
 	const appSlug = requireEnv('APP_SLUG');
 	if (!APP_SLUG_PATTERN.test(appSlug)) fail('APP_SLUG is not a GitHub App slug.');
 	const repository = requireRepository();
-	const appUrl = requireEnv('APP_URL');
 
 	// Read once, before any write. If it fails, the sweep fails without writing.
 	const newestBaseline = await fetchNewestBaseline(githubToken, repository);
@@ -2340,7 +2457,7 @@ async function sweep() {
 		try {
 			// Sequential: a few requests per pull request stay well inside the rate limits.
 			// oxlint-disable-next-line no-await-in-loop
-			await sweepPull({ appSlug, appToken, appUrl, githubToken, newestBaseline, pull, repository });
+			await sweepPull({ appSlug, appToken, githubToken, newestBaseline, pull, repository });
 		} catch (error) {
 			failures += 1;
 			const reason = error instanceof Error ? error.message : String(error);
