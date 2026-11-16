@@ -76,10 +76,12 @@ route with `503 unconfigured`.
 [Visual regression testing](../../docs/VISUAL_TESTING.md#review-backend) lists the GitHub App and
 Pages settings.
 
-A review's `state` is `comparing` while a comparison runs, and nobody can decide it then. A decision
-applies only to the latest comparison: the newest `Visual regression` run for the head commit.
-Requesting a re-run makes the earlier attempt stale at once. The backend refuses a decision with
-`409` and one of these codes, and writes nothing:
+A review's `state` is `comparing` while a comparison runs, and nobody can decide it then. A check
+run can fail without a new record, for example when its baseline is replaced. A failed check run is
+`changes-requested` only when its record is a review and its title names the reviewer. Any other
+failed check run is `failed`. A decision applies only to the latest comparison: the newest
+`Visual regression` run for the head commit. Requesting a re-run makes the earlier attempt stale at
+once. The backend refuses a decision with `409` and one of these codes, and writes nothing:
 
 - `not-reviewable`: the check run is not a completed comparison with changes to review.
 - `stale`: the pull request has a newer commit, or the check run's comparison is not the latest
@@ -94,8 +96,8 @@ GitHub has no conditional write for check runs, so the backend checks a decision
 writes it. It registers the write and that check with `waitUntil` before the write starts, so a
 reviewer who disconnects cannot cancel either.
 
-The backend never writes the check run's `external_id`. Only the workflows that record comparison
-results write it, so the response to each backend write names the record that the write landed on:
+The backend never writes the check run's `external_id`. Only `Visual review publish` writes it, so
+the response to each backend write names the record that the write landed on:
 
 - When the decision's response names another record, a workflow recorded it in between. The backend
   restores that record's conclusion and title, and answers `409 stale`. The summary then says that
@@ -104,7 +106,10 @@ results write it, so the response to each backend write names the record that th
   withdraws the decision: the check run goes back to `Needs review` with the `action_required`
   conclusion, and the backend answers `409 stale`. `Visual review publish` records the re-run
   itself.
-- When that read fails, it withdraws the decision and answers `502 upstream`.
+- It then reads the newest baseline again, because a replaced baseline changes no record. When the
+  baseline is not the one the comparison used, it withdraws the decision and answers
+  `409 stale-baseline`.
+- When either read fails, it withdraws the decision and answers `502 upstream`.
 - When the decision's write fails, the write may still have landed. The backend withdraws the
   decision, restores any newer record that the withdrawal's response names, and answers
   `502 upstream`.

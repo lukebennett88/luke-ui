@@ -110,9 +110,15 @@ describe('reviewFromCheckRun', () => {
 		['pending', null, 'Comparing', 'comparing', null],
 		['pending', 'action_required', 'Comparing', 'comparing', null],
 		['pending', 'success', 'Approved by @luke', 'comparing', null],
+		['review', 'failure', 'Baseline is out of date', 'failed', null],
+		['review', 'failure', 'Publishing the report failed', 'failed', null],
+		['review', 'failure', null, 'failed', null],
+		['review', 'action_required', 'Comparing', 'needs-review', null],
+		['clean', 'failure', 'Baseline is out of date', 'failed', null],
+		['pending', 'failure', 'Publishing the report failed', 'failed', null],
 	] as const;
 	for (const [kind, conclusion, title, state, decidedBy] of states) {
-		test(`maps ${kind} with ${conclusion} to ${state}`, () => {
+		test(`maps ${kind} with ${conclusion} and the title ${title} to ${state}`, () => {
 			const review = reviewFromCheckRun(
 				run({ conclusion, externalId: externalId({ kind }), title }),
 			);

@@ -272,18 +272,7 @@ export async function decide(context: Context, number: number): Promise<Response
 			'The comparison has no verified baseline. Re-run the comparison.',
 		);
 	}
-	const baseline = await latestBaseline(context);
-	if (
-		baseline?.id !== externalId.baselineRunId ||
-		baseline.run_attempt !== externalId.baselineRunAttempt ||
-		baseline.head_sha !== externalId.baselineSha
-	) {
-		throw new ApiError(
-			409,
-			'stale-baseline',
-			'A newer baseline exists. Update the branch or re-run the comparison.',
-		);
-	}
+	if (!isBaseline(await latestBaseline(context), externalId)) throw staleBaseline();
 	const comparison = await latestComparison(context, body.headSha);
 	if (
 		!isComparison(comparison, externalId) ||
@@ -384,15 +373,15 @@ async function writeDecision(context: Context, write: DecisionWrite): Promise<Re
  * run when it does not. GitHub has no conditional write for check runs, so the check comes after
  * the write.
  *
- * The backend never writes `external_id`. Only the workflows that record comparison results do, so
- * each write's response names the record the write landed on:
+ * The backend never writes `external_id`. Only the publish workflow does, so each
+ * write's response names the record the write landed on:
  *
  * - When the decision's response names another record, a publication wrote in between, and the
  *   check run gets that record's presentation back.
- * - When a re-run was requested since the pre-check, or the latest comparison cannot be read, the
- *   decision is withdrawn. The publish workflow records the newer run itself.
+ * - When a re-run was requested or the baseline was replaced since the pre-check, or either cannot
+ *   be read, the decision is withdrawn. The publish workflow records a newer run itself.
  *
- * It throws `409 stale` or `502 upstream` after a repair. Otherwise it mirrors the decision in the
+ * It throws `409 stale`, `409 stale-baseline` or `502 upstream` after a repair. Otherwise it mirrors the decision in the
  * sticky comment.
  */
 async function confirmDecision(
@@ -427,6 +416,30 @@ async function confirmDecision(
 			withdrawal(write, 'a newer comparison started'),
 		);
 		throw staleComparison();
+	}
+	// A baseline replaced since the pre-check changes no record, so only this read shows it.
+	let baseline: WorkflowRun | undefined;
+	try {
+		baseline = await latestBaseline(context);
+	} catch {
+		await repair(
+			context,
+			write,
+			decided,
+			write.externalId,
+			withdrawal(write, 'the baseline could not be checked'),
+		);
+		throw upstream('GitHub did not confirm the baseline. The decision was withdrawn. Try again.');
+	}
+	if (!isBaseline(baseline, write.externalId)) {
+		await repair(
+			context,
+			write,
+			decided,
+			write.externalId,
+			withdrawal(write, 'a newer baseline exists'),
+		);
+		throw staleBaseline();
 	}
 	// The check run is the record of the decision. The comment only mirrors it, so a failure here
 	// does not fail a decision that has already been written.
@@ -543,6 +556,23 @@ function present(
 /** Whether two records are the same. Two records the backend cannot read count as the same. */
 function sameRecord(left: ExternalId | undefined, right: ExternalId | undefined): boolean {
 	return left && right ? sameExternalId(left, right) : left === right;
+}
+
+function staleBaseline(): ApiError {
+	return new ApiError(
+		409,
+		'stale-baseline',
+		'A newer baseline exists. Update the branch or re-run the comparison.',
+	);
+}
+
+/** Whether a workflow run is the baseline run, attempt and commit an external id records. */
+function isBaseline(run: WorkflowRun | undefined, externalId: ExternalId): boolean {
+	return (
+		run?.id === externalId.baselineRunId &&
+		run.run_attempt === externalId.baselineRunAttempt &&
+		run.head_sha === externalId.baselineSha
+	);
 }
 
 function staleComparison(): ApiError {

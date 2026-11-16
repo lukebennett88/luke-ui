@@ -93,7 +93,7 @@ export function parseExternalId(value: string | null): ExternalId | undefined {
 export function reviewFromCheckRun(run: CheckRunSnapshot): Review | null {
 	const externalId = parseExternalId(run.externalId);
 	if (!externalId) return null;
-	const state = reviewState(externalId.kind, run.conclusion);
+	const state = reviewState(externalId.kind, run.conclusion, run.title);
 	const decided = state === 'approved' || state === 'changes-requested';
 	return {
 		baselineRunAttempt: externalId.baselineRunAttempt,
@@ -110,12 +110,23 @@ export function reviewFromCheckRun(run: CheckRunSnapshot): Review | null {
 	};
 }
 
-function reviewState(kind: ExternalId['kind'], conclusion: string | null): ReviewState {
-	if (kind === 'clean') return 'clean';
+/**
+ * A check run can fail without a new record, because only the publish workflow writes
+ * `external_id`. A failure on a `clean` or `pending` record, or on a `review` record without a
+ * decision's title, is therefore a failed result and not a request for changes.
+ */
+function reviewState(
+	kind: ExternalId['kind'],
+	conclusion: string | null,
+	title: string | null,
+): ReviewState {
 	if (kind === 'failed') return 'failed';
+	if (conclusion === 'failure') {
+		return kind === 'review' && DECIDED_TITLE.test(title ?? '') ? 'changes-requested' : 'failed';
+	}
+	if (kind === 'clean') return 'clean';
 	if (kind === 'pending') return 'comparing';
 	if (conclusion === 'success') return 'approved';
-	if (conclusion === 'failure') return 'changes-requested';
 	return 'needs-review';
 }
 
