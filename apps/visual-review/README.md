@@ -123,11 +123,15 @@ results write it, so the response to each backend write names the record that th
   conclusion, and the backend answers `409 stale`. `Visual review publish` records the re-run
   itself.
 - When that read fails, it withdraws the decision and answers `502 upstream`.
+- When the decision's write fails, the write may still have landed. The backend withdraws the
+  decision, restores any newer record that the withdrawal's response names, and answers
+  `502 upstream`.
 
 A repair never passes the check, except when it restores a `clean` record. When a repair's own
 response names yet another record, the backend restores that record instead. After three attempts it
-writes `action_required` for the last record named, which blocks merging, and stops. Each repair
-adds a line to the check run's history and rewrites the sticky comment's status to match.
+writes `action_required` for the last record named, which blocks merging, and stops. A repair write
+that fails is tried up to three times before the backend answers `502 upstream`. Each repair adds a
+line to the check run's history and rewrites the sticky comment's status to match.
 
 GitHub keeps a completed check run completed, so a `Comparing` check run has the `action_required`
 conclusion, and its state comes from the `pending` kind in its `external_id`.
