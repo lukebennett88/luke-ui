@@ -51,6 +51,12 @@ reference app's settings navigation needs the same thing and also builds it by h
 `Cluster` rejects `backgroundColor`, so a toolbar row with a surface background is a `Box` with
 `display="flex"` and the alignment props spelled out.
 
+### Multi-line text field
+
+A note with a "request changes" decision can be up to 500 characters, which suits a text area. Luke
+UI has only `TextInputField`, so the note is a single-line input with `maxLength`. A longer note
+scrolls out of view as the reviewer types.
+
 ### Development server and newly imported components
 
 Importing a Luke UI component for the first time while the development server runs makes Vite

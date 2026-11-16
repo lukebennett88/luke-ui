@@ -7,9 +7,16 @@ export function useLocationSearch(): string {
 	return useSyncExternalStore(subscribe, getSearch);
 }
 
-/** Client-side navigation to a same-origin href, such as `?pr=12`. */
+/**
+ * Client-side navigation to another view of the app, such as `?pr=12`. Every view shares one path,
+ * so an href to another path, such as the backend's `/api/auth/login`, loads that page instead.
+ */
 export function navigate(href: string, options: { replace?: boolean } = {}): void {
 	const url = new URL(href, window.location.href);
+	if (url.origin !== window.location.origin || url.pathname !== window.location.pathname) {
+		window.location.assign(url);
+		return;
+	}
 	if (url.href === window.location.href) return;
 	if (options.replace) window.history.replaceState(null, '', url);
 	else window.history.pushState(null, '', url);

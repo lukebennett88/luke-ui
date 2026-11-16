@@ -165,9 +165,11 @@ The backend acts as a GitHub App. Create one with these settings:
 - Webhook: inactive.
 - Install it on this repository only.
 
-A reviewer signs in through the App's user authorisation flow. The backend allows a decision when
-GitHub reports the admin, maintain, or write role on the repository for that account. It asks GitHub
-again on every decision, so removing someone's access takes effect at once.
+A reviewer signs in through the App's user authorisation flow, from the review page's status bar.
+[Reviewing in the app](../apps/visual-review/README.md#reviewing-in-the-app) describes it. The
+backend allows a decision when GitHub reports the admin, maintain, or write role on the repository
+for that account. It asks GitHub again on every decision, so removing someone's access takes effect
+at once.
 
 Set these variables as secrets on the Pages project's production environment only. Preview
 deployments, including every `pr-<number>` branch, then have no credentials, and the backend answers

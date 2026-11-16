@@ -6,11 +6,13 @@ import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { Suspense, use } from 'react';
+import type { Review } from '../api/review-api.js';
 import { isLocalSourceAvailable, repository } from '../config.js';
 import { loadReport } from '../report/load-report.js';
 import * as styles from './dashboard.css.js';
 import type { PullRequest, PullRequestsResult } from './open-pull-requests.js';
 import { loadOpenPullRequests } from './open-pull-requests.js';
+import { orderByReview, reviewChip } from './pull-status.js';
 import type { ReportState } from './report-state.js';
 import { reportState } from './report-state.js';
 
@@ -66,7 +68,7 @@ function PullRequestList({ result }: { result: PullRequestsResult }) {
 	}
 	return (
 		<ul className={styles.list}>
-			{result.pullRequests.map((pullRequest) => (
+			{orderByReview(result.pullRequests).map((pullRequest) => (
 				<li className={styles.row} key={pullRequest.number}>
 					<Stack gap="space.8" minInlineSize="0">
 						<Text fontWeight="label">
@@ -78,9 +80,12 @@ function PullRequestList({ result }: { result: PullRequestsResult }) {
 							{describePullRequest(pullRequest)}
 						</Text>
 					</Stack>
-					<Suspense fallback={<LoadingSpinner aria-label="Loading report" size="small" />}>
-						<PullRequestReport pullRequest={pullRequest} />
-					</Suspense>
+					<Cluster gap="space.16">
+						{pullRequest.review === undefined ? null : <ReviewChip review={pullRequest.review} />}
+						<Suspense fallback={<LoadingSpinner aria-label="Loading report" size="small" />}>
+							<PullRequestReport pullRequest={pullRequest} />
+						</Suspense>
+					</Cluster>
 				</li>
 			))}
 		</ul>
@@ -89,9 +94,11 @@ function PullRequestList({ result }: { result: PullRequestsResult }) {
 
 function PullRequestReport({ pullRequest }: { pullRequest: PullRequest }) {
 	const result = use(loadReport({ kind: 'pull-request', number: pullRequest.number }));
-	const state = reportState(result, pullRequest.head.sha);
+	const state = reportState(result, pullRequest.headSha);
 
 	if (state.kind !== 'differences') {
+		// The review chip already says there is no report, or nothing changed.
+		if (pullRequest.review !== undefined && state.kind !== 'out-of-date') return null;
 		return (
 			<Text color="secondary" typography="label">
 				{STATE_LABELS[state.kind]}
@@ -110,9 +117,18 @@ function PullRequestReport({ pullRequest }: { pullRequest: PullRequest }) {
 	);
 }
 
+function ReviewChip({ review }: { review: Review | null }) {
+	const { color, label } = reviewChip(review);
+	return (
+		<Text className={styles.chip} color={color} fontWeight="label" typography="caption">
+			{label}
+		</Text>
+	);
+}
+
 function describePullRequest(pullRequest: PullRequest) {
-	const parts = [pullRequest.head.ref];
-	if (pullRequest.user) parts.unshift(pullRequest.user.login);
+	const parts = [pullRequest.headRef];
+	if (pullRequest.author) parts.unshift(pullRequest.author);
 	if (pullRequest.draft) parts.push('draft');
 	return parts.join(' · ');
 }

@@ -32,6 +32,8 @@ export default defineConfig({
 						instances: [{ browser: 'chromium' }],
 						provider: playwright({}),
 					},
+					// Pull request reports come from this origin, which the tests' mocked fetch answers.
+					env: { VITE_VISUAL_REVIEW_DATA_URL_TEMPLATE: 'https://pr-{pr}.reports.test' },
 					include: ['src/**/*.browser.test.tsx'],
 					name: 'browser',
 					setupFiles: ['./src/test/browser-setup.ts'],
