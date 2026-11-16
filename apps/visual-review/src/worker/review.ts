@@ -1,0 +1,149 @@
+import { z } from 'zod';
+
+/** The check run's name. One per head commit, written by the publish workflow. */
+export const CHECK_NAME = 'visual-review';
+/** Identifies the sticky pull request comment, with its `<slug>[bot]` author. */
+export const COMMENT_MARKER = '<!-- luke-ui-visual-review -->';
+
+const MAX_HISTORY_ENTRIES = 50;
+const MAX_NOTE_LENGTH = 500;
+const STATUS_PREFIX = '**Status:** ';
+const STATUS_SECTION = /<!-- visual-review-status -->[\s\S]*?<!-- \/visual-review-status -->/;
+const DECIDED_TITLE = /^(?:Approved|Changes requested) by @([A-Za-z0-9-]{1,39})$/;
+
+export const shaSchema = z.string().regex(/^[0-9a-f]{40}$/);
+export const positiveIntegerSchema = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
+
+const externalIdSchema = z.object({
+	baselineRunId: positiveIntegerSchema.nullable(),
+	baselineSha: shaSchema.nullable(),
+	kind: z.enum(['clean', 'failed', 'review']),
+	reasons: z.array(z.enum(['infrastructure', 'visual'])),
+	runAttempt: positiveIntegerSchema,
+	runId: positiveIntegerSchema,
+	v: z.literal(1),
+});
+
+export type ExternalId = z.infer<typeof externalIdSchema>;
+export type Decision = 'approve' | 'request-changes';
+type ReviewState = 'approved' | 'changes-requested' | 'clean' | 'failed' | 'needs-review';
+
+export interface Review {
+	baselineRunId: number | null;
+	baselineSha: string | null;
+	checkUrl: string;
+	decidedBy: string | null;
+	headSha: string;
+	kind: ExternalId['kind'];
+	reasons: ExternalId['reasons'];
+	runAttempt: number;
+	runId: number;
+	state: ReviewState;
+}
+
+/** The fields of a check run, from REST or GraphQL, that a `Review` reads. */
+export interface CheckRunSnapshot {
+	/** Lower case, as REST spells it. */
+	conclusion: string | null;
+	externalId: string | null;
+	headSha: string;
+	htmlUrl: string;
+	title: string | null;
+}
+
+/** Parses the publish workflow's v1 `external_id`, or returns `undefined` for anything else. */
+export function parseExternalId(value: string | null): ExternalId | undefined {
+	if (!value) return undefined;
+	let parsed: unknown;
+	try {
+		parsed = JSON.parse(value);
+	} catch {
+		return undefined;
+	}
+	const result = externalIdSchema.safeParse(parsed);
+	return result.success ? result.data : undefined;
+}
+
+/** Maps a `visual-review` check run to a `Review`, or `null` when its `external_id` is not v1. */
+export function reviewFromCheckRun(run: CheckRunSnapshot): Review | null {
+	const externalId = parseExternalId(run.externalId);
+	if (!externalId) return null;
+	const state = reviewState(externalId.kind, run.conclusion);
+	const decided = state === 'approved' || state === 'changes-requested';
+	return {
+		baselineRunId: externalId.baselineRunId,
+		baselineSha: externalId.baselineSha,
+		checkUrl: run.htmlUrl,
+		decidedBy: decided ? (DECIDED_TITLE.exec(run.title ?? '')?.[1] ?? null) : null,
+		headSha: run.headSha,
+		kind: externalId.kind,
+		reasons: externalId.reasons,
+		runAttempt: externalId.runAttempt,
+		runId: externalId.runId,
+		state,
+	};
+}
+
+function reviewState(kind: ExternalId['kind'], conclusion: string | null): ReviewState {
+	if (kind === 'clean') return 'clean';
+	if (kind === 'failed') return 'failed';
+	if (conclusion === 'success') return 'approved';
+	if (conclusion === 'failure') return 'changes-requested';
+	return 'needs-review';
+}
+
+/** The status text a decision writes to the title, the summary and the comment. */
+export function decisionStatus(decision: Decision, login: string): string {
+	return decision === 'approve' ? `Approved by @${login}` : `Changes requested by @${login}`;
+}
+
+/** Replaces the summary's first line, the status line, and keeps the rest. */
+export function rewriteSummary(summary: string | null, status: string): string {
+	const statusLine = `${STATUS_PREFIX}${status}`;
+	if (!summary) return statusLine;
+	const newline = summary.indexOf('\n');
+	const firstLine = newline === -1 ? summary : summary.slice(0, newline);
+	if (!firstLine.startsWith(STATUS_PREFIX)) return `${statusLine}\n\n${summary}`;
+	return newline === -1 ? statusLine : `${statusLine}${summary.slice(newline)}`;
+}
+
+/** Prepends an entry to the check run's history, newest first, keeping 50 entries. */
+export function prependHistory(text: string | null, entry: string): string {
+	const entries = (text ?? '').split('\n').filter((line) => line.startsWith('- '));
+	return ['### History', '', ...[entry, ...entries].slice(0, MAX_HISTORY_ENTRIES)].join('\n');
+}
+
+export function historyEntry(date: Date, status: string, note: string | undefined): string {
+	return `- ${formatTimestamp(date)} · ${status}${note ? `: ${escapeNote(note)}` : ''}`;
+}
+
+/** `YYYY-MM-DD HH:MM UTC`. */
+function formatTimestamp(date: Date): string {
+	return `${date.toISOString().slice(0, 16).replace('T', ' ')} UTC`;
+}
+
+/** Collapses whitespace to single spaces and trims. */
+export function normalizeNote(value: string): string {
+	return value.replaceAll(/\s+/g, ' ').trim();
+}
+
+export function isValidNote(note: string): boolean {
+	return note.length <= MAX_NOTE_LENGTH && !/\p{Cc}/u.test(note);
+}
+
+function escapeNote(note: string): string {
+	return note.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+}
+
+/**
+ * Rewrites the status section of the sticky comment, or returns `undefined` when the comment has
+ * none.
+ */
+export function rewriteCommentStatus(body: string, status: string): string | undefined {
+	if (!STATUS_SECTION.test(body)) return undefined;
+	return body.replace(
+		STATUS_SECTION,
+		() =>
+			`<!-- visual-review-status -->\n${STATUS_PREFIX}${status}\n<!-- /visual-review-status -->`,
+	);
+}

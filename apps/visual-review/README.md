@@ -46,3 +46,34 @@ The browser tests in `src/review/review.browser.test.tsx` review the small repor
 
 `pnpm test:visual` writes the comparison that `http://localhost:5175/?source=local` reviews. Set
 `VISUAL_REVIEW_LOCAL_DIR` to review a comparison in another directory.
+
+## Review backend
+
+`src/worker/` is the backend that records reviews. Reviewers with write access sign in with GitHub
+and approve or request changes on a pull request's `visual-review` check run. A decision completes
+the check run with a success or failure conclusion, adds a line to its history, and rewrites the
+status in the pull request's sticky comment. The browser app does not import the worker.
+
+The build compiles the worker into `dist/_worker.js`, one ES module with its dependencies bundled,
+and writes `dist/_routes.json`, which sends only `/api/*` to it. Cloudflare Pages runs it as Pages
+Functions in advanced mode. `vite.worker.config.ts` holds that build and fails it if the worker
+would import anything at runtime.
+
+| Route                               | Purpose                                                         |
+| ----------------------------------- | --------------------------------------------------------------- |
+| `GET /api/auth/login?return=<path>` | Starts GitHub sign-in, then returns to the path                 |
+| `GET /api/auth/callback`            | Finishes sign-in and sets an eight-hour session cookie          |
+| `POST /api/auth/logout`             | Ends the session                                                |
+| `GET /api/session`                  | The signed-in account, and whether it can review                |
+| `GET /api/pulls`                    | Open pull requests with their head commit's review, cached 30 s |
+| `GET /api/pulls/<number>/review`    | The review of a pull request's head commit                      |
+| `POST /api/pulls/<number>/decision` | Approves or requests changes on that review                     |
+
+A `POST` must send `Content-Type: application/json` and an `Origin` header equal to `APP_ORIGIN`.
+Report deployments on `pr-<number>` subdomains are same-site with the app, so the session cookie's
+`SameSite` setting alone does not block them. Without its configuration, the worker answers every
+route with `503 unconfigured`.
+[Visual regression testing](../../docs/VISUAL_TESTING.md#review-backend) lists the GitHub App and
+Pages settings.
+
+The unit tests in `src/worker/` run the request handler against a stubbed `fetch`.
