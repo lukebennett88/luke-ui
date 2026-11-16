@@ -109,14 +109,25 @@ Requesting a re-run makes the earlier attempt stale at once. The backend refuses
   that baseline also makes it stale. Update the branch, or re-run the comparison.
 
 GitHub has no conditional write for check runs, so the backend checks a decision again after it
-writes it, and keeps that check running through `waitUntil` if the reviewer disconnects:
+writes it. It registers the write and that check with `waitUntil` before the write starts, so a
+reviewer who disconnects cannot cancel either.
 
-- When the write's response shows that the publish workflow changed the check run's `external_id` in
-  between, the backend sets the check run back to `Comparing` for the comparison it names and
-  answers `409 stale`.
-- Otherwise it reads the latest comparison again. When a re-run was requested in between, it sets
-  the check run back to `Comparing` for the newer run and answers `409 stale`.
-- When that read fails, it sets the check run back to `Needs review` and answers `502 upstream`.
+The backend never writes the check run's `external_id`. Only the workflows that record comparison
+results write it, so the response to each backend write names the record that the write landed on:
+
+- When the decision's response names another record, a workflow recorded it in between. The backend
+  restores that record's conclusion and title, and answers `409 stale`. The summary then says that
+  the review app still has the report.
+- Otherwise it reads the latest comparison again. When a re-run was requested in between, it
+  withdraws the decision: the check run goes back to `Needs review` with the `action_required`
+  conclusion, and the backend answers `409 stale`. `Visual review publish` records the re-run
+  itself.
+- When that read fails, it withdraws the decision and answers `502 upstream`.
+
+A repair never passes the check, except when it restores a `clean` record. When a repair's own
+response names yet another record, the backend restores that record instead. After three attempts it
+writes `action_required` for the last record named, which blocks merging, and stops. Each repair
+adds a line to the check run's history and rewrites the sticky comment's status to match.
 
 GitHub keeps a completed check run completed, so a `Comparing` check run has the `action_required`
 conclusion, and its state comes from the `pending` kind in its `external_id`.

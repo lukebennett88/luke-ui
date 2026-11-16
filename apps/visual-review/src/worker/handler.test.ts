@@ -129,8 +129,11 @@ function fakeGitHub() {
 		],
 		/** The latest comparison on each read, in order, or `'error'` for a 500. The last repeats. */
 		comparisons: [comparisonRun()] as Array<WorkflowRun | 'error'>,
-		/** The `external_id` a check run write returns, when the publisher wrote in between. */
-		externalIdAfterWrite: undefined as string | null | undefined,
+		/**
+		 * The `external_id` stored when each check run write lands, in order, standing for records
+		 * a workflow recorded in between. The last repeats. Empty keeps the validated one.
+		 */
+		storedExternalIds: [] as Array<string | null>,
 		/** The check run that `GET /api/pulls` lists for pull request 5. */
 		listedCheckRun: {
 			conclusion: 'SUCCESS',
@@ -145,11 +148,15 @@ function fakeGitHub() {
 		pull: { head: { sha: HEAD }, state: 'open' },
 	};
 	const calls: Array<Call> = [];
+	/** Each request's method and URL, recorded when `fetch` is called, before its body is read. */
+	const started: Array<string> = [];
 	let comparisonReads = 0;
+	let checkRunWrites = 0;
 
 	async function fetchStub(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
 		const request = new Request(input, init);
 		const url = new URL(request.url);
+		started.push(`${request.method} ${url}`);
 		const text = await request.text();
 		const body: unknown = text ? JSON.parse(text) : undefined;
 		calls.push({
@@ -183,13 +190,18 @@ function fakeGitHub() {
 				return respond(state.pull);
 			case `GET api.github.com/repos/octo/widgets/commits/${HEAD}/check-runs`:
 				return respond({ check_runs: state.checkRuns, total_count: state.checkRuns.length });
-			case 'PATCH api.github.com/repos/octo/widgets/check-runs/900':
+			case 'PATCH api.github.com/repos/octo/widgets/check-runs/900': {
+				const stored = state.storedExternalIds.length
+					? state.storedExternalIds[Math.min(checkRunWrites, state.storedExternalIds.length - 1)]
+					: checkRun().external_id;
+				checkRunWrites += 1;
 				return respond({
 					...checkRun(),
 					conclusion: null,
-					external_id: state.externalIdAfterWrite ?? checkRun().external_id,
+					external_id: stored,
 					...(body as Partial<CheckRun>),
 				});
+			}
 			case 'GET api.github.com/repos/octo/widgets/actions/workflows/visual-regression.yml/runs': {
 				const run = state.comparisons[Math.min(comparisonReads, state.comparisons.length - 1)];
 				comparisonReads += 1;
@@ -212,7 +224,7 @@ function fakeGitHub() {
 		}
 	}
 
-	return { calls, fetch: fetchStub, state };
+	return { calls, fetch: fetchStub, started, state };
 }
 
 function graphqlPulls(listed: ListedCheckRun) {
@@ -309,6 +321,60 @@ function setCookies(response: Response): Array<string> {
 
 function patches(calls: Array<Call>): Array<Call> {
 	return calls.filter((call) => call.method === 'PATCH');
+}
+
+interface CheckRunWrite {
+	conclusion: string;
+	output: { summary: string; text: string; title: string };
+}
+
+/** The bodies of the check run writes, in order. */
+function checkRunBodies(calls: Array<Call>): Array<CheckRunWrite> {
+	return patches(calls)
+		.filter((call) => call.url.endsWith('/check-runs/900'))
+		.map((call) => call.body as CheckRunWrite);
+}
+
+/** Only the workflows that record comparison results write `external_id`. */
+function expectNoExternalId(calls: Array<Call>) {
+	for (const call of patches(calls)) expect(call.body).not.toHaveProperty('external_id');
+}
+
+function countComparisonReads(calls: Array<Call>): number {
+	return calls.filter((call) => call.url.includes('/visual-regression.yml/runs')).length;
+}
+
+/** An `external_id` that a workflow recorded on the same check run. */
+function record(overrides: Record<string, unknown>): string {
+	return String(checkRun(overrides).external_id);
+}
+
+const PENDING_RERUN = record({
+	baselineRunAttempt: null,
+	baselineRunId: null,
+	baselineSha: null,
+	kind: 'pending',
+	reasons: [],
+	runAttempt: 2,
+});
+const FAILED_RERUN = record({
+	baselineRunAttempt: null,
+	baselineRunId: null,
+	baselineSha: null,
+	kind: 'failed',
+	reasons: [],
+	runAttempt: 2,
+});
+const CLEAN_RERUN = record({ kind: 'clean', reasons: [], runAttempt: 2 });
+const REPLACED =
+	'A decision written at the same moment replaced this summary, and the review app still has the report.';
+const DECISION_HISTORY =
+	'- 2026-11-16 03:40 UTC · Approved by @luke\n- 2026-11-16 03:22 UTC · Comparison run 123 (attempt 1): needs review';
+
+function commentWith(status: string) {
+	return {
+		body: `<!-- luke-ui-visual-review -->\n<!-- visual-review-status -->\n**Status:** ${status}\n<!-- /visual-review-status -->\n3 changed`,
+	};
 }
 
 describe('configuration', () => {
@@ -729,112 +795,98 @@ describe('decisions', () => {
 		expect(response.status).toBe(200);
 	});
 
-	test('returns the check run to pending when a re-run starts during the decision', async () => {
+	test('registers the decision with waitUntil before writing it', async () => {
 		const { github, handle } = setup();
-		github.state.comparisons = [
-			comparisonRun(),
-			comparisonRun({ conclusion: null, run_attempt: 2, status: 'queued' }),
-		];
-		const response = await handle(await decisionRequest(APPROVE), env);
-
-		expect(response.status).toBe(409);
-		expect(await response.json()).toMatchObject({ error: 'stale' });
-		const [decision, pending, comment] = patches(github.calls);
-		expect(decision?.body).toMatchObject({ conclusion: 'success', status: 'completed' });
-		expect(pending?.url).toBe('https://api.github.com/repos/octo/widgets/check-runs/900');
-		// GitHub ignores `in_progress` on a completed check run, so pending stays completed.
-		expect(pending?.body).toEqual({
-			completed_at: '2026-11-16T03:40:00.000Z',
-			conclusion: 'action_required',
-			external_id: JSON.stringify({
-				baselineRunAttempt: null,
-				baselineRunId: null,
-				baselineSha: null,
-				kind: 'pending',
-				reasons: [],
-				runAttempt: 2,
-				runId: 123,
-				v: 1,
-			}),
-			output: {
-				summary: '**Status:** Comparing\n',
-				text: '### History\n\n- 2026-11-16 03:40 UTC · Comparison run 123 (attempt 2) started\n- 2026-11-16 03:40 UTC · Approved by @luke\n- 2026-11-16 03:22 UTC · Comparison run 123 (attempt 1): needs review',
-				title: 'Comparing',
+		const requestsAtWaitUntil: Array<Array<string>> = [];
+		const pending: Array<Promise<unknown>> = [];
+		const response = await handle(await decisionRequest(APPROVE), env, {
+			waitUntil: (promise) => {
+				requestsAtWaitUntil.push([...github.started]);
+				pending.push(promise);
 			},
-			status: 'completed',
 		});
-		expect(comment?.body).toEqual({
-			body: '<!-- luke-ui-visual-review -->\n<!-- visual-review-status -->\n**Status:** Comparing\n<!-- /visual-review-status -->\n3 changed',
-		});
-	});
 
-	test('undoes the decision when the comparison cannot be read again', async () => {
-		const { github, handle } = setup();
-		github.state.comparisons = [comparisonRun(), 'error'];
-		const response = await handle(await decisionRequest(APPROVE), env);
-
-		expect(response.status).toBe(502);
-		expect(await response.json()).toMatchObject({ error: 'upstream' });
-		const [decision, undo, ...rest] = patches(github.calls);
-		expect(decision?.body).toMatchObject({ conclusion: 'success', status: 'completed' });
-		expect(undo?.body).toEqual({
-			completed_at: '2026-11-16T03:40:00.000Z',
-			conclusion: 'action_required',
-			output: {
-				summary: '**Status:** Needs review\n\n| Changed | 3 |',
-				text: '### History\n\n- 2026-11-16 03:40 UTC · Decision by @luke undone: the comparison could not be checked\n- 2026-11-16 03:40 UTC · Approved by @luke\n- 2026-11-16 03:22 UTC · Comparison run 123 (attempt 1): needs review',
-				title: 'Needs review: 3 changed',
-			},
-			status: 'completed',
-		});
-		// The comment never showed the decision, so it is left alone.
-		expect(rest).toEqual([]);
-	});
-
-	test('returns the check run to pending when the publisher wrote during the decision', async () => {
-		const { github, handle } = setup();
-		// The write's response shows the publisher already marked a re-run as started.
-		github.state.externalIdAfterWrite = checkRun({
-			baselineRunAttempt: null,
-			baselineRunId: null,
-			baselineSha: null,
-			kind: 'pending',
-			reasons: [],
-			runAttempt: 2,
-		}).external_id;
-		const response = await handle(await decisionRequest(APPROVE), env);
-
-		expect(response.status).toBe(409);
-		expect(await response.json()).toMatchObject({ error: 'stale' });
-		const [, pending] = patches(github.calls);
-		expect(pending?.body).toMatchObject({
-			conclusion: 'action_required',
-			external_id: github.state.externalIdAfterWrite,
-			output: { summary: '**Status:** Comparing\n', title: 'Comparing' },
-		});
-		// The repair does not wait for the runs list to show the re-run.
-		const comparisonReads = github.calls.filter((call) =>
-			call.url.includes('/visual-regression.yml/runs'),
+		expect(response.status).toBe(200);
+		expect(requestsAtWaitUntil).toHaveLength(1);
+		expect(requestsAtWaitUntil[0]?.filter((request) => request.startsWith('PATCH '))).toEqual([]);
+		expect(github.started).toContain(
+			'PATCH https://api.github.com/repos/octo/widgets/check-runs/900',
 		);
-		expect(comparisonReads).toHaveLength(1);
+		expect(pending).toHaveLength(1);
 	});
 
-	test('returns the check run to pending for the latest comparison when the write loses its external id', async () => {
-		const { github, handle } = setup();
-		github.state.externalIdAfterWrite = 'legacy';
-		const response = await handle(await decisionRequest(APPROVE), env);
+	const restorations: Array<{
+		conclusion: string;
+		name: string;
+		stored: string;
+		summary: string;
+		title: string;
+	}> = [
+		{
+			conclusion: 'action_required',
+			name: 'a pending record',
+			stored: PENDING_RERUN,
+			summary: '**Status:** Comparing\n',
+			title: 'Comparing',
+		},
+		{
+			conclusion: 'action_required',
+			name: 'a newer review record',
+			stored: record({ runAttempt: 2 }),
+			summary: `**Status:** Needs review\n\n${REPLACED}`,
+			title: 'Needs review',
+		},
+		{
+			conclusion: 'success',
+			name: 'a clean record',
+			stored: CLEAN_RERUN,
+			summary: `**Status:** No visual changes\n\n${REPLACED}`,
+			title: 'No visual changes',
+		},
+		{
+			conclusion: 'failure',
+			name: 'a failed record',
+			stored: FAILED_RERUN,
+			summary: `**Status:** Comparison failed\n\n${REPLACED}`,
+			title: 'Comparison failed',
+		},
+		{
+			conclusion: 'action_required',
+			name: 'a record it cannot read',
+			stored: 'legacy',
+			summary: `**Status:** Needs review\n\n${REPLACED}`,
+			title: 'Needs review',
+		},
+	];
+	for (const restoration of restorations) {
+		test(`restores ${restoration.name} that the decision landed on`, async () => {
+			const { github, handle } = setup();
+			github.state.storedExternalIds = [restoration.stored];
+			const response = await handle(await decisionRequest(APPROVE), env);
 
-		expect(response.status).toBe(409);
-		const [, pending] = patches(github.calls);
-		const written = pending?.body as { external_id?: string } | undefined;
-		expect(JSON.parse(String(written?.external_id))).toMatchObject({
-			kind: 'pending',
-			runAttempt: 1,
-			runId: 123,
+			expect(response.status).toBe(409);
+			expect(await response.json()).toMatchObject({ error: 'stale' });
+			const [decision, restore, ...rest] = checkRunBodies(github.calls);
+			expect(decision?.conclusion).toBe('success');
+			expect(restore).toEqual({
+				completed_at: '2026-11-16T03:40:00.000Z',
+				conclusion: restoration.conclusion,
+				output: {
+					summary: restoration.summary,
+					text: `### History\n\n- 2026-11-16 03:40 UTC · Decision by @luke withdrawn: a newer result was recorded at the same time\n${DECISION_HISTORY}`,
+					title: restoration.title,
+				},
+				status: 'completed',
+			});
+			expect(rest).toEqual([]);
+			expectNoExternalId(github.calls);
+			// The response already names the newer record, so the runs list is not read again.
+			expect(countComparisonReads(github.calls)).toBe(1);
+			expect(patches(github.calls).at(-1)?.body).toEqual(commentWith(restoration.title));
 		});
-	});
+	}
 
-	test('keeps confirming the decision after the response through waitUntil', async () => {
+	test('withdraws the decision when a re-run starts during it', async () => {
 		const { github, handle } = setup();
 		github.state.comparisons = [
 			comparisonRun(),
@@ -846,10 +898,104 @@ describe('decisions', () => {
 		});
 
 		expect(response.status).toBe(409);
-		expect(pending).toHaveLength(1);
+		expect(await response.json()).toMatchObject({ error: 'stale' });
 		// The registered promise settles without rejecting, so the runtime never reports it.
 		await expect(pending[0]).resolves.toBeUndefined();
-		expect(patches(github.calls)[1]?.body).toMatchObject({ conclusion: 'action_required' });
+		const [decision, withdrawal, ...rest] = checkRunBodies(github.calls);
+		expect(decision?.conclusion).toBe('success');
+		// The publish workflow records the re-run, so the backend leaves the record alone.
+		expect(withdrawal).toEqual({
+			completed_at: '2026-11-16T03:40:00.000Z',
+			conclusion: 'action_required',
+			output: {
+				summary: '**Status:** Needs review\n\n| Changed | 3 |',
+				text: `### History\n\n- 2026-11-16 03:40 UTC · Decision by @luke withdrawn: a newer comparison started\n${DECISION_HISTORY}`,
+				title: 'Needs review',
+			},
+			status: 'completed',
+		});
+		expect(rest).toEqual([]);
+		expectNoExternalId(github.calls);
+		expect(patches(github.calls).at(-1)?.body).toEqual(commentWith('Needs review'));
+	});
+
+	test('withdraws the decision when the comparison cannot be read again', async () => {
+		const { github, handle } = setup();
+		github.state.comparisons = [comparisonRun(), 'error'];
+		const response = await handle(await decisionRequest(APPROVE), env);
+
+		expect(response.status).toBe(502);
+		expect(await response.json()).toMatchObject({ error: 'upstream' });
+		const [, withdrawal, ...rest] = checkRunBodies(github.calls);
+		expect(withdrawal).toMatchObject({
+			conclusion: 'action_required',
+			output: {
+				summary: '**Status:** Needs review\n\n| Changed | 3 |',
+				text: expect.stringContaining(
+					'- 2026-11-16 03:40 UTC · Decision by @luke withdrawn: the comparison could not be checked\n',
+				),
+				title: 'Needs review',
+			},
+		});
+		expect(rest).toEqual([]);
+		expectNoExternalId(github.calls);
+	});
+
+	test('restores the record a withdrawal landed on instead', async () => {
+		const { github, handle } = setup();
+		github.state.comparisons = [
+			comparisonRun(),
+			comparisonRun({ conclusion: null, run_attempt: 2, status: 'queued' }),
+		];
+		// The decision lands on the validated record, and the publisher writes between it and the
+		// withdrawal.
+		github.state.storedExternalIds = [String(checkRun().external_id), PENDING_RERUN];
+		const response = await handle(await decisionRequest(APPROVE), env);
+
+		expect(response.status).toBe(409);
+		const writes = checkRunBodies(github.calls);
+		expect(writes.map((write) => write.output.title)).toEqual([
+			'Approved by @luke',
+			'Needs review',
+			'Comparing',
+		]);
+		expect(writes[2]).toMatchObject({
+			conclusion: 'action_required',
+			output: { summary: '**Status:** Comparing\n' },
+		});
+		expectNoExternalId(github.calls);
+		expect(patches(github.calls).at(-1)?.body).toEqual(commentWith('Comparing'));
+	});
+
+	test('stops after three repairs with a final action_required write', async () => {
+		const { github, handle } = setup();
+		github.state.comparisons = [
+			comparisonRun(),
+			comparisonRun({ conclusion: null, run_attempt: 2, status: 'queued' }),
+		];
+		// Every repair lands on a record newer than the one it meant to fix.
+		github.state.storedExternalIds = [
+			String(checkRun().external_id),
+			PENDING_RERUN,
+			FAILED_RERUN,
+			CLEAN_RERUN,
+		];
+		const response = await handle(await decisionRequest(APPROVE), env);
+
+		expect(response.status).toBe(409);
+		const writes = checkRunBodies(github.calls);
+		expect(writes.map((write) => [write.conclusion, write.output.title])).toEqual([
+			['success', 'Approved by @luke'],
+			['action_required', 'Needs review'],
+			['action_required', 'Comparing'],
+			['failure', 'Comparison failed'],
+			// The last record is clean, but nothing confirmed it, so it does not pass.
+			['action_required', 'No visual changes'],
+		]);
+		expect(writes[4]?.output.text).toMatch(
+			/^### History\n\n- 2026-11-16 03:40 UTC · Decision by @luke withdrawn: newer results kept arriving\n/,
+		);
+		expectNoExternalId(github.calls);
 	});
 
 	test('reuses the installation token across requests', async () => {

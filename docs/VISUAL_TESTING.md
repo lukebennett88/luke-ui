@@ -176,6 +176,12 @@ old login gains none. The backend asks GitHub again on every decision, so removi
 takes effect at once. The [app README](../apps/visual-review/README.md#review-backend) lists the
 freshness checks a decision must pass.
 
+The backend writes a check run's conclusion, title, summary, and history, but never its
+`external_id`. Only the workflows that record comparison results write it. When a decision races a
+newer result, the backend restores that result's presentation or withdraws the decision, and it
+never passes the check unless it restores a clean result. The
+[app README](../apps/visual-review/README.md#review-backend) describes each repair.
+
 Set these variables as secrets on the Pages project's production environment only. Preview
 deployments, including every `pr-<number>` branch, then have no credentials, and the backend answers
 there with `503 unconfigured`.
