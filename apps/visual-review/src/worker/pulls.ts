@@ -231,7 +231,7 @@ export async function getReview(context: Context, number: number): Promise<Respo
 /**
  * `POST /api/pulls/:number/decision`: approves or requests changes on the head commit's check run,
  * then updates the sticky comment's status. Each check fails before anything is written. A
- * comparison re-run requested while the decision is written turns the check run back to pending.
+ * publication or a comparison re-run that races the decision makes the backend withdraw it.
  */
 export async function decide(context: Context, number: number): Promise<Response> {
 	const reviewer = await readSession(context);
@@ -293,47 +293,35 @@ export async function decide(context: Context, number: number): Promise<Response
 		throw staleComparison();
 	}
 
-	const status = decisionStatus(body.decision, login);
-	const now = new Date(context.deps.now());
-	const decided = await patchCheckRun(context, run.id, {
-		completed_at: now.toISOString(),
+	const write: DecisionWrite = {
 		conclusion: body.decision === 'approve' ? 'success' : 'failure',
-		output: {
-			summary: rewriteSummary(run.output.summary, status),
-			text: prependHistory(run.output.text, historyEntry(now, status, body.note)),
-			title: status,
-		},
-		status: 'completed',
-	});
-
-	// GitHub has no conditional write for check runs, so the decision is checked again after it is
-	// written. The check also runs through `waitUntil`, so a client that disconnects cannot cancel a
-	// repair halfway.
-	const check = confirmDecision(context, {
-		decided,
 		externalId,
 		headSha: body.headSha,
 		login,
-		now,
+		note: body.note,
+		now: new Date(context.deps.now()),
 		number,
 		run,
-		status,
-	});
-	context.waitUntil(check.catch(() => undefined));
-	await check;
+		status: decisionStatus(body.decision, login),
+	};
+	// The write starts after a microtask, so `waitUntil` holds it before any request leaves. A client
+	// that disconnects then cannot cancel the decision between its write and its repair.
+	const work = Promise.resolve().then(() => writeDecision(context, write));
+	context.waitUntil(work.catch(() => undefined));
+	const decided = await work;
 
 	const review = reviewFromCheckRun(snapshot(context, decided));
 	if (!review) throw upstream('GitHub sent back a check run without its external id.');
 	return json({ review });
 }
 
-interface WrittenDecision {
-	/** The check run as the decision's write returned it. */
-	decided: RestCheckRun;
+interface DecisionWrite {
+	conclusion: 'failure' | 'success';
 	/** The external id the decision was validated against. */
 	externalId: ExternalId;
 	headSha: string;
 	login: string;
+	note: string | undefined;
 	now: Date;
 	number: number;
 	/** The check run as it was read before the decision. */
@@ -341,81 +329,187 @@ interface WrittenDecision {
 	status: string;
 }
 
+/** What a repair writes to the check run's conclusion, title, summary and history. */
+interface Presentation {
+	conclusion: 'action_required' | 'failure' | 'success';
+	entry: string;
+	summary: string;
+	title: string;
+}
+
+const MAX_REPAIR_ATTEMPTS = 3;
+const CLEAN_STATUS = 'No visual changes';
+const FAILED_STATUS = 'Comparison failed';
+const REPLACED_SUMMARY =
+	'A decision written at the same moment replaced this summary, and the review app still has the report.';
+
+/** Writes the decision, then confirms it. Returns the check run as the decision's write left it. */
+async function writeDecision(context: Context, write: DecisionWrite): Promise<RestCheckRun> {
+	const { now, run, status } = write;
+	const decided = await patchCheckRun(context, run.id, {
+		completed_at: now.toISOString(),
+		conclusion: write.conclusion,
+		output: {
+			summary: rewriteSummary(run.output.summary, status),
+			text: prependHistory(run.output.text, historyEntry(now, status, write.note)),
+			title: status,
+		},
+		status: 'completed',
+	});
+	await confirmDecision(context, write, decided);
+	return decided;
+}
+
 /**
  * Confirms that a written decision still applies to the latest comparison, and repairs the check
- * run when it does not:
+ * run when it does not. GitHub has no conditional write for check runs, so the check comes after
+ * the write.
  *
- * - The write's response carries the check run's current `external_id`. When it differs from the
- *   validated one, the publish workflow wrote in between, so the check run goes back to pending
- *   for the comparison it names, without waiting for the runs list.
- * - A re-run requested since the pre-check makes the decision stale, and the check run goes back
- *   to pending for the newer run, as the publish workflow writes it when a comparison starts.
- * - When the latest comparison cannot be read, the decision is undone so it never passes
- *   unchecked.
+ * The backend never writes `external_id`. Only the workflows that record comparison results do, so
+ * each write's response names the record the write landed on:
+ *
+ * - When the decision's response names another record, a publication wrote in between, and the
+ *   check run gets that record's presentation back.
+ * - When a re-run was requested since the pre-check, or the latest comparison cannot be read, the
+ *   decision is withdrawn. The publish workflow records the newer run itself.
  *
  * It throws `409 stale` or `502 upstream` after a repair. Otherwise it mirrors the decision in the
  * sticky comment.
  */
-async function confirmDecision(context: Context, written: WrittenDecision): Promise<void> {
-	const { decided, externalId, now, number, run } = written;
-	const current = parseExternalId(decided.external_id);
-	let stale: Comparison | undefined;
-	if (current && sameExternalId(current, externalId)) {
-		const latest = await latestComparison(context, written.headSha).catch(() => undefined);
-		if (!latest) return undoDecision(context, written);
-		if (!isComparison(latest, externalId)) stale = comparisonOf(latest);
-	} else if (current) {
-		stale = comparisonOf(current);
-	} else {
-		const latest = await latestComparison(context, written.headSha).catch(() => undefined);
-		if (!latest) return undoDecision(context, written);
-		stale = comparisonOf(latest);
+async function confirmDecision(
+	context: Context,
+	write: DecisionWrite,
+	decided: RestCheckRun,
+): Promise<void> {
+	const landed = parseExternalId(decided.external_id);
+	if (!sameRecord(landed, write.externalId)) {
+		await repair(context, write, decided, landed, restoration(write, landed));
+		throw staleComparison();
 	}
-	if (stale) {
-		await patchCheckRun(context, run.id, pendingCheckRun(stale, decided.output.text, now));
-		await updateCommentStatus(context, number, COMPARING_STATUS).catch(() => undefined);
+	let latest: WorkflowRun | undefined;
+	try {
+		latest = await latestComparison(context, write.headSha);
+	} catch {
+		await repair(
+			context,
+			write,
+			decided,
+			write.externalId,
+			withdrawal(write, 'the comparison could not be checked'),
+		);
+		throw upstream('GitHub did not confirm the comparison. The decision was withdrawn. Try again.');
+	}
+	if (!isComparison(latest, write.externalId)) {
+		await repair(
+			context,
+			write,
+			decided,
+			write.externalId,
+			withdrawal(write, 'a newer comparison started'),
+		);
 		throw staleComparison();
 	}
 	// The check run is the record of the decision. The comment only mirrors it, so a failure here
 	// does not fail a decision that has already been written.
-	await updateCommentStatus(context, number, written.status).catch(() => undefined);
+	await updateCommentStatus(context, write.number, write.status).catch(() => undefined);
 }
 
-/** Puts the check run back to `Needs review` and fails the request. */
-async function undoDecision(context: Context, written: WrittenDecision): Promise<never> {
-	const { decided, login, now, run } = written;
-	await patchCheckRun(context, run.id, {
-		completed_at: now.toISOString(),
+/**
+ * Writes a repair meant for `target`, the record the previous response named. When the repair's
+ * own response names another record, that record was written in between, so the next attempt
+ * restores it instead. After the last attempt it writes `action_required`, which blocks merging
+ * whatever the record is.
+ */
+async function repair(
+	context: Context,
+	write: DecisionWrite,
+	previous: RestCheckRun,
+	target: ExternalId | undefined,
+	presentation: Presentation,
+	attempt = 1,
+): Promise<void> {
+	const response = await present(context, write, previous, presentation);
+	const landed = parseExternalId(response.external_id);
+	if (sameRecord(landed, target)) {
+		await updateCommentStatus(context, write.number, presentation.title).catch(() => undefined);
+		return;
+	}
+	const next = restoration(write, landed);
+	if (attempt < MAX_REPAIR_ATTEMPTS) {
+		return repair(context, write, response, landed, next, attempt + 1);
+	}
+	const last: Presentation = {
+		...next,
 		conclusion: 'action_required',
+		entry: `Decision by @${write.login} withdrawn: newer results kept arriving`,
+	};
+	await present(context, write, response, last);
+	await updateCommentStatus(context, write.number, last.title).catch(() => undefined);
+}
+
+/** Puts the check run back to `Needs review` for the record the decision was validated against. */
+function withdrawal(write: DecisionWrite, why: string): Presentation {
+	return {
+		conclusion: 'action_required',
+		entry: `Decision by @${write.login} withdrawn: ${why}`,
+		summary: rewriteSummary(write.run.output.summary, NEEDS_REVIEW_STATUS),
+		title: NEEDS_REVIEW_STATUS,
+	};
+}
+
+/**
+ * The presentation of a record that a decision or a repair overwrote. Only a `clean` record passes,
+ * because its publication passed it. A record the backend cannot read blocks merging.
+ */
+function restoration(write: DecisionWrite, record: ExternalId | undefined): Presentation {
+	const entry = `Decision by @${write.login} withdrawn: a newer result was recorded at the same time`;
+	if (record?.kind === 'pending') {
+		return {
+			conclusion: 'action_required',
+			entry,
+			summary: `${statusLine(COMPARING_STATUS)}\n`,
+			title: COMPARING_STATUS,
+		};
+	}
+	const replaced = (conclusion: Presentation['conclusion'], title: string): Presentation => ({
+		conclusion,
+		entry,
+		summary: `${statusLine(title)}\n\n${REPLACED_SUMMARY}`,
+		title,
+	});
+	if (record?.kind === 'clean') return replaced('success', CLEAN_STATUS);
+	if (record?.kind === 'failed') return replaced('failure', FAILED_STATUS);
+	return replaced('action_required', NEEDS_REVIEW_STATUS);
+}
+
+/** Writes a presentation. It never sends `external_id`, so the response shows the stored record. */
+function present(
+	context: Context,
+	write: DecisionWrite,
+	previous: RestCheckRun,
+	presentation: Presentation,
+): Promise<RestCheckRun> {
+	const { now } = write;
+	return patchCheckRun(context, write.run.id, {
+		completed_at: now.toISOString(),
+		conclusion: presentation.conclusion,
 		output: {
-			summary: run.output.summary ?? statusLine(NEEDS_REVIEW_STATUS),
-			text: prependHistory(
-				decided.output.text,
-				historyEntry(
-					now,
-					`Decision by @${login} undone: the comparison could not be checked`,
-					undefined,
-				),
-			),
-			title: run.output.title ?? NEEDS_REVIEW_STATUS,
+			summary: presentation.summary,
+			text: prependHistory(previous.output.text, historyEntry(now, presentation.entry, undefined)),
+			title: presentation.title,
 		},
 		status: 'completed',
 	});
-	throw upstream('GitHub did not confirm the comparison. The decision was undone. Try again.');
 }
 
-/** The comparison run and attempt of an external id or a workflow run. */
-function comparisonOf(source: ExternalId | WorkflowRun): Comparison {
-	return 'v' in source
-		? { runAttempt: source.runAttempt, runId: source.runId }
-		: { runAttempt: source.run_attempt, runId: source.id };
+/** Whether two records are the same. Two records the backend cannot read count as the same. */
+function sameRecord(left: ExternalId | undefined, right: ExternalId | undefined): boolean {
+	return left && right ? sameExternalId(left, right) : left === right;
 }
 
 function staleComparison(): ApiError {
 	return new ApiError(409, 'stale', 'A newer comparison ran on this commit. Reload the review.');
 }
-
-type Comparison = Pick<ExternalId, 'runAttempt' | 'runId'>;
 
 /** Whether a workflow run is the comparison run and attempt an external id records. */
 function isComparison(
@@ -423,41 +517,6 @@ function isComparison(
 	externalId: Pick<ExternalId, 'runAttempt' | 'runId'>,
 ): run is WorkflowRun {
 	return run?.id === externalId.runId && run.run_attempt === externalId.runAttempt;
-}
-
-/**
- * The check run update that marks a comparison run as started. GitHub ignores a change from
- * `completed` back to `in_progress`, so the run stays completed with `action_required`, which still
- * blocks merging. Readers take the state from the external id's `pending` kind.
- */
-function pendingCheckRun(comparison: Comparison, history: string | null, now: Date) {
-	return {
-		completed_at: now.toISOString(),
-		conclusion: 'action_required',
-		external_id: JSON.stringify({
-			baselineRunAttempt: null,
-			baselineRunId: null,
-			baselineSha: null,
-			kind: 'pending',
-			reasons: [],
-			runAttempt: comparison.runAttempt,
-			runId: comparison.runId,
-			v: 1,
-		}),
-		output: {
-			summary: `${statusLine(COMPARING_STATUS)}\n`,
-			text: prependHistory(
-				history,
-				historyEntry(
-					now,
-					`Comparison run ${comparison.runId} (attempt ${comparison.runAttempt}) started`,
-					undefined,
-				),
-			),
-			title: COMPARING_STATUS,
-		},
-		status: 'completed',
-	};
 }
 
 async function patchCheckRun(context: Context, id: number, body: object): Promise<RestCheckRun> {
