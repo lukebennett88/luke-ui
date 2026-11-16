@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import type { Context } from './access.js';
-import { assertSameOrigin, canReview, nowSeconds, readSession } from './access.js';
+import { assertSameOrigin, nowSeconds, readSession, reviewerLogin } from './access.js';
 import { githubFetch, readGitHubJson, upstream, USER_AGENT } from './github.js';
 import { ApiError, errorResponse, json, noContent, redirect } from './http.js';
 import {
@@ -147,7 +147,7 @@ export async function session(context: Context): Promise<Response> {
 		return json({ user: null }, { cookies: hasCookie ? [sessionCookie('', 0)] : [] });
 	}
 	return json({
-		canReview: await canReview(context, current.login),
+		canReview: (await reviewerLogin(context, current)) !== undefined,
 		user: { avatarUrl: current.avatarUrl, login: current.login },
 	});
 }

@@ -10,6 +10,7 @@ const ORIGIN = 'https://review.example';
 const SECRET = 'a-test-secret-that-is-32-bytes-long';
 const HEAD = 'a'.repeat(40);
 const BOT = 'luke-ui-visual-review[bot]';
+const BASELINE = 'b'.repeat(40);
 const { pem } = await generateTestKey();
 
 const env: Env = {
@@ -30,6 +31,7 @@ interface CheckRun {
 	html_url: string;
 	id: number;
 	output: { summary: string | null; text: string | null; title: string | null };
+	status: string;
 }
 
 function checkRun(externalId: Record<string, unknown> = {}): CheckRun {
@@ -38,7 +40,7 @@ function checkRun(externalId: Record<string, unknown> = {}): CheckRun {
 		conclusion: 'action_required',
 		external_id: JSON.stringify({
 			baselineRunId: 456,
-			baselineSha: 'b'.repeat(40),
+			baselineSha: BASELINE,
 			kind: 'review',
 			reasons: ['visual'],
 			runAttempt: 1,
@@ -54,7 +56,52 @@ function checkRun(externalId: Record<string, unknown> = {}): CheckRun {
 			text: '### History\n\n- 2026-11-16 03:22 UTC · Comparison run 123 (attempt 1): needs review',
 			title: 'Needs review: 3 changed',
 		},
+		status: 'completed',
 	};
+}
+
+interface WorkflowRun {
+	conclusion: string | null;
+	event: string;
+	head_branch: string;
+	head_repository: { full_name: string };
+	head_sha: string;
+	id: number;
+	run_attempt: number;
+	status: string;
+}
+
+/** A `Visual regression` run on the head commit. */
+function comparisonRun(overrides: Partial<WorkflowRun> = {}): WorkflowRun {
+	return {
+		conclusion: 'success',
+		event: 'pull_request',
+		head_branch: 'button-padding',
+		head_repository: { full_name: 'mona/widgets' },
+		head_sha: HEAD,
+		id: 123,
+		run_attempt: 1,
+		status: 'completed',
+		...overrides,
+	};
+}
+
+/** A `Visual baseline` run on `main`. */
+function baselineRun(overrides: Partial<WorkflowRun> = {}): WorkflowRun {
+	return comparisonRun({
+		event: 'push',
+		head_branch: 'main',
+		head_repository: { full_name: 'octo/widgets' },
+		head_sha: BASELINE,
+		id: 456,
+		...overrides,
+	});
+}
+
+interface ListedCheckRun {
+	conclusion: string | null;
+	externalId: string | null;
+	title: string;
 }
 
 interface Call {
@@ -67,6 +114,9 @@ interface Call {
 /** A stand-in for the GitHub endpoints the worker calls, recording every request. */
 function fakeGitHub() {
 	const state = {
+		/** The account behind the session's user id, or `null` when GitHub answers 404. */
+		account: { id: 1, login: 'luke' } as { id: number; login: string } | null,
+		baselineRuns: [baselineRun()],
 		checkRuns: [checkRun()],
 		comments: [
 			{ body: 'Looks good', id: 1, user: { login: 'mona' } },
@@ -76,10 +126,23 @@ function fakeGitHub() {
 				user: { login: BOT },
 			},
 		],
-		permission: { permission: 'write', role_name: 'write' },
+		/** The latest comparison on each read, in order, or `'error'` for a 500. The last repeats. */
+		comparisons: [comparisonRun()] as Array<WorkflowRun | 'error'>,
+		/** The check run that `GET /api/pulls` lists for pull request 5. */
+		listedCheckRun: {
+			conclusion: 'SUCCESS',
+			externalId: checkRun().external_id,
+			title: 'Approved by @luke',
+		} as ListedCheckRun,
+		permission: {
+			permission: 'write',
+			role_name: 'write',
+			user: { id: 1 } as { id: number } | null,
+		},
 		pull: { head: { sha: HEAD }, state: 'open' },
 	};
 	const calls: Array<Call> = [];
+	let comparisonReads = 0;
 
 	async function fetchStub(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
 		const request = new Request(input, init);
@@ -94,6 +157,8 @@ function fakeGitHub() {
 		});
 		const route = `${request.method} ${url.host}${url.pathname}`;
 		const respond = (value: unknown, status = 200) => Response.json(value, { status });
+		const permissionRoute = `GET api.github.com/repos/octo/widgets/collaborators/${state.account?.login}/permission`;
+		if (state.account && route === permissionRoute) return respond(state.permission);
 		switch (route) {
 			case 'GET api.github.com/repos/octo/widgets/installation':
 				return respond({ id: 7 });
@@ -109,23 +174,31 @@ function fakeGitHub() {
 					id: 1,
 					login: 'luke',
 				});
-			case 'GET api.github.com/repos/octo/widgets/collaborators/luke/permission':
-				return respond(state.permission);
+			case 'GET api.github.com/user/1':
+				return state.account ? respond(state.account) : respond({ message: 'Not Found' }, 404);
 			case 'GET api.github.com/repos/octo/widgets/pulls/5':
 				return respond(state.pull);
 			case `GET api.github.com/repos/octo/widgets/commits/${HEAD}/check-runs`:
 				return respond({ check_runs: state.checkRuns, total_count: state.checkRuns.length });
-			case 'PATCH api.github.com/repos/octo/widgets/check-runs/900': {
-				const patch = body as Pick<CheckRun, 'conclusion' | 'output'>;
-				const updated = { ...checkRun(), conclusion: patch.conclusion, output: patch.output };
-				return respond(updated);
+			case 'PATCH api.github.com/repos/octo/widgets/check-runs/900':
+				return respond({ ...checkRun(), conclusion: null, ...(body as Partial<CheckRun>) });
+			case 'GET api.github.com/repos/octo/widgets/actions/workflows/visual-regression.yml/runs': {
+				const run = state.comparisons[Math.min(comparisonReads, state.comparisons.length - 1)];
+				comparisonReads += 1;
+				if (run === 'error') return respond({ message: 'Server Error' }, 500);
+				return respond({ total_count: run ? 1 : 0, workflow_runs: run ? [run] : [] });
 			}
+			case 'GET api.github.com/repos/octo/widgets/actions/workflows/visual-baseline.yml/runs':
+				return respond({
+					total_count: state.baselineRuns.length,
+					workflow_runs: state.baselineRuns,
+				});
 			case 'GET api.github.com/repos/octo/widgets/issues/5/comments':
 				return respond(state.comments);
 			case 'PATCH api.github.com/repos/octo/widgets/issues/comments/2':
 				return respond({ id: 2, ...(body as object) });
 			case 'POST api.github.com/graphql':
-				return respond(graphqlPulls());
+				return respond(graphqlPulls(state.listedCheckRun));
 			default:
 				throw new Error(`Unexpected request: ${route}`);
 		}
@@ -134,7 +207,7 @@ function fakeGitHub() {
 	return { calls, fetch: fetchStub, state };
 }
 
-function graphqlPulls() {
+function graphqlPulls(listed: ListedCheckRun) {
 	const run = checkRun();
 	return {
 		data: {
@@ -151,15 +224,7 @@ function graphqlPulls() {
 												nodes: [
 													{
 														checkRuns: {
-															nodes: [
-																{
-																	conclusion: 'SUCCESS',
-																	databaseId: run.id,
-																	externalId: run.external_id,
-																	title: 'Approved by @luke',
-																	url: run.html_url,
-																},
-															],
+															nodes: [{ ...listed, databaseId: run.id, url: run.html_url }],
 														},
 													},
 												],
@@ -400,7 +465,11 @@ describe('session', () => {
 
 	test('cannot review with read access', async () => {
 		const { github, handle } = setup();
-		github.state.permission = { permission: 'read', role_name: 'triage' };
+		github.state.permission = {
+			...github.state.permission,
+			permission: 'read',
+			role_name: 'triage',
+		};
 		const response = await handle(
 			new Request(`${ORIGIN}/api/session`, {
 				headers: { Cookie: `vr_session=${await sessionToken()}` },
@@ -408,6 +477,33 @@ describe('session', () => {
 			env,
 		);
 		expect(await response.json()).toMatchObject({ canReview: false, user: { login: 'luke' } });
+	});
+
+	test('checks the permission of the account behind the session user id', async () => {
+		const { github, handle } = setup();
+		github.state.account = { id: 1, login: 'luke-renamed' };
+		const response = await handle(
+			new Request(`${ORIGIN}/api/session`, {
+				headers: { Cookie: `vr_session=${await sessionToken()}` },
+			}),
+			env,
+		);
+		expect(await response.json()).toMatchObject({ canReview: true });
+		expect(github.calls.map((call) => new URL(call.url).pathname)).toContain(
+			'/repos/octo/widgets/collaborators/luke-renamed/permission',
+		);
+	});
+
+	test('cannot review when the permission belongs to another account', async () => {
+		const { github, handle } = setup();
+		github.state.permission = { ...github.state.permission, user: { id: 2 } };
+		const response = await handle(
+			new Request(`${ORIGIN}/api/session`, {
+				headers: { Cookie: `vr_session=${await sessionToken()}` },
+			}),
+			env,
+		);
+		expect(await response.json()).toMatchObject({ canReview: false });
 	});
 });
 
@@ -435,7 +531,7 @@ describe('pull requests', () => {
 					number: 5,
 					review: {
 						baselineRunId: 456,
-						baselineSha: 'b'.repeat(40),
+						baselineSha: BASELINE,
 						checkUrl: 'https://github.com/octo/widgets/runs/900',
 						decidedBy: 'luke',
 						headSha: HEAD,
@@ -468,6 +564,29 @@ describe('pull requests', () => {
 
 		await handle(new Request(`${ORIGIN}/api/pulls`), env);
 		expect(github.calls.filter((call) => call.url.endsWith('/graphql'))).toHaveLength(1);
+	});
+
+	test('lists a comparison in progress as comparing', async () => {
+		const { github, handle } = setup();
+		github.state.listedCheckRun = {
+			conclusion: null,
+			externalId: checkRun({
+				baselineRunId: null,
+				baselineSha: null,
+				kind: 'pending',
+				reasons: [],
+				runAttempt: 2,
+			}).external_id,
+			title: 'Comparing',
+		};
+		const response = await handle(new Request(`${ORIGIN}/api/pulls`), env);
+		const { pulls } = (await response.json()) as { pulls: Array<{ review: unknown }> };
+		expect(pulls[0]?.review).toMatchObject({
+			decidedBy: null,
+			kind: 'pending',
+			runAttempt: 2,
+			state: 'comparing',
+		});
 	});
 
 	test('reads the review of the head commit', async () => {
@@ -549,6 +668,119 @@ describe('decisions', () => {
 		expect(patches(github.calls)).toEqual([]);
 	});
 
+	test('checks the comparison and the baseline against GitHub Actions', async () => {
+		const { github, handle } = setup();
+		await handle(await decisionRequest(APPROVE), env);
+		const query = (workflow: string) =>
+			github.calls
+				.filter((call) => call.url.includes(`/workflows/${workflow}/runs?`))
+				.map((call) => Object.fromEntries(new URL(call.url).searchParams));
+		// The latest comparison is read before and after the decision is written.
+		expect(query('visual-regression.yml')).toEqual([
+			{ event: 'pull_request', head_sha: HEAD, per_page: '1' },
+			{ event: 'pull_request', head_sha: HEAD, per_page: '1' },
+		]);
+		expect(query('visual-baseline.yml')).toEqual([
+			{ branch: 'main', per_page: '100', status: 'success' },
+		]);
+		const token = github.calls.find((call) => call.url.endsWith('/access_tokens'));
+		expect(token?.body).toEqual({
+			permissions: { actions: 'read', checks: 'write', metadata: 'read', pull_requests: 'write' },
+			repositories: ['widgets'],
+		});
+	});
+
+	test('names the reviewer by their current login after a rename', async () => {
+		const { github, handle } = setup();
+		github.state.account = { id: 1, login: 'luke-renamed' };
+		const response = await handle(
+			await decisionRequest(APPROVE, { cookie: await sessionToken('luke') }),
+			env,
+		);
+		expect(await response.json()).toMatchObject({
+			review: { decidedBy: 'luke-renamed', state: 'approved' },
+		});
+		expect(patches(github.calls)[0]?.body).toMatchObject({
+			output: { title: 'Approved by @luke-renamed' },
+		});
+	});
+
+	test('ignores a baseline run from a fork branch called main', async () => {
+		const { github, handle } = setup();
+		github.state.baselineRuns = [
+			baselineRun({
+				event: 'workflow_dispatch',
+				head_repository: { full_name: 'mona/widgets' },
+				head_sha: 'e'.repeat(40),
+				id: 457,
+			}),
+			baselineRun(),
+		];
+		const response = await handle(await decisionRequest(APPROVE), env);
+		expect(response.status).toBe(200);
+	});
+
+	test('returns the check run to pending when a re-run starts during the decision', async () => {
+		const { github, handle } = setup();
+		github.state.comparisons = [
+			comparisonRun(),
+			comparisonRun({ conclusion: null, run_attempt: 2, status: 'queued' }),
+		];
+		const response = await handle(await decisionRequest(APPROVE), env);
+
+		expect(response.status).toBe(409);
+		expect(await response.json()).toMatchObject({ error: 'stale' });
+		const [decision, pending, comment] = patches(github.calls);
+		expect(decision?.body).toMatchObject({ conclusion: 'success', status: 'completed' });
+		expect(pending?.url).toBe('https://api.github.com/repos/octo/widgets/check-runs/900');
+		// GitHub ignores `in_progress` on a completed check run, so pending stays completed.
+		expect(pending?.body).toEqual({
+			completed_at: '2026-11-16T03:40:00.000Z',
+			conclusion: 'action_required',
+			external_id: JSON.stringify({
+				baselineRunId: null,
+				baselineSha: null,
+				kind: 'pending',
+				reasons: [],
+				runAttempt: 2,
+				runId: 123,
+				v: 1,
+			}),
+			output: {
+				summary: '**Status:** Comparing\n',
+				text: '### History\n\n- 2026-11-16 03:40 UTC · Comparison run 123 (attempt 2) started\n- 2026-11-16 03:40 UTC · Approved by @luke\n- 2026-11-16 03:22 UTC · Comparison run 123 (attempt 1): needs review',
+				title: 'Comparing',
+			},
+			status: 'completed',
+		});
+		expect(comment?.body).toEqual({
+			body: '<!-- luke-ui-visual-review -->\n<!-- visual-review-status -->\n**Status:** Comparing\n<!-- /visual-review-status -->\n3 changed',
+		});
+	});
+
+	test('undoes the decision when the comparison cannot be read again', async () => {
+		const { github, handle } = setup();
+		github.state.comparisons = [comparisonRun(), 'error'];
+		const response = await handle(await decisionRequest(APPROVE), env);
+
+		expect(response.status).toBe(502);
+		expect(await response.json()).toMatchObject({ error: 'upstream' });
+		const [decision, undo, ...rest] = patches(github.calls);
+		expect(decision?.body).toMatchObject({ conclusion: 'success', status: 'completed' });
+		expect(undo?.body).toEqual({
+			completed_at: '2026-11-16T03:40:00.000Z',
+			conclusion: 'action_required',
+			output: {
+				summary: '**Status:** Needs review\n\n| Changed | 3 |',
+				text: '### History\n\n- 2026-11-16 03:40 UTC · Decision by @luke undone: the comparison could not be checked\n- 2026-11-16 03:40 UTC · Approved by @luke\n- 2026-11-16 03:22 UTC · Comparison run 123 (attempt 1): needs review',
+				title: 'Needs review: 3 changed',
+			},
+			status: 'completed',
+		});
+		// The comment never showed the decision, so it is left alone.
+		expect(rest).toEqual([]);
+	});
+
 	test('reuses the installation token across requests', async () => {
 		const { github, handle } = setup();
 		await handle(await decisionRequest(APPROVE), env);
@@ -592,7 +824,29 @@ describe('decisions', () => {
 			code: 'forbidden',
 			name: 'from an account without write access',
 			prepare: (github) => {
-				github.state.permission = { permission: 'read', role_name: 'read' };
+				github.state.permission = {
+					...github.state.permission,
+					permission: 'read',
+					role_name: 'read',
+				};
+			},
+			request: () => decisionRequest(APPROVE),
+			status: 403,
+		},
+		{
+			code: 'forbidden',
+			name: 'when the permission belongs to another account',
+			prepare: (github) => {
+				github.state.permission = { ...github.state.permission, user: { id: 2 } };
+			},
+			request: () => decisionRequest(APPROVE),
+			status: 403,
+		},
+		{
+			code: 'forbidden',
+			name: 'when the session user id no longer exists',
+			prepare: (github) => {
+				github.state.account = null;
 			},
 			request: () => decisionRequest(APPROVE),
 			status: 403,
@@ -638,6 +892,66 @@ describe('decisions', () => {
 			name: 'on a clean comparison',
 			prepare: (github) => {
 				github.state.checkRuns = [checkRun({ kind: 'clean' })];
+			},
+			request: () => decisionRequest(APPROVE),
+			status: 409,
+		},
+		{
+			code: 'not-reviewable',
+			name: 'while the comparison is pending',
+			prepare: (github) => {
+				const pending = checkRun({ baselineRunId: null, baselineSha: null, kind: 'pending' });
+				github.state.checkRuns = [{ ...pending, conclusion: null, status: 'in_progress' }];
+			},
+			request: () => decisionRequest(APPROVE),
+			status: 409,
+		},
+		{
+			code: 'not-reviewable',
+			name: 'on a check run that is not complete',
+			prepare: (github) => {
+				github.state.checkRuns = [{ ...checkRun(), conclusion: null, status: 'in_progress' }];
+			},
+			request: () => decisionRequest(APPROVE),
+			status: 409,
+		},
+		{
+			code: 'unverified-baseline',
+			name: 'on a comparison without a verified baseline',
+			prepare: (github) => {
+				github.state.checkRuns = [checkRun({ baselineRunId: null, baselineSha: null })];
+			},
+			request: () => decisionRequest(APPROVE),
+			status: 409,
+		},
+		{
+			code: 'stale-baseline',
+			name: 'when a newer baseline succeeded',
+			prepare: (github) => {
+				github.state.baselineRuns = [
+					baselineRun({ head_sha: 'e'.repeat(40), id: 457 }),
+					baselineRun(),
+				];
+			},
+			request: () => decisionRequest(APPROVE),
+			status: 409,
+		},
+		{
+			code: 'stale',
+			name: 'when a re-run superseded the comparison',
+			prepare: (github) => {
+				github.state.comparisons = [
+					comparisonRun({ conclusion: null, run_attempt: 2, status: 'queued' }),
+				];
+			},
+			request: () => decisionRequest(APPROVE),
+			status: 409,
+		},
+		{
+			code: 'stale',
+			name: 'when the comparison run failed',
+			prepare: (github) => {
+				github.state.comparisons = [comparisonRun({ conclusion: 'failure' })];
 			},
 			request: () => decisionRequest(APPROVE),
 			status: 409,

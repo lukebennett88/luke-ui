@@ -1,12 +1,13 @@
 import { z } from 'zod';
 import type { Context } from './access.js';
-import { assertSameOrigin, canReview, installationFetch, readSession } from './access.js';
+import { assertSameOrigin, installationFetch, readSession, reviewerLogin } from './access.js';
 import { readGitHubJson, upstream } from './github.js';
 import { ApiError, json } from './http.js';
-import type { CheckRunSnapshot, Review } from './review.js';
+import type { CheckRunSnapshot, ExternalId, Review } from './review.js';
 import {
 	CHECK_NAME,
 	COMMENT_MARKER,
+	COMPARING_STATUS,
 	decisionStatus,
 	historyEntry,
 	isValidNote,
@@ -18,11 +19,17 @@ import {
 	rewriteCommentStatus,
 	rewriteSummary,
 	shaSchema,
+	statusLine,
 } from './review.js';
 
 const PULLS_CACHE_SECONDS = 30;
 const MAX_BODY_BYTES = 4096;
 const MAX_COMMENT_PAGES = 10;
+const NEEDS_REVIEW_STATUS = 'Needs review';
+const COMPARISON_WORKFLOW = 'visual-regression.yml';
+const BASELINE_WORKFLOW = 'visual-baseline.yml';
+const BASELINE_BRANCH = 'main';
+const BASELINE_EVENTS = new Set(['push', 'workflow_dispatch']);
 
 const OPEN_PULL_REQUESTS_QUERY = `query OpenPullRequests($owner: String!, $name: String!, $appId: Int!) {
   repository(owner: $owner, name: $name) {
@@ -116,6 +123,7 @@ const restCheckRunSchema = z.object({
 		text: z.string().nullable(),
 		title: z.string().nullable(),
 	}),
+	status: z.string(),
 });
 
 type RestCheckRun = z.infer<typeof restCheckRunSchema>;
@@ -129,6 +137,21 @@ const commentsSchema = z.array(
 		user: z.object({ login: z.string() }).nullable(),
 	}),
 );
+
+const workflowRunSchema = z.object({
+	conclusion: z.string().nullable(),
+	event: z.string(),
+	head_branch: z.string().nullable(),
+	head_repository: z.object({ full_name: z.string() }).nullable(),
+	head_sha: z.string(),
+	id: positiveIntegerSchema,
+	run_attempt: positiveIntegerSchema,
+	status: z.string().nullable(),
+});
+
+type WorkflowRun = z.infer<typeof workflowRunSchema>;
+
+const workflowRunsSchema = z.object({ workflow_runs: z.array(workflowRunSchema) });
 
 const decisionBodySchema = z.object({
 	decision: z.enum(['approve', 'request-changes']),
@@ -206,14 +229,16 @@ export async function getReview(context: Context, number: number): Promise<Respo
 
 /**
  * `POST /api/pulls/:number/decision`: approves or requests changes on the head commit's check run,
- * then updates the sticky comment's status. Each check fails before anything is written.
+ * then updates the sticky comment's status. Each check fails before anything is written. A
+ * comparison re-run requested while the decision is written turns the check run back to pending.
  */
 export async function decide(context: Context, number: number): Promise<Response> {
 	const reviewer = await readSession(context);
 	if (!reviewer) throw new ApiError(401, 'unauthenticated', 'Sign in to review.');
 	assertSameOrigin(context);
 	const body = await readDecisionBody(context.request);
-	if (!(await canReview(context, reviewer.login))) {
+	const login = await reviewerLogin(context, reviewer);
+	if (!login) {
 		throw new ApiError(403, 'forbidden', 'Reviewing needs write access to the repository.');
 	}
 
@@ -229,39 +254,192 @@ export async function decide(context: Context, number: number): Promise<Response
 	if (!run || !externalId) {
 		throw new ApiError(404, 'not-found', 'The commit has no visual review check.');
 	}
-	if (externalId.kind !== 'review') {
+	if (run.status !== 'completed' || externalId.kind !== 'review') {
 		throw new ApiError(409, 'not-reviewable', 'This comparison has nothing to review.');
 	}
 	if (externalId.runId !== body.runId || externalId.runAttempt !== body.runAttempt) {
-		throw new ApiError(409, 'stale', 'A newer comparison ran on this commit. Reload the review.');
+		throw staleComparison();
+	}
+	if (externalId.baselineSha === null || externalId.baselineRunId === null) {
+		throw new ApiError(
+			409,
+			'unverified-baseline',
+			'The comparison has no verified baseline. Re-run the comparison.',
+		);
+	}
+	const baseline = await latestBaseline(context);
+	if (baseline?.id !== externalId.baselineRunId || baseline.head_sha !== externalId.baselineSha) {
+		throw new ApiError(
+			409,
+			'stale-baseline',
+			'A newer baseline exists. Update the branch or re-run the comparison.',
+		);
+	}
+	const comparison = await latestComparison(context, body.headSha);
+	if (
+		!isComparison(comparison, externalId) ||
+		comparison.status !== 'completed' ||
+		comparison.conclusion !== 'success'
+	) {
+		throw staleComparison();
 	}
 
-	const status = decisionStatus(body.decision, reviewer.login);
+	const status = decisionStatus(body.decision, login);
 	const now = new Date(context.deps.now());
-	const updated = await readGitHubJson(
-		await installationFetch(context, `/repos/${context.config.repository}/check-runs/${run.id}`, {
-			body: {
-				completed_at: now.toISOString(),
-				conclusion: body.decision === 'approve' ? 'success' : 'failure',
-				output: {
-					summary: rewriteSummary(run.output.summary, status),
-					text: prependHistory(run.output.text, historyEntry(now, status, body.note)),
-					title: status,
-				},
-				status: 'completed',
+	const decided = await patchCheckRun(context, run.id, {
+		completed_at: now.toISOString(),
+		conclusion: body.decision === 'approve' ? 'success' : 'failure',
+		output: {
+			summary: rewriteSummary(run.output.summary, status),
+			text: prependHistory(run.output.text, historyEntry(now, status, body.note)),
+			title: status,
+		},
+		status: 'completed',
+	});
+
+	// GitHub has no conditional write for check runs, so read the latest comparison again. A
+	// re-run requested since the pre-check makes this decision stale, and the check run goes back
+	// to pending for the newer run, as the publish workflow writes it when a comparison starts.
+	// When the comparison cannot be read, the decision is undone so it never passes unchecked.
+	const latest = await latestComparison(context, body.headSha).catch(() => undefined);
+	if (!latest) {
+		await patchCheckRun(context, run.id, {
+			completed_at: now.toISOString(),
+			conclusion: 'action_required',
+			output: {
+				summary: run.output.summary ?? statusLine(NEEDS_REVIEW_STATUS),
+				text: prependHistory(
+					decided.output.text,
+					historyEntry(
+						now,
+						`Decision by @${login} undone: the comparison could not be checked`,
+						undefined,
+					),
+				),
+				title: run.output.title ?? NEEDS_REVIEW_STATUS,
 			},
+			status: 'completed',
+		});
+		throw upstream('GitHub did not confirm the comparison. The decision was undone. Try again.');
+	}
+	if (!isComparison(latest, externalId)) {
+		await patchCheckRun(context, run.id, pendingCheckRun(latest, decided.output.text, now));
+		await updateCommentStatus(context, number, COMPARING_STATUS).catch(() => undefined);
+		throw staleComparison();
+	}
+
+	// The check run is the record of the decision. The comment only mirrors it, so a failure here
+	// does not fail a decision that has already been written.
+	await updateCommentStatus(context, number, status).catch(() => undefined);
+
+	const review = reviewFromCheckRun(snapshot(context, decided));
+	if (!review) throw upstream('GitHub sent back a check run without its external id.');
+	return json({ review });
+}
+
+function staleComparison(): ApiError {
+	return new ApiError(409, 'stale', 'A newer comparison ran on this commit. Reload the review.');
+}
+
+/** Whether a workflow run is the comparison run and attempt an external id records. */
+function isComparison(
+	run: WorkflowRun | undefined,
+	externalId: Pick<ExternalId, 'runAttempt' | 'runId'>,
+): run is WorkflowRun {
+	return run?.id === externalId.runId && run.run_attempt === externalId.runAttempt;
+}
+
+/**
+ * The check run update that marks a comparison run as started. GitHub ignores a change from
+ * `completed` back to `in_progress`, so the run stays completed with `action_required`, which still
+ * blocks merging. Readers take the state from the external id's `pending` kind.
+ */
+function pendingCheckRun(run: WorkflowRun, history: string | null, now: Date) {
+	return {
+		completed_at: now.toISOString(),
+		conclusion: 'action_required',
+		external_id: JSON.stringify({
+			baselineRunId: null,
+			baselineSha: null,
+			kind: 'pending',
+			reasons: [],
+			runAttempt: run.run_attempt,
+			runId: run.id,
+			v: 1,
+		}),
+		output: {
+			summary: `${statusLine(COMPARING_STATUS)}\n`,
+			text: prependHistory(
+				history,
+				historyEntry(
+					now,
+					`Comparison run ${run.id} (attempt ${run.run_attempt}) started`,
+					undefined,
+				),
+			),
+			title: COMPARING_STATUS,
+		},
+		status: 'completed',
+	};
+}
+
+async function patchCheckRun(context: Context, id: number, body: object): Promise<RestCheckRun> {
+	return readGitHubJson(
+		await installationFetch(context, `/repos/${context.config.repository}/check-runs/${id}`, {
+			body,
 			method: 'PATCH',
 		}),
 		restCheckRunSchema,
 		'check run',
 	);
-	// The check run is the record of the decision. The comment only mirrors it, so a failure here
-	// does not fail a decision that has already been written.
-	await updateCommentStatus(context, number, status).catch(() => undefined);
+}
 
-	const review = reviewFromCheckRun(snapshot(context, updated));
-	if (!review) throw upstream('GitHub sent back a check run without its external id.');
-	return json({ review });
+/**
+ * The latest comparison of a commit: the newest `Visual regression` run for it. A re-run keeps
+ * the run id and raises its attempt as soon as it is requested.
+ */
+async function latestComparison(context: Context, sha: string): Promise<WorkflowRun | undefined> {
+	const query = new URLSearchParams({ event: 'pull_request', head_sha: sha, per_page: '1' });
+	const { workflow_runs: runs } = await readGitHubJson(
+		await installationFetch(
+			context,
+			`/repos/${context.config.repository}/actions/workflows/${COMPARISON_WORKFLOW}/runs?${query}`,
+		),
+		workflowRunsSchema,
+		'comparison run list',
+	);
+	return runs[0];
+}
+
+/**
+ * The newest successful `Visual baseline` run on `main`, from a push or a manual dispatch in this
+ * repository. A fork's branch can also be called `main`, so the head repository must match.
+ */
+async function latestBaseline(context: Context): Promise<WorkflowRun | undefined> {
+	const query = new URLSearchParams({
+		branch: BASELINE_BRANCH,
+		per_page: '100',
+		status: 'success',
+	});
+	const { workflow_runs: runs } = await readGitHubJson(
+		await installationFetch(
+			context,
+			`/repos/${context.config.repository}/actions/workflows/${BASELINE_WORKFLOW}/runs?${query}`,
+		),
+		workflowRunsSchema,
+		'baseline run list',
+	);
+	return newest(
+		runs.filter(
+			(run) =>
+				BASELINE_EVENTS.has(run.event) &&
+				run.head_branch === BASELINE_BRANCH &&
+				run.head_repository?.full_name === context.config.repository &&
+				run.status === 'completed' &&
+				run.conclusion === 'success',
+		),
+		(run) => run.id,
+	);
 }
 
 async function readDecisionBody(request: Request): Promise<z.infer<typeof decisionBodySchema>> {

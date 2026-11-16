@@ -180,7 +180,12 @@ export function createGitHubApp(deps: Deps): GitHubApp {
 			const created = await readGitHubJson(
 				await githubFetch(deps, `/app/installations/${installation.id}/access_tokens`, {
 					body: {
-						permissions: { checks: 'write', metadata: 'read', pull_requests: 'write' },
+						permissions: {
+							actions: 'read',
+							checks: 'write',
+							metadata: 'read',
+							pull_requests: 'write',
+						},
 						repositories: [config.repositoryName],
 					},
 					method: 'POST',

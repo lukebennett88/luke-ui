@@ -160,14 +160,20 @@ upload only the allow-listed report, so they never run it.
 
 The backend acts as a GitHub App. Create one with these settings:
 
-- Repository permissions: Checks read and write, Pull requests read and write, and Metadata read.
+- Repository permissions: Checks read and write, Pull requests read and write, Actions read, and
+  Metadata read. Actions read lets the backend check that a decision matches the latest comparison
+  and baseline runs.
 - Callback URL: `https://luke-ui-visual-review.pages.dev/api/auth/callback`.
 - Webhook: inactive.
 - Install it on this repository only.
 
-A reviewer signs in through the App's user authorisation flow. The backend allows a decision when
-GitHub reports the admin, maintain, or write role on the repository for that account. It asks GitHub
-again on every decision, so removing someone's access takes effect at once.
+A reviewer signs in through the App's user authorisation flow. The session keeps the account's
+immutable GitHub user id. The backend reads the account's current login from that id, then allows a
+decision when GitHub reports the admin, maintain, or write role on the repository for the same id. A
+renamed account keeps its access, and an account that takes over an old login gains none. The
+backend asks GitHub again on every decision, so removing someone's access takes effect at once. The
+[app README](../apps/visual-review/README.md#review-backend) lists the freshness checks a decision
+must pass.
 
 Set these variables as secrets on the Pages project's production environment only. Preview
 deployments, including every `pr-<number>` branch, then have no credentials, and the backend answers
