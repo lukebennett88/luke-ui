@@ -177,9 +177,10 @@ takes effect at once. The [app README](../apps/visual-review/README.md#review-ba
 freshness checks a decision must pass.
 
 The backend writes a check run's conclusion, title, summary, and history, but never its
-`external_id`. Only the workflows that record comparison results write it. When a decision races a
-newer result, the backend restores that result's presentation or withdraws the decision, and it
-never passes the check unless it restores a clean result. The
+`external_id`. Only `Visual review publish` writes it. When a decision races a newer result, a
+comparison re-run, or a replaced baseline, the backend restores that result's presentation or
+withdraws the decision. It never passes the check unless it restores a clean result. It reports a
+check run that failed without a new record as failed, not as changes requested. The
 [app README](../apps/visual-review/README.md#review-backend) describes each repair.
 
 Set these variables as secrets on the Pages project's production environment only. Preview

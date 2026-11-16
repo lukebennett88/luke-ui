@@ -118,6 +118,8 @@ function fakeGitHub() {
 		/** The account behind the session's user id, or `null` when GitHub answers 404. */
 		account: { id: 1, login: 'luke' } as { id: number; login: string } | null,
 		baselineRuns: [baselineRun()],
+		/** The baseline runs from the second read on, or `'error'` for a 500. Unset repeats the first. */
+		laterBaselineRuns: undefined as Array<WorkflowRun> | 'error' | undefined,
 		checkRuns: [checkRun()],
 		comments: [
 			{ body: 'Looks good', id: 1, user: { login: 'mona' } },
@@ -131,7 +133,7 @@ function fakeGitHub() {
 		comparisons: [comparisonRun()] as Array<WorkflowRun | 'error'>,
 		/**
 		 * The `external_id` stored when each check run write lands, in order, standing for records
-		 * a workflow recorded in between. The last repeats. Empty keeps the validated one.
+		 * the publish workflow recorded in between. The last repeats. Empty keeps the validated one.
 		 */
 		storedExternalIds: [] as Array<string | null>,
 		/**
@@ -157,6 +159,7 @@ function fakeGitHub() {
 	const started: Array<string> = [];
 	let comparisonReads = 0;
 	let checkRunWrites = 0;
+	let baselineReads = 0;
 
 	async function fetchStub(input: RequestInfo | URL, init?: RequestInit): Promise<Response> {
 		const request = new Request(input, init);
@@ -216,11 +219,15 @@ function fakeGitHub() {
 				if (run === 'error') return respond({ message: 'Server Error' }, 500);
 				return respond({ total_count: run ? 1 : 0, workflow_runs: run ? [run] : [] });
 			}
-			case 'GET api.github.com/repos/octo/widgets/actions/workflows/visual-baseline.yml/runs':
-				return respond({
-					total_count: state.baselineRuns.length,
-					workflow_runs: state.baselineRuns,
-				});
+			case 'GET api.github.com/repos/octo/widgets/actions/workflows/visual-baseline.yml/runs': {
+				const runs =
+					baselineReads === 0
+						? state.baselineRuns
+						: (state.laterBaselineRuns ?? state.baselineRuns);
+				baselineReads += 1;
+				if (runs === 'error') return respond({ message: 'Server Error' }, 500);
+				return respond({ total_count: runs.length, workflow_runs: runs });
+			}
 			case 'GET api.github.com/repos/octo/widgets/issues/5/comments':
 				return respond(state.comments);
 			case 'PATCH api.github.com/repos/octo/widgets/issues/comments/2':
@@ -343,7 +350,7 @@ function checkRunBodies(calls: Array<Call>): Array<CheckRunWrite> {
 		.map((call) => call.body as CheckRunWrite);
 }
 
-/** Only the workflows that record comparison results write `external_id`. */
+/** Only the publish workflow writes `external_id`. */
 function expectNoExternalId(calls: Array<Call>) {
 	for (const call of patches(calls)) expect(call.body).not.toHaveProperty('external_id');
 }
@@ -352,7 +359,7 @@ function countComparisonReads(calls: Array<Call>): number {
 	return calls.filter((call) => call.url.includes('/visual-regression.yml/runs')).length;
 }
 
-/** An `external_id` that a workflow recorded on the same check run. */
+/** An `external_id` that the publish workflow recorded on the same check run. */
 function record(overrides: Record<string, unknown>): string {
 	return String(checkRun(overrides).external_id);
 }
@@ -683,6 +690,32 @@ describe('pull requests', () => {
 		expect(new URL(list?.url ?? '').searchParams.get('check_name')).toBe('visual-review');
 	});
 
+	test('lists a review that failed without a new record as failed', async () => {
+		const { github, handle } = setup();
+		github.state.listedCheckRun = {
+			conclusion: 'FAILURE',
+			externalId: checkRun().external_id,
+			title: 'Baseline is out of date',
+		};
+		const response = await handle(new Request(`${ORIGIN}/api/pulls`), env);
+		const { pulls } = (await response.json()) as { pulls: Array<{ review: unknown }> };
+		expect(pulls[0]?.review).toMatchObject({ decidedBy: null, kind: 'review', state: 'failed' });
+	});
+
+	test('reads a review that failed without a new record as failed', async () => {
+		const { github, handle } = setup();
+		const invalidated = checkRun();
+		github.state.checkRuns = [
+			{
+				...invalidated,
+				conclusion: 'failure',
+				output: { ...invalidated.output, title: 'Publishing the report failed' },
+			},
+		];
+		const response = await handle(new Request(`${ORIGIN}/api/pulls/5/review`), env);
+		expect(await response.json()).toMatchObject({ review: { kind: 'review', state: 'failed' } });
+	});
+
 	test('refuses a pull request number that is not a positive integer', async () => {
 		const { handle } = setup();
 		const response = await handle(new Request(`${ORIGIN}/api/pulls/0/review`), env);
@@ -758,12 +791,13 @@ describe('decisions', () => {
 			github.calls
 				.filter((call) => call.url.includes(`/workflows/${workflow}/runs?`))
 				.map((call) => Object.fromEntries(new URL(call.url).searchParams));
-		// The latest comparison is read before and after the decision is written.
+		// Both are read before and after the decision is written.
 		expect(query('visual-regression.yml')).toEqual([
 			{ event: 'pull_request', head_sha: HEAD, per_page: '1' },
 			{ event: 'pull_request', head_sha: HEAD, per_page: '1' },
 		]);
 		expect(query('visual-baseline.yml')).toEqual([
+			{ branch: 'main', per_page: '100', status: 'success' },
 			{ branch: 'main', per_page: '100', status: 'success' },
 		]);
 		const token = github.calls.find((call) => call.url.endsWith('/access_tokens'));
@@ -941,6 +975,51 @@ describe('decisions', () => {
 				summary: '**Status:** Needs review\n\n| Changed | 3 |',
 				text: expect.stringContaining(
 					'- 2026-11-16 03:40 UTC · Decision by @luke withdrawn: the comparison could not be checked\n',
+				),
+				title: 'Needs review',
+			},
+		});
+		expect(rest).toEqual([]);
+		expectNoExternalId(github.calls);
+	});
+
+	test('withdraws the decision when the baseline is replaced during it', async () => {
+		const { github, handle } = setup();
+		github.state.laterBaselineRuns = [baselineRun({ run_attempt: 2 })];
+		const response = await handle(await decisionRequest(APPROVE), env);
+
+		expect(response.status).toBe(409);
+		expect(await response.json()).toMatchObject({ error: 'stale-baseline' });
+		const [decision, withdrawal, ...rest] = checkRunBodies(github.calls);
+		expect(decision?.conclusion).toBe('success');
+		expect(withdrawal).toEqual({
+			completed_at: '2026-11-16T03:40:00.000Z',
+			conclusion: 'action_required',
+			output: {
+				summary: '**Status:** Needs review\n\n| Changed | 3 |',
+				text: `### History\n\n- 2026-11-16 03:40 UTC · Decision by @luke withdrawn: a newer baseline exists\n${DECISION_HISTORY}`,
+				title: 'Needs review',
+			},
+			status: 'completed',
+		});
+		expect(rest).toEqual([]);
+		expectNoExternalId(github.calls);
+		expect(patches(github.calls).at(-1)?.body).toEqual(commentWith('Needs review'));
+	});
+
+	test('withdraws the decision when the baseline cannot be read again', async () => {
+		const { github, handle } = setup();
+		github.state.laterBaselineRuns = 'error';
+		const response = await handle(await decisionRequest(APPROVE), env);
+
+		expect(response.status).toBe(502);
+		expect(await response.json()).toMatchObject({ error: 'upstream' });
+		const [, withdrawal, ...rest] = checkRunBodies(github.calls);
+		expect(withdrawal).toMatchObject({
+			conclusion: 'action_required',
+			output: {
+				text: expect.stringContaining(
+					'- 2026-11-16 03:40 UTC · Decision by @luke withdrawn: the baseline could not be checked\n',
 				),
 				title: 'Needs review',
 			},
@@ -1246,6 +1325,23 @@ describe('decisions', () => {
 			code: 'stale-baseline',
 			name: 'when the baseline run was re-run',
 			prepare: (github) => {
+				github.state.baselineRuns = [baselineRun({ run_attempt: 2 })];
+			},
+			request: () => decisionRequest(APPROVE),
+			status: 409,
+		},
+		{
+			code: 'stale-baseline',
+			name: 'on a review that failed without a new record when its baseline was replaced',
+			prepare: (github) => {
+				const invalidated = checkRun();
+				github.state.checkRuns = [
+					{
+						...invalidated,
+						conclusion: 'failure',
+						output: { ...invalidated.output, title: 'Baseline is out of date' },
+					},
+				];
 				github.state.baselineRuns = [baselineRun({ run_attempt: 2 })];
 			},
 			request: () => decisionRequest(APPROVE),
