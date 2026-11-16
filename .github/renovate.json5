@@ -111,7 +111,8 @@
 		},
 		{
 			// Workflows pin actions at the major tag, so the only update Renovate can offer is a major tag
-			// move. Read the changelog before merging one.
+			// move. Read the changelog before merging one. The visual review workflows hold deploy
+			// secrets, so they pin cloudflare/wrangler-action to a commit SHA with a version comment.
 			matchManagers: ['github-actions'],
 			groupName: 'github actions',
 			automerge: false,

@@ -30,6 +30,10 @@ export default {
 			entry: ['src/**/*.browser.test.tsx'],
 			project: ['src/**/*.{ts,tsx}'],
 		},
+		'apps/visual-review': {
+			entry: ['src/**/*.browser.test.tsx'],
+			project: ['src/**/*.{ts,tsx}'],
+		},
 		'packages/@luke-ui/playground-core': {
 			entry: [
 				'src/compiler.ts',
