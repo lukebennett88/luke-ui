@@ -134,6 +134,11 @@ function fakeGitHub() {
 		 * a workflow recorded in between. The last repeats. Empty keeps the validated one.
 		 */
 		storedExternalIds: [] as Array<string | null>,
+		/**
+		 * The check run writes, counted from 0, that answer 500. Each still lands and stores its
+		 * `external_id`, as a write whose response is lost would.
+		 */
+		failedCheckRunWrites: [] as Array<number>,
 		/** The check run that `GET /api/pulls` lists for pull request 5. */
 		listedCheckRun: {
 			conclusion: 'SUCCESS',
@@ -195,6 +200,9 @@ function fakeGitHub() {
 					? state.storedExternalIds[Math.min(checkRunWrites, state.storedExternalIds.length - 1)]
 					: checkRun().external_id;
 				checkRunWrites += 1;
+				if (state.failedCheckRunWrites.includes(checkRunWrites - 1)) {
+					return respond({ message: 'Server Error' }, 500);
+				}
 				return respond({
 					...checkRun(),
 					conclusion: null,
@@ -995,6 +1003,90 @@ describe('decisions', () => {
 		expect(writes[4]?.output.text).toMatch(
 			/^### History\n\n- 2026-11-16 03:40 UTC · Decision by @luke withdrawn: newer results kept arriving\n/,
 		);
+		expectNoExternalId(github.calls);
+	});
+
+	test('withdraws a decision whose write fails', async () => {
+		const { github, handle } = setup();
+		github.state.failedCheckRunWrites = [0];
+		const response = await handle(await decisionRequest(APPROVE), env);
+
+		expect(response.status).toBe(502);
+		expect(await response.json()).toMatchObject({
+			error: 'upstream',
+			message: 'GitHub did not record the decision. Try again.',
+		});
+		const [decision, withdrawal, ...rest] = checkRunBodies(github.calls);
+		expect(decision?.conclusion).toBe('success');
+		// The failed write may have landed, so the withdrawal builds on the history read before it.
+		expect(withdrawal).toEqual({
+			completed_at: '2026-11-16T03:40:00.000Z',
+			conclusion: 'action_required',
+			output: {
+				summary: '**Status:** Needs review\n\n| Changed | 3 |',
+				text: '### History\n\n- 2026-11-16 03:40 UTC · Decision by @luke withdrawn: its write could not be confirmed\n- 2026-11-16 03:22 UTC · Comparison run 123 (attempt 1): needs review',
+				title: 'Needs review',
+			},
+			status: 'completed',
+		});
+		expect(rest).toEqual([]);
+		expectNoExternalId(github.calls);
+	});
+
+	test('restores a failed record that a failed decision write landed on', async () => {
+		const { github, handle } = setup();
+		github.state.failedCheckRunWrites = [0];
+		github.state.storedExternalIds = [FAILED_RERUN];
+		const response = await handle(await decisionRequest(APPROVE), env);
+
+		expect(response.status).toBe(502);
+		const writes = checkRunBodies(github.calls);
+		expect(writes.map((write) => [write.conclusion, write.output.title])).toEqual([
+			['success', 'Approved by @luke'],
+			['action_required', 'Needs review'],
+			['failure', 'Comparison failed'],
+		]);
+		expectNoExternalId(github.calls);
+	});
+
+	test('tries a failed repair write again', async () => {
+		const { github, handle } = setup();
+		github.state.comparisons = [
+			comparisonRun(),
+			comparisonRun({ conclusion: null, run_attempt: 2, status: 'queued' }),
+		];
+		github.state.failedCheckRunWrites = [1];
+		const response = await handle(await decisionRequest(APPROVE), env);
+
+		expect(response.status).toBe(409);
+		expect(await response.json()).toMatchObject({ error: 'stale' });
+		const [decision, failed, withdrawal, ...rest] = checkRunBodies(github.calls);
+		expect(decision?.conclusion).toBe('success');
+		expect(failed?.output.title).toBe('Needs review');
+		expect(withdrawal).toEqual(failed);
+		expect(rest).toEqual([]);
+		expectNoExternalId(github.calls);
+		expect(patches(github.calls).at(-1)?.body).toEqual(commentWith('Needs review'));
+	});
+
+	test('answers 502 when a repair write fails three times', async () => {
+		const { github, handle } = setup();
+		github.state.comparisons = [
+			comparisonRun(),
+			comparisonRun({ conclusion: null, run_attempt: 2, status: 'queued' }),
+		];
+		github.state.failedCheckRunWrites = [1, 2, 3, 4, 5];
+		const response = await handle(await decisionRequest(APPROVE), env);
+
+		expect(response.status).toBe(502);
+		expect(await response.json()).toMatchObject({ error: 'upstream' });
+		const writes = checkRunBodies(github.calls);
+		expect(writes.map((write) => write.output.title)).toEqual([
+			'Approved by @luke',
+			'Needs review',
+			'Needs review',
+			'Needs review',
+		]);
 		expectNoExternalId(github.calls);
 	});
 

@@ -338,6 +338,8 @@ interface Presentation {
 }
 
 const MAX_REPAIR_ATTEMPTS = 3;
+/** How many times one repair attempt tries its write. */
+const MAX_REPAIR_TRIES = 3;
 const CLEAN_STATUS = 'No visual changes';
 const FAILED_STATUS = 'Comparison failed';
 const REPLACED_SUMMARY =
@@ -346,16 +348,33 @@ const REPLACED_SUMMARY =
 /** Writes the decision, then confirms it. Returns the check run as the decision's write left it. */
 async function writeDecision(context: Context, write: DecisionWrite): Promise<RestCheckRun> {
 	const { now, run, status } = write;
-	const decided = await patchCheckRun(context, run.id, {
-		completed_at: now.toISOString(),
-		conclusion: write.conclusion,
-		output: {
-			summary: rewriteSummary(run.output.summary, status),
-			text: prependHistory(run.output.text, historyEntry(now, status, write.note)),
-			title: status,
-		},
-		status: 'completed',
-	});
+	let decided: RestCheckRun;
+	try {
+		decided = await patchCheckRun(context, run.id, {
+			completed_at: now.toISOString(),
+			conclusion: write.conclusion,
+			output: {
+				summary: rewriteSummary(run.output.summary, status),
+				text: prependHistory(run.output.text, historyEntry(now, status, write.note)),
+				title: status,
+			},
+			status: 'completed',
+		});
+	} catch {
+		// A write that failed in transit may still have landed, on the validated record or on a newer
+		// one. The withdrawal's response shows which, and the repair restores a newer record.
+		const notRecorded = upstream('GitHub did not record the decision. Try again.');
+		await repair(
+			context,
+			write,
+			run,
+			write.externalId,
+			withdrawal(write, 'its write could not be confirmed'),
+		).catch(() => {
+			throw notRecorded;
+		});
+		throw notRecorded;
+	}
 	await confirmDecision(context, write, decided);
 	return decided;
 }
@@ -428,7 +447,7 @@ async function repair(
 	presentation: Presentation,
 	attempt = 1,
 ): Promise<void> {
-	const response = await present(context, write, previous, presentation);
+	const response = await presentRetrying(context, write, previous, presentation);
 	const landed = parseExternalId(response.external_id);
 	if (sameRecord(landed, target)) {
 		await updateCommentStatus(context, write.number, presentation.title).catch(() => undefined);
@@ -443,8 +462,27 @@ async function repair(
 		conclusion: 'action_required',
 		entry: `Decision by @${write.login} withdrawn: newer results kept arriving`,
 	};
-	await present(context, write, response, last);
+	await presentRetrying(context, write, response, last);
 	await updateCommentStatus(context, write.number, last.title).catch(() => undefined);
+}
+
+/**
+ * Writes a presentation, trying again when the write fails. An unrepaired decision can leave a
+ * failed record passing, so one failed write is not reason enough to give up.
+ */
+async function presentRetrying(
+	context: Context,
+	write: DecisionWrite,
+	previous: RestCheckRun,
+	presentation: Presentation,
+	tries = MAX_REPAIR_TRIES,
+): Promise<RestCheckRun> {
+	try {
+		return await present(context, write, previous, presentation);
+	} catch {
+		if (tries <= 1) throw upstream('GitHub did not accept the repair of the check run. Try again.');
+		return presentRetrying(context, write, previous, presentation, tries - 1);
+	}
 }
 
 /** Puts the check run back to `Needs review` for the record the decision was validated against. */
