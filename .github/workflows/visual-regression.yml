@@ -112,11 +112,14 @@ jobs:
           "$BASELINE_RUN_ATTEMPT" "$BASELINE_ARTIFACT_ID" >
           .artifacts/visual-regression/baseline.json
 
+      # A re-run attempt replaces the earlier attempt's report, so the publisher's download by name
+      # for this run gets the latest attempt's files.
       - name: Upload expected, actual, and diff screenshots
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: visual-regression-diff
+          overwrite: true
           path: |
             .artifacts/visual-regression/diff
             .artifacts/visual-regression/summary.json

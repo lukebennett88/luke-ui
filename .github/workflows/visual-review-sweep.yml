@@ -8,6 +8,8 @@ name: Visual review sweep
 #   token could not be created
 # - a baseline that changed without `main` changing, through a dispatch or a re-run of
 #   `Visual baseline`
+# - a check run that passes on a failed or `Comparing` record, because a review decision landed on
+#   a record written at the same moment and the review backend could not repair it
 #
 # The sweep only invalidates. It never writes a result that can pass, never checks out or runs pull
 # request code, and reads no artefacts.

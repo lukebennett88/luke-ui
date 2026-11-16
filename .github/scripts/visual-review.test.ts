@@ -33,6 +33,7 @@ import {
 	findOwnCheckRun,
 	findStickyComment,
 	formatTimestamp,
+	isSupersededFailure,
 	infrastructureChanges,
 	isAlreadyRecorded,
 	isCurrentBaseline,
@@ -1474,6 +1475,7 @@ const currentBaseline = { ...baselineRun, id: 678, run_attempt: 1 };
 
 const sweepPlan = (options: Partial<Parameters<typeof planSweep>[0]> = {}) => {
 	return planSweep({
+		conclusion: 'action_required',
 		latest: latestRun(),
 		newestBaseline: currentBaseline,
 		now: NOW,
@@ -1497,9 +1499,10 @@ test('leaves a recorded result against the current baseline alone', () => {
 	}
 });
 
-for (const kind of ['pending', 'failed', undefined] as const) {
-	test(`never sweeps a check run that records ${JSON.stringify(kind)}`, () => {
+for (const kind of ['failed', undefined] as const) {
+	test(`never sweeps a failing check run that records ${JSON.stringify(kind)}`, () => {
 		const swept = sweepPlan({
+			conclusion: 'failure',
 			latest: finishedRun(SWEEP_GRACE_MS),
 			newestBaseline: undefined,
 			state: checkState({ kind }),
@@ -1507,6 +1510,102 @@ for (const kind of ['pending', 'failed', undefined] as const) {
 		expect(swept.action).toBe('none');
 	});
 }
+
+const failedState = checkState({ kind: 'failed', reasons: ['visual'] });
+const pendingRecord = checkState({
+	baselineRunAttempt: null,
+	baselineRunId: null,
+	baselineSha: null,
+	kind: 'pending',
+	reasons: [],
+});
+
+test('fails again a failed record whose check run passes, keeping what it recorded', () => {
+	// Whatever the latest comparison is: the record itself must stop passing.
+	for (const latest of [latestRun(), finishedRun(0), undefined]) {
+		expect(sweepPlan({ conclusion: 'success', latest, state: failedState })).toEqual({
+			action: 'write',
+			failure: 'publish-failed',
+			historyEntry: 'The check run passed on a failed result',
+			state: failedState,
+		});
+	}
+});
+
+test('fails a pending comparison that finished past the grace period without being recorded', () => {
+	for (const conclusion of ['action_required', 'success']) {
+		const swept = sweepPlan({
+			conclusion,
+			latest: finishedRun(SWEEP_GRACE_MS, { run_attempt: 2 }),
+			state: pendingRecord,
+		});
+		expect(swept).toEqual({
+			action: 'write',
+			failure: 'publish-failed',
+			historyEntry: 'Comparison run 345 (attempt 2) was not recorded',
+			state: { ...pendingRecord, kind: 'failed' },
+		});
+	}
+});
+
+test('leaves a pending comparison that is running or within the grace period alone', () => {
+	const running = latestRun({ conclusion: null, status: 'in_progress' });
+	const justFinished = finishedRun(SWEEP_GRACE_MS - 1, { run_attempt: 2 });
+	for (const latest of [running, justFinished]) {
+		expect(sweepPlan({ latest, state: pendingRecord }).action).toBe('none');
+	}
+});
+
+test('writes a pending record again when a decision made its check run pass', () => {
+	const running = latestRun({ conclusion: null, status: 'in_progress' });
+	const justFinished = finishedRun(SWEEP_GRACE_MS - 1, { run_attempt: 2 });
+	for (const latest of [running, justFinished]) {
+		expect(sweepPlan({ conclusion: 'success', latest, state: pendingRecord })).toEqual({
+			action: 'write',
+			state: pendingRecord,
+		});
+	}
+});
+
+test('treats a pending record of an older attempt like any other stale record', () => {
+	expect(sweepPlan({ latest: finishedRun(SWEEP_GRACE_MS), state: pendingRecord })).toMatchObject({
+		action: 'write',
+		failure: 'publish-failed',
+		historyEntry: 'Comparison run 345 (attempt 3) was not recorded',
+	});
+	expect(
+		sweepPlan({ latest: latestRun({ run_attempt: 3, status: 'queued' }), state: pendingRecord }),
+	).toMatchObject({ action: 'write', state: { kind: 'pending', runAttempt: 3 } });
+});
+
+test('records a failed publication only when no newer result is recorded', () => {
+	const latest = latestRun({ run_attempt: 3 });
+	const failure = { latest, runAttempt: 2, runId: 345 };
+
+	for (const kind of ['review', 'clean'] as const) {
+		const recorded = recordedRun({ kind, runAttempt: 3 });
+		expect(isSupersededFailure({ ...failure, recorded })).toBe(true);
+	}
+	// The failure is for the latest comparison itself.
+	expect(
+		isSupersededFailure({ ...failure, recorded: recordedRun({ runAttempt: 3 }), runAttempt: 3 }),
+	).toBe(false);
+	// The newer comparison is not recorded as a result yet, or the latest could not be read.
+	for (const kind of ['pending', 'failed'] as const) {
+		expect(
+			isSupersededFailure({ ...failure, recorded: recordedRun({ kind, runAttempt: 3 }) }),
+		).toBe(false);
+	}
+	expect(isSupersededFailure({ ...failure, recorded: recordedRun({ runAttempt: 2 }) })).toBe(false);
+	expect(isSupersededFailure({ ...failure, recorded: undefined })).toBe(false);
+	expect(
+		isSupersededFailure({
+			...failure,
+			latest: undefined,
+			recorded: recordedRun({ runAttempt: 3 }),
+		}),
+	).toBe(false);
+});
 
 test('leaves a commit with no comparison alone', () => {
 	expect(sweepPlan({ latest: undefined }).action).toBe('none');

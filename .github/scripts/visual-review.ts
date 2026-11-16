@@ -178,6 +178,7 @@ export type ExistingCheckRun = {
 	id: number;
 	app: { slug: string } | null;
 	status?: string | null;
+	conclusion?: string | null;
 	external_id?: string | null;
 	output?: { text?: string | null } | null;
 };
@@ -723,16 +724,31 @@ export type SweepPlan =
  *   recorded, every publication of it is taken to have failed.
  * - the recorded baseline is no longer the newest one, because `Visual baseline` was dispatched or
  *   re-run without `main` changing.
+ * - the check run passes on a failed or pending record. A review decision can land on a record the
+ *   publisher or the sweep wrote at the same moment, and the backend's repair of it can fail.
+ * - a pending comparison that finished for {@link SWEEP_GRACE_MS} without being recorded.
  */
 export function planSweep(options: {
 	state: Partial<CheckState>;
+	/** The check run's conclusion, which a decision may have set whatever the record says. */
+	conclusion: string | null | undefined;
 	latest: LatestComparison | undefined;
 	newestBaseline: BaselineRun | undefined;
 	now: Date;
 }): SweepPlan {
 	const { state, latest } = options;
-	// Every other kind already blocks merging.
-	if (state.kind !== 'review' && state.kind !== 'clean') {
+	const passing = options.conclusion === 'success';
+	if (state.kind === 'failed') {
+		if (!passing) return { action: 'none', reason: 'The check run fails a failed result.' };
+		return {
+			action: 'write',
+			failure: 'publish-failed',
+			historyEntry: 'The check run passed on a failed result',
+			state: restate(state, 'failed'),
+		};
+	}
+	// Any other kind is not one this workflow writes.
+	if (state.kind !== 'review' && state.kind !== 'clean' && state.kind !== 'pending') {
 		return { action: 'none', reason: `The check run records ${JSON.stringify(state.kind)}.` };
 	}
 	if (latest === undefined) {
@@ -740,6 +756,11 @@ export function planSweep(options: {
 	}
 	const { runId, runAttempt } = requireRunIdentity(latest);
 	const run = `Comparison run ${runId} (attempt ${runAttempt})`;
+	// A missing or unreadable time counts as past the grace period, so it fails closed.
+	const finishedAt = Date.parse(latest.updated_at ?? '');
+	const pastGrace =
+		latest.status === 'completed' &&
+		!(Number.isFinite(finishedAt) && options.now.getTime() - finishedAt < SWEEP_GRACE_MS);
 	const unrecorded = (kind: 'pending' | 'failed'): CheckState => ({
 		baselineRunAttempt: null,
 		baselineRunId: null,
@@ -755,9 +776,7 @@ export function planSweep(options: {
 		if (latest.status !== 'completed') {
 			return { action: 'write', state: unrecorded('pending') };
 		}
-		// A missing or unreadable time counts as past the grace period, so it fails closed.
-		const finishedAt = Date.parse(latest.updated_at ?? '');
-		if (Number.isFinite(finishedAt) && options.now.getTime() - finishedAt < SWEEP_GRACE_MS) {
+		if (!pastGrace) {
 			return {
 				action: 'none',
 				reason: `${run} finished less than ${SWEEP_GRACE_MS / 60_000} minutes ago, so the publisher may still be recording it.`,
@@ -769,6 +788,20 @@ export function planSweep(options: {
 			historyEntry: `${run} was not recorded`,
 			state: unrecorded('failed'),
 		};
+	}
+
+	if (state.kind === 'pending') {
+		if (pastGrace) {
+			return {
+				action: 'write',
+				failure: 'publish-failed',
+				historyEntry: `${run} was not recorded`,
+				state: unrecorded('failed'),
+			};
+		}
+		// A decision landed on the pending record, so the check passes while the comparison runs.
+		if (passing) return { action: 'write', state: unrecorded('pending') };
+		return { action: 'none', reason: `${run} is still being compared or recorded.` };
 	}
 
 	// A clean result with no baseline is a skipped comparison, which compared nothing.
@@ -798,6 +831,49 @@ export function planSweep(options: {
 	}
 
 	return { action: 'none', reason: `${run} is recorded against the current baseline.` };
+}
+
+/** A recorded state again, with every field it records, as `kind`. */
+function restate(state: Partial<CheckState>, kind: ReviewKind): CheckState {
+	const { runId, runAttempt } = state;
+	if (typeof runId !== 'number' || typeof runAttempt !== 'number') {
+		throw new Error('The check run records no comparison run.');
+	}
+	requireRunIdentity({ id: runId, run_attempt: runAttempt });
+	return {
+		baselineRunAttempt: state.baselineRunAttempt ?? null,
+		baselineRunId: state.baselineRunId ?? null,
+		baselineSha: state.baselineSha ?? null,
+		kind,
+		reasons: (state.reasons ?? []).filter((reason) => {
+			return reason === 'visual' || reason === 'infrastructure';
+		}),
+		runAttempt,
+		runId,
+		v: 1,
+	};
+}
+
+/**
+ * Whether a failed publication is for an older comparison than the one the check run already
+ * records as a result. Recording it would replace that newer result, or a decision on it, with a
+ * failure that no longer applies.
+ */
+export function isSupersededFailure(options: {
+	latest: LatestComparison | undefined;
+	runId: number;
+	runAttempt: number;
+	recorded: ExistingCheckRun | undefined;
+}): boolean {
+	const { latest } = options;
+	if (latest === undefined) return false;
+	if (latest.id === options.runId && latest.run_attempt === options.runAttempt) return false;
+	const state = recordedState(options.recorded);
+	return (
+		state?.runId === latest.id &&
+		state.runAttempt === latest.run_attempt &&
+		(state.kind === 'review' || state.kind === 'clean')
+	);
 }
 
 /**
@@ -1969,6 +2045,25 @@ async function review() {
 
 	const existing = await findAppCheckRun({ appSlug, appToken, headSha, repository });
 
+	// A failed publication, perhaps from before `resolve-pr` ran, may be for an older comparison
+	// than the result already recorded. When the latest comparison cannot be read, the failure is
+	// recorded anyway, so it fails closed.
+	if (outcome === 'publish-failed') {
+		const latest = await fetchLatestComparison({ headSha, repository, token: githubToken }).catch(
+			(error: unknown) => {
+				const reason = error instanceof Error ? error.message : String(error);
+				info(`Could not read the latest comparison for ${headSha}: ${reason}`);
+				return undefined;
+			},
+		);
+		if (isSupersededFailure({ latest, recorded: existing, runAttempt, runId })) {
+			info(
+				`Run ${runId} attempt ${runAttempt} is older than run ${latest?.id} attempt ${latest?.run_attempt}, which ${CHECK_NAME} already records. Nothing to record.`,
+			);
+			return;
+		}
+	}
+
 	// Only a failed publication may run without a resolved pull request: `resolve-pr` itself may
 	// have failed. It is then recorded only on a commit the App already checks or that is still an
 	// open pull request's head.
@@ -2169,11 +2264,10 @@ async function sweepPull(options: {
 	const existing = await findAppCheckRun({ appSlug, appToken, headSha, repository });
 	const state = recordedState(existing);
 	if (existing === undefined || state === undefined) return;
-	// Only a check run that passes or awaits a decision can carry a stale result.
-	if (state.kind !== 'review' && state.kind !== 'clean') return;
 
 	const now = new Date();
 	const plan = planSweep({
+		conclusion: existing.conclusion,
 		latest: await fetchLatestComparison({ headSha, repository, token: githubToken }),
 		newestBaseline: options.newestBaseline,
 		now,

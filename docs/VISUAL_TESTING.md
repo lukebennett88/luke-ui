@@ -189,14 +189,18 @@ A `baseline.json` that names only the run records no exact baseline, so its resu
 
 The `Visual review sweep` workflow covers what the publisher cannot see. It runs when a
 `Visual baseline` run completes, whatever its conclusion, every 30 minutes, and on demand. For each
-open pull request whose `visual-review` check run passes or needs review, it reads the latest
-comparison and the newest baseline:
+open pull request with a `visual-review` check run, it reads the latest comparison and the newest
+baseline:
 
-- A newer comparison that is still running sets the check run to `Comparing`.
-- A newer comparison that finished at least 30 minutes ago and was never recorded fails with
-  `Publishing the report failed`. The 30 minutes leave the publisher time to record it.
+- A newer comparison than the one recorded that is still running sets the check run to `Comparing`.
+- A newer comparison, or the recorded `Comparing` one, that finished at least 30 minutes ago and was
+  never recorded fails with `Publishing the report failed`. The 30 minutes leave the publisher time
+  to record it.
 - A recorded result whose baseline is no longer the newest fails with `Baseline is out of date`. A
   skipped comparison compared nothing, so its baseline never goes out of date.
+- A check run that passes on a recorded failure or on `Comparing` is written again as that record. A
+  decision can land on a record the publisher or the sweep wrote at the same moment, and the review
+  backend's repair of it can fail. A failure is written again as `Publishing the report failed`.
 
 The sweep only invalidates. It never writes a result that can pass, it keeps the check run's
 history, and it updates only the status of an existing comment. It reads no artefacts and runs no
@@ -242,8 +246,10 @@ deliberate tampering.
   records `Publishing the report failed`, so a failed resolution, download, preparation, or
   deployment never leaves an earlier result or approval in place. When `resolve-pr` itself failed,
   the failure is recorded only on a commit that already has the check run or is still an open pull
-  request's head. When the App token cannot be created, nothing is recorded, and the sweep fails the
-  result once a token can be created again.
+  request's head. A failed publication for an older comparison than a result the check run already
+  records is not recorded, so it never replaces that result. When the latest comparison cannot be
+  read, the failure is recorded. When the App token cannot be created, nothing is recorded, and the
+  sweep fails the result once a token can be created again.
 - `visual-review review` writes the check run and the comment with a token for the visual review
   App, limited to check runs and pull requests. `resolve-pr` uses the same token to read the check
   run. Everything else, such as the runs, jobs, changed files, and their `package.json` and
