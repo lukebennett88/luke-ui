@@ -17,9 +17,11 @@ export interface Context {
 
 const REVIEW_ROLES = new Set(['admin', 'maintain', 'write']);
 
+const accountSchema = z.object({ id: z.number(), login: z.string() });
 const permissionSchema = z.object({
 	permission: z.string(),
 	role_name: z.string().optional(),
+	user: z.object({ id: z.number() }).nullable(),
 });
 
 export function nowSeconds(context: Context): number {
@@ -46,18 +48,30 @@ export async function readSession(context: Context): Promise<Session | undefined
 }
 
 /**
- * Whether the account can review: it has the admin, maintain or write role on the repository. It
- * asks GitHub on every call, so removing someone's access takes effect before their session ends.
+ * The account's current login when it can review, or `undefined` when it cannot. An account can
+ * review when it has the admin, maintain or write role on the repository. The session's login can
+ * be out of date after a rename, so this reads the login from the account's immutable id and
+ * checks that the permission belongs to that same id. It asks GitHub on every call, so removing
+ * someone's access takes effect before their session ends.
  */
-export async function canReview(context: Context, login: string): Promise<boolean> {
+export async function reviewerLogin(
+	context: Context,
+	session: Pick<Session, 'id'>,
+): Promise<string | undefined> {
+	const accountResponse = await installationFetch(context, `/user/${session.id}`);
+	if (accountResponse.status === 404) return undefined;
+	const account = await readGitHubJson(accountResponse, accountSchema, 'account');
+	if (account.id !== session.id) return undefined;
 	const response = await installationFetch(
 		context,
-		`/repos/${context.config.repository}/collaborators/${encodeURIComponent(login)}/permission`,
+		`/repos/${context.config.repository}/collaborators/${encodeURIComponent(account.login)}/permission`,
 	);
-	if (response.status === 404) return false;
+	if (response.status === 404) return undefined;
 	const access = await readGitHubJson(response, permissionSchema, 'collaborator permission');
+	if (access.user?.id !== session.id) return undefined;
 	// `role_name` names maintain and custom roles. `permission` is the base role behind them.
-	return REVIEW_ROLES.has(access.role_name ?? '') || REVIEW_ROLES.has(access.permission);
+	const allowed = REVIEW_ROLES.has(access.role_name ?? '') || REVIEW_ROLES.has(access.permission);
+	return allowed ? account.login : undefined;
 }
 
 /**

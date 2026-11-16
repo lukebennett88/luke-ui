@@ -54,7 +54,7 @@ describe('parseExternalId', () => {
 		['no value', null],
 		['text that is not JSON', 'run-123'],
 		['another version', externalId({ v: 2 })],
-		['an unknown kind', externalId({ kind: 'pending' })],
+		['an unknown kind', externalId({ kind: 'queued' })],
 		['an unknown reason', externalId({ reasons: ['flaky'] })],
 		['a fractional run id', externalId({ runId: 1.5 })],
 		['a short baseline sha', externalId({ baselineSha: 'abc' })],
@@ -87,6 +87,9 @@ describe('reviewFromCheckRun', () => {
 		['review', 'failure', 'Changes requested by @mona-l', 'changes-requested', 'mona-l'],
 		['clean', 'success', 'No visual changes', 'clean', null],
 		['failed', 'failure', 'Comparison did not finish', 'failed', null],
+		['pending', null, 'Comparing', 'comparing', null],
+		['pending', 'action_required', 'Comparing', 'comparing', null],
+		['pending', 'success', 'Approved by @luke', 'comparing', null],
 	] as const;
 	for (const [kind, conclusion, title, state, decidedBy] of states) {
 		test(`maps ${kind} with ${conclusion} to ${state}`, () => {
@@ -118,6 +121,13 @@ describe('rewriteSummary', () => {
 	test('writes the status line alone to an empty summary', () => {
 		expect(rewriteSummary(null, 'Approved by @luke')).toBe('**Status:** Approved by @luke');
 	});
+
+	test('keeps the summary within 60,000 characters', () => {
+		const summary = `**Status:** Needs review\n\n${'x'.repeat(65_000)}`;
+		const result = rewriteSummary(summary, 'Approved by @luke');
+		expect(result).toHaveLength(60_000);
+		expect(result.startsWith('**Status:** Approved by @luke\n\n')).toBe(true);
+	});
 });
 
 describe('prependHistory', () => {
@@ -133,6 +143,24 @@ describe('prependHistory', () => {
 		const old = Array.from({ length: 50 }, (_, index) => `- entry ${index}`);
 		const lines = prependHistory(`### History\n\n${old.join('\n')}`, '- newest').split('\n');
 		expect(lines.slice(2)).toEqual(['- newest', ...old.slice(0, 49)]);
+	});
+
+	test('drops the oldest entries to keep the text within 60,000 characters', () => {
+		const entry = historyEntry(
+			new Date('2026-11-16T03:40:00Z'),
+			'Changes requested by @luke',
+			'n'.repeat(500),
+		);
+		const old = Array.from(
+			{ length: 49 },
+			(_, index) => `- ${String(index).padStart(2, '0')} ${'o'.repeat(1500)}`,
+		);
+		const result = prependHistory(`### History\n\n${old.join('\n')}`, entry);
+		expect(result.length).toBeLessThanOrEqual(60_000);
+		const lines = result.split('\n');
+		expect(lines.slice(0, 3)).toEqual(['### History', '', entry]);
+		// With its newline, each earlier entry takes 1,506 characters, so 39 fit beside the new one.
+		expect(lines.slice(3)).toEqual(old.slice(0, 39));
 	});
 
 	test('starts a history when there is none', () => {

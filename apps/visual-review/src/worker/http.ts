@@ -7,8 +7,10 @@ export type ErrorCode =
 	| 'not-found'
 	| 'not-reviewable'
 	| 'stale'
+	| 'stale-baseline'
 	| 'unauthenticated'
 	| 'unconfigured'
+	| 'unverified-baseline'
 	| 'upstream';
 
 /** A failure that becomes an `{ error, message }` response with its status. */

@@ -6,6 +6,9 @@ export const CHECK_NAME = 'visual-review';
 export const COMMENT_MARKER = '<!-- luke-ui-visual-review -->';
 
 const MAX_HISTORY_ENTRIES = 50;
+/** GitHub limits `output.text` and `output.summary` to 65,535 characters. */
+const MAX_OUTPUT_LENGTH = 60_000;
+const HISTORY_HEADING = '### History';
 const MAX_NOTE_LENGTH = 500;
 const STATUS_PREFIX = '**Status:** ';
 const STATUS_SECTION = /<!-- visual-review-status -->[\s\S]*?<!-- \/visual-review-status -->/;
@@ -17,7 +20,7 @@ export const positiveIntegerSchema = z.number().int().positive().max(Number.MAX_
 const externalIdSchema = z.object({
 	baselineRunId: positiveIntegerSchema.nullable(),
 	baselineSha: shaSchema.nullable(),
-	kind: z.enum(['clean', 'failed', 'review']),
+	kind: z.enum(['clean', 'failed', 'pending', 'review']),
 	reasons: z.array(z.enum(['infrastructure', 'visual'])),
 	runAttempt: positiveIntegerSchema,
 	runId: positiveIntegerSchema,
@@ -26,7 +29,13 @@ const externalIdSchema = z.object({
 
 export type ExternalId = z.infer<typeof externalIdSchema>;
 export type Decision = 'approve' | 'request-changes';
-type ReviewState = 'approved' | 'changes-requested' | 'clean' | 'failed' | 'needs-review';
+type ReviewState =
+	| 'approved'
+	| 'changes-requested'
+	| 'clean'
+	| 'comparing'
+	| 'failed'
+	| 'needs-review';
 
 export interface Review {
 	baselineRunId: number | null;
@@ -87,6 +96,7 @@ export function reviewFromCheckRun(run: CheckRunSnapshot): Review | null {
 function reviewState(kind: ExternalId['kind'], conclusion: string | null): ReviewState {
 	if (kind === 'clean') return 'clean';
 	if (kind === 'failed') return 'failed';
+	if (kind === 'pending') return 'comparing';
 	if (conclusion === 'success') return 'approved';
 	if (conclusion === 'failure') return 'changes-requested';
 	return 'needs-review';
@@ -97,20 +107,45 @@ export function decisionStatus(decision: Decision, login: string): string {
 	return decision === 'approve' ? `Approved by @${login}` : `Changes requested by @${login}`;
 }
 
-/** Replaces the summary's first line, the status line, and keeps the rest. */
-export function rewriteSummary(summary: string | null, status: string): string {
-	const statusLine = `${STATUS_PREFIX}${status}`;
-	if (!summary) return statusLine;
-	const newline = summary.indexOf('\n');
-	const firstLine = newline === -1 ? summary : summary.slice(0, newline);
-	if (!firstLine.startsWith(STATUS_PREFIX)) return `${statusLine}\n\n${summary}`;
-	return newline === -1 ? statusLine : `${statusLine}${summary.slice(newline)}`;
+/** The status text of a check run that is waiting for its comparison. */
+export const COMPARING_STATUS = 'Comparing';
+
+/** The first line of a check run's summary and the sticky comment's status section. */
+export function statusLine(status: string): string {
+	return `${STATUS_PREFIX}${status}`;
 }
 
-/** Prepends an entry to the check run's history, newest first, keeping 50 entries. */
+/**
+ * Replaces the summary's first line, the status line, and keeps the rest, cut to 60,000
+ * characters.
+ */
+export function rewriteSummary(summary: string | null, status: string): string {
+	const line = statusLine(status);
+	if (!summary) return line;
+	const newline = summary.indexOf('\n');
+	const firstLine = newline === -1 ? summary : summary.slice(0, newline);
+	let result: string;
+	if (!firstLine.startsWith(STATUS_PREFIX)) result = `${line}\n\n${summary}`;
+	else result = newline === -1 ? line : `${line}${summary.slice(newline)}`;
+	return result.slice(0, MAX_OUTPUT_LENGTH);
+}
+
+/**
+ * Prepends an entry to the check run's history, newest first. It drops the oldest entries until
+ * at most 50 remain and the text is at most 60,000 characters.
+ */
 export function prependHistory(text: string | null, entry: string): string {
-	const entries = (text ?? '').split('\n').filter((line) => line.startsWith('- '));
-	return ['### History', '', ...[entry, ...entries].slice(0, MAX_HISTORY_ENTRIES)].join('\n');
+	const entries = [entry, ...(text ?? '').split('\n').filter((line) => line.startsWith('- '))];
+	entries.length = Math.min(entries.length, MAX_HISTORY_ENTRIES);
+	// The heading, a blank line, then one line per entry.
+	let length = HISTORY_HEADING.length + 1;
+	let kept = 0;
+	for (const line of entries) {
+		if (length + 1 + line.length > MAX_OUTPUT_LENGTH) break;
+		length += 1 + line.length;
+		kept += 1;
+	}
+	return [HISTORY_HEADING, '', ...entries.slice(0, kept)].join('\n');
 }
 
 export function historyEntry(date: Date, status: string, note: string | undefined): string {
@@ -143,7 +178,6 @@ export function rewriteCommentStatus(body: string, status: string): string | und
 	if (!STATUS_SECTION.test(body)) return undefined;
 	return body.replace(
 		STATUS_SECTION,
-		() =>
-			`<!-- visual-review-status -->\n${STATUS_PREFIX}${status}\n<!-- /visual-review-status -->`,
+		() => `<!-- visual-review-status -->\n${statusLine(status)}\n<!-- /visual-review-status -->`,
 	);
 }
