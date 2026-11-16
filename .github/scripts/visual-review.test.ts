@@ -4,10 +4,13 @@ import { mkdir, mkdtemp, open, readdir, readFile, symlink, writeFile } from 'nod
 import { expect, test } from 'vite-plus/test';
 import type {
 	CheckState,
+	FileContent,
+	FileReader,
 	IssueComment,
 	PublishedMeta,
 	PublishedResult,
 	PublishedSummary,
+	PullFile,
 	PullRequestCandidate,
 	RunMeta,
 } from './visual-review.js';
@@ -22,20 +25,29 @@ import {
 	decidePublish,
 	decideReview,
 	decideRunOutcome,
+	findInfrastructureChanges,
 	findOwnCheckRun,
 	findStickyComment,
 	formatTimestamp,
 	infrastructureChanges,
+	isLatestComparison,
+	isPendingFor,
+	MAX_HISTORY_CHARS,
 	MAX_HISTORY_ENTRIES,
 	MAX_IMAGE_BYTES,
 	MAX_PUBLISHED_BYTES,
 	MAX_PUBLISHED_FILES,
 	MAX_SUMMARY_BYTES,
+	MAX_SUMMARY_CHARS,
 	parseArtifactSummary,
 	parseBaselineRunId,
 	parseMeta,
 	prepareSite,
 	prependHistory,
+	replaceCommentStatus,
+	stripCatalogBlocks,
+	UNLISTED_FILES_ENTRY,
+	verifiedBaselineSha,
 } from './visual-review.js';
 
 const HEAD_SHA = 'a'.repeat(40);
@@ -604,18 +616,68 @@ test('rejects a symlinked baseline file', async () => {
 	);
 });
 
-test('maps a run conclusion to what it means for review', () => {
-	expect(decideRunOutcome('success', true)).toBe('report');
-	expect(decideRunOutcome('success', false)).toBe('skipped');
-	expect(decideRunOutcome('failure', false)).toBe('failed');
-	expect(decideRunOutcome('timed_out', true)).toBe('failed');
-	// A newer push usually cancelled the run, so there is nothing to record.
-	expect(decideRunOutcome('cancelled', true)).toBe('none');
-	expect(decideRunOutcome('action_required', false)).toBe('none');
-	expect(decideRunOutcome('', false)).toBe('none');
+test('treats only the newest attempt of the newest run for the commit as current', () => {
+	expect(isLatestComparison({ id: 345, run_attempt: 2 }, 345, 2)).toBe(true);
+	// A newer push or manual run for the same commit superseded this run.
+	expect(isLatestComparison({ id: 400, run_attempt: 1 }, 345, 2)).toBe(false);
+	// A re-run of the same run raised the attempt.
+	expect(isLatestComparison({ id: 345, run_attempt: 3 }, 345, 2)).toBe(false);
+	expect(isLatestComparison(undefined, 345, 2)).toBe(false);
 });
 
-test('finds the visual testing infrastructure among changed files', () => {
+test('maps a run event to what it means for review', () => {
+	expect(decideRunOutcome('requested', '', false)).toBe('pending');
+	expect(decideRunOutcome('in_progress', '', false)).toBe('pending');
+	expect(decideRunOutcome('completed', 'success', true)).toBe('report');
+	expect(decideRunOutcome('completed', 'success', false)).toBe('skipped');
+	expect(decideRunOutcome('completed', 'failure', false)).toBe('failed');
+	expect(decideRunOutcome('completed', 'timed_out', true)).toBe('failed');
+	expect(decideRunOutcome('completed', 'cancelled', true)).toBe('cancelled');
+	expect(decideRunOutcome('completed', 'action_required', false)).toBe('none');
+	expect(decideRunOutcome('completed', '', false)).toBe('none');
+	expect(decideRunOutcome('', 'success', true)).toBe('none');
+});
+
+const BASELINE_SHA = 'b'.repeat(40);
+
+const baselineRun = {
+	conclusion: 'success',
+	event: 'push',
+	head_branch: 'main',
+	head_repository: { full_name: 'luke/luke-ui' },
+	head_sha: BASELINE_SHA,
+	path: '.github/workflows/visual-baseline.yml',
+	status: 'completed',
+};
+
+test('verifies a successful Visual baseline run of main, pushed or dispatched', () => {
+	expect(verifiedBaselineSha(baselineRun, 'luke/luke-ui')).toBe(BASELINE_SHA);
+	expect(verifiedBaselineSha({ ...baselineRun, event: 'workflow_dispatch' }, 'luke/luke-ui')).toBe(
+		BASELINE_SHA,
+	);
+});
+
+for (const [name, baseline] of [
+	// A fork's own branch called main runs in this repository with the fork as head repository.
+	[
+		'a fork branch named main',
+		{ ...baselineRun, head_repository: { full_name: 'mallory/luke-ui' } },
+	],
+	['a run with no head repository', { ...baselineRun, head_repository: null }],
+	['a pull request run', { ...baselineRun, event: 'pull_request' }],
+	['a pull_request_target run', { ...baselineRun, event: 'pull_request_target' }],
+	['another workflow', { ...baselineRun, path: '.github/workflows/visual-regression.yml' }],
+	['another branch', { ...baselineRun, head_branch: 'feature' }],
+	['a failed run', { ...baselineRun, conclusion: 'failure' }],
+	['a run still in progress', { ...baselineRun, conclusion: null, status: 'in_progress' }],
+	['a malformed commit', { ...baselineRun, head_sha: 'abc' }],
+] as const) {
+	test(`does not verify ${name} as a baseline`, () => {
+		expect(verifiedBaselineSha(baseline, 'luke/luke-ui')).toBeNull();
+	});
+}
+
+test('finds the visual testing infrastructure among changed paths', () => {
 	expect(
 		infrastructureChanges([
 			'packages/@luke-ui/react/src/button/button.tsx',
@@ -623,45 +685,286 @@ test('finds the visual testing infrastructure among changed files', () => {
 			'packages/@luke-ui/react/scripts/visual-regression-lib.ts',
 			'.github/visual-playwright/Dockerfile',
 			'.github/workflows/visual-review-publish.yml',
+			'.github/scripts/visual-review.ts',
+			'.github/scripts/package.json',
+			'packages/@luke-ui/react/src/core/test-utils/axe.ts',
+			'patches/react-aria.patch',
+			'packages/@luke-ui/react/turbo.json',
+			'turbo.json',
 			'docs/VISUAL_TESTING.md',
 		]),
 	).toEqual([
+		'.github/scripts/package.json',
+		'.github/scripts/visual-review.ts',
 		'.github/visual-playwright/Dockerfile',
 		'.github/workflows/visual-regression.yml',
 		'packages/@luke-ui/react/scripts/visual-regression-lib.ts',
+		'packages/@luke-ui/react/src/core/test-utils/axe.ts',
+		'packages/@luke-ui/react/turbo.json',
+		'patches/react-aria.patch',
+		'turbo.json',
 	]);
 });
 
+const text = (value: string): FileContent => ({ kind: 'text', text: value });
+const json = (value: unknown): FileContent => text(JSON.stringify(value, null, '\t'));
+const MISSING: FileContent = { kind: 'missing' };
+
+/** A reader over fixed base and head file contents. Unlisted files are missing. */
+function fixedReader(
+	base: Record<string, FileContent>,
+	head: Record<string, FileContent>,
+): FileReader {
+	return async (file, side) => (side === 'base' ? base : head)[file] ?? MISSING;
+}
+
+async function infrastructureFor(
+	files: Array<PullFile>,
+	base: Record<string, FileContent> = {},
+	head: Record<string, FileContent> = {},
+	complete = true,
+) {
+	return findInfrastructureChanges({ complete, files, read: fixedReader(base, head) });
+}
+
+test('counts a file renamed away from an infrastructure path', async () => {
+	const files = [
+		{
+			filename: 'docs/old-visual-ci.ts',
+			previous_filename: '.github/scripts/visual-ci.ts',
+			status: 'renamed',
+		},
+	];
+
+	expect(await infrastructureFor(files)).toEqual(['.github/scripts/visual-ci.ts']);
+});
+
+test('treats a pull request with more files than the API lists as infrastructure', async () => {
+	const files = [{ filename: 'README.md', status: 'modified' }];
+
+	expect(await infrastructureFor(files, {}, {}, false)).toEqual([UNLISTED_FILES_ENTRY]);
+});
+
+const packageBase = {
+	dependencies: { react: '^19.3.0' },
+	name: '@luke-ui/react',
+	scripts: { 'test:visual:run': 'vp test run --project visual' },
+	version: '1.0.0',
+};
+const packageFile = 'packages/@luke-ui/react/package.json';
+const modifiedPackage = [{ filename: packageFile, status: 'modified' }];
+
+test('ignores a package.json change to dependencies and the version alone', async () => {
+	const head = json({
+		...packageBase,
+		devDependencies: { typescript: '^7.0.2' },
+		dependencies: { react: '^19.4.0' },
+		version: '1.1.0',
+	});
+
+	expect(
+		await infrastructureFor(
+			modifiedPackage,
+			{ [packageFile]: json(packageBase) },
+			{ [packageFile]: head },
+		),
+	).toEqual([]);
+});
+
+test('ignores a package.json whose keys only moved', async () => {
+	const reordered = `{"version":"1.0.0","scripts":{"test:visual:run":"vp test run --project visual"},"name":"@luke-ui/react","dependencies":{"react":"^19.3.0"}}`;
+
+	expect(
+		await infrastructureFor(
+			modifiedPackage,
+			{ [packageFile]: json(packageBase) },
+			{ [packageFile]: text(reordered) },
+		),
+	).toEqual([]);
+});
+
+for (const [name, head] of [
+	['a scripts change', json({ ...packageBase, scripts: { 'test:visual:run': 'true' } })],
+	['a pnpm field', json({ ...packageBase, pnpm: { overrides: { react: '1.0.0' } } })],
+	['unparseable JSON', text('{"name":')],
+	['a JSON array', text('[]')],
+	['a file over the size cap', { kind: 'too-large' } as const],
+] as const) {
+	test(`counts a package.json with ${name}`, async () => {
+		expect(
+			await infrastructureFor(
+				modifiedPackage,
+				{ [packageFile]: json(packageBase) },
+				{ [packageFile]: head },
+			),
+		).toEqual([packageFile]);
+	});
+}
+
+test('compares an added or removed package.json against an empty object', async () => {
+	const added = [{ filename: packageFile, status: 'added' }];
+	const removed = [{ filename: packageFile, status: 'removed' }];
+	const dependenciesOnly = json({ dependencies: { react: '^19.3.0' }, version: '1.0.0' });
+
+	expect(await infrastructureFor(added, {}, { [packageFile]: dependenciesOnly })).toEqual([]);
+	expect(await infrastructureFor(added, {}, { [packageFile]: json(packageBase) })).toEqual([
+		packageFile,
+	]);
+	expect(await infrastructureFor(removed, { [packageFile]: json(packageBase) })).toEqual([
+		packageFile,
+	]);
+});
+
+test('counts a package.json the pull request lists but the API cannot read', async () => {
+	// Modified means it exists at both sides. A missing head must not compare as `{}`.
+	expect(await infrastructureFor(modifiedPackage)).toEqual([packageFile]);
+});
+
+test('counts a package.json renamed away from its directory', async () => {
+	const files = [
+		{ filename: 'scratch/package.json.bak', previous_filename: packageFile, status: 'renamed' },
+	];
+
+	expect(await infrastructureFor(files, { [packageFile]: json(packageBase) })).toEqual([
+		packageFile,
+	]);
+});
+
+const workspaceBase = [
+	'packages:',
+	'  - packages/*',
+	'',
+	'overrides:',
+	"  vite@*: 'catalog:'",
+	'',
+	'catalog:',
+	'  playwright: ^1.65.0',
+	'  # Kept with the Dockerfile.',
+	'',
+	'  react: ^19.3.0',
+	'minimumReleaseAgeExclude:',
+	'  - vite-plus',
+	'',
+].join('\n');
+const modifiedWorkspace = [{ filename: 'pnpm-workspace.yaml', status: 'modified' }];
+
+async function workspaceInfrastructure(head: string) {
+	return infrastructureFor(
+		modifiedWorkspace,
+		{ 'pnpm-workspace.yaml': text(workspaceBase) },
+		{ 'pnpm-workspace.yaml': text(head) },
+	);
+}
+
+test('ignores a pnpm-workspace.yaml change inside the catalog alone', async () => {
+	const head = workspaceBase
+		.replace('playwright: ^1.65.0', 'playwright: ^1.66.0')
+		.replace('react: ^19.3.0', "react: ^19.4.0\ncatalogs:\n  next:\n    react: '20.0.0'");
+
+	expect(await workspaceInfrastructure(head)).toEqual([]);
+});
+
+for (const [name, head] of [
+	['an overrides change', workspaceBase.replace("vite@*: 'catalog:'", "vite@*: '8.0.0'")],
+	[
+		'a setting after the catalog',
+		workspaceBase.replace('  - vite-plus', '  - vite-plus\n  - evil'),
+	],
+	['a new top-level setting', `${workspaceBase}patchedDependencies:\n  react: patch.diff\n`],
+	['a catalog anchor', workspaceBase.replace('catalog:', 'catalog: &pins')],
+] as const) {
+	test(`counts a pnpm-workspace.yaml with ${name}`, async () => {
+		expect(await workspaceInfrastructure(head)).toEqual(['pnpm-workspace.yaml']);
+	});
+}
+
+test('strips each catalog block up to the next top-level key', () => {
+	expect(stripCatalogBlocks(workspaceBase)).toBe(
+		[
+			'packages:',
+			'  - packages/*',
+			'',
+			'overrides:',
+			"  vite@*: 'catalog:'",
+			'',
+			'minimumReleaseAgeExclude:',
+			'  - vite-plus',
+			'',
+		].join('\n'),
+	);
+	// `catalogMode` is a different setting, not a catalog block.
+	expect(stripCatalogBlocks('catalogMode: strict\n')).toBe('catalogMode: strict\n');
+});
+
+const reviewOf = (overrides: Partial<Parameters<typeof decideReview>[0]>) => {
+	return decideReview({
+		baselineSha: BASELINE_SHA,
+		differing: 0,
+		infrastructureFiles: [],
+		outcome: 'report',
+		...overrides,
+	});
+};
+
 test('needs review for differences, infrastructure changes, or both', () => {
 	const infra = ['.github/scripts/visual-ci.ts'];
-	expect(decideReview({ differing: 2, infrastructureFiles: [], outcome: 'report' })).toEqual({
-		kind: 'review',
-		reasons: ['visual'],
-	});
-	expect(decideReview({ differing: 0, infrastructureFiles: infra, outcome: 'report' })).toEqual({
+	expect(reviewOf({ differing: 2 })).toEqual({ kind: 'review', reasons: ['visual'] });
+	expect(reviewOf({ infrastructureFiles: infra })).toEqual({
 		kind: 'review',
 		reasons: ['infrastructure'],
 	});
-	expect(decideReview({ differing: 0, infrastructureFiles: infra, outcome: 'skipped' })).toEqual({
-		kind: 'review',
-		reasons: ['infrastructure'],
-	});
-	expect(decideReview({ differing: 1, infrastructureFiles: infra, outcome: 'report' })).toEqual({
+	expect(reviewOf({ differing: 1, infrastructureFiles: infra })).toEqual({
 		kind: 'review',
 		reasons: ['visual', 'infrastructure'],
 	});
 });
 
-test('passes a clean or skipped comparison and fails an unfinished one', () => {
-	expect(decideReview({ differing: 0, infrastructureFiles: [], outcome: 'report' }).kind).toBe(
-		'clean',
-	);
-	expect(decideReview({ differing: 0, infrastructureFiles: [], outcome: 'skipped' }).kind).toBe(
-		'clean',
-	);
+test('passes a verified report without differences and a skipped comparison', () => {
+	expect(reviewOf({})).toEqual({ kind: 'clean', reasons: [] });
+	// A skipped run compared nothing, so it has no baseline to verify.
+	expect(reviewOf({ baselineSha: null, outcome: 'skipped' })).toEqual({
+		kind: 'clean',
+		reasons: [],
+	});
+});
+
+for (const differing of [0, 2]) {
+	test(`fails a report with ${differing} differences and an unverified baseline`, () => {
+		expect(reviewOf({ baselineSha: null, differing })).toEqual({
+			failure: 'unverified-baseline',
+			kind: 'failed',
+			reasons: [],
+		});
+	});
+}
+
+for (const [outcome, failure] of [
+	['failed', 'unfinished'],
+	['cancelled', 'cancelled'],
+	['publish-failed', 'publish-failed'],
+] as const) {
+	test(`fails a ${outcome} comparison, whatever it changed`, () => {
+		const infra = ['.github/scripts/visual-ci.ts'];
+		expect(reviewOf({ differing: 3, infrastructureFiles: infra, outcome })).toEqual({
+			failure,
+			kind: 'failed',
+			reasons: [],
+		});
+	});
+}
+
+test('fails a skipped comparison that changed infrastructure', () => {
 	const infra = ['.github/scripts/visual-ci.ts'];
-	expect(decideReview({ differing: 3, infrastructureFiles: infra, outcome: 'failed' })).toEqual({
+	expect(reviewOf({ infrastructureFiles: infra, outcome: 'skipped' })).toEqual({
+		failure: 'unfinished',
 		kind: 'failed',
+		reasons: [],
+	});
+});
+
+test('records a started comparison as pending', () => {
+	expect(reviewOf({ baselineSha: null, outcome: 'pending' })).toEqual({
+		kind: 'pending',
 		reasons: [],
 	});
 });
@@ -691,6 +994,7 @@ function payloadFor(
 		infrastructureFiles: [],
 		now: NOW,
 		previousText: undefined,
+		updatesExisting: false,
 		pullRequest: 12,
 		repository: 'luke/luke-ui',
 		state,
@@ -752,17 +1056,100 @@ test('marks an unverified or unrecorded baseline', () => {
 	).toContain('against an unrecorded baseline.');
 });
 
-test('passes a clean report and fails an unfinished comparison', () => {
+test('passes a clean report', () => {
 	const clean = payloadFor(checkState({ kind: 'clean', reasons: [] }), {
 		summary: publishedSummary([]),
 	});
-	expect(clean.conclusion).toBe('success');
+	expect(clean).toMatchObject({ conclusion: 'success', status: 'completed' });
 	expect(clean.output.title).toBe('No visual changes');
+});
 
-	const failed = payloadFor(checkState({ kind: 'failed', reasons: [] }), { summary: undefined });
-	expect(failed.conclusion).toBe('failure');
-	expect(failed.output.title).toBe('Comparison did not finish');
-	expect(failed.output.summary).not.toContain('Review in the visual review app');
+for (const [failure, title] of [
+	['unfinished', 'Comparison did not finish'],
+	['cancelled', 'Comparison was cancelled'],
+	['publish-failed', 'Publishing the report failed'],
+	['unverified-baseline', 'Baseline could not be verified'],
+] as const) {
+	test(`fails the check with the title "${title}"`, () => {
+		const failed = payloadFor(checkState({ kind: 'failed', reasons: [] }), {
+			failure,
+			summary: undefined,
+		});
+		expect(failed).toMatchObject({
+			completed_at: NOW.toISOString(),
+			conclusion: 'failure',
+			status: 'completed',
+		});
+		expect(failed.output.title).toBe(title);
+		expect(failed.output.summary.split('\n')[0]).toBe(`**Status:** ${title}`);
+		expect(failed.output.summary).not.toContain('Review in the visual review app');
+		expect(failed.output.text).toContain(`(attempt 2): ${title.toLowerCase()}`);
+	});
+}
+
+const pendingState = checkState({
+	baselineRunId: null,
+	baselineSha: null,
+	kind: 'pending',
+	reasons: [],
+});
+
+test('creates a started comparison in progress, with no conclusion', () => {
+	const payload = payloadFor(pendingState);
+
+	expect(payload.status).toBe('in_progress');
+	expect(payload).not.toHaveProperty('conclusion');
+	expect(payload).not.toHaveProperty('completed_at');
+	expect(payload.output).toEqual({
+		summary: '**Status:** Comparing\n',
+		text: '### History\n\n- 2026-11-16 03:22 UTC · Comparison run 345 (attempt 2) started\n',
+		title: 'Comparing',
+	});
+	expect(JSON.parse(payload.external_id)).toEqual(pendingState);
+});
+
+test('completes an existing check run as action_required for a started comparison', () => {
+	// GitHub ignores a PATCH back to `in_progress` on a completed check run, which would leave an
+	// earlier approval passing.
+	const payload = payloadFor(pendingState, { updatesExisting: true });
+
+	expect(payload).toMatchObject({
+		completed_at: NOW.toISOString(),
+		conclusion: 'action_required',
+		status: 'completed',
+	});
+	expect(payload.output.title).toBe('Comparing');
+	expect(payload.output.summary).toBe('**Status:** Comparing\n');
+	expect(JSON.parse(payload.external_id)).toEqual(pendingState);
+});
+
+test('records a start once when both start events arrive', () => {
+	const pending = {
+		app: { slug: 'luke-ui-visual-review' },
+		external_id: JSON.stringify(checkState({ kind: 'pending', reasons: [] })),
+		id: 1,
+		status: 'in_progress',
+	};
+
+	expect(isPendingFor(pending, 345, 2)).toBe(true);
+	expect(isPendingFor(pending, 345, 3)).toBe(false);
+	// A pending check run written over an existing one is completed. The external id decides.
+	expect(isPendingFor({ ...pending, status: 'completed' }, 345, 2)).toBe(true);
+	expect(isPendingFor({ ...pending, external_id: JSON.stringify(checkState()) }, 345, 2)).toBe(
+		false,
+	);
+	expect(isPendingFor({ ...pending, external_id: 'not json' }, 345, 2)).toBe(false);
+	expect(isPendingFor(undefined, 345, 2)).toBe(false);
+});
+
+test(`caps the check run summary at ${MAX_SUMMARY_CHARS} characters`, () => {
+	const files = Array.from({ length: 20 }, (_, index) => `${index}${'x'.repeat(5_000)}`);
+	const payload = payloadFor(checkState({ reasons: ['infrastructure'] }), {
+		infrastructureFiles: files,
+	});
+
+	expect(payload.output.summary.length).toBeLessThanOrEqual(MAX_SUMMARY_CHARS);
+	expect(payload.output.summary.split('\n')[0]).toBe('**Status:** Needs review');
 });
 
 test('keeps the commit history when a later comparison run updates the check', () => {
@@ -793,6 +1180,26 @@ test(`keeps the newest ${MAX_HISTORY_ENTRIES} history entries`, () => {
 	expect(entries).toHaveLength(MAX_HISTORY_ENTRIES);
 	expect(entries[0]).toBe('- new');
 	expect(entries.at(-1)).toBe(`- old ${MAX_HISTORY_ENTRIES - 2}`);
+});
+
+test(`drops the oldest history entries past ${MAX_HISTORY_CHARS} characters`, () => {
+	// Ten long entries are well under the entry count, but over the size bound together.
+	const previous = Array.from({ length: 10 }, (_, index) => `- old ${index} ${'x'.repeat(9_000)}`);
+
+	const history = prependHistory(previous.join('\n'), 'new');
+	const entries = history.split('\n').filter((line) => line.startsWith('- '));
+
+	expect(history.length).toBeLessThanOrEqual(MAX_HISTORY_CHARS);
+	expect(entries[0]).toBe('- new');
+	expect(entries.slice(1)).toEqual(previous.slice(0, entries.length - 1));
+	expect(entries.length).toBe(7);
+});
+
+test('cuts one oversized history entry to fit', () => {
+	const history = prependHistory(undefined, 'x'.repeat(MAX_HISTORY_CHARS * 2));
+
+	expect(history.length).toBeLessThanOrEqual(MAX_HISTORY_CHARS);
+	expect(history.startsWith('### History\n\n- x')).toBe(true);
 });
 
 test('formats timestamps to the minute in UTC', () => {
@@ -917,3 +1324,43 @@ test('updates an existing comment whatever the result', () => {
 	expect(decideCommentAction('clean', 77)).toEqual({ commentId: 77, type: 'update' });
 	expect(decideCommentAction('failed', 77)).toEqual({ commentId: 77, type: 'update' });
 });
+
+test('gives each failure its own status in the comment', () => {
+	const cancelled = comment({ failure: 'cancelled', kind: 'failed', summary: undefined });
+	expect(cancelled).toContain('**Status:** Comparison was cancelled');
+	const unverified = comment({ failure: 'unverified-baseline', kind: 'failed' });
+	expect(unverified).toContain('**Status:** Baseline could not be verified');
+	expect(unverified).not.toContain('Review in the visual review app');
+});
+
+test('never creates a comment for a pending comparison, only updates one', () => {
+	expect(decideCommentAction('pending', undefined)).toEqual({ type: 'skip' });
+	expect(decideCommentAction('pending', 77)).toEqual({ commentId: 77, type: 'update' });
+});
+
+test('sets a pending comment to comparing and keeps the rest of the report', () => {
+	const body = comment();
+
+	const updated = replaceCommentStatus(body, 'Comparing');
+
+	expect(updated).toBe(body.replace('**Status:** Needs review', '**Status:** Comparing'));
+	expect(updated).toContain('| 2 | 1 | 0 | 30 |');
+});
+
+test('replaces a status the review backend rewrote', () => {
+	const body = `${COMMENT_MARKER}\n${COMMENT_STATUS_START}\n**Status:** Approved by @luke\n\nextra\n${COMMENT_STATUS_END}\nrest`;
+
+	expect(replaceCommentStatus(body, 'Comparing')).toBe(
+		`${COMMENT_MARKER}\n${COMMENT_STATUS_START}\n**Status:** Comparing\n${COMMENT_STATUS_END}\nrest`,
+	);
+});
+
+for (const body of [
+	`${COMMENT_MARKER}\n**Status:** Needs review`,
+	`${COMMENT_MARKER}\n${COMMENT_STATUS_START}\n**Status:** Needs review`,
+	`${COMMENT_MARKER}\n${COMMENT_STATUS_END}\n${COMMENT_STATUS_START}\n**Status:** Needs review`,
+]) {
+	test(`leaves a comment without a complete status block alone: ${JSON.stringify(body)}`, () => {
+		expect(replaceCommentStatus(body, 'Comparing')).toBeUndefined();
+	});
+}

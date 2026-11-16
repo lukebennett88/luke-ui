@@ -101,9 +101,10 @@ pull request's report live in one Cloudflare Pages project that takes direct upl
   the differing captures' PNGs. The baseline stays in the `visual-baseline` artefact.
 
 `Visual review publish` then records the `visual-review` check run for the commit and writes one
-comment on the pull request, which it updates on each run. The comment gives the review status and
-the counts, and links to the review. A report with no differences is still published, so the app can
-tell "no visual changes" from "no report".
+comment on the pull request, which it updates on each run. It also runs when a comparison starts, to
+set the check run to `Comparing`. The comment gives the review status and the counts, and links to
+the review. A report with no differences is still published, so the app can tell "no visual changes"
+from "no report".
 
 To review a local comparison, run `pnpm test:visual`, then `pnpm dev:visual-review`, and open
 `http://localhost:5175/?source=local`.
@@ -114,24 +115,49 @@ The `visual-review` check run records whether a commit's visual changes are appr
 from `visual-regression`, which reports whether the comparison itself worked. The visual review
 GitHub App owns the check run, and each commit has exactly one:
 
-| Comparison                                                    | `visual-review` conclusion |
-| ------------------------------------------------------------- | -------------------------- |
-| No differences, or skipped because nothing visual changed     | `success`                  |
-| Differences, or a change to the visual testing infrastructure | `action_required`          |
-| Did not finish                                                | `failure`                  |
-| Cancelled, usually because a newer push superseded it         | Unchanged                  |
+| Comparison                                                       | `visual-review`   | Title                            |
+| ---------------------------------------------------------------- | ----------------- | -------------------------------- |
+| Started or re-run                                                | See below         | `Comparing`                      |
+| No differences, or skipped because nothing visual changed        | `success`         | `No visual changes`              |
+| Differences, or a change to the visual testing infrastructure    | `action_required` | `Needs review: …`                |
+| Failed or timed out, or skipped despite an infrastructure change | `failure`         | `Comparison did not finish`      |
+| Cancelled                                                        | `failure`         | `Comparison was cancelled`       |
+| A report whose baseline is missing or could not be verified      | `failure`         | `Baseline could not be verified` |
+| `Visual review publish` failed after resolving the pull request  | `failure`         | `Publishing the report failed`   |
 
-A pull request that changes the files in `INFRASTRUCTURE_PATHS` in
-[`visual-review.ts`](../.github/scripts/visual-review.ts) needs a review even when nothing differs,
-because those files decide how its own comparison runs.
+Only the latest comparison for a commit is recorded: the newest `Visual regression` pull request run
+for that commit, at its newest attempt. A re-run raises the attempt as soon as it is requested, so
+an earlier attempt or a superseded run that finishes late records nothing. The review backend uses
+the same rule before it accepts a decision. Every interleaving of the two writers ends with the
+check failing or in progress unless the latest comparison's verified result has a decision.
+
+GitHub sends no `requested` event for a re-run, so `Visual review publish` also treats the
+`in_progress` event as the start of a comparison. A start event that arrives after its run finished
+is ignored. A started comparison creates the check run in progress when the commit has none. GitHub
+ignores a change back to in progress on a completed check run, so an existing one becomes
+`action_required` with the title `Comparing` instead. Either way it cannot pass, and its external id
+records the `pending` kind that readers act on. Starting a comparison also updates the status of an
+existing comment to `Comparing`, and never creates one.
+
+A pull request needs a review even when nothing differs if it changes the visual testing
+infrastructure, because those files decide how its own comparison runs. `findInfrastructureChanges`
+in [`visual-review.ts`](../.github/scripts/visual-review.ts) decides which changes count:
+
+- A path in `INFRASTRUCTURE_PATHS` or with a name in `INFRASTRUCTURE_FILE_NAMES`. A renamed file
+  counts under its old name too.
+- Any `package.json`, unless only `dependencies`, `devDependencies`, `peerDependencies`,
+  `optionalDependencies`, or `version` changed. An added or removed file compares against `{}`, and
+  a file over 1 MiB or that is not a JSON object always counts.
+- `pnpm-workspace.yaml`, unless only its top-level `catalog:` and `catalogs:` blocks changed.
+- Every pull request with more files than the GitHub API lists (3,000).
 
 A later comparison run on the same commit, such as a re-run, updates the same check run and resets
-it to its new result. The check run's text keeps the commit's history of comparisons and decisions.
-Its external id records the comparison run and the baseline run it was compared against.
-`Visual regression` writes the baseline run id to `baseline.json` in its artefact, and
-`Visual review publish` confirms through the GitHub API that the id names a successful
-`Visual baseline` run on `main` before recording its commit. An unconfirmed baseline is recorded as
-unverified.
+it to its new result. The check run's text keeps the commit's history of comparisons and decisions,
+up to 50 entries and 60,000 characters. Its external id records the comparison run and the baseline
+run it was compared against. `Visual regression` writes the baseline run id to `baseline.json` in
+its artefact. `Visual review publish` confirms through the GitHub API that the id names a
+successful, completed `Visual baseline` run, pushed or dispatched on this repository's `main`,
+before recording its commit.
 
 A new commit starts with no check run, so an approval never carries over to it. To make approval
 block merging, require `visual-review` in branch protection with the visual review App as its
@@ -146,8 +172,8 @@ always compared against the current baseline.
 `visual-regression-diff` artefact as hostile data:
 
 - `visual-review resolve-pr` finds the pull request from the run's head commit through the GitHub
-  API. It publishes only when that commit is still the pull request's head, and never reads a pull
-  request number from the artefact.
+  API. It records a run only when that commit is still the pull request's head and the run is the
+  latest comparison for it, and never reads a pull request number from the artefact.
 - `visual-review prepare` validates `summary.json` and builds the upload from an allow-list: the
   PNGs each validated capture id implies, checked as regular files with a PNG signature. Nothing
   else in the artefact is published, so it cannot add Pages control files such as `_worker.js`.
@@ -156,9 +182,12 @@ always compared against the current baseline.
 - Wrangler runs from a directory that `prepare` creates and that must not exist beforehand, so the
   deployment never includes the repository's `functions/` directory or a file planted beside the
   upload.
+- The App token is created straight after `resolve-pr`. When a later step fails, the last step
+  records `Publishing the report failed`, so a failed download, preparation, or deployment never
+  leaves an earlier result or approval in place.
 - `visual-review review` writes the check run and the comment with a token for the visual review
-  App, limited to check runs and pull requests. It reads the pull request's changed files and the
-  baseline run with the workflow token.
+  App, limited to check runs and pull requests. It reads the pull request's changed files, their
+  `package.json` and `pnpm-workspace.yaml` contents, and the baseline run with the workflow token.
 
 The two jobs that hold the Cloudflare token pin `cloudflare/wrangler-action` to a commit and
 `wranglerVersion` to an exact release. Renovate does not update `wranglerVersion`. Raise it by hand
@@ -168,21 +197,25 @@ A pull request controls its own comparison, so its report and comment describe w
 request chose to publish. A pull request that changes the visual testing infrastructure always needs
 a review for that reason. Review those changes as code, too.
 
+Dependency changes are not infrastructure: a pull request that only changes dependency ranges, the
+catalog, or `pnpm-lock.yaml` can pass with no visual differences. A malicious or broken dependency
+could still alter its own comparison, so review dependency and lockfile changes as code.
+
 Never check out or run pull request code in `Visual review publish`.
 
 ### Configuration
 
 Both workflows skip their job until `VISUAL_REVIEW_PAGES_PROJECT` is set.
 
-| Setting                                            | Where                                      | Value                                                                                                  |
-| -------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| Pages project                                      | Cloudflare                                 | A direct upload project with the production branch `main`                                              |
-| `VISUAL_REVIEW_PAGES_PROJECT`                      | Repository variable                        | The Pages project's name                                                                               |
-| `VISUAL_REVIEW_APP_URL`                            | Repository variable, optional              | The app's origin. Defaults to `https://<project>.pages.dev`                                            |
-| `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` | Secrets of the `visual-review` environment | A token with the account's Cloudflare Pages edit permission, and its account id                        |
-| Visual review App                                  | GitHub                                     | A GitHub App installed on this repository only, with read and write access to checks and pull requests |
-| `VISUAL_REVIEW_APP_CLIENT_ID`                      | Repository variable                        | The App's client id                                                                                    |
-| `VISUAL_REVIEW_APP_PRIVATE_KEY`                    | Secret of the `visual-review` environment  | A private key for the App                                                                              |
+| Setting                                            | Where                                      | Value                                                                                                                              |
+| -------------------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Pages project                                      | Cloudflare                                 | A direct upload project with the production branch `main`                                                                          |
+| `VISUAL_REVIEW_PAGES_PROJECT`                      | Repository variable                        | The Pages project's name                                                                                                           |
+| `VISUAL_REVIEW_APP_URL`                            | Repository variable, optional              | The app's origin. Defaults to `https://<project>.pages.dev`                                                                        |
+| `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` | Secrets of the `visual-review` environment | A token with the account's Cloudflare Pages edit permission, and its account id                                                    |
+| Visual review App                                  | GitHub                                     | A GitHub App installed on this repository only, with read and write access to checks and pull requests, and read access to Actions |
+| `VISUAL_REVIEW_APP_CLIENT_ID`                      | Repository variable                        | The App's client id                                                                                                                |
+| `VISUAL_REVIEW_APP_PRIVATE_KEY`                    | Secret of the `visual-review` environment  | A private key for the App                                                                                                          |
 
 `Visual review publish` records no check run and writes no comment until
 `VISUAL_REVIEW_APP_CLIENT_ID` is set.
