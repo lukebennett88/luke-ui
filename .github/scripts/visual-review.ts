@@ -5,6 +5,8 @@
 //                in a deploy directory it creates itself
 //   review     — record the `visual-review` check run for the commit and update the sticky pull
 //                request comment, both as the visual review GitHub App
+//   sweep      — fail every open pull request's passing check run whose comparison was never
+//                recorded or whose baseline is no longer current
 //
 // The publish workflow runs this file with plain `node` and no install, so it imports Node
 // built-ins only. It runs with secrets beside an artefact produced by pull request code. Treat
@@ -37,6 +39,10 @@ export type PublishedMeta = {
 	generatedAt: string;
 	/** The Visual baseline run the report was compared against, when the artefact names one. */
 	baselineRunId: number | null;
+	/** That run's attempt, which produced the baseline artefact. */
+	baselineRunAttempt: number | null;
+	/** The id of the baseline artefact the comparison downloaded. */
+	baselineArtifactId: number | null;
 };
 
 /** The `summary.json` the viewer app fetches from a pull request's deployment. */
@@ -85,7 +91,8 @@ export type CommentAction =
  *   applies
  * - `report`: the comparison ran and uploaded a report
  * - `skipped`: the `compare` job was skipped, because nothing visual could have changed
- * - `failed`: the run failed or timed out, or `compare` succeeded without uploading a report
+ * - `failed`: the run ended any way other than success or cancellation, or it succeeded without a
+ *   report from a `compare` job that succeeded
  * - `cancelled`: the run was cancelled
  * - `none`: nothing to record, for example because the result is already recorded
  */
@@ -181,6 +188,8 @@ export type LatestComparison = {
 	run_attempt: number;
 	status?: string | null;
 	conclusion?: string | null;
+	/** When the run last changed, which for a completed run is about when it finished. */
+	updated_at?: string | null;
 };
 
 /** The fields of a workflow run that decide whether it is a trustworthy baseline. */
@@ -195,6 +204,12 @@ export type BaselineRun = {
 	conclusion?: string | null;
 	head_repository?: { full_name?: string | null } | null;
 };
+
+/** One entry of a workflow run's artefacts list. */
+export type BaselineArtifact = { id: number; name: string; expired: boolean };
+
+/** The baseline a comparison recorded in `baseline.json`: the exact run attempt and artefact. */
+export type RecordedBaseline = { runId: number; runAttempt: number; artifactId: number };
 
 /** One entry of the pull request files API. */
 export type PullFile = { filename: string; previous_filename?: string; status: string };
@@ -291,7 +306,17 @@ export const MAX_PUBLISHED_FILES = 3_000;
  */
 export const MAX_PUBLISHED_BYTES = 300 * 1024 * 1024;
 
+/**
+ * How long after a comparison finishes the sweep leaves it to the publisher. Past this, a finished
+ * comparison the check run does not record is taken as one whose every publication failed.
+ */
+export const SWEEP_GRACE_MS = 30 * 60_000;
+
+/** The sweep reads at most this many open pull requests. */
+const MAX_SWEPT_PULL_PAGES = 3;
+
 const DIFF_ARTIFACT_NAME = 'visual-regression-diff';
+const BASELINE_ARTIFACT_NAME = 'visual-baseline';
 const SUMMARY_FILE = 'summary.json';
 const BASELINE_FILE = 'baseline.json';
 const MAX_BASELINE_BYTES = 1024;
@@ -406,7 +431,10 @@ export function parseArtifactSummary(raw: string): ArtifactSummary {
 	return { results, unchanged };
 }
 
-export type RunMeta = Omit<PublishedMeta, 'baselineRunId'>;
+export type RunMeta = Omit<
+	PublishedMeta,
+	'baselineArtifactId' | 'baselineRunAttempt' | 'baselineRunId'
+>;
 
 /** Reads run metadata from workflow-provided environment values, never from the artefact. */
 export function parseMeta(
@@ -426,11 +454,12 @@ export function parseMeta(
 }
 
 /**
- * Reads the baseline run id the comparison recorded. The artefact is hostile, so this only proves
- * the shape. `review` checks through the GitHub API that the run really is a baseline from `main`.
- * Runs from before the comparison recorded its baseline have no file, and get `null`.
+ * Reads the baseline run, attempt, and artefact the comparison recorded. The artefact is hostile, so
+ * this only proves the shape. `review` checks through the GitHub API that they name the current
+ * baseline from `main`. A run with no file, or with a file that names only the run, recorded no
+ * exact baseline and gets `null`, which `review` records as unverified.
  */
-export function parseBaselineRunId(raw: string | undefined): number | null {
+export function parseBaseline(raw: string | undefined): RecordedBaseline | null {
 	if (raw === undefined) return null;
 	let data: unknown;
 	try {
@@ -438,11 +467,21 @@ export function parseBaselineRunId(raw: string | undefined): number | null {
 	} catch {
 		throw new Error(`${BASELINE_FILE} is not valid JSON.`);
 	}
-	if (!isRecord(data) || typeof data.runId !== 'number' || !Number.isSafeInteger(data.runId)) {
-		throw new Error(`${BASELINE_FILE} runId must be a positive integer.`);
+	if (!isRecord(data)) throw new Error(`${BASELINE_FILE} must be an object.`);
+	const runId = requireBaselineId(data.runId, 'runId');
+	if (data.runAttempt === undefined || data.artifactId === undefined) return null;
+	return {
+		artifactId: requireBaselineId(data.artifactId, 'artifactId'),
+		runAttempt: requireBaselineId(data.runAttempt, 'runAttempt'),
+		runId,
+	};
+}
+
+function requireBaselineId(value: unknown, label: string): number {
+	if (typeof value !== 'number' || !Number.isSafeInteger(value) || value <= 0) {
+		throw new Error(`${BASELINE_FILE} ${label} must be a positive integer.`);
 	}
-	if (data.runId <= 0) throw new Error(`${BASELINE_FILE} runId must be a positive integer.`);
-	return data.runId;
+	return value;
 }
 
 /**
@@ -480,9 +519,12 @@ export async function prepareSite(options: {
 				root: artifactRoot,
 			})
 		: undefined;
+	const baseline = parseBaseline(rawBaseline?.toString('utf8'));
 	const meta: PublishedMeta = {
 		...options.meta,
-		baselineRunId: parseBaselineRunId(rawBaseline?.toString('utf8')),
+		baselineArtifactId: baseline?.artifactId ?? null,
+		baselineRunAttempt: baseline?.runAttempt ?? null,
+		baselineRunId: baseline?.runId ?? null,
 	};
 
 	const diffRoot = path.join(artifactRoot, DIFF_DIR);
@@ -547,7 +589,9 @@ export async function prepareSite(options: {
 /**
  * Decides what a Visual regression run means for review. A successful run skipped comparing only
  * when its `compare` job was skipped. A `compare` job that succeeded without uploading a report did
- * not finish, so a missing artefact alone never passes the check.
+ * not finish, so a missing artefact alone never passes the check. Every other conclusion, including
+ * `neutral`, `skipped`, `stale`, a missing one, and any GitHub adds later, is a run without a
+ * verified comparison, so it fails rather than leaving an earlier result in place.
  */
 export function decideRunOutcome(options: {
 	status: string | null | undefined;
@@ -555,20 +599,17 @@ export function decideRunOutcome(options: {
 	/** The conclusion of the run attempt's `compare` job, or `undefined` when it has none. */
 	compareConclusion: string | null | undefined;
 	hasArtifact: boolean;
-}): RunOutcome {
+}): Exclude<RunOutcome, 'none'> {
 	if (options.status !== 'completed') return 'pending';
 	switch (options.conclusion) {
 		case 'success':
 			if (options.compareConclusion === 'skipped') return 'skipped';
 			if (options.compareConclusion === 'success' && options.hasArtifact) return 'report';
 			return 'failed';
-		case 'failure':
-		case 'timed_out':
-			return 'failed';
 		case 'cancelled':
 			return 'cancelled';
 		default:
-			return 'none';
+			return 'failed';
 	}
 }
 
@@ -633,14 +674,7 @@ export function planReconcile(options: {
 	if (latest === undefined) {
 		return { outcome: 'none', reason: 'The commit has no Visual regression pull request run.' };
 	}
-	const runId = latest.id;
-	const runAttempt = latest.run_attempt;
-	if (!Number.isSafeInteger(runId) || runId <= 0) {
-		throw new Error('GitHub returned an invalid run id.');
-	}
-	if (!Number.isSafeInteger(runAttempt) || runAttempt <= 0) {
-		throw new Error('GitHub returned an invalid run attempt.');
-	}
+	const { runId, runAttempt } = requireRunIdentity(latest);
 
 	const outcome = decideRunOutcome({
 		compareConclusion: options.compareConclusion,
@@ -648,12 +682,6 @@ export function planReconcile(options: {
 		hasArtifact: options.hasArtifact,
 		status: latest.status,
 	});
-	if (outcome === 'none') {
-		return {
-			outcome,
-			reason: `Run ${runId} attempt ${runAttempt} concluded ${JSON.stringify(latest.conclusion)}.`,
-		};
-	}
 	if (isAlreadyRecorded({ outcome, recorded: options.recorded, runAttempt, runId })) {
 		return {
 			outcome: 'none',
@@ -661,6 +689,115 @@ export function planReconcile(options: {
 		};
 	}
 	return { outcome, runAttempt, runId };
+}
+
+/** The comparison's run id and attempt, proven to be positive integers before they are recorded. */
+function requireRunIdentity(latest: LatestComparison): { runId: number; runAttempt: number } {
+	if (!Number.isSafeInteger(latest.id) || latest.id <= 0) {
+		throw new Error('GitHub returned an invalid run id.');
+	}
+	if (!Number.isSafeInteger(latest.run_attempt) || latest.run_attempt <= 0) {
+		throw new Error('GitHub returned an invalid run attempt.');
+	}
+	return { runAttempt: latest.run_attempt, runId: latest.id };
+}
+
+export type SweepPlan =
+	| { action: 'none'; reason: string }
+	| {
+			action: 'write';
+			state: CheckState;
+			/** Present when `state.kind` is `failed`. */
+			failure?: FailureReason;
+			/** Says why the sweep wrote, in place of the publisher's own history entry. */
+			historyEntry?: string;
+	  };
+
+/**
+ * What the sweep writes for one passing check run. The sweep only invalidates: it never records a
+ * result that can pass. It catches what the publisher cannot, because the publisher did not run or
+ * every run of it failed:
+ *
+ * - the latest comparison is not the one recorded, so the recorded result no longer applies. While
+ *   it runs, it is recorded as pending. Once it has finished for {@link SWEEP_GRACE_MS} without being
+ *   recorded, every publication of it is taken to have failed.
+ * - the recorded baseline is no longer the newest one, because `Visual baseline` was dispatched or
+ *   re-run without `main` changing.
+ */
+export function planSweep(options: {
+	state: Partial<CheckState>;
+	latest: LatestComparison | undefined;
+	newestBaseline: BaselineRun | undefined;
+	now: Date;
+}): SweepPlan {
+	const { state, latest } = options;
+	// Every other kind already blocks merging.
+	if (state.kind !== 'review' && state.kind !== 'clean') {
+		return { action: 'none', reason: `The check run records ${JSON.stringify(state.kind)}.` };
+	}
+	if (latest === undefined) {
+		return { action: 'none', reason: 'The commit has no Visual regression pull request run.' };
+	}
+	const { runId, runAttempt } = requireRunIdentity(latest);
+	const run = `Comparison run ${runId} (attempt ${runAttempt})`;
+	const unrecorded = (kind: 'pending' | 'failed'): CheckState => ({
+		baselineRunAttempt: null,
+		baselineRunId: null,
+		baselineSha: null,
+		kind,
+		reasons: [],
+		runAttempt,
+		runId,
+		v: 1,
+	});
+
+	if (runId !== state.runId || runAttempt !== state.runAttempt) {
+		if (latest.status !== 'completed') {
+			return { action: 'write', state: unrecorded('pending') };
+		}
+		// A missing or unreadable time counts as past the grace period, so it fails closed.
+		const finishedAt = Date.parse(latest.updated_at ?? '');
+		if (Number.isFinite(finishedAt) && options.now.getTime() - finishedAt < SWEEP_GRACE_MS) {
+			return {
+				action: 'none',
+				reason: `${run} finished less than ${SWEEP_GRACE_MS / 60_000} minutes ago, so the publisher may still be recording it.`,
+			};
+		}
+		return {
+			action: 'write',
+			failure: 'publish-failed',
+			historyEntry: `${run} was not recorded`,
+			state: unrecorded('failed'),
+		};
+	}
+
+	// A clean result with no baseline is a skipped comparison, which compared nothing.
+	const baselineRunId = state.baselineRunId ?? null;
+	const baselineRunAttempt = state.baselineRunAttempt ?? null;
+	if (
+		baselineRunId !== null &&
+		!isCurrentBaseline(options.newestBaseline, baselineRunId, baselineRunAttempt)
+	) {
+		return {
+			action: 'write',
+			failure: 'outdated-baseline',
+			historyEntry: `Baseline run ${baselineRunId} (attempt ${baselineRunAttempt ?? '?'}) is no longer current`,
+			state: {
+				baselineRunAttempt,
+				baselineRunId,
+				baselineSha: state.baselineSha ?? null,
+				kind: 'failed',
+				reasons: (state.reasons ?? []).filter((reason) => {
+					return reason === 'visual' || reason === 'infrastructure';
+				}),
+				runAttempt,
+				runId,
+				v: 1,
+			},
+		};
+	}
+
+	return { action: 'none', reason: `${run} is recorded against the current baseline.` };
 }
 
 /**
@@ -690,6 +827,42 @@ export function isCurrentBaseline(
 		newest.id === baselineRunId &&
 		newest.run_attempt === baselineRunAttempt
 	);
+}
+
+/**
+ * Checks the baseline a report recorded against the GitHub API at record time. `baselineSha` is
+ * `null` when the baseline is unverified, and `baselineCurrent` is false when it was verified but is
+ * no longer the one to compare against, as {@link decideReview} expects:
+ *
+ * - verified: the run is a successful `Visual baseline` run of `main`
+ * - exact: the run is still at the recorded attempt, so no re-run replaced it, and its one unexpired
+ *   baseline artefact is the one the comparison downloaded
+ * - current: that run and attempt is the newest successful baseline
+ */
+export function checkRecordedBaseline(options: {
+	recorded: RecordedBaseline | null;
+	/** The recorded run from the API, or `undefined` when it could not be read. */
+	run: BaselineRun | undefined;
+	/** The recorded run's `visual-baseline` artefacts, or `undefined` when they could not be read. */
+	artifacts: ReadonlyArray<BaselineArtifact> | undefined;
+	newest: BaselineRun | undefined;
+	repository: string;
+}): { baselineSha: string | null; baselineCurrent: boolean } {
+	const { recorded, run } = options;
+	const unverified = { baselineCurrent: false, baselineSha: null };
+	if (recorded === null || run === undefined) return unverified;
+	const sha = verifiedBaselineSha(run, options.repository);
+	if (sha === null) return unverified;
+	// A re-run replaced the artefact the comparison used, so the baseline moved on.
+	if (run.run_attempt !== recorded.runAttempt) return { baselineCurrent: false, baselineSha: sha };
+	const usable = (options.artifacts ?? []).filter((artifact) => {
+		return artifact.name === BASELINE_ARTIFACT_NAME && !artifact.expired;
+	});
+	if (usable.length !== 1 || usable[0]?.id !== recorded.artifactId) return unverified;
+	return {
+		baselineCurrent: isCurrentBaseline(options.newest, recorded.runId, recorded.runAttempt),
+		baselineSha: sha,
+	};
 }
 
 /**
@@ -984,6 +1157,8 @@ export function checkRunPayload(options: {
 	previousText: string | null | undefined;
 	/** Whether the commit already has this App's check run, which the payload then updates. */
 	updatesExisting: boolean;
+	/** The history entry after its timestamp, when the default would not say why it was written. */
+	historyEntry?: string;
 	now: Date;
 }): CheckRunPayload {
 	const { state, summary, infrastructureFiles, now } = options;
@@ -1003,7 +1178,10 @@ export function checkRunPayload(options: {
 			output: {
 				// Only the status, so no earlier report table describes a comparison still running.
 				summary: `**Status:** ${status}\n`,
-				text: prependHistory(options.previousText, `${formatTimestamp(now)} · ${run} started`),
+				text: prependHistory(
+					options.previousText,
+					`${formatTimestamp(now)} · ${options.historyEntry ?? `${run} started`}`,
+				),
 				title: status,
 			},
 		};
@@ -1054,7 +1232,7 @@ export function checkRunPayload(options: {
 		);
 	}
 
-	const entry = `${formatTimestamp(now)} · ${run}: ${status.toLowerCase()}`;
+	const entry = `${formatTimestamp(now)} · ${options.historyEntry ?? `${run}: ${status.toLowerCase()}`}`;
 
 	return {
 		completed_at: now.toISOString(),
@@ -1448,6 +1626,29 @@ async function findAppCheckRun(options: {
 	return findOwnCheckRun(checkRuns, appSlug);
 }
 
+/**
+ * The latest comparison for a commit: the newest `Visual regression` pull request run for it. This
+ * is the one source of truth for freshness that the review backend shares. A re-run keeps the run
+ * id and raises `run_attempt` as soon as it is requested.
+ */
+async function fetchLatestComparison(options: {
+	token: string;
+	repository: string;
+	headSha: string;
+}): Promise<LatestComparison | undefined> {
+	const { token, repository, headSha } = options;
+	const runsUrl = new URL(
+		`https://api.github.com/repos/${repository}/actions/workflows/${COMPARISON_WORKFLOW_FILE}/runs`,
+	);
+	runsUrl.searchParams.set('head_sha', headSha);
+	runsUrl.searchParams.set('event', 'pull_request');
+	runsUrl.searchParams.set('per_page', '1');
+	const { workflow_runs: latestRuns } = await githubRequest<{
+		workflow_runs: Array<LatestComparison>;
+	}>({ token, url: runsUrl });
+	return latestRuns[0];
+}
+
 /** The event's head, read from the workflow environment. */
 function eventHead(): { run: WorkflowRunHead; headBranch: string } {
 	return {
@@ -1492,18 +1693,7 @@ async function resolvePr() {
 		return;
 	}
 
-	// The latest comparison is the one source of truth for freshness that the review backend
-	// shares. A re-run keeps the run id and raises `run_attempt` as soon as it is requested.
-	const runsUrl = new URL(
-		`https://api.github.com/repos/${repository}/actions/workflows/${COMPARISON_WORKFLOW_FILE}/runs`,
-	);
-	runsUrl.searchParams.set('head_sha', run.headSha);
-	runsUrl.searchParams.set('event', 'pull_request');
-	runsUrl.searchParams.set('per_page', '1');
-	const { workflow_runs: latestRuns } = await githubRequest<{
-		workflow_runs: Array<LatestComparison>;
-	}>({ token, url: runsUrl });
-	const latest = latestRuns[0];
+	const latest = await fetchLatestComparison({ headSha: run.headSha, repository, token });
 
 	let compareConclusion: string | null | undefined;
 	let hasArtifact = false;
@@ -1670,27 +1860,29 @@ async function pullInfrastructureChanges(options: {
 }
 
 /**
- * Confirms through the GitHub API that the run the artefact names is a successful Visual baseline
- * run of this repository's `main`, and returns its commit and attempt. Anything else is
- * unverified.
+ * Reads the baseline run the report names and its `visual-baseline` artefacts. Either one that
+ * cannot be read is `undefined`, which {@link checkRecordedBaseline} treats as unverified.
  */
-async function verifyBaseline(token: string, repository: string, runId: number) {
-	try {
-		const run = await githubRequest<BaselineRun>({
-			token,
-			url: `https://api.github.com/repos/${repository}/actions/runs/${runId}`,
-		});
-		const sha = verifiedBaselineSha(run, repository);
-		const attempt = run.run_attempt;
-		if (sha !== null && Number.isSafeInteger(attempt) && attempt !== undefined && attempt > 0) {
-			return { attempt, sha };
+async function readRecordedBaseline(token: string, repository: string, runId: number) {
+	const read = async <T>(url: URL | string): Promise<T | undefined> => {
+		try {
+			return await githubRequest<T>({ token, url });
+		} catch (error) {
+			const reason = error instanceof Error ? error.message : String(error);
+			info(`Could not read baseline run ${runId}: ${reason}`);
+			return undefined;
 		}
-	} catch (error) {
-		const reason = error instanceof Error ? error.message : String(error);
-		info(`Could not read baseline run ${runId}: ${reason}`);
-	}
-	info(`Baseline run ${runId} is not a successful Visual baseline run of main.`);
-	return null;
+	};
+	const artifactsUrl = new URL(
+		`https://api.github.com/repos/${repository}/actions/runs/${runId}/artifacts`,
+	);
+	artifactsUrl.searchParams.set('name', BASELINE_ARTIFACT_NAME);
+	artifactsUrl.searchParams.set('per_page', String(API_PAGE_SIZE));
+	const [run, listed] = await Promise.all([
+		read<BaselineRun>(`https://api.github.com/repos/${repository}/actions/runs/${runId}`),
+		read<{ artifacts: Array<BaselineArtifact> }>(artifactsUrl),
+	]);
+	return { artifacts: listed?.artifacts, run };
 }
 
 /**
@@ -1709,6 +1901,15 @@ async function fetchNewestBaseline(token: string, repository: string) {
 		url,
 	});
 	return newestBaselineRun(runs, repository);
+}
+
+/** The exact baseline a prepared summary records, or `null` when it names none. */
+function baselineOf(meta: PublishedMeta): RecordedBaseline | null {
+	const { baselineArtifactId, baselineRunAttempt, baselineRunId } = meta;
+	if (baselineRunId === null || baselineRunAttempt === null || baselineArtifactId === null) {
+		return null;
+	}
+	return { artifactId: baselineArtifactId, runAttempt: baselineRunAttempt, runId: baselineRunId };
 }
 
 const REVIEW_OUTCOMES: ReadonlyArray<string> = [
@@ -1815,19 +2016,17 @@ async function review() {
 			? await pullInfrastructureChanges({ headSha, pullRequest, repository, token: githubToken })
 			: [];
 
-	const baselineRunId = summary?.meta.baselineRunId ?? null;
-	const baseline =
-		baselineRunId === null ? null : await verifyBaseline(githubToken, repository, baselineRunId);
-	const baselineSha = baseline?.sha ?? null;
-	const baselineRunAttempt = baseline?.attempt ?? null;
+	const recordedBaseline = summary === undefined ? null : baselineOf(summary.meta);
 	// Checked at record time: a newer baseline may have finished while the comparison ran.
-	const baselineCurrent =
-		baseline !== null &&
-		isCurrentBaseline(
-			await fetchNewestBaseline(githubToken, repository),
-			baselineRunId,
-			baselineRunAttempt,
-		);
+	const { baselineCurrent, baselineSha } =
+		recordedBaseline === null
+			? { baselineCurrent: false, baselineSha: null }
+			: checkRecordedBaseline({
+					...(await readRecordedBaseline(githubToken, repository, recordedBaseline.runId)),
+					newest: await fetchNewestBaseline(githubToken, repository),
+					recorded: recordedBaseline,
+					repository,
+				});
 	const { failure, kind, reasons } = decideReview({
 		baselineCurrent,
 		baselineSha,
@@ -1835,9 +2034,10 @@ async function review() {
 		infrastructureFiles,
 		outcome,
 	});
+	// The attempt the comparison recorded, which `checkRecordedBaseline` compared with the API's.
 	const state: CheckState = {
-		baselineRunAttempt,
-		baselineRunId,
+		baselineRunAttempt: recordedBaseline?.runAttempt ?? null,
+		baselineRunId: recordedBaseline?.runId ?? null,
 		baselineSha,
 		kind,
 		reasons,
@@ -1932,6 +2132,131 @@ async function review() {
 	}
 }
 
+/** Open pull requests, newest first, up to {@link MAX_SWEPT_PULL_PAGES} pages. */
+async function listOpenPulls(token: string, repository: string) {
+	const pulls: Array<PullRequestCandidate> = [];
+	for (let page = 1; page <= MAX_SWEPT_PULL_PAGES; page += 1) {
+		const url = new URL(`https://api.github.com/repos/${repository}/pulls`);
+		url.searchParams.set('state', 'open');
+		url.searchParams.set('per_page', String(API_PAGE_SIZE));
+		url.searchParams.set('page', String(page));
+		// Sequential: each page decides whether another one exists.
+		// oxlint-disable-next-line no-await-in-loop
+		const batch = await githubRequest<Array<PullRequestCandidate>>({ token, url });
+		pulls.push(...batch);
+		if (batch.length < API_PAGE_SIZE) break;
+	}
+	return pulls;
+}
+
+/** Applies {@link planSweep} to one open pull request's check run. */
+async function sweepPull(options: {
+	githubToken: string;
+	appToken: string;
+	appSlug: string;
+	appUrl: string;
+	repository: string;
+	newestBaseline: BaselineRun | undefined;
+	pull: PullRequestCandidate;
+}) {
+	const { githubToken, appToken, appSlug, repository, pull } = options;
+	const headSha = pull.head.sha;
+	if (!SHA_PATTERN.test(headSha)) throw new Error('GitHub returned an invalid head SHA.');
+	if (!Number.isSafeInteger(pull.number) || pull.number <= 0) {
+		throw new Error('GitHub returned an invalid pull request number.');
+	}
+
+	const existing = await findAppCheckRun({ appSlug, appToken, headSha, repository });
+	const state = recordedState(existing);
+	if (existing === undefined || state === undefined) return;
+	// Only a check run that passes or awaits a decision can carry a stale result.
+	if (state.kind !== 'review' && state.kind !== 'clean') return;
+
+	const now = new Date();
+	const plan = planSweep({
+		latest: await fetchLatestComparison({ headSha, repository, token: githubToken }),
+		newestBaseline: options.newestBaseline,
+		now,
+		state,
+	});
+	if (plan.action === 'none') {
+		info(`#${pull.number}: ${plan.reason}`);
+		return;
+	}
+
+	const payload = checkRunPayload({
+		appUrl: options.appUrl,
+		failure: plan.failure,
+		headSha,
+		historyEntry: plan.historyEntry,
+		infrastructureFiles: [],
+		now,
+		previousText: existing.output?.text,
+		pullRequest: pull.number,
+		repository,
+		state: plan.state,
+		summary: undefined,
+		updatesExisting: true,
+	});
+	const { head_sha: _headSha, ...update } = payload;
+	await githubRequest({
+		body: update,
+		method: 'PATCH',
+		token: appToken,
+		url: `https://api.github.com/repos/${repository}/check-runs/${existing.id}`,
+	});
+	info(`#${pull.number}: updated ${CHECK_NAME} check run ${existing.id}: ${payload.output.title}.`);
+
+	// Only the status changes, so the comment keeps describing the report it links to.
+	const comments = await listComments(appToken, repository, pull.number);
+	const sticky = findStickyComment(comments, `${appSlug}[bot]`);
+	const body =
+		sticky === undefined
+			? undefined
+			: replaceCommentStatus(sticky.body ?? '', statusText(plan.state.kind, plan.failure));
+	if (sticky === undefined || body === undefined) return;
+	await githubRequest({
+		body: { body },
+		method: 'PATCH',
+		token: appToken,
+		url: `https://api.github.com/repos/${repository}/issues/comments/${sticky.id}`,
+	});
+	info(`#${pull.number}: updated visual review comment ${sticky.id}.`);
+}
+
+/**
+ * Fails each open pull request's passing check run that no longer describes its latest comparison
+ * against the current baseline. It never writes a result that can pass, so a race with the publisher
+ * can only fail a check, which a re-run fixes.
+ */
+async function sweep() {
+	const githubToken = requireEnv('GITHUB_TOKEN');
+	const appToken = requireEnv('APP_TOKEN');
+	const appSlug = requireEnv('APP_SLUG');
+	if (!APP_SLUG_PATTERN.test(appSlug)) fail('APP_SLUG is not a GitHub App slug.');
+	const repository = requireRepository();
+	const appUrl = requireEnv('APP_URL');
+
+	// Read once, before any write. If it fails, the sweep fails without writing.
+	const newestBaseline = await fetchNewestBaseline(githubToken, repository);
+	const pulls = await listOpenPulls(githubToken, repository);
+
+	let failures = 0;
+	for (const pull of pulls) {
+		try {
+			// Sequential: a few requests per pull request stay well inside the rate limits.
+			// oxlint-disable-next-line no-await-in-loop
+			await sweepPull({ appSlug, appToken, appUrl, githubToken, newestBaseline, pull, repository });
+		} catch (error) {
+			failures += 1;
+			const reason = error instanceof Error ? error.message : String(error);
+			process.stderr.write(`#${pull.number}: ${reason}\n`);
+		}
+	}
+	info(`Swept ${pulls.length} open pull request(s).`);
+	if (failures > 0) fail(`${failures} pull request(s) could not be swept.`);
+}
+
 const entry = process.argv[1];
 const isCli = entry !== undefined && import.meta.url === pathToFileURL(path.resolve(entry)).href;
 
@@ -1949,8 +2274,11 @@ if (isCli) {
 			case 'review':
 				await review();
 				break;
+			case 'sweep':
+				await sweep();
+				break;
 			case undefined:
-				fail('Usage: visual-review <resolve-pr|prepare|review>');
+				fail('Usage: visual-review <resolve-pr|prepare|review|sweep>');
 				break;
 			default:
 				fail(`Unknown command: ${command}`);

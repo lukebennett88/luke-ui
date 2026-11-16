@@ -3,6 +3,7 @@ import path from 'node:path';
 import { mkdir, mkdtemp, open, readdir, readFile, symlink, writeFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 import type {
+	BaselineArtifact,
 	CheckState,
 	FileContent,
 	FileReader,
@@ -18,6 +19,7 @@ import type {
 import {
 	canRecordFailedPublication,
 	CHECK_NAME,
+	checkRecordedBaseline,
 	checkRunPayload,
 	COMMENT_MARKER,
 	COMMENT_STATUS_END,
@@ -43,14 +45,16 @@ import {
 	MAX_SUMMARY_CHARS,
 	newestBaselineRun,
 	parseArtifactSummary,
-	parseBaselineRunId,
+	parseBaseline,
 	parseMeta,
 	planReconcile,
+	planSweep,
 	prepareSite,
 	prependHistory,
 	recordedState,
 	replaceCommentStatus,
 	stripCatalogBlocks,
+	SWEEP_GRACE_MS,
 	UNLISTED_FILES_ENTRY,
 	verifiedBaselineSha,
 } from './visual-review.js';
@@ -66,7 +70,12 @@ const runMeta: RunMeta = {
 	runId: 345,
 };
 
-const meta: PublishedMeta = { ...runMeta, baselineRunId: null };
+const meta: PublishedMeta = {
+	...runMeta,
+	baselineArtifactId: null,
+	baselineRunAttempt: null,
+	baselineRunId: null,
+};
 
 const artifactCounts = { added: 0, changed: 0, removed: 0, unchanged: 0 };
 
@@ -587,27 +596,56 @@ function publishedSummary(results: Array<PublishedResult>, unchanged = 30): Publ
 	return { counts, meta, results, schemaVersion: 1 };
 }
 
-test('records the baseline run the comparison names', async () => {
+test('records the baseline run, attempt, and artefact the comparison names', async () => {
 	const { artifactDir, outDir } = await createArtifact(artifactSummary([]), {
-		'baseline.json': '{"runId":678}\n',
+		'baseline.json': '{"runId":678,"runAttempt":2,"artifactId":9001}\n',
 	});
 
 	const summary = await prepareSite({ artifactDir, meta: runMeta, outDir });
 
-	expect(summary.meta.baselineRunId).toBe(678);
+	expect(summary.meta).toMatchObject({
+		baselineArtifactId: 9001,
+		baselineRunAttempt: 2,
+		baselineRunId: 678,
+	});
 });
+
+for (const raw of [
+	'{"runId":678}',
+	'{"runId":678,"runAttempt":2}',
+	'{"runId":678,"artifactId":9}',
+]) {
+	test(`treats the baseline file ${raw}, which names no exact artefact, as unverified`, () => {
+		expect(parseBaseline(raw)).toBeNull();
+	});
+}
 
 test('records no baseline for a run from before comparisons named one', async () => {
 	const { artifactDir, outDir } = await createArtifact(artifactSummary([]));
 
 	const summary = await prepareSite({ artifactDir, meta: runMeta, outDir });
 
-	expect(summary.meta.baselineRunId).toBeNull();
+	expect(summary.meta).toMatchObject({
+		baselineArtifactId: null,
+		baselineRunAttempt: null,
+		baselineRunId: null,
+	});
 });
 
-for (const raw of ['', 'nope', '[]', '{}', '{"runId":0}', '{"runId":"7"}', '{"runId":1.5}']) {
+for (const raw of [
+	'',
+	'nope',
+	'[]',
+	'{}',
+	'{"runId":0}',
+	'{"runId":"7"}',
+	'{"runId":1.5}',
+	'{"runId":7,"runAttempt":0,"artifactId":9}',
+	'{"runId":7,"runAttempt":1,"artifactId":"9"}',
+	'{"runId":7,"runAttempt":null,"artifactId":9}',
+]) {
 	test(`rejects the baseline file ${JSON.stringify(raw)}`, () => {
-		expect(() => parseBaselineRunId(raw)).toThrow(/baseline\.json/);
+		expect(() => parseBaseline(raw)).toThrow(/baseline\.json/);
 	});
 }
 
@@ -637,16 +675,33 @@ test('treats a run that has not finished as pending', () => {
 	}
 });
 
-test('maps a finished run to what it means for review', () => {
+test('records a successful run with a report, and a cancelled run as cancelled', () => {
 	expect(completedRun()).toBe('report');
-	expect(completedRun({ conclusion: 'failure', compareConclusion: 'failure' })).toBe('failed');
-	expect(completedRun({ conclusion: 'timed_out', compareConclusion: null })).toBe('failed');
 	expect(completedRun({ conclusion: 'cancelled', compareConclusion: 'cancelled' })).toBe(
 		'cancelled',
 	);
-	expect(completedRun({ conclusion: 'action_required' })).toBe('none');
-	expect(completedRun({ conclusion: null })).toBe('none');
 });
+
+// Each of these finished without a verified comparison, so none may leave an earlier result.
+for (const conclusion of [
+	'failure',
+	'timed_out',
+	'neutral',
+	'skipped',
+	'stale',
+	'action_required',
+	'startup_failure',
+	null,
+	undefined,
+	'something_new',
+]) {
+	test(`fails a finished run that concluded ${JSON.stringify(conclusion)}`, () => {
+		expect(completedRun({ conclusion })).toBe('failed');
+		expect(completedRun({ compareConclusion: 'skipped', conclusion, hasArtifact: false })).toBe(
+			'failed',
+		);
+	});
+}
 
 test('skips only when the compare job was skipped', () => {
 	expect(completedRun({ compareConclusion: 'skipped', hasArtifact: false })).toBe('skipped');
@@ -1082,6 +1137,69 @@ test('treats a baseline as current only at the newest run and attempt', () => {
 	expect(isCurrentBaseline(undefined, 800, 2)).toBe(false);
 });
 
+const recordedBaseline = { artifactId: 9001, runAttempt: 2, runId: 800 };
+const baselineArtifact = (overrides: Partial<BaselineArtifact> = {}): BaselineArtifact => ({
+	expired: false,
+	id: 9001,
+	name: 'visual-baseline',
+	...overrides,
+});
+
+const baselineCheck = (overrides: Partial<Parameters<typeof checkRecordedBaseline>[0]> = {}) => {
+	return checkRecordedBaseline({
+		artifacts: [baselineArtifact()],
+		newest: { ...baselineRun, id: 800, run_attempt: 2 },
+		recorded: recordedBaseline,
+		repository: 'luke/luke-ui',
+		run: { ...baselineRun, id: 800, run_attempt: 2 },
+		...overrides,
+	});
+};
+
+test('accepts the exact baseline the comparison recorded while it is the newest', () => {
+	expect(baselineCheck()).toEqual({ baselineCurrent: true, baselineSha: BASELINE_SHA });
+	// An expired copy beside the one artefact changes nothing.
+	expect(
+		baselineCheck({ artifacts: [baselineArtifact({ expired: true, id: 1 }), baselineArtifact()] }),
+	).toEqual({ baselineCurrent: true, baselineSha: BASELINE_SHA });
+});
+
+test('treats a re-run of the recorded baseline as out of date', () => {
+	// The re-run replaced the artefact, so the recorded one no longer exists either.
+	const rerun = { ...baselineRun, id: 800, run_attempt: 3 };
+	expect(
+		baselineCheck({ artifacts: [baselineArtifact({ id: 9002 })], newest: rerun, run: rerun }),
+	).toEqual({ baselineCurrent: false, baselineSha: BASELINE_SHA });
+});
+
+test('treats a newer baseline run as out of date', () => {
+	expect(baselineCheck({ newest: { ...baselineRun, id: 900, run_attempt: 1 } })).toEqual({
+		baselineCurrent: false,
+		baselineSha: BASELINE_SHA,
+	});
+});
+
+for (const [name, artifacts] of [
+	['another artefact', [baselineArtifact({ id: 9002 })]],
+	['no artefact', []],
+	['only an expired artefact', [baselineArtifact({ expired: true })]],
+	['two artefacts', [baselineArtifact(), baselineArtifact({ id: 9002 })]],
+	['unreadable artefacts', undefined],
+] as const) {
+	test(`does not verify a recorded baseline whose run has ${name}`, () => {
+		expect(baselineCheck({ artifacts })).toEqual({ baselineCurrent: false, baselineSha: null });
+	});
+}
+
+test('does not verify a missing, unreadable, or untrusted baseline run', () => {
+	const unverified = { baselineCurrent: false, baselineSha: null };
+	expect(baselineCheck({ recorded: null })).toEqual(unverified);
+	expect(baselineCheck({ run: undefined })).toEqual(unverified);
+	expect(
+		baselineCheck({ run: { ...baselineRun, event: 'pull_request', id: 800, run_attempt: 2 } }),
+	).toEqual(unverified);
+});
+
 for (const [outcome, failure] of [
 	['failed', 'unfinished'],
 	['cancelled', 'cancelled'],
@@ -1350,6 +1468,192 @@ test('cuts one oversized history entry to fit', () => {
 
 	expect(history.length).toBeLessThanOrEqual(MAX_HISTORY_CHARS);
 	expect(history.startsWith('### History\n\n- x')).toBe(true);
+});
+
+const currentBaseline = { ...baselineRun, id: 678, run_attempt: 1 };
+
+const sweepPlan = (options: Partial<Parameters<typeof planSweep>[0]> = {}) => {
+	return planSweep({
+		latest: latestRun(),
+		newestBaseline: currentBaseline,
+		now: NOW,
+		state: checkState(),
+		...options,
+	});
+};
+
+/** A comparison that finished `ago` milliseconds before {@link NOW}. */
+const finishedRun = (ago: number, overrides: Partial<LatestComparison> = {}) => {
+	return latestRun({
+		run_attempt: 3,
+		updated_at: new Date(NOW.getTime() - ago).toISOString(),
+		...overrides,
+	});
+};
+
+test('leaves a recorded result against the current baseline alone', () => {
+	for (const kind of ['review', 'clean'] as const) {
+		expect(sweepPlan({ state: checkState({ kind }) }).action).toBe('none');
+	}
+});
+
+for (const kind of ['pending', 'failed', undefined] as const) {
+	test(`never sweeps a check run that records ${JSON.stringify(kind)}`, () => {
+		const swept = sweepPlan({
+			latest: finishedRun(SWEEP_GRACE_MS),
+			newestBaseline: undefined,
+			state: checkState({ kind }),
+		});
+		expect(swept.action).toBe('none');
+	});
+}
+
+test('leaves a commit with no comparison alone', () => {
+	expect(sweepPlan({ latest: undefined }).action).toBe('none');
+});
+
+test('records a newer comparison that is still running as pending', () => {
+	const swept = sweepPlan({
+		latest: latestRun({ conclusion: null, run_attempt: 3, status: 'queued' }),
+	});
+
+	expect(swept).toEqual({
+		action: 'write',
+		state: checkState({
+			baselineRunAttempt: null,
+			baselineRunId: null,
+			baselineSha: null,
+			kind: 'pending',
+			reasons: [],
+			runAttempt: 3,
+		}),
+	});
+});
+
+test('leaves a newer finished comparison to the publisher for the grace period', () => {
+	expect(sweepPlan({ latest: finishedRun(SWEEP_GRACE_MS - 1) }).action).toBe('none');
+});
+
+for (const [name, latest] of [
+	['at the end of the grace period', finishedRun(SWEEP_GRACE_MS)],
+	['long after it', finishedRun(SWEEP_GRACE_MS * 10)],
+	['with no finish time', finishedRun(0, { updated_at: null })],
+	['in a newer run', finishedRun(SWEEP_GRACE_MS, { id: 999, run_attempt: 1 })],
+] as const) {
+	test(`fails a newer finished comparison that was never recorded, ${name}`, () => {
+		const swept = sweepPlan({ latest });
+
+		expect(swept).toEqual({
+			action: 'write',
+			failure: 'publish-failed',
+			historyEntry: `Comparison run ${latest.id} (attempt ${latest.run_attempt}) was not recorded`,
+			state: checkState({
+				baselineRunAttempt: null,
+				baselineRunId: null,
+				baselineSha: null,
+				kind: 'failed',
+				reasons: [],
+				runAttempt: latest.run_attempt,
+				runId: latest.id,
+			}),
+		});
+	});
+}
+
+for (const [name, newestBaseline] of [
+	['a newer baseline run', { ...baselineRun, id: 700, run_attempt: 1 }],
+	['a re-run of the recorded baseline', { ...baselineRun, id: 678, run_attempt: 2 }],
+	['no successful baseline at all', undefined],
+] as const) {
+	test(`fails a recorded result after ${name}, keeping what it recorded`, () => {
+		const state = checkState({ kind: 'clean', reasons: [] });
+		const swept = sweepPlan({ newestBaseline, state });
+
+		expect(swept).toEqual({
+			action: 'write',
+			failure: 'outdated-baseline',
+			historyEntry: 'Baseline run 678 (attempt 1) is no longer current',
+			state: { ...state, kind: 'failed' },
+		});
+	});
+}
+
+test('keeps the reasons of an outdated result that needed review', () => {
+	const state = checkState({ reasons: ['visual', 'infrastructure'] });
+	const swept = sweepPlan({ newestBaseline: undefined, state });
+
+	expect(swept.action === 'write' && swept.state.reasons).toEqual(['visual', 'infrastructure']);
+});
+
+test('never fails a skipped comparison for its baseline, because it has none', () => {
+	const skipped = checkState({
+		baselineRunAttempt: null,
+		baselineRunId: null,
+		baselineSha: null,
+		kind: 'clean',
+		reasons: [],
+	});
+
+	expect(sweepPlan({ newestBaseline: undefined, state: skipped }).action).toBe('none');
+});
+
+test('keeps the check run history when the sweep fails a result', () => {
+	const previousText = [
+		'### History',
+		'',
+		'- 2026-11-16 03:40 UTC · Approved by @luke',
+		'- 2026-11-16 03:22 UTC · Comparison run 345 (attempt 2): needs review',
+		'',
+	].join('\n');
+	const swept = sweepPlan({ newestBaseline: undefined });
+	if (swept.action !== 'write') throw new Error('Expected the sweep to write.');
+
+	const payload = payloadFor(swept.state, {
+		failure: swept.failure,
+		historyEntry: swept.historyEntry,
+		previousText,
+		summary: undefined,
+		updatesExisting: true,
+	});
+
+	expect(payload).toMatchObject({ conclusion: 'failure', status: 'completed' });
+	expect(payload.output.title).toBe('Baseline is out of date');
+	expect(JSON.parse(payload.external_id)).toEqual(swept.state);
+	expect(payload.output.text.split('\n').filter((line) => line.startsWith('- '))).toEqual([
+		'- 2026-11-16 03:22 UTC · Baseline run 678 (attempt 1) is no longer current',
+		'- 2026-11-16 03:40 UTC · Approved by @luke',
+		'- 2026-11-16 03:22 UTC · Comparison run 345 (attempt 2): needs review',
+	]);
+});
+
+test('keeps the check run history when the sweep records a newer comparison', () => {
+	const previousText = '### History\n\n- 2026-11-16 03:40 UTC · Approved by @luke\n';
+	const notRecorded = sweepPlan({ latest: finishedRun(SWEEP_GRACE_MS) });
+	const running = sweepPlan({
+		latest: latestRun({ conclusion: null, run_attempt: 3, status: 'in_progress' }),
+	});
+	if (notRecorded.action !== 'write' || running.action !== 'write') {
+		throw new Error('Expected the sweep to write.');
+	}
+
+	const failed = payloadFor(notRecorded.state, {
+		failure: notRecorded.failure,
+		historyEntry: notRecorded.historyEntry,
+		previousText,
+		summary: undefined,
+		updatesExisting: true,
+	});
+	const pending = payloadFor(running.state, { previousText, updatesExisting: true });
+
+	expect(failed.output.title).toBe('Publishing the report failed');
+	expect(failed.output.text).toBe(
+		'### History\n\n- 2026-11-16 03:22 UTC · Comparison run 345 (attempt 3) was not recorded\n- 2026-11-16 03:40 UTC · Approved by @luke\n',
+	);
+	// The publisher's own pending payload, which completes an existing check run as action_required.
+	expect(pending).toMatchObject({ conclusion: 'action_required', status: 'completed' });
+	expect(pending.output.text).toBe(
+		'### History\n\n- 2026-11-16 03:22 UTC · Comparison run 345 (attempt 3) started\n- 2026-11-16 03:40 UTC · Approved by @luke\n',
+	);
 });
 
 test('formats timestamps to the minute in UTC', () => {

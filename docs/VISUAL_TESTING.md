@@ -15,7 +15,11 @@ GitHub-hosted `ubuntu-latest` alone is not stable enough for pixel screenshots. 
 the test process uses the browsers baked into the image.
 
 The `Visual baseline` workflow renders `main` and uploads the `visual-baseline` artefact. Pull
-requests download the newest `main` run, render their branch, and compare it.
+requests download that artefact from the newest `main` run, render their branch, and compare it.
+`visual-ci resolve-baseline` finds the run's one unexpired `visual-baseline` artefact, and the
+comparison downloads it by id. A re-run of `Visual baseline` replaces the artefact with a new id, so
+a download of the old id fails rather than comparing against other files. No artefact, or more than
+one, fails the job.
 
 After a rendering-environment change, the first comparison can show large intentional diffs. Once
 the change merges, re-run `Visual baseline` on `main`.
@@ -84,7 +88,8 @@ capture in its job summary and adds a warning annotation to the pull request. It
 expected, actual, and diff PNGs as the `visual-regression-diff` artefact. Check those diffs before
 you merge. Capture, baseline, and infrastructure failures still fail the gate.
 
-Configure branch protection to require `visual-regression`. The workflow cannot make its own status
+Configure branch protection to require `visual-regression` and, once the review App is configured,
+`visual-review`. See [Review check](#review-check). The workflow cannot make its own status
 mandatory in repository settings. `Visual baseline` regenerates the authoritative baseline on `main`
 after merge.
 
@@ -119,11 +124,11 @@ GitHub App owns the check run, and each commit has exactly one:
 | Not finished                                                          | See below         | `Comparing`                      |
 | No differences, or its `compare` job skipped                          | `success`         | `No visual changes`              |
 | Differences, or a change to the visual testing infrastructure         | `action_required` | `Needs review: …`                |
-| Failed, timed out, or `compare` uploaded no report                    | `failure`         | `Comparison did not finish`      |
+| Ended any other way, or `compare` uploaded no report                  | `failure`         | `Comparison did not finish`      |
 | Cancelled                                                             | `failure`         | `Comparison was cancelled`       |
 | A report whose baseline is missing or could not be verified           | `failure`         | `Baseline could not be verified` |
 | A report whose baseline is no longer the newest `Visual baseline` run | `failure`         | `Baseline is out of date`        |
-| `Visual review publish` failed or was cancelled                       | `failure`         | `Publishing the report failed`   |
+| `Visual review publish` failed, was cancelled, or never recorded it   | `failure`         | `Publishing the report failed`   |
 
 `Visual review publish` runs when a `Visual regression` run is requested, starts, or completes, but
 it never records the run the event describes. It finds the open pull request whose head is the
@@ -139,7 +144,8 @@ A re-run raises the attempt as soon as it is requested, so it makes the earlier 
 once. GitHub sends no `requested` event for a re-run, so the `in_progress` event also reconciles.
 
 A run skipped comparing only when its `compare` job was skipped. A `compare` job that succeeded but
-uploaded no report did not finish.
+uploaded no report did not finish. A run that did not succeed and was not cancelled, whatever its
+conclusion, is `Comparison did not finish` too. Only a verified successful comparison can pass.
 
 When no check run exists yet, `Comparing` creates one in progress. GitHub ignores a change back to
 in progress on a completed check run, so an existing one becomes `action_required` with the title
@@ -162,21 +168,53 @@ stop tampering. `findInfrastructureChanges` in
 A later comparison run on the same commit, such as a re-run, updates the same check run and resets
 it to its new result. The check run's text keeps the commit's history of comparisons and decisions,
 up to 50 entries and 60,000 characters. Its external id records the comparison run and attempt, and
-the baseline run and attempt it was compared against. `Visual regression` writes the baseline run id
-to `baseline.json` in its artefact. `Visual review publish` confirms through the GitHub API that the
-id names a successful, completed `Visual baseline` run, pushed or dispatched on this repository's
-`main`. When it records the result, that run must also still be the newest such run, by run and by
-attempt. A push to `main`, a manual dispatch, or a re-run of `Visual baseline` replaces the
-baseline, so a report compared against an older one fails with `Baseline is out of date`. Re-run the
-comparison to record a new result.
+the baseline run and attempt it was compared against.
+
+`Visual regression` writes the baseline it downloaded to `baseline.json` in its artefact: the run
+id, the run's attempt, and the artefact id. `Visual review publish` checks all three through the
+GitHub API when it records the result:
+
+- The run must be a successful, completed `Visual baseline` run, pushed or dispatched on this
+  repository's `main`. Otherwise the result is `Baseline could not be verified`.
+- The run must still be at the recorded attempt, and its one unexpired `visual-baseline` artefact
+  must have the recorded id. A different attempt means a re-run replaced the baseline, which is
+  `Baseline is out of date`. The same attempt with another artefact is
+  `Baseline could not be verified`.
+- That run and attempt must still be the newest successful `Visual baseline` run. Otherwise the
+  result is `Baseline is out of date`.
+
+A `baseline.json` that names only the run records no exact baseline, so its result is
+`Baseline could not be verified`. A push to `main`, a manual dispatch, or a re-run of
+`Visual baseline` replaces the baseline. Re-run the comparison to record a new result.
+
+The `Visual review sweep` workflow covers what the publisher cannot see. It runs when a
+`Visual baseline` run completes, whatever its conclusion, every 30 minutes, and on demand. For each
+open pull request whose `visual-review` check run passes or needs review, it reads the latest
+comparison and the newest baseline:
+
+- A newer comparison that is still running sets the check run to `Comparing`.
+- A newer comparison that finished at least 30 minutes ago and was never recorded fails with
+  `Publishing the report failed`. The 30 minutes leave the publisher time to record it.
+- A recorded result whose baseline is no longer the newest fails with `Baseline is out of date`. A
+  skipped comparison compared nothing, so its baseline never goes out of date.
+
+The sweep only invalidates. It never writes a result that can pass, it keeps the check run's
+history, and it updates only the status of an existing comment. It reads no artefacts and runs no
+pull request code. When every publication of a completed comparison failed, an approval can stay
+passing until the first sweep that can create an App token at least 30 minutes after the comparison
+finished. A new commit never passes without a recorded result. In a race of milliseconds, the sweep
+can replace a result the publisher has just written with a failure. That fails closed, and a re-run
+of the comparison fixes it.
 
 A new commit starts with no check run, so an approval never carries over to it. To make approval
-block merging, require `visual-review` in branch protection with the visual review App as its
-source, so a status with the same name from anywhere else does not count. Also require branches to
-be up to date before merging. A new `Visual baseline` run on `main` usually means `main` moved, so
-an up-to-date branch gets a fresh comparison against the new baseline. A baseline that changes
-without `main` moving, through a dispatch or a re-run, is caught when the comparison is recorded or
-approved.
+block merging, require both `visual-regression` and `visual-review` in branch protection, with the
+visual review App as the source of `visual-review`, so a status with the same name from anywhere
+else does not count. While a comparison runs, its `visual-regression` gate is pending, so merging is
+blocked even before the publisher records `Comparing`. Also require branches to be up to date before
+merging. A new `Visual baseline` run on `main` usually means `main` moved, so an up-to-date branch
+gets a fresh comparison against the new baseline. A baseline that changes without `main` moving,
+through a dispatch or a re-run, is caught when the comparison is recorded or approved, and by the
+sweep for a result already recorded.
 
 ### Trust boundary
 
@@ -204,7 +242,8 @@ deliberate tampering.
   records `Publishing the report failed`, so a failed resolution, download, preparation, or
   deployment never leaves an earlier result or approval in place. When `resolve-pr` itself failed,
   the failure is recorded only on a commit that already has the check run or is still an open pull
-  request's head.
+  request's head. When the App token cannot be created, nothing is recorded, and the sweep fails the
+  result once a token can be created again.
 - `visual-review review` writes the check run and the comment with a token for the visual review
   App, limited to check runs and pull requests. `resolve-pr` uses the same token to read the check
   run. Everything else, such as the runs, jobs, changed files, and their `package.json` and
@@ -219,11 +258,12 @@ infrastructure: a pull request that only changes dependency ranges, the catalog,
 can pass with no visual differences, and a malicious or broken dependency could still alter its own
 comparison.
 
-Never check out or run pull request code in `Visual review publish`.
+Never check out or run pull request code in `Visual review publish` or `Visual review sweep`.
 
 ### Configuration
 
-Both workflows skip their job until `VISUAL_REVIEW_PAGES_PROJECT` is set.
+`Visual review deploy`, `Visual review publish`, and `Visual review sweep` skip their job until
+`VISUAL_REVIEW_PAGES_PROJECT` is set.
 
 | Setting                                            | Where                                      | Value                                                                                                                              |
 | -------------------------------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
@@ -236,11 +276,11 @@ Both workflows skip their job until `VISUAL_REVIEW_PAGES_PROJECT` is set.
 | `VISUAL_REVIEW_APP_PRIVATE_KEY`                    | Secret of the `visual-review` environment  | A private key for the App                                                                                                          |
 
 `Visual review publish` records no check run and writes no comment until
-`VISUAL_REVIEW_APP_CLIENT_ID` is set.
+`VISUAL_REVIEW_APP_CLIENT_ID` is set. `Visual review sweep` skips its job until then.
 
 Restrict the `visual-review` environment's deployment branches to `main`. A workflow edited in a
-pull request then cannot read the Cloudflare secrets. The token can edit every Pages project in its
-account, because Cloudflare does not scope a token to one project.
+pull request then cannot read the Cloudflare secrets or the App key. The Cloudflare token can edit
+every Pages project in its account, because Cloudflare does not scope a token to one project.
 
 Cloudflare keeps a closed pull request's deployments. Nothing removes them.
 

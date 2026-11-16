@@ -1,0 +1,82 @@
+name: Visual review sweep
+
+# Fails a pull request's passing `visual-review` check run when it no longer describes the latest
+# comparison against the current baseline. `Visual review publish` keeps the check run current on
+# every comparison event. This catches what it cannot:
+#
+# - a comparison that finished while every run of the publisher failed, for example because the App
+#   token could not be created
+# - a baseline that changed without `main` changing, through a dispatch or a re-run of
+#   `Visual baseline`
+#
+# The sweep only invalidates. It never writes a result that can pass, never checks out or runs pull
+# request code, and reads no artefacts.
+
+on:
+  workflow_run:
+    workflows: ['Visual baseline']
+    # Any conclusion: a failed re-run also leaves no current baseline.
+    types: [completed]
+  # Heals failed publications once the App works again.
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: visual-review-sweep
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    name: sweep
+    # Inert until the publisher is configured. `vars` here must be a repository variable:
+    # environment variables are not available to a job-level `if`. A dispatch from another branch
+    # does not run, and the environment's branch rule keeps the App key from it anyway.
+    if: >-
+      github.ref == 'refs/heads/main' && vars.VISUAL_REVIEW_APP_CLIENT_ID != '' &&
+      vars.VISUAL_REVIEW_PAGES_PROJECT != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # The App's private key lives in this environment, restricted to `main`.
+    environment: visual-review
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: read
+    steps:
+      # This checks out the default branch, which is the trusted code that handles the App key.
+      # Never check out a pull request head here: its scripts would run with that key.
+      - name: Checkout default branch
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: package.json
+
+      # Scoped to this repository, because no `repositories` are named. A scheduled event has no
+      # repository in its payload to name. The token can write check runs and pull request comments
+      # and nothing else.
+      - name: Create a visual review App token
+        id: app-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.VISUAL_REVIEW_APP_CLIENT_ID }}
+          private-key: ${{ secrets.VISUAL_REVIEW_APP_PRIVATE_KEY }}
+          permission-checks: write
+          permission-pull-requests: write
+
+      # Reads (pull requests, runs, the baseline) use the workflow token. Writes use the App token,
+      # so the check run and comment stay the App's.
+      - name: Sweep the visual-review check runs
+        env:
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
+          APP_URL: >-
+            ${{ vars.VISUAL_REVIEW_APP_URL || format('https://{0}.pages.dev',
+            vars.VISUAL_REVIEW_PAGES_PROJECT) }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node .github/scripts/visual-review.ts sweep

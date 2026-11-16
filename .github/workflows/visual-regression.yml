@@ -69,10 +69,13 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: pnpm --filter @luke-ui/workflow-scripts run visual-ci resolve-baseline
 
+      # By id, not by name, so the files compared are exactly the artefact `baseline.json` records.
+      # A re-run of Visual baseline replaces the artefact with a new id, and this download then
+      # fails instead of comparing against other files.
       - name: Download baseline
         uses: actions/download-artifact@v8
         with:
-          name: visual-baseline
+          artifact-ids: ${{ steps.baseline.outputs.artifact-id }}
           path: .artifacts/visual-regression/baseline
           github-token: ${{ github.token }}
           repository: ${{ github.repository }}
@@ -97,11 +100,17 @@ jobs:
         run: pnpm --filter @luke-ui/workflow-scripts run visual-ci summarise
 
       # The visual review approval records which baseline a report was compared against. The
-      # publish workflow verifies this run id through the GitHub API before recording it.
+      # publish workflow verifies this run, attempt, and artefact through the GitHub API before
+      # recording it.
       - name: Record the baseline run
         env:
+          BASELINE_ARTIFACT_ID: ${{ steps.baseline.outputs.artifact-id }}
+          BASELINE_RUN_ATTEMPT: ${{ steps.baseline.outputs.run-attempt }}
           BASELINE_RUN_ID: ${{ steps.baseline.outputs.run-id }}
-        run: printf '{"runId":%s}\n' "$BASELINE_RUN_ID" > .artifacts/visual-regression/baseline.json
+        run: >-
+          printf '{"runId":%s,"runAttempt":%s,"artifactId":%s}\n' "$BASELINE_RUN_ID"
+          "$BASELINE_RUN_ATTEMPT" "$BASELINE_ARTIFACT_ID" >
+          .artifacts/visual-regression/baseline.json
 
       - name: Upload expected, actual, and diff screenshots
         if: always()
