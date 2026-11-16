@@ -339,6 +339,28 @@ export const GUIDE_TAUGHT_PROPS: Readonly<Record<string, ReadonlyArray<string>>>
 		[],
 	'primitives/radio.mdx::packages/@luke-ui/react/src/core/primitives/radio/radio.tsx::RadioIndicatorProps':
 		[],
+	'overlays/dialog.mdx::packages/@luke-ui/react/src/core/dialog/dialog.tsx::DialogProps': [
+		'children',
+		'description',
+		'isCloseButtonDisabled',
+		'isDismissable',
+		'isKeyboardDismissDisabled',
+		'isOpen',
+		'onOpenChange',
+		'role',
+		'showCloseButton',
+		'title',
+	],
+	'overlays/dialog.mdx::packages/@luke-ui/react/src/core/dialog/primitive/trigger.tsx::DialogTriggerProps':
+		['defaultOpen', 'isOpen', 'onOpenChange'],
+	'primitives/dialog.mdx::packages/@luke-ui/react/src/core/dialog/primitive/content.tsx::DialogContentProps':
+		['role'],
+	'primitives/dialog.mdx::packages/@luke-ui/react/src/core/dialog/primitive/overlay.tsx::DialogOverlayProps':
+		['isDismissable', 'isKeyboardDismissDisabled', 'isOpen', 'onOpenChange'],
+	'primitives/dialog.mdx::packages/@luke-ui/react/src/core/dialog/primitive/surface.tsx::DialogSurfaceProps':
+		[],
+	'primitives/dialog.mdx::packages/@luke-ui/react/src/core/dialog/primitive/trigger.tsx::DialogTriggerProps':
+		['defaultOpen', 'isOpen', 'onOpenChange'],
 	'primitives/select.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectIndicatorProps':
 		['children'],
 	'primitives/select.mdx::packages/@luke-ui/react/src/core/primitives/select/select.tsx::SelectItemProps':

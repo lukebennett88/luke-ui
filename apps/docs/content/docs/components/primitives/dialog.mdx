@@ -1,0 +1,82 @@
+---
+title: Dialog primitives
+description: Lower-level parts for composing a modal dialog.
+source: packages/@luke-ui/react/src/exports/primitives/dialog.ts
+reactAria: https://react-spectrum.adobe.com/react-aria/Modal.html
+---
+
+Use these primitives when [`Dialog`](/components/overlays/dialog) does not fit. Choose them for
+custom anatomy, such as a different header layout, or for custom surface styling. `Dialog` already
+works with `DialogTrigger`, so a trigger alone is no reason to leave it.
+
+<ExampleBlock src="dialog-primitive/basic" layout="centered" title="Dialog primitives: Basic" />
+
+## Anatomy
+
+`DialogTrigger` connects a pressable trigger, such as a `Button`, to the `DialogOverlay` after it.
+It renders no element and returns focus to the trigger when the dialog closes. `DialogOverlay`
+portals the dialog to `<body>`, paints the backdrop, and owns dismissal. `DialogSurface` is the
+raised panel inside it. `DialogContent` is the semantic dialog inside the surface.
+
+Inside `DialogContent`, a `Heading` with `slot="title"` names the dialog, and a `Button` with
+`slot="close"` closes it.
+
+## Open state
+
+`DialogTrigger` is uncontrolled by default. Pass `defaultOpen`, or control it with `isOpen` and
+`onOpenChange`.
+
+Without a `DialogTrigger`, a `DialogOverlay` takes `isOpen` and `onOpenChange` itself.
+
+## Dismissal
+
+Escape closes the dialog. Set `isDismissable` on `DialogOverlay` to close it with a press outside
+the surface, and `isKeyboardDismissDisabled` to stop Escape from closing it. Both props have no
+effect on a `Button` with `slot="close"`.
+
+## Alert dialog
+
+Set `role="alertdialog"` on `DialogContent` for an urgent confirmation that needs a response.
+
+## Description
+
+Pass the `id` of a short description to `DialogContent` as `aria-describedby`. Leave it out when the
+content is structured, such as several paragraphs or a list, because a description is read as one
+unbroken string. In an `alertdialog`, a `Text` with `slot="description"` also describes the dialog.
+An explicit `aria-labelledby` or `aria-describedby` wins over the slots.
+
+## Size
+
+Controls inside the primitives inherit the surrounding control size, such as the `controlSize` of a
+`Form` around the dialog. Unlike [`Dialog`](/components/overlays/dialog#forms), they do not reset
+it.
+
+## API
+
+### DialogTriggerProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/dialog/primitive/trigger.tsx"
+	name="DialogTriggerProps"
+/>
+
+### DialogOverlayProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/dialog/primitive/overlay.tsx"
+	name="DialogOverlayProps"
+/>
+
+### DialogSurfaceProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/dialog/primitive/surface.tsx"
+	name="DialogSurfaceProps"
+/>
+
+### DialogContentProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/dialog/primitive/content.tsx"
+	name="DialogContentProps"
+/>

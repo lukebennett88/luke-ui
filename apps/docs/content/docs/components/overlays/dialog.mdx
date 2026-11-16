@@ -1,0 +1,112 @@
+---
+title: Dialog
+description: A modal dialog with a title, an optional description, and content you provide.
+source: packages/@luke-ui/react/src/exports/dialog.ts
+reactAria: https://react-spectrum.adobe.com/react-aria/Modal.html
+---
+
+Use `Dialog` for a focused task or message that needs a response before someone returns to the page.
+It renders a title, an optional description, and your content in a modal over a backdrop. Place it
+inside a `DialogTrigger` after the `Button` that opens it.
+
+<ExampleBlock src="dialog/basic" layout="centered" title="Dialog: Basic" />
+
+## Best practices
+
+| Guidance | Practices                                                                                    |
+| -------- | -------------------------------------------------------------------------------------------- |
+| Do       | Write a title that names the task or question, such as "Delete item?".                       |
+| Do       | Give the dialog a way to close, such as `showCloseButton` or a `Button` with `slot="close"`. |
+| Don't    | Use a dialog for a message that does not need a response. Show it in the page instead.       |
+
+## Open state
+
+Inside a `DialogTrigger`, omit `isOpen` and `onOpenChange`. The trigger owns the open state, marks
+the `Button` with `aria-expanded`, and returns focus to it when the dialog closes. To open the
+dialog on mount, pass `defaultOpen` to the trigger. To control it, pass `isOpen` and `onOpenChange`
+to the trigger.
+
+Without a trigger, `Dialog` is controlled. Pass `isOpen` and `onOpenChange`, and render your own
+`Button` to set `isOpen`. `onOpenChange` receives `false` when a close button, Escape, or a press
+outside the dialog asks it to close. The dialog stays open until you change `isOpen`.
+
+A `Button` with `slot="close"` inside the dialog closes it in both cases.
+
+## Description
+
+Pass a short sentence to `description`. Assistive technology announces it with the title when the
+dialog opens, so keep it to the dialog's purpose. Put longer or structured content, such as several
+paragraphs or a list, in `children` instead. A description is read as one unbroken string, which
+makes structured content hard to follow.
+
+## Dismissal
+
+Escape closes the dialog. A press outside the dialog closes it only when you set `isDismissable`.
+Set `isKeyboardDismissDisabled` to stop Escape from closing it.
+
+## Close button
+
+Set `showCloseButton` to add a close button at the inline end of the title. It follows the title in
+focus order and is named "Close". It closes the dialog like a `Button` with `slot="close"`, so the
+dismissal props do not affect it. Set `isCloseButtonDisabled` to disable it.
+
+<ExampleBlock src="dialog/close-button" layout="centered" title="Dialog: Close button" />
+
+## Alert dialog
+
+Set `role="alertdialog"` for an urgent confirmation that needs a response, such as a destructive
+action. Pair it with a `danger` tone on the confirming button, and keep the outside press off. Leave
+out `showCloseButton`, because an alert dialog needs an explicit response, and a close button does
+not say which response it gives.
+
+<ExampleBlock src="dialog/alert-dialog" layout="centered" title="Dialog: Alert dialog" />
+
+## Closing after an action
+
+Pass a function as `children` to close the dialog when an async action finishes. Track the action
+with `useTransition`, and pass its `isPending` to the props that would otherwise close the dialog
+mid-action:
+
+- Set `isDismissable` to `!isPending`.
+- Set `isKeyboardDismissDisabled` to `isPending`, because Escape closes the dialog even when
+  `isDismissable` is `false`.
+- Set `isDisabled` on the close `Button`, and `isCloseButtonDisabled` when the dialog shows its
+  close button, because these props do not block them.
+
+Set `isPending` on the action `Button`. Keep the pending state in the dialog rather than in a
+`Button` `pressAction`, so the dialog can observe it.
+
+<ExampleBlock src="dialog/pending" layout="centered" title="Dialog: Pending" />
+
+## Forms
+
+Put a [`Form`](/components/forms/form) inside the dialog for input. Controls inside a dialog default
+to the `medium` size and do not inherit the `controlSize` of a `Form` outside it. Set `controlSize`
+on a `Form` inside the dialog to change it.
+
+## Accessibility
+
+The `title` names the dialog and the `description` describes it, for both `dialog` and
+`alertdialog`. Give an `alertdialog` a `description` that states the message it needs a response to.
+Focus moves into the dialog when it opens and stays inside while it is open. See
+[Open state](#open-state) for where focus returns when it closes.
+
+The dialog follows the document's colour mode, because it renders in `<body>` outside the trigger's
+colour scope. Its entrance fades and rises, and reduced motion keeps only the fade. In forced
+colours mode the surface keeps a system-colour border.
+
+## API
+
+### DialogProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/dialog/dialog.tsx"
+	name="DialogProps"
+/>
+
+### DialogTriggerProps
+
+<component-props-table
+	path="packages/@luke-ui/react/src/core/dialog/primitive/trigger.tsx"
+	name="DialogTriggerProps"
+/>

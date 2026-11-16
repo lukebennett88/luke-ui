@@ -9,6 +9,7 @@ export const DOC_GROUPS = [
 	'feedback',
 	'forms',
 	'layout',
+	'overlays',
 	'typography',
 	'visuals',
 ] as const;

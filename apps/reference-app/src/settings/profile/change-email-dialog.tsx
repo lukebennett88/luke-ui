@@ -1,6 +1,6 @@
 import { Button } from '@luke-ui/react/button';
 import { Cluster } from '@luke-ui/react/cluster';
-import { Heading } from '@luke-ui/react/heading';
+import { Dialog, DialogTrigger } from '@luke-ui/react/dialog';
 import { Icon } from '@luke-ui/react/icon';
 import { Prose } from '@luke-ui/react/prose';
 import { Stack } from '@luke-ui/react/stack';
@@ -8,10 +8,8 @@ import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import { useIsMutating, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { SubmitEvent } from 'react';
-import { useId, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Button as RacButton } from 'react-aria-components/Button';
-import { Dialog, DialogTrigger } from 'react-aria-components/Dialog';
-import { Modal, ModalOverlay } from 'react-aria-components/Modal';
 import { settingsApi, settingsMutationErrorMessage } from '../settings-api.js';
 import { settingsQueryKey } from '../settings-query.js';
 import * as styles from '../settings.css.js';
@@ -21,7 +19,6 @@ const EMAIL_MUTATION_KEY = [...settingsQueryKey, 'profile-field', 'email'] as co
 
 export function ChangeEmailDialog({ email }: { email: string }) {
 	const queryClient = useQueryClient();
-	const descriptionId = useId();
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [isOpen, setIsOpen] = useState(false);
 	const [draft, setDraft] = useState('');
@@ -72,82 +69,63 @@ export function ChangeEmailDialog({ email }: { email: string }) {
 			<RacButton aria-label="Change email" className={styles.emailEditButton}>
 				<Icon aria-hidden="true" name="edit" size="xsmall" />
 			</RacButton>
-			<ModalOverlay
-				className={styles.dialogOverlay}
+			<Dialog
+				description="If you’d like to change the email address for your account, we’ll send a verification link to your new email address. This change will apply across all workspaces that you are a member of."
 				isDismissable={!isSaving}
 				isKeyboardDismissDisabled={isSaving}
+				title="Change email"
 			>
-				<Modal className={styles.dialogModal}>
-					<Dialog
-						aria-describedby={descriptionId}
-						aria-label="Change email"
-						className={styles.dialog}
-					>
-						<form onSubmit={save}>
-							<Stack gap="space.16">
-								<Heading level={2} shouldDisableTrim typography="heading3">
-									Change email
-								</Heading>
-								<Prose id={descriptionId}>
-									<Text color="secondary" elementType="p">
-										If you’d like to change the email address for your account, we’ll send a
-										verification link to your new email address. This change will apply across all
-										workspaces that you are a member of.
-									</Text>
-									<Text color="secondary" elementType="p">
-										Please check if the new email address is tied to an existing account before
-										proceeding with the change.
-									</Text>
-									<Text color="primary" elementType="p" fontWeight="label">
-										Enter the new email address you’d like to use.
-									</Text>
-								</Prose>
-								<TextInputField
-									aria-label="New email address"
-									errorMessage={errorMessage ? <span role="alert">{errorMessage}</span> : undefined}
-									inputRef={inputRef}
-									isReadOnly={isSaving}
-									name="email"
-									onChange={(nextDraft) => {
-										if (isSaving) return;
-										setDraft(nextDraft);
-										setValidationError(undefined);
-										mutation.reset();
-									}}
-									placeholder="New email address"
-									size="small"
-									validationBehavior="aria"
-									value={draft}
-								/>
-								<Stack gap={isSaving ? 'space.8' : '0'}>
-									<Text
-										color="secondary"
-										elementType="p"
-										fontWeight="body"
-										role="status"
-										shouldDisableTrim
-										typography="label"
-									>
-										{isSaving ? 'Saving…' : null}
-									</Text>
-									<Cluster gap="space.8" justifyContent="flex-end">
-										<Button
-											isDisabled={isSaving}
-											onPress={() => handleOpenChange(false)}
-											prominence="low"
-										>
-											Cancel
-										</Button>
-										<Button isPending={isSaving} prominence="high" type="submit">
-											Check for existing account
-										</Button>
-									</Cluster>
-								</Stack>
-							</Stack>
-						</form>
-					</Dialog>
-				</Modal>
-			</ModalOverlay>
+				<form onSubmit={save}>
+					<Stack gap="space.16">
+						<Prose>
+							<Text color="secondary" elementType="p">
+								Please check if the new email address is tied to an existing account before
+								proceeding with the change.
+							</Text>
+							<Text color="primary" elementType="p" fontWeight="label">
+								Enter the new email address you’d like to use.
+							</Text>
+						</Prose>
+						<TextInputField
+							aria-label="New email address"
+							errorMessage={errorMessage ? <span role="alert">{errorMessage}</span> : undefined}
+							inputRef={inputRef}
+							isReadOnly={isSaving}
+							name="email"
+							onChange={(nextDraft) => {
+								if (isSaving) return;
+								setDraft(nextDraft);
+								setValidationError(undefined);
+								mutation.reset();
+							}}
+							placeholder="New email address"
+							size="small"
+							validationBehavior="aria"
+							value={draft}
+						/>
+						<Stack gap={isSaving ? 'space.8' : '0'}>
+							<Text
+								color="secondary"
+								elementType="p"
+								fontWeight="body"
+								role="status"
+								shouldDisableTrim
+								typography="label"
+							>
+								{isSaving ? 'Saving…' : null}
+							</Text>
+							<Cluster gap="space.8" justifyContent="flex-end">
+								<Button isDisabled={isSaving} prominence="low" slot="close">
+									Cancel
+								</Button>
+								<Button isPending={isSaving} prominence="high" type="submit">
+									Check for existing account
+								</Button>
+							</Cluster>
+						</Stack>
+					</Stack>
+				</form>
+			</Dialog>
 		</DialogTrigger>
 	);
 }
