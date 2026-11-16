@@ -3,37 +3,53 @@ import path from 'node:path';
 import { mkdir, mkdtemp, open, readdir, readFile, symlink, writeFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
 import type {
+	CheckState,
 	IssueComment,
 	PublishedMeta,
 	PublishedResult,
 	PublishedSummary,
 	PullRequestCandidate,
+	RunMeta,
 } from './visual-review.js';
 import {
+	CHECK_NAME,
+	checkRunPayload,
 	COMMENT_MARKER,
+	COMMENT_STATUS_END,
+	COMMENT_STATUS_START,
 	commentMarkdown,
 	decideCommentAction,
 	decidePublish,
+	decideReview,
+	decideRunOutcome,
+	findOwnCheckRun,
 	findStickyComment,
+	formatTimestamp,
+	infrastructureChanges,
+	MAX_HISTORY_ENTRIES,
 	MAX_IMAGE_BYTES,
 	MAX_PUBLISHED_BYTES,
 	MAX_PUBLISHED_FILES,
 	MAX_SUMMARY_BYTES,
 	parseArtifactSummary,
+	parseBaselineRunId,
 	parseMeta,
 	prepareSite,
+	prependHistory,
 } from './visual-review.js';
 
 const HEAD_SHA = 'a'.repeat(40);
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00]);
 
-const meta: PublishedMeta = {
+const runMeta: RunMeta = {
 	generatedAt: '2026-01-02T03:04:05.000Z',
 	headSha: HEAD_SHA,
 	pullRequest: 12,
 	runAttempt: 2,
 	runId: 345,
 };
+
+const meta: PublishedMeta = { ...runMeta, baselineRunId: null };
 
 const artifactCounts = { added: 0, changed: 0, removed: 0, unchanged: 0 };
 
@@ -250,7 +266,7 @@ test('reads run metadata from the environment', () => {
 		{ HEAD_SHA, PR_NUMBER: '12', RUN_ATTEMPT: '2', RUN_ID: '345' },
 		() => new Date(meta.generatedAt),
 	);
-	expect(parsed).toEqual(meta);
+	expect(parsed).toEqual(runMeta);
 });
 
 for (const [name, value] of [
@@ -291,7 +307,7 @@ test('publishes the rewritten summary and exactly the images each status implies
 		},
 	);
 
-	const summary = await prepareSite({ artifactDir, meta, outDir });
+	const summary = await prepareSite({ artifactDir, meta: runMeta, outDir });
 
 	expect(await listFiles(outDir)).toEqual([
 		'diff/button/hover.actual.png',
@@ -331,7 +347,7 @@ test('never publishes Pages control files or anything else the artefact carries'
 		},
 	);
 
-	await prepareSite({ artifactDir, meta, outDir });
+	await prepareSite({ artifactDir, meta: runMeta, outDir });
 
 	expect(await listFiles(outDir)).toEqual(['diff/card/new.actual.png', 'summary.json']);
 });
@@ -347,7 +363,7 @@ test('takes metadata and counts from the workflow, never from the artefact', asy
 		{ 'diff/card/new.actual.png': PNG },
 	);
 
-	const summary = await prepareSite({ artifactDir, meta, outDir });
+	const summary = await prepareSite({ artifactDir, meta: runMeta, outDir });
 
 	expect(summary.schemaVersion).toBe(1);
 	expect(summary.meta).toEqual(meta);
@@ -363,7 +379,7 @@ test('publishes a summary alone when nothing differs', async () => {
 		}),
 	);
 
-	const summary = await prepareSite({ artifactDir, meta, outDir });
+	const summary = await prepareSite({ artifactDir, meta: runMeta, outDir });
 
 	expect(summary.results).toEqual([]);
 	expect(await listFiles(outDir)).toEqual(['summary.json']);
@@ -375,7 +391,7 @@ test('fails when a required image is missing', async () => {
 		{ 'diff/button/hover.actual.png': PNG, 'diff/button/hover.expected.png': PNG },
 	);
 
-	await expect(prepareSite({ artifactDir, meta, outDir })).rejects.toThrow(
+	await expect(prepareSite({ artifactDir, meta: runMeta, outDir })).rejects.toThrow(
 		'Required file diff/button/hover.diff.png is missing.',
 	);
 });
@@ -384,7 +400,7 @@ test('fails when the summary is missing', async () => {
 	const root = await mkdtemp(path.join(tmpdir(), 'visual-review-'));
 
 	await expect(
-		prepareSite({ artifactDir: root, meta, outDir: path.join(root, 'deploy', 'site') }),
+		prepareSite({ artifactDir: root, meta: runMeta, outDir: path.join(root, 'deploy', 'site') }),
 	).rejects.toThrow('Required file summary.json is missing.');
 });
 
@@ -400,7 +416,9 @@ for (const [name, bytes] of [
 			{ 'diff/card/new.actual.png': bytes },
 		);
 
-		await expect(prepareSite({ artifactDir, meta, outDir })).rejects.toThrow(/is not a PNG/);
+		await expect(prepareSite({ artifactDir, meta: runMeta, outDir })).rejects.toThrow(
+			/is not a PNG/,
+		);
 	});
 }
 
@@ -415,7 +433,9 @@ test('rejects a symlinked image even when it points at a real PNG', async () => 
 		path.join(artifactDir, 'diff', 'card', 'new.actual.png'),
 	);
 
-	await expect(prepareSite({ artifactDir, meta, outDir })).rejects.toThrow(/not a regular file/);
+	await expect(prepareSite({ artifactDir, meta: runMeta, outDir })).rejects.toThrow(
+		/not a regular file/,
+	);
 });
 
 test('rejects an image reached through a symlinked directory outside the artefact', async () => {
@@ -427,7 +447,7 @@ test('rejects an image reached through a symlinked directory outside the artefac
 	await mkdir(path.join(artifactDir, 'diff'));
 	await symlink(path.join(root, 'outside'), path.join(artifactDir, 'diff', 'card'));
 
-	await expect(prepareSite({ artifactDir, meta, outDir })).rejects.toThrow(
+	await expect(prepareSite({ artifactDir, meta: runMeta, outDir })).rejects.toThrow(
 		/resolves outside the artefact/,
 	);
 });
@@ -440,7 +460,7 @@ test('rejects a symlinked summary', async () => {
 	await symlink(path.join(root, 'elsewhere.json'), path.join(artifactDir, 'summary.json'));
 
 	await expect(
-		prepareSite({ artifactDir, meta, outDir: path.join(root, 'deploy', 'site') }),
+		prepareSite({ artifactDir, meta: runMeta, outDir: path.join(root, 'deploy', 'site') }),
 	).rejects.toThrow(/not a regular file/);
 });
 
@@ -450,7 +470,7 @@ test('rejects an image over the size cap', async () => {
 		{ 'diff/card/new.actual.png': Buffer.concat([PNG, Buffer.alloc(MAX_IMAGE_BYTES)]) },
 	);
 
-	await expect(prepareSite({ artifactDir, meta, outDir })).rejects.toThrow(/larger than/);
+	await expect(prepareSite({ artifactDir, meta: runMeta, outDir })).rejects.toThrow(/larger than/);
 });
 
 test('rejects an oversized summary file without reading it', async () => {
@@ -458,7 +478,7 @@ test('rejects an oversized summary file without reading it', async () => {
 		artifactSummary([], { padding: 'x'.repeat(MAX_SUMMARY_BYTES) }),
 	);
 
-	await expect(prepareSite({ artifactDir, meta, outDir })).rejects.toThrow(/larger than/);
+	await expect(prepareSite({ artifactDir, meta: runMeta, outDir })).rejects.toThrow(/larger than/);
 });
 
 test('refuses a deploy directory that already exists, even an empty one', async () => {
@@ -466,7 +486,9 @@ test('refuses a deploy directory that already exists, even an empty one', async 
 	const deployDir = path.dirname(outDir);
 	await mkdir(deployDir);
 
-	await expect(prepareSite({ artifactDir, meta, outDir })).rejects.toThrow(/already exists/);
+	await expect(prepareSite({ artifactDir, meta: runMeta, outDir })).rejects.toThrow(
+		/already exists/,
+	);
 	expect(await listFiles(deployDir)).toEqual([]);
 });
 
@@ -476,7 +498,9 @@ test('leaves a deploy directory that holds Wrangler inputs untouched', async () 
 	await mkdir(path.join(deployDir, 'functions'), { recursive: true });
 	await writeFile(path.join(deployDir, 'functions', '_middleware.js'), 'export {};');
 
-	await expect(prepareSite({ artifactDir, meta, outDir })).rejects.toThrow(/already exists/);
+	await expect(prepareSite({ artifactDir, meta: runMeta, outDir })).rejects.toThrow(
+		/already exists/,
+	);
 	expect(await listFiles(deployDir)).toEqual(['functions/_middleware.js']);
 });
 
@@ -486,7 +510,7 @@ test('creates the deploy directory with the site as its only entry', async () =>
 		{ 'diff/card/new.actual.png': PNG },
 	);
 
-	await prepareSite({ artifactDir, meta, outDir });
+	await prepareSite({ artifactDir, meta: runMeta, outDir });
 
 	expect(await readdir(path.dirname(outDir))).toEqual(['site']);
 });
@@ -520,7 +544,7 @@ test('rejects a report over the total size budget before writing anything', asyn
 		}),
 	);
 
-	await expect(prepareSite({ artifactDir, meta, outDir })).rejects.toThrow(
+	await expect(prepareSite({ artifactDir, meta: runMeta, outDir })).rejects.toThrow(
 		`Refusing to publish more than ${MAX_PUBLISHED_BYTES} bytes.`,
 	);
 	await expect(readdir(path.dirname(outDir))).rejects.toThrow(/ENOENT/);
@@ -533,7 +557,7 @@ test('rejects a report with more files than the cap', async () => {
 	}));
 	const { artifactDir, outDir } = await createArtifact(artifactSummary(results));
 
-	await expect(prepareSite({ artifactDir, meta, outDir })).rejects.toThrow(
+	await expect(prepareSite({ artifactDir, meta: runMeta, outDir })).rejects.toThrow(
 		`Refusing to publish more than ${MAX_PUBLISHED_FILES} files.`,
 	);
 });
@@ -546,20 +570,272 @@ function publishedSummary(results: Array<PublishedResult>, unchanged = 30): Publ
 	return { counts, meta, results, schemaVersion: 1 };
 }
 
-test('reports the counts, the commit, and a link to the review app', () => {
-	const markdown = commentMarkdown({
+test('records the baseline run the comparison names', async () => {
+	const { artifactDir, outDir } = await createArtifact(artifactSummary([]), {
+		'baseline.json': '{"runId":678}\n',
+	});
+
+	const summary = await prepareSite({ artifactDir, meta: runMeta, outDir });
+
+	expect(summary.meta.baselineRunId).toBe(678);
+});
+
+test('records no baseline for a run from before comparisons named one', async () => {
+	const { artifactDir, outDir } = await createArtifact(artifactSummary([]));
+
+	const summary = await prepareSite({ artifactDir, meta: runMeta, outDir });
+
+	expect(summary.meta.baselineRunId).toBeNull();
+});
+
+for (const raw of ['', 'nope', '[]', '{}', '{"runId":0}', '{"runId":"7"}', '{"runId":1.5}']) {
+	test(`rejects the baseline file ${JSON.stringify(raw)}`, () => {
+		expect(() => parseBaselineRunId(raw)).toThrow(/baseline\.json/);
+	});
+}
+
+test('rejects a symlinked baseline file', async () => {
+	const { artifactDir, outDir, root } = await createArtifact(artifactSummary([]));
+	await writeFile(path.join(root, 'elsewhere.json'), '{"runId":1}');
+	await symlink(path.join(root, 'elsewhere.json'), path.join(artifactDir, 'baseline.json'));
+
+	await expect(prepareSite({ artifactDir, meta: runMeta, outDir })).rejects.toThrow(
+		/not a regular file/,
+	);
+});
+
+test('maps a run conclusion to what it means for review', () => {
+	expect(decideRunOutcome('success', true)).toBe('report');
+	expect(decideRunOutcome('success', false)).toBe('skipped');
+	expect(decideRunOutcome('failure', false)).toBe('failed');
+	expect(decideRunOutcome('timed_out', true)).toBe('failed');
+	// A newer push usually cancelled the run, so there is nothing to record.
+	expect(decideRunOutcome('cancelled', true)).toBe('none');
+	expect(decideRunOutcome('action_required', false)).toBe('none');
+	expect(decideRunOutcome('', false)).toBe('none');
+});
+
+test('finds the visual testing infrastructure among changed files', () => {
+	expect(
+		infrastructureChanges([
+			'packages/@luke-ui/react/src/button/button.tsx',
+			'.github/workflows/visual-regression.yml',
+			'packages/@luke-ui/react/scripts/visual-regression-lib.ts',
+			'.github/visual-playwright/Dockerfile',
+			'.github/workflows/visual-review-publish.yml',
+			'docs/VISUAL_TESTING.md',
+		]),
+	).toEqual([
+		'.github/visual-playwright/Dockerfile',
+		'.github/workflows/visual-regression.yml',
+		'packages/@luke-ui/react/scripts/visual-regression-lib.ts',
+	]);
+});
+
+test('needs review for differences, infrastructure changes, or both', () => {
+	const infra = ['.github/scripts/visual-ci.ts'];
+	expect(decideReview({ differing: 2, infrastructureFiles: [], outcome: 'report' })).toEqual({
+		kind: 'review',
+		reasons: ['visual'],
+	});
+	expect(decideReview({ differing: 0, infrastructureFiles: infra, outcome: 'report' })).toEqual({
+		kind: 'review',
+		reasons: ['infrastructure'],
+	});
+	expect(decideReview({ differing: 0, infrastructureFiles: infra, outcome: 'skipped' })).toEqual({
+		kind: 'review',
+		reasons: ['infrastructure'],
+	});
+	expect(decideReview({ differing: 1, infrastructureFiles: infra, outcome: 'report' })).toEqual({
+		kind: 'review',
+		reasons: ['visual', 'infrastructure'],
+	});
+});
+
+test('passes a clean or skipped comparison and fails an unfinished one', () => {
+	expect(decideReview({ differing: 0, infrastructureFiles: [], outcome: 'report' }).kind).toBe(
+		'clean',
+	);
+	expect(decideReview({ differing: 0, infrastructureFiles: [], outcome: 'skipped' }).kind).toBe(
+		'clean',
+	);
+	const infra = ['.github/scripts/visual-ci.ts'];
+	expect(decideReview({ differing: 3, infrastructureFiles: infra, outcome: 'failed' })).toEqual({
+		kind: 'failed',
+		reasons: [],
+	});
+});
+
+const NOW = new Date('2026-11-16T03:22:45.000Z');
+
+function checkState(overrides: Partial<CheckState> = {}): CheckState {
+	return {
+		baselineRunId: 678,
+		baselineSha: 'b'.repeat(40),
+		kind: 'review',
+		reasons: ['visual'],
+		runAttempt: 2,
+		runId: 345,
+		v: 1,
+		...overrides,
+	};
+}
+
+function payloadFor(
+	state: CheckState,
+	overrides: Partial<Parameters<typeof checkRunPayload>[0]> = {},
+) {
+	return checkRunPayload({
 		appUrl: APP_URL,
+		headSha: HEAD_SHA,
+		infrastructureFiles: [],
+		now: NOW,
+		previousText: undefined,
+		pullRequest: 12,
+		repository: 'luke/luke-ui',
+		state,
+		summary: publishedSummary([
+			{ id: 'button/hover', status: 'changed' },
+			{ id: 'card/new', status: 'added' },
+		]),
+		...overrides,
+	});
+}
+
+test('asks for review of a report with differences', () => {
+	const payload = payloadFor(checkState());
+
+	expect(payload).toMatchObject({
+		completed_at: NOW.toISOString(),
+		conclusion: 'action_required',
+		details_url: `${APP_URL}/?pr=12`,
+		head_sha: HEAD_SHA,
+		name: CHECK_NAME,
+		status: 'completed',
+	});
+	expect(payload.output.title).toBe('Needs review: 1 changed, 1 added');
+	expect(payload.output.summary.split('\n')[0]).toBe('**Status:** Needs review');
+	expect(payload.output.summary).toContain('| 1 | 1 | 0 | 30 |');
+	expect(payload.output.summary).toContain(
+		'against baseline run [678](https://github.com/luke/luke-ui/actions/runs/678) from `main@bbbbbbb`.',
+	);
+	expect(payload.output.text).toBe(
+		[
+			'### History',
+			'',
+			'- 2026-11-16 03:22 UTC · Comparison run 345 (attempt 2): needs review',
+			'',
+		].join('\n'),
+	);
+});
+
+test('stores the comparison run and baseline in the external id', () => {
+	const state = checkState({ reasons: ['visual', 'infrastructure'] });
+
+	expect(JSON.parse(payloadFor(state).external_id)).toEqual(state);
+});
+
+test('lists changed infrastructure and names it in the title', () => {
+	const payload = payloadFor(checkState({ reasons: ['infrastructure'] }), {
+		infrastructureFiles: ['.github/scripts/visual-ci.ts'],
+		summary: publishedSummary([]),
+	});
+
+	expect(payload.output.title).toBe('Needs review: visual testing infrastructure changed');
+	expect(payload.output.summary).toContain('- `.github/scripts/visual-ci.ts`');
+});
+
+test('marks an unverified or unrecorded baseline', () => {
+	expect(payloadFor(checkState({ baselineSha: null })).output.summary).toContain('(unverified)');
+	expect(
+		payloadFor(checkState({ baselineRunId: null, baselineSha: null })).output.summary,
+	).toContain('against an unrecorded baseline.');
+});
+
+test('passes a clean report and fails an unfinished comparison', () => {
+	const clean = payloadFor(checkState({ kind: 'clean', reasons: [] }), {
+		summary: publishedSummary([]),
+	});
+	expect(clean.conclusion).toBe('success');
+	expect(clean.output.title).toBe('No visual changes');
+
+	const failed = payloadFor(checkState({ kind: 'failed', reasons: [] }), { summary: undefined });
+	expect(failed.conclusion).toBe('failure');
+	expect(failed.output.title).toBe('Comparison did not finish');
+	expect(failed.output.summary).not.toContain('Review in the visual review app');
+});
+
+test('keeps the commit history when a later comparison run updates the check', () => {
+	const previousText = [
+		'### History',
+		'',
+		'- 2026-11-16 03:40 UTC · Approved by @luke',
+		'- 2026-11-16 03:22 UTC · Comparison run 300 (attempt 1): needs review',
+		'',
+	].join('\n');
+
+	const payload = payloadFor(checkState(), { previousText });
+
+	expect(payload.output.text.split('\n').filter((line) => line.startsWith('- '))).toEqual([
+		'- 2026-11-16 03:22 UTC · Comparison run 345 (attempt 2): needs review',
+		'- 2026-11-16 03:40 UTC · Approved by @luke',
+		'- 2026-11-16 03:22 UTC · Comparison run 300 (attempt 1): needs review',
+	]);
+});
+
+test(`keeps the newest ${MAX_HISTORY_ENTRIES} history entries`, () => {
+	const previous = Array.from({ length: MAX_HISTORY_ENTRIES }, (_, index) => `- old ${index}`);
+
+	const entries = prependHistory(previous.join('\n'), 'new')
+		.split('\n')
+		.filter((line) => line.startsWith('- '));
+
+	expect(entries).toHaveLength(MAX_HISTORY_ENTRIES);
+	expect(entries[0]).toBe('- new');
+	expect(entries.at(-1)).toBe(`- old ${MAX_HISTORY_ENTRIES - 2}`);
+});
+
+test('formats timestamps to the minute in UTC', () => {
+	expect(formatTimestamp(new Date('2026-01-02T09:08:59.999Z'))).toBe('2026-01-02 09:08 UTC');
+});
+
+test('updates the newest check run this App made, ignoring other sources', () => {
+	const runs = [
+		{ app: { slug: 'github-actions' }, id: 90 },
+		{ app: { slug: 'luke-ui-visual-review' }, id: 10 },
+		{ app: { slug: 'luke-ui-visual-review' }, id: 20 },
+		{ app: null, id: 99 },
+	];
+
+	expect(findOwnCheckRun(runs, 'luke-ui-visual-review')?.id).toBe(20);
+	expect(findOwnCheckRun(runs.slice(0, 1), 'luke-ui-visual-review')).toBeUndefined();
+});
+
+function comment(options: Partial<Parameters<typeof commentMarkdown>[0]> = {}): string {
+	return commentMarkdown({
+		appUrl: APP_URL,
+		headSha: HEAD_SHA,
+		infrastructureFiles: [],
+		kind: 'review',
+		pullRequest: 12,
 		summary: publishedSummary([
 			{ id: 'button/hover', status: 'changed' },
 			{ id: 'button/idle', status: 'changed' },
 			{ id: 'card/new', status: 'added' },
 		]),
+		...options,
 	});
+}
 
-	expect(markdown).toBe(
+test('reports the status, the counts, the commit, and a link to the review app', () => {
+	expect(comment()).toBe(
 		[
 			COMMENT_MARKER,
-			'## Visual changes',
+			'## Visual review',
+			'',
+			COMMENT_STATUS_START,
+			'**Status:** Needs review',
+			COMMENT_STATUS_END,
 			'',
 			'| changed | added | removed | unchanged |',
 			'| --- | --- | --- | --- |',
@@ -573,57 +849,71 @@ test('reports the counts, the commit, and a link to the review app', () => {
 	);
 });
 
-test('reports no visual changes in one line', () => {
-	const markdown = commentMarkdown({ appUrl: APP_URL, summary: publishedSummary([]) });
+test('explains an infrastructure review without differences', () => {
+	const markdown = comment({
+		infrastructureFiles: ['.github/scripts/visual-ci.ts'],
+		summary: publishedSummary([]),
+	});
 
-	expect(markdown).toBe(`${COMMENT_MARKER}\nNo visual changes for \`aaaaaaa\`.\n`);
+	expect(markdown).not.toContain('| changed |');
+	expect(markdown).toContain('changes the visual testing infrastructure');
+});
+
+test('reports a clean or failed comparison without a review link for failures', () => {
+	expect(comment({ kind: 'clean', summary: publishedSummary([]) })).toContain(
+		'**Status:** No visual changes',
+	);
+	const failed = comment({ kind: 'failed', summary: undefined });
+	expect(failed).toContain('**Status:** Comparison did not finish');
+	expect(failed).not.toContain('Review in the visual review app');
 });
 
 test('uses only the origin of the configured app URL', () => {
-	const markdown = commentMarkdown({
-		appUrl: `${APP_URL}/some/path?x=1`,
-		summary: publishedSummary([{ id: 'card/new', status: 'added' }]),
-	});
-
-	expect(markdown).toContain(`](${APP_URL}/?pr=12)`);
+	expect(comment({ appUrl: `${APP_URL}/some/path?x=1` })).toContain(`](${APP_URL}/?pr=12)`);
 });
 
 for (const url of ['', 'not a url', 'http://insecure.example', 'javascript:alert(1)']) {
 	test(`rejects the app URL ${JSON.stringify(url)}`, () => {
-		const summary = publishedSummary([{ id: 'card/new', status: 'added' }]);
-		expect(() => commentMarkdown({ appUrl: url, summary })).toThrow(/APP_URL/);
+		expect(() => comment({ appUrl: url })).toThrow(/APP_URL/);
+		expect(() => payloadFor(checkState(), { appUrl: url })).toThrow(/APP_URL/);
 	});
 }
 
+const BOT = 'luke-ui-visual-review[bot]';
+
 const stickyComment = (overrides: Partial<IssueComment> = {}): IssueComment => ({
-	body: `${COMMENT_MARKER}\n## Visual changes\n`,
+	body: `${COMMENT_MARKER}\n## Visual review\n`,
 	id: 1,
-	user: { login: 'github-actions[bot]' },
+	user: { login: BOT },
 	...overrides,
 });
 
-test('finds the sticky comment by marker and bot author together', () => {
+test('finds the sticky comment by marker and App bot author together', () => {
 	const comments = [
 		stickyComment({ body: 'Looks good to me.', id: 1 }),
 		// Anyone can paste the marker, so the author must match too.
 		stickyComment({ id: 2, user: { login: 'mallory' } }),
-		stickyComment({ id: 3, user: null }),
-		stickyComment({ body: null, id: 4 }),
-		stickyComment({ id: 5 }),
+		// The comment from before the App owned it cannot be edited by the App.
+		stickyComment({ id: 3, user: { login: 'github-actions[bot]' } }),
+		stickyComment({ id: 4, user: null }),
+		stickyComment({ body: null, id: 5 }),
 		stickyComment({ id: 6 }),
+		stickyComment({ id: 7 }),
 	];
 
-	expect(findStickyComment(comments)?.id).toBe(5);
-	expect(findStickyComment(comments.slice(0, 4))).toBeUndefined();
-	expect(findStickyComment([])).toBeUndefined();
+	expect(findStickyComment(comments, BOT)?.id).toBe(6);
+	expect(findStickyComment(comments.slice(0, 5), BOT)).toBeUndefined();
+	expect(findStickyComment([], BOT)).toBeUndefined();
 });
 
-test('creates a comment only when captures differ', () => {
-	expect(decideCommentAction(3, undefined)).toEqual({ type: 'create' });
-	expect(decideCommentAction(0, undefined)).toEqual({ type: 'skip' });
+test('creates a comment only when the commit needs review', () => {
+	expect(decideCommentAction('review', undefined)).toEqual({ type: 'create' });
+	expect(decideCommentAction('clean', undefined)).toEqual({ type: 'skip' });
+	expect(decideCommentAction('failed', undefined)).toEqual({ type: 'skip' });
 });
 
-test('updates an existing comment whether or not captures still differ', () => {
-	expect(decideCommentAction(3, 77)).toEqual({ commentId: 77, type: 'update' });
-	expect(decideCommentAction(0, 77)).toEqual({ commentId: 77, type: 'update' });
+test('updates an existing comment whatever the result', () => {
+	expect(decideCommentAction('review', 77)).toEqual({ commentId: 77, type: 'update' });
+	expect(decideCommentAction('clean', 77)).toEqual({ commentId: 77, type: 'update' });
+	expect(decideCommentAction('failed', 77)).toEqual({ commentId: 77, type: 'update' });
 });

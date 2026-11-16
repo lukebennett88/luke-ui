@@ -1,7 +1,9 @@
 name: Visual review publish
 
-# Publishes a pull request's visual-regression-diff artefact for the visual review app and
-# links it from one sticky comment.
+# Publishes a pull request's visual-regression-diff artefact for the visual review app, records
+# the `visual-review` check run for the commit, and links the report from one sticky comment.
+# The check run and the comment belong to the visual review GitHub App, so its review backend can
+# update them when someone approves or requests changes.
 #
 # `workflow_run` starts this workflow from the default branch with secrets, after the untrusted
 # `Visual regression` run has finished. The artefact is data produced by pull request code:
@@ -28,10 +30,10 @@ jobs:
   publish:
     name: publish
     # Inert until the Pages project is configured. `vars` here must be a repository variable:
-    # environment variables are not available to a job-level `if`.
+    # environment variables are not available to a job-level `if`. Failed runs also reach
+    # `resolve-pr`, so the check run can record that the comparison did not finish.
     if: >-
-      github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion ==
-      'success' && vars.VISUAL_REVIEW_PAGES_PROJECT != ''
+      github.event.workflow_run.event == 'pull_request' && vars.VISUAL_REVIEW_PAGES_PROJECT != ''
     runs-on: ubuntu-latest
     timeout-minutes: 10
     # The Cloudflare secrets live in this environment, restricted to `main`, so a workflow edited
@@ -40,7 +42,7 @@ jobs:
     permissions:
       actions: read
       contents: read
-      pull-requests: write
+      pull-requests: read
     steps:
       # This checks out the default branch, which is the trusted code that handles the secrets.
       # Never check out the pull request head here: its scripts would run with those secrets.
@@ -62,6 +64,7 @@ jobs:
           HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
           HEAD_REPOSITORY: ${{ github.event.workflow_run.head_repository.full_name }}
           HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
           RUN_EVENT: ${{ github.event.workflow_run.event }}
           RUN_ID: ${{ github.event.workflow_run.id }}
         run: node .github/scripts/visual-review.ts resolve-pr
@@ -115,14 +118,34 @@ jobs:
             pages deploy site --project-name=${{ vars.VISUAL_REVIEW_PAGES_PROJECT }} --branch=pr-${{
             steps.pr.outputs.number }} --commit-hash=${{ steps.pr.outputs.sha }} --commit-dirty=true
 
-      - name: Comment on the pull request
-        if: steps.pr.outputs.publish == 'true'
+      # The token can write check runs and pull request comments and nothing else. The App's
+      # private key lives in the `visual-review` environment with the Cloudflare secrets.
+      - name: Create a visual review App token
+        id: app-token
+        if: steps.pr.outputs.outcome != 'none' && vars.VISUAL_REVIEW_APP_CLIENT_ID != ''
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.VISUAL_REVIEW_APP_CLIENT_ID }}
+          private-key: ${{ secrets.VISUAL_REVIEW_APP_PRIVATE_KEY }}
+          repositories: ${{ github.event.repository.name }}
+          permission-checks: write
+          permission-pull-requests: write
+
+      # Reads (changed files, the baseline run) use the workflow token. Writes use the App token,
+      # so the check run and comment belong to the App.
+      - name: Record the review
+        if: steps.app-token.outcome == 'success'
         env:
+          APP_SLUG: ${{ steps.app-token.outputs.app-slug }}
+          APP_TOKEN: ${{ steps.app-token.outputs.token }}
           APP_URL: >-
             ${{ vars.VISUAL_REVIEW_APP_URL || format('https://{0}.pages.dev',
             vars.VISUAL_REVIEW_PAGES_PROJECT) }}
           GITHUB_TOKEN: ${{ github.token }}
           HEAD_SHA: ${{ steps.pr.outputs.sha }}
+          OUTCOME: ${{ steps.pr.outputs.outcome }}
           PR_NUMBER: ${{ steps.pr.outputs.number }}
+          RUN_ATTEMPT: ${{ github.event.workflow_run.run_attempt }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
           SUMMARY_FILE: ${{ runner.temp }}/visual-review-deploy/site/summary.json
-        run: node .github/scripts/visual-review.ts comment "$SUMMARY_FILE"
+        run: node .github/scripts/visual-review.ts review

@@ -2,7 +2,8 @@
 //   resolve-pr — find the open pull request a finished Visual regression run belongs to
 //   prepare    — rebuild a publishable site from the untrusted visual-regression-diff artefact,
 //                in a deploy directory it creates itself
-//   comment    — create or update the sticky pull request comment
+//   review     — record the `visual-review` check run for the commit and update the sticky pull
+//                request comment, both as the visual review GitHub App
 //
 // The publish workflow runs this file with plain `node` and no install, so it imports Node
 // built-ins only. It runs with secrets beside an artefact produced by pull request code. Treat
@@ -33,6 +34,8 @@ export type PublishedMeta = {
 	runId: number;
 	runAttempt: number;
 	generatedAt: string;
+	/** The Visual baseline run the report was compared against, when the artefact names one. */
+	baselineRunId: number | null;
 };
 
 /** The `summary.json` the viewer app fetches from a pull request's deployment. */
@@ -75,8 +78,83 @@ export type CommentAction =
 	| { type: 'update'; commentId: number }
 	| { type: 'skip' };
 
+/**
+ * What a finished Visual regression run means for review:
+ * - `report`: the comparison ran and uploaded a report
+ * - `skipped`: the run passed without comparing, because nothing visual could have changed
+ * - `failed`: the run failed, so there is nothing trustworthy to review
+ * - `none`: nothing to record, for example a cancelled run that a newer push superseded
+ */
+export type RunOutcome = 'report' | 'skipped' | 'failed' | 'none';
+
+/**
+ * - `review`: someone must approve or request changes
+ * - `clean`: nothing to review, so the check passes
+ * - `failed`: the comparison did not finish, so the check fails
+ */
+export type ReviewKind = 'review' | 'clean' | 'failed';
+export type ReviewReason = 'visual' | 'infrastructure';
+
+/**
+ * The check run's `external_id`. Only this workflow writes it, and a decision never changes it,
+ * so the review backend can tell which comparison run an approval applies to.
+ */
+export type CheckState = {
+	v: 1;
+	runId: number;
+	runAttempt: number;
+	baselineRunId: number | null;
+	baselineSha: string | null;
+	kind: ReviewKind;
+	reasons: Array<ReviewReason>;
+};
+
+export type CheckRunPayload = {
+	name: typeof CHECK_NAME;
+	head_sha: string;
+	details_url: string;
+	external_id: string;
+	status: 'completed';
+	conclusion: 'action_required' | 'failure' | 'success';
+	completed_at: string;
+	output: { title: string; summary: string; text: string };
+};
+
+export type ExistingCheckRun = {
+	id: number;
+	app: { slug: string } | null;
+	output?: { text?: string | null } | null;
+};
+
 /** Hidden marker that identifies the one sticky comment this script owns. */
 export const COMMENT_MARKER = '<!-- luke-ui-visual-review -->';
+
+/** The review status inside the sticky comment, which the review backend rewrites in place. */
+export const COMMENT_STATUS_START = '<!-- visual-review-status -->';
+export const COMMENT_STATUS_END = '<!-- /visual-review-status -->';
+
+/** The check run branch protection requires. The visual review GitHub App owns it. */
+export const CHECK_NAME = 'visual-review';
+
+/** Older entries drop off so the check run text stays well under GitHub's 65,535 characters. */
+export const MAX_HISTORY_ENTRIES = 50;
+
+/**
+ * Files that decide how screenshots are captured and compared. A pull request that changes one of
+ * them could change its own comparison, so it needs a visual review even when nothing differs.
+ * Each entry is a path prefix.
+ */
+export const INFRASTRUCTURE_PATHS: ReadonlyArray<string> = [
+	'.github/scripts/visual-ci.ts',
+	'.github/scripts/visual-gate.sh',
+	'.github/scripts/visual-impact.ts',
+	'.github/visual-playwright/',
+	'.github/workflows/visual-baseline.yml',
+	'.github/workflows/visual-image.yml',
+	'.github/workflows/visual-regression.yml',
+	'packages/@luke-ui/react/scripts/visual-regression',
+	'packages/@luke-ui/react/vitest.config.ts',
+];
 
 /** Also bounds how many results the artefact can list, since each one costs bytes. */
 export const MAX_SUMMARY_BYTES = 5 * 1024 * 1024;
@@ -97,8 +175,15 @@ export const MAX_PUBLISHED_FILES = 3_000;
 export const MAX_PUBLISHED_BYTES = 300 * 1024 * 1024;
 
 const DIFF_ARTIFACT_NAME = 'visual-regression-diff';
-const COMMENT_AUTHOR = 'github-actions[bot]';
 const SUMMARY_FILE = 'summary.json';
+const BASELINE_FILE = 'baseline.json';
+const MAX_BASELINE_BYTES = 1024;
+const BASELINE_WORKFLOW_PATH = '.github/workflows/visual-baseline.yml';
+const BASELINE_BRANCH = 'main';
+const MAX_FILE_PAGES = 30;
+const MAX_LISTED_INFRASTRUCTURE_FILES = 20;
+const MAX_TITLE_LENGTH = 100;
+const APP_SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{0,99}$/;
 const DIFF_DIR = 'diff';
 const SHORT_SHA_LENGTH = 7;
 const API_PAGE_SIZE = 100;
@@ -110,6 +195,13 @@ const VIEWPORT_PATTERN = /^\d{1,5}x\d{1,5}$/;
 const SHA_PATTERN = /^[0-9a-f]{40}$/;
 const POSITIVE_INTEGER_PATTERN = /^[1-9]\d{0,14}$/;
 const REPOSITORY_PATTERN = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
+
+/** A check run that needs review blocks merging until a decision replaces `action_required`. */
+const CONCLUSIONS: Record<ReviewKind, CheckRunPayload['conclusion']> = {
+	clean: 'success',
+	failed: 'failure',
+	review: 'action_required',
+};
 
 /** The PNGs each status publishes. Nothing else is ever copied out of the artefact. */
 const IMAGE_KINDS: Record<PublishedStatus, ReadonlyArray<ImageKind>> = {
@@ -192,11 +284,13 @@ export function parseArtifactSummary(raw: string): ArtifactSummary {
 	return { results, unchanged };
 }
 
+export type RunMeta = Omit<PublishedMeta, 'baselineRunId'>;
+
 /** Reads run metadata from workflow-provided environment values, never from the artefact. */
 export function parseMeta(
 	env: Record<string, string | undefined>,
 	now: () => Date = () => new Date(),
-): PublishedMeta {
+): RunMeta {
 	const headSha = env.HEAD_SHA ?? '';
 	if (!SHA_PATTERN.test(headSha)) throw new Error('HEAD_SHA must be a 40-character commit SHA.');
 
@@ -207,6 +301,26 @@ export function parseMeta(
 		runAttempt: requirePositiveInteger(env.RUN_ATTEMPT, 'RUN_ATTEMPT'),
 		generatedAt: now().toISOString(),
 	};
+}
+
+/**
+ * Reads the baseline run id the comparison recorded. The artefact is hostile, so this only proves
+ * the shape. `review` checks through the GitHub API that the run really is a baseline from `main`.
+ * Runs from before the comparison recorded its baseline have no file, and get `null`.
+ */
+export function parseBaselineRunId(raw: string | undefined): number | null {
+	if (raw === undefined) return null;
+	let data: unknown;
+	try {
+		data = JSON.parse(raw);
+	} catch {
+		throw new Error(`${BASELINE_FILE} is not valid JSON.`);
+	}
+	if (!isRecord(data) || typeof data.runId !== 'number' || !Number.isSafeInteger(data.runId)) {
+		throw new Error(`${BASELINE_FILE} runId must be a positive integer.`);
+	}
+	if (data.runId <= 0) throw new Error(`${BASELINE_FILE} runId must be a positive integer.`);
+	return data.runId;
 }
 
 /**
@@ -223,9 +337,9 @@ export function parseMeta(
 export async function prepareSite(options: {
 	artifactDir: string;
 	outDir: string;
-	meta: PublishedMeta;
+	meta: RunMeta;
 }): Promise<PublishedSummary> {
-	const { artifactDir, outDir, meta } = options;
+	const { artifactDir, outDir } = options;
 
 	const artifactRoot = await realpath(artifactDir);
 	const rawSummary = await readContainedFile({
@@ -235,6 +349,19 @@ export async function prepareSite(options: {
 		root: artifactRoot,
 	});
 	const { results, unchanged } = parseArtifactSummary(rawSummary.toString('utf8'));
+	const baselineFile = path.join(artifactDir, BASELINE_FILE);
+	const rawBaseline = (await lstat(baselineFile).catch(() => undefined))
+		? await readContainedFile({
+				file: baselineFile,
+				label: BASELINE_FILE,
+				maxBytes: MAX_BASELINE_BYTES,
+				root: artifactRoot,
+			})
+		: undefined;
+	const meta: PublishedMeta = {
+		...options.meta,
+		baselineRunId: parseBaselineRunId(rawBaseline?.toString('utf8')),
+	};
 
 	const diffRoot = path.join(artifactRoot, DIFF_DIR);
 	const images = results.flatMap((result) => {
@@ -295,54 +422,230 @@ export async function prepareSite(options: {
 	return summary;
 }
 
-/** The sticky comment body for a prepared summary: the counts and a link to the review app. */
-export function commentMarkdown(options: {
-	summary: PublishedSummary;
-	/** Viewer origin, for example `https://luke-ui-visual-review.pages.dev`. */
-	appUrl: string;
-}): string {
-	const { counts, meta, results } = options.summary;
-	const appUrl = requireHttpsOrigin(options.appUrl, 'APP_URL');
-	const shortSha = meta.headSha.slice(0, SHORT_SHA_LENGTH);
-
-	if (results.length === 0) {
-		return `${COMMENT_MARKER}\nNo visual changes for \`${shortSha}\`.\n`;
+/** Decides what a finished Visual regression run means for review, from its conclusion alone. */
+export function decideRunOutcome(conclusion: string, hasArtifact: boolean): RunOutcome {
+	switch (conclusion) {
+		case 'success':
+			return hasArtifact ? 'report' : 'skipped';
+		case 'failure':
+		case 'timed_out':
+			return 'failed';
+		default:
+			// `cancelled` usually means a newer push superseded the run. Leave the check alone.
+			return 'none';
 	}
+}
 
+/** The pull request files that belong to the visual testing infrastructure, sorted. */
+export function infrastructureChanges(files: ReadonlyArray<string>): Array<string> {
+	return files
+		.filter((file) => INFRASTRUCTURE_PATHS.some((prefix) => file.startsWith(prefix)))
+		.toSorted();
+}
+
+/** Whether a report needs review, and why. */
+export function decideReview(options: {
+	outcome: Exclude<RunOutcome, 'none'>;
+	differing: number;
+	infrastructureFiles: ReadonlyArray<string>;
+}): { kind: ReviewKind; reasons: Array<ReviewReason> } {
+	if (options.outcome === 'failed') return { kind: 'failed', reasons: [] };
+	const reasons: Array<ReviewReason> = [];
+	if (options.differing > 0) reasons.push('visual');
+	if (options.infrastructureFiles.length > 0) reasons.push('infrastructure');
+	return { kind: reasons.length > 0 ? 'review' : 'clean', reasons };
+}
+
+/** The status line text shared by the check run and the sticky comment. */
+export function statusText(kind: ReviewKind): string {
+	switch (kind) {
+		case 'review':
+			return 'Needs review';
+		case 'clean':
+			return 'No visual changes';
+		case 'failed':
+			return 'Comparison did not finish';
+	}
+}
+
+/** `2026-11-16 03:22 UTC`. */
+export function formatTimestamp(date: Date): string {
+	return `${date.toISOString().slice(0, 16).replace('T', ' ')} UTC`;
+}
+
+/**
+ * Prepends one entry to a check run's history. Lines that are not entries are dropped, and the
+ * oldest entries fall off past {@link MAX_HISTORY_ENTRIES}.
+ */
+export function prependHistory(previousText: string | null | undefined, entry: string): string {
+	const previous = (previousText ?? '').split('\n').filter((line) => line.startsWith('- '));
+	const entries = [`- ${entry}`, ...previous].slice(0, MAX_HISTORY_ENTRIES);
+	return ['### History', '', ...entries, ''].join('\n');
+}
+
+function countParts(counts: Record<VisualStatus, number>): Array<string> {
+	return (['changed', 'added', 'removed'] as const)
+		.filter((status) => counts[status] > 0)
+		.map((status) => `${counts[status]} ${status}`);
+}
+
+function countsTable(counts: Record<VisualStatus, number>): Array<string> {
 	return [
-		COMMENT_MARKER,
-		'## Visual changes',
-		'',
 		'| changed | added | removed | unchanged |',
 		'| --- | --- | --- | --- |',
 		`| ${counts.changed} | ${counts.added} | ${counts.removed} | ${counts.unchanged} |`,
-		'',
-		`**[Review in the visual review app](${appUrl}/?pr=${meta.pullRequest})**`,
-		'',
-		`Report for \`${shortSha}\`.`,
-		'',
-	].join('\n');
+	];
 }
 
-/** Finds the sticky comment: it must carry the marker and come from the Actions bot. */
-export function findStickyComment(comments: ReadonlyArray<IssueComment>): IssueComment | undefined {
-	return comments.find((candidate) => {
-		return (
-			candidate.user?.login === COMMENT_AUTHOR && (candidate.body ?? '').includes(COMMENT_MARKER)
+function infrastructureList(files: ReadonlyArray<string>): Array<string> {
+	const listed = files.slice(0, MAX_LISTED_INFRASTRUCTURE_FILES).map((file) => `- \`${file}\``);
+	const more = files.length - listed.length;
+	return more > 0 ? [...listed, `- and ${more} more`] : listed;
+}
+
+/**
+ * The `visual-review` check run for one comparison run. Its first summary line is the status,
+ * which the review backend rewrites when someone approves or requests changes.
+ */
+export function checkRunPayload(options: {
+	state: CheckState;
+	headSha: string;
+	pullRequest: number;
+	repository: string;
+	/** Present when the run published a report. */
+	summary: PublishedSummary | undefined;
+	infrastructureFiles: ReadonlyArray<string>;
+	appUrl: string;
+	previousText: string | null | undefined;
+	now: Date;
+}): CheckRunPayload {
+	const { state, summary, infrastructureFiles, now } = options;
+	const appUrl = requireHttpsOrigin(options.appUrl, 'APP_URL');
+	const detailsUrl = `${appUrl}/?pr=${options.pullRequest}`;
+	const runUrl = `https://github.com/${options.repository}/actions/runs/${state.runId}`;
+	const status = statusText(state.kind);
+
+	const reasonParts: Array<string> = [];
+	if (state.reasons.includes('visual') && summary !== undefined) {
+		reasonParts.push(countParts(summary.counts).join(', '));
+	}
+	if (state.reasons.includes('infrastructure')) {
+		reasonParts.push('visual testing infrastructure changed');
+	}
+	const title = state.kind === 'review' ? `${status}: ${reasonParts.join('; ')}` : status;
+
+	const baseline =
+		state.baselineRunId === null
+			? 'an unrecorded baseline'
+			: `baseline run [${state.baselineRunId}](https://github.com/${options.repository}/actions/runs/${state.baselineRunId})${
+					state.baselineSha === null
+						? ' (unverified)'
+						: ` from \`main@${state.baselineSha.slice(0, SHORT_SHA_LENGTH)}\``
+				}`;
+
+	const lines = [`**Status:** ${status}`, ''];
+	if (summary !== undefined) lines.push(...countsTable(summary.counts), '');
+	if (state.kind !== 'failed') lines.push(`[Review in the visual review app](${detailsUrl})`, '');
+	lines.push(
+		`Comparison run [${state.runId}](${runUrl}) (attempt ${state.runAttempt}) against ${baseline}.`,
+	);
+	if (infrastructureFiles.length > 0) {
+		lines.push(
+			'',
+			'This pull request changes the visual testing infrastructure, so it needs a review even when nothing differs:',
+			'',
+			...infrastructureList(infrastructureFiles),
 		);
+	}
+
+	const entry = `${formatTimestamp(now)} · Comparison run ${state.runId} (attempt ${state.runAttempt}): ${status.toLowerCase()}`;
+
+	return {
+		completed_at: now.toISOString(),
+		conclusion: CONCLUSIONS[state.kind],
+		details_url: detailsUrl,
+		external_id: JSON.stringify(state),
+		head_sha: options.headSha,
+		name: CHECK_NAME,
+		output: {
+			summary: `${lines.join('\n')}\n`,
+			text: prependHistory(options.previousText, entry),
+			title: title.slice(0, MAX_TITLE_LENGTH),
+		},
+		status: 'completed',
+	};
+}
+
+/**
+ * The one check run this App already made for the commit, if any. Re-running a comparison updates
+ * it instead of adding a second run with the same name.
+ */
+export function findOwnCheckRun(
+	runs: ReadonlyArray<ExistingCheckRun>,
+	appSlug: string,
+): ExistingCheckRun | undefined {
+	return runs.filter((run) => run.app?.slug === appSlug).toSorted((a, b) => b.id - a.id)[0];
+}
+
+/** The sticky comment body: the review status, the counts, and a link to the review app. */
+export function commentMarkdown(options: {
+	kind: ReviewKind;
+	pullRequest: number;
+	headSha: string;
+	summary: PublishedSummary | undefined;
+	infrastructureFiles: ReadonlyArray<string>;
+	/** Viewer origin, for example `https://luke-ui-visual-review.pages.dev`. */
+	appUrl: string;
+}): string {
+	const { kind, summary } = options;
+	const appUrl = requireHttpsOrigin(options.appUrl, 'APP_URL');
+	const shortSha = options.headSha.slice(0, SHORT_SHA_LENGTH);
+
+	const lines = [
+		COMMENT_MARKER,
+		'## Visual review',
+		'',
+		COMMENT_STATUS_START,
+		`**Status:** ${statusText(kind)}`,
+		COMMENT_STATUS_END,
+		'',
+	];
+	if (summary !== undefined && summary.results.length > 0) {
+		lines.push(...countsTable(summary.counts), '');
+	}
+	if (options.infrastructureFiles.length > 0) {
+		lines.push(
+			'This pull request changes the visual testing infrastructure, so it needs a review even when nothing differs.',
+			'',
+		);
+	}
+	if (kind !== 'failed') {
+		lines.push(`**[Review in the visual review app](${appUrl}/?pr=${options.pullRequest})**`, '');
+	}
+	lines.push(`Report for \`${shortSha}\`.`, '');
+	return lines.join('\n');
+}
+
+/** Finds the sticky comment: it must carry the marker and come from the given bot. */
+export function findStickyComment(
+	comments: ReadonlyArray<IssueComment>,
+	author: string,
+): IssueComment | undefined {
+	return comments.find((candidate) => {
+		return candidate.user?.login === author && (candidate.body ?? '').includes(COMMENT_MARKER);
 	});
 }
 
 /**
- * One sticky comment per pull request. A report without differences only updates a comment that
- * already exists, so a pull request that never changed pixels gets no comment at all.
+ * One sticky comment per pull request. Only a report that needs review creates one, so a pull
+ * request that never needed a review gets no comment at all.
  */
 export function decideCommentAction(
-	differing: number,
+	kind: ReviewKind,
 	existingCommentId: number | undefined,
 ): CommentAction {
 	if (existingCommentId !== undefined) return { commentId: existingCommentId, type: 'update' };
-	if (differing === 0) return { type: 'skip' };
+	if (kind !== 'review') return { type: 'skip' };
 	return { type: 'create' };
 }
 
@@ -547,6 +850,7 @@ async function githubRequest<T>(options: {
 async function doNotPublish(reason: string) {
 	info(`Nothing to publish: ${reason}`);
 	await writeOutput('publish', false);
+	await writeOutput('outcome', 'none');
 }
 
 async function resolvePr() {
@@ -587,21 +891,26 @@ async function resolvePr() {
 		return;
 	}
 
-	// Prose-only pull requests skip the compare job, so their runs upload no artefact.
-	const artifactsUrl = new URL(
-		`https://api.github.com/repos/${repository}/actions/runs/${runId}/artifacts`,
-	);
-	artifactsUrl.searchParams.set('name', DIFF_ARTIFACT_NAME);
-	const artifacts = await githubRequest<{ total_count: number }>({ token, url: artifactsUrl });
-	if (artifacts.total_count === 0) {
-		await doNotPublish(`Run ${runId} has no ${DIFF_ARTIFACT_NAME} artefact.`);
-		return;
+	const conclusion = process.env.RUN_CONCLUSION ?? '';
+	let hasArtifact = false;
+	if (conclusion === 'success') {
+		// Prose-only pull requests skip the compare job, so their runs upload no artefact.
+		const artifactsUrl = new URL(
+			`https://api.github.com/repos/${repository}/actions/runs/${runId}/artifacts`,
+		);
+		artifactsUrl.searchParams.set('name', DIFF_ARTIFACT_NAME);
+		const artifacts = await githubRequest<{ total_count: number }>({ token, url: artifactsUrl });
+		hasArtifact = artifacts.total_count > 0;
 	}
 
-	info(`Publishing run ${runId} for pull request #${decision.number} at ${run.headSha}.`);
+	const outcome = decideRunOutcome(conclusion, hasArtifact);
+	info(
+		`Run ${runId} for pull request #${decision.number} at ${run.headSha} concluded ${JSON.stringify(conclusion)}: ${outcome}.`,
+	);
 	await writeOutput('number', decision.number);
 	await writeOutput('sha', run.headSha);
-	await writeOutput('publish', true);
+	await writeOutput('outcome', outcome);
+	await writeOutput('publish', outcome === 'report');
 }
 
 async function prepare(artifactDir: string | undefined, outDir: string | undefined) {
@@ -637,34 +946,159 @@ async function listComments(token: string, repository: string, pullRequest: numb
 	return comments;
 }
 
-async function comment(summaryPath: string | undefined) {
-	if (summaryPath === undefined) fail('Usage: visual-review comment <summaryPath>');
+/** Lists the pull request's changed files. Past GitHub's 3,000-file limit the list is partial. */
+async function listPullFiles(token: string, repository: string, pullRequest: number) {
+	const files: Array<string> = [];
+	for (let page = 1; page <= MAX_FILE_PAGES; page += 1) {
+		const url = new URL(`https://api.github.com/repos/${repository}/pulls/${pullRequest}/files`);
+		url.searchParams.set('per_page', String(API_PAGE_SIZE));
+		url.searchParams.set('page', String(page));
+		// Sequential: each page decides whether another one exists.
+		// oxlint-disable-next-line no-await-in-loop
+		const batch = await githubRequest<Array<{ filename: string }>>({ token, url });
+		files.push(...batch.map((file) => file.filename));
+		if (batch.length < API_PAGE_SIZE) return { complete: true, files };
+	}
+	return { complete: false, files };
+}
 
-	const token = requireEnv('GITHUB_TOKEN');
+/**
+ * Confirms through the GitHub API that the run the artefact names is a successful Visual baseline
+ * run on `main`, and returns its commit. Anything else is recorded as unverified.
+ */
+async function verifyBaseline(token: string, repository: string, runId: number) {
+	try {
+		const run = await githubRequest<{
+			path?: string;
+			head_branch?: string | null;
+			head_sha?: string;
+			conclusion?: string | null;
+			repository?: { full_name?: string };
+		}>({ token, url: `https://api.github.com/repos/${repository}/actions/runs/${runId}` });
+		const verified =
+			run.path === BASELINE_WORKFLOW_PATH &&
+			run.head_branch === BASELINE_BRANCH &&
+			run.conclusion === 'success' &&
+			run.repository?.full_name === repository &&
+			SHA_PATTERN.test(run.head_sha ?? '');
+		if (verified) return run.head_sha ?? null;
+	} catch (error) {
+		const reason = error instanceof Error ? error.message : String(error);
+		info(`Could not read baseline run ${runId}: ${reason}`);
+	}
+	info(
+		`Baseline run ${runId} is not a successful Visual baseline run on main. Recording it as unverified.`,
+	);
+	return null;
+}
+
+async function review() {
+	const outcome = requireEnv('OUTCOME');
+	if (outcome !== 'report' && outcome !== 'skipped' && outcome !== 'failed') {
+		fail(`OUTCOME must be report, skipped, or failed, not ${JSON.stringify(outcome)}.`);
+	}
+	const githubToken = requireEnv('GITHUB_TOKEN');
+	const appToken = requireEnv('APP_TOKEN');
+	const appSlug = requireEnv('APP_SLUG');
+	if (!APP_SLUG_PATTERN.test(appSlug)) fail('APP_SLUG is not a GitHub App slug.');
 	const repository = requireRepository();
+	const appUrl = requireEnv('APP_URL');
 	const pullRequest = requirePositiveInteger(process.env.PR_NUMBER, 'PR_NUMBER');
 	const headSha = requireEnv('HEAD_SHA');
+	if (!SHA_PATTERN.test(headSha)) fail('HEAD_SHA must be a 40-character commit SHA.');
+	const runId = requirePositiveInteger(process.env.RUN_ID, 'RUN_ID');
+	const runAttempt = requirePositiveInteger(process.env.RUN_ATTEMPT, 'RUN_ATTEMPT');
 
-	// This file is the output of `prepare`, not artefact content.
-	const summary: PublishedSummary = JSON.parse(await readFile(path.resolve(summaryPath), 'utf8'));
-	if (summary.meta.pullRequest !== pullRequest || summary.meta.headSha !== headSha) {
-		fail('The prepared summary does not match PR_NUMBER and HEAD_SHA.');
+	let summary: PublishedSummary | undefined;
+	if (outcome === 'report') {
+		// This file is the output of `prepare`, not artefact content.
+		summary = JSON.parse(await readFile(path.resolve(requireEnv('SUMMARY_FILE')), 'utf8'));
+		if (summary?.meta.pullRequest !== pullRequest || summary.meta.headSha !== headSha) {
+			fail('The prepared summary does not match PR_NUMBER and HEAD_SHA.');
+		}
 	}
 
-	const body = commentMarkdown({ appUrl: requireEnv('APP_URL'), summary });
+	const pullFiles = await listPullFiles(githubToken, repository, pullRequest);
+	const infrastructureFiles = infrastructureChanges(pullFiles.files);
+	if (!pullFiles.complete) {
+		// Files past the limit cannot be checked, so assume they include infrastructure.
+		infrastructureFiles.push('(files past the 3,000 GitHub lists)');
+	}
+
+	const baselineRunId = summary?.meta.baselineRunId ?? null;
+	const baselineSha =
+		baselineRunId === null ? null : await verifyBaseline(githubToken, repository, baselineRunId);
+	const { kind, reasons } = decideReview({
+		differing: summary?.results.length ?? 0,
+		infrastructureFiles,
+		outcome,
+	});
+	const state: CheckState = { baselineRunId, baselineSha, kind, reasons, runAttempt, runId, v: 1 };
+
+	const checkRunsUrl = new URL(
+		`https://api.github.com/repos/${repository}/commits/${headSha}/check-runs`,
+	);
+	checkRunsUrl.searchParams.set('check_name', CHECK_NAME);
+	checkRunsUrl.searchParams.set('filter', 'all');
+	checkRunsUrl.searchParams.set('per_page', String(API_PAGE_SIZE));
+	const { check_runs: checkRuns } = await githubRequest<{ check_runs: Array<ExistingCheckRun> }>({
+		token: appToken,
+		url: checkRunsUrl,
+	});
+	const existing = findOwnCheckRun(checkRuns, appSlug);
+
+	const payload = checkRunPayload({
+		appUrl,
+		headSha,
+		infrastructureFiles,
+		now: new Date(),
+		previousText: existing?.output?.text,
+		pullRequest,
+		repository,
+		state,
+		summary,
+	});
+	if (existing === undefined) {
+		await githubRequest({
+			body: payload,
+			method: 'POST',
+			token: appToken,
+			url: `https://api.github.com/repos/${repository}/check-runs`,
+		});
+		info(`Created the ${CHECK_NAME} check run for ${headSha}: ${payload.output.title}.`);
+	} else {
+		const { head_sha: _headSha, ...update } = payload;
+		await githubRequest({
+			body: update,
+			method: 'PATCH',
+			token: appToken,
+			url: `https://api.github.com/repos/${repository}/check-runs/${existing.id}`,
+		});
+		info(`Updated ${CHECK_NAME} check run ${existing.id} for ${headSha}: ${payload.output.title}.`);
+	}
+
+	const body = commentMarkdown({
+		appUrl,
+		headSha,
+		infrastructureFiles,
+		kind,
+		pullRequest,
+		summary,
+	});
 	await writeStepSummary(body);
 
-	const existing = findStickyComment(await listComments(token, repository, pullRequest));
-	const action = decideCommentAction(summary.results.length, existing?.id);
+	const comments = await listComments(appToken, repository, pullRequest);
+	const sticky = findStickyComment(comments, `${appSlug}[bot]`);
+	const action = decideCommentAction(kind, sticky?.id);
 	switch (action.type) {
 		case 'skip':
-			info('No visual changes and no existing comment. Nothing to post.');
+			info('Nothing to review and no existing comment. Nothing to post.');
 			break;
 		case 'create':
 			await githubRequest({
 				body: { body },
 				method: 'POST',
-				token,
+				token: appToken,
 				url: `https://api.github.com/repos/${repository}/issues/${pullRequest}/comments`,
 			});
 			info(`Created the visual review comment on pull request #${pullRequest}.`);
@@ -673,7 +1107,7 @@ async function comment(summaryPath: string | undefined) {
 			await githubRequest({
 				body: { body },
 				method: 'PATCH',
-				token,
+				token: appToken,
 				url: `https://api.github.com/repos/${repository}/issues/comments/${action.commentId}`,
 			});
 			info(`Updated visual review comment ${action.commentId}.`);
@@ -695,11 +1129,11 @@ if (isCli) {
 			case 'prepare':
 				await prepare(args[0], args[1]);
 				break;
-			case 'comment':
-				await comment(args[0]);
+			case 'review':
+				await review();
 				break;
 			case undefined:
-				fail('Usage: visual-review <resolve-pr|prepare|comment>');
+				fail('Usage: visual-review <resolve-pr|prepare|review>');
 				break;
 			default:
 				fail(`Unknown command: ${command}`);

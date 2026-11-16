@@ -96,6 +96,13 @@ jobs:
       - name: Summarise the comparison
         run: pnpm --filter @luke-ui/workflow-scripts run visual-ci summarise
 
+      # The visual review approval records which baseline a report was compared against. The
+      # publish workflow verifies this run id through the GitHub API before recording it.
+      - name: Record the baseline run
+        env:
+          BASELINE_RUN_ID: ${{ steps.baseline.outputs.run-id }}
+        run: printf '{"runId":%s}\n' "$BASELINE_RUN_ID" > .artifacts/visual-regression/baseline.json
+
       - name: Upload expected, actual, and diff screenshots
         if: always()
         uses: actions/upload-artifact@v7
@@ -104,6 +111,7 @@ jobs:
           path: |
             .artifacts/visual-regression/diff
             .artifacts/visual-regression/summary.json
+            .artifacts/visual-regression/baseline.json
           if-no-files-found: ignore
           retention-days: 14
 
