@@ -61,6 +61,9 @@ to the comparison on screen. When a newer commit or comparison exists, the bar s
 out of date and turns the decisions off until the page reloads. Someone without write access sees
 the status only.
 
+The [scheduled sweep](../../docs/VISUAL_TESTING.md#review-check) can occasionally revoke a valid
+approval when it races another update. Refresh the page and approve again.
+
 The bar needs the review backend. On the development server it says review actions are only
 available on the deployed app. A local comparison (`?source=local`) has no pull request, so it shows
 no bar.

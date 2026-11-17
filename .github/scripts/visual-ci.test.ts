@@ -4,10 +4,11 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mkdir, mkdtemp, writeFile } from 'node:fs/promises';
 import { expect, test } from 'vite-plus/test';
-import type { BaselineRun, VisualCounts } from './visual-ci.js';
+import type { BaselineRun, RunArtifact, VisualCounts } from './visual-ci.js';
 import {
 	countPngs,
 	countsTableRows,
+	decideBaselineArtifact,
 	decideBaselineRun,
 	isBaselineRunWaitable,
 	isWorkflowMissingStatus,
@@ -67,6 +68,37 @@ test('checks status before conclusion so a queued run is not read as a failure',
 	const decision = decideBaselineRun({ conclusion: null, id: 3, status: 'queued' }, runUrl);
 	expect(!decision.ok && decision.reason).toContain('queued');
 });
+
+const baselineArtifact = (overrides: Partial<RunArtifact> = {}): RunArtifact => ({
+	expired: false,
+	id: 555,
+	name: 'visual-baseline',
+	...overrides,
+});
+
+test('picks the one unexpired baseline artefact of the run', () => {
+	const decision = decideBaselineArtifact(
+		[
+			baselineArtifact({ expired: true, id: 554 }),
+			baselineArtifact(),
+			baselineArtifact({ id: 556, name: 'something-else' }),
+		],
+		42,
+	);
+	expect(decision).toEqual({ artifactId: 555, ok: true });
+});
+
+for (const [name, artifacts] of [
+	['no artefact', []],
+	['only an expired artefact', [baselineArtifact({ expired: true })]],
+	['two unexpired artefacts', [baselineArtifact(), baselineArtifact({ id: 556 })]],
+] as const) {
+	test(`fails a baseline run with ${name} rather than guessing`, () => {
+		const decision = decideBaselineArtifact(artifacts, 42);
+		expect(decision.ok).toBe(false);
+		expect(!decision.ok && decision.reason).toContain('not exactly one');
+	});
+}
 
 test('treats only 404 as the missing-workflow bootstrap case', () => {
 	expect(isWorkflowMissingStatus(404)).toBe(true);
@@ -165,11 +197,11 @@ function sequenceFetch(responses: Array<BaselineRun | undefined | 'workflow-miss
 test('waits through in-progress polls then accepts the same newest run once it succeeds', async () => {
 	const clock = createClock();
 	const logs: Array<string> = [];
-	const runId = await waitForNewestBaseline({
+	const baseline = await waitForNewestBaseline({
 		fetchNewest: sequenceFetch([
 			{ conclusion: null, id: 70, status: 'queued' },
 			{ conclusion: null, id: 70, status: 'in_progress' },
-			{ conclusion: 'success', id: 70, status: 'completed' },
+			{ conclusion: 'success', id: 70, run_attempt: 3, status: 'completed' },
 		]),
 		runUrl,
 		sleep: (ms) => clock.sleep(ms),
@@ -179,7 +211,8 @@ test('waits through in-progress polls then accepts the same newest run once it s
 		info: (message) => logs.push(message),
 	});
 
-	expect(runId).toBe(70);
+	// The attempt that succeeded, so a later re-run of the baseline counts as a different one.
+	expect(baseline).toEqual({ runAttempt: 3, runId: 70 });
 	expect(clock.sleepCalls).toEqual([1_000, 1_000]);
 	expect(logs.some((line) => line.includes('queued') && line.includes(runUrl(70)))).toBe(true);
 	expect(logs.some((line) => line.includes('completed successfully'))).toBe(true);
@@ -237,7 +270,7 @@ test('fails immediately when the newest completed baseline was cancelled', async
 
 test('returns immediately when the newest baseline is already successful', async () => {
 	const clock = createClock();
-	const runId = await waitForNewestBaseline({
+	const baseline = await waitForNewestBaseline({
 		fetchNewest: async () => ({ conclusion: 'success', id: 5, status: 'completed' }),
 		runUrl,
 		sleep: (ms) => clock.sleep(ms),
@@ -246,14 +279,14 @@ test('returns immediately when the newest baseline is already successful', async
 		timeoutMs: 5_000,
 	});
 
-	expect(runId).toBe(5);
+	expect(baseline).toEqual({ runAttempt: 1, runId: 5 });
 	expect(clock.sleepCalls).toEqual([]);
 });
 
 test('switches to a newer in-progress run that appears while waiting, even when status matches', async () => {
 	const clock = createClock();
 	const logs: Array<string> = [];
-	const runId = await waitForNewestBaseline({
+	const { runId } = await waitForNewestBaseline({
 		fetchNewest: sequenceFetch([
 			{ conclusion: null, id: 10, status: 'in_progress' },
 			{ conclusion: null, id: 20, status: 'in_progress' },
