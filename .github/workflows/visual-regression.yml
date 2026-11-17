@@ -112,6 +112,10 @@ jobs:
           "$BASELINE_RUN_ATTEMPT" "$BASELINE_ARTIFACT_ID" >
           .artifacts/visual-regression/baseline.json
 
+      - name: Write an invalid report for the first live-probe attempt
+        if: github.run_attempt == 1
+        run: printf '{}\n' > .artifacts/visual-regression/summary.json
+
       # A re-run attempt replaces the earlier attempt's report, so the publisher's download by name
       # for this run gets the latest attempt's files.
       - name: Upload expected, actual, and diff screenshots
