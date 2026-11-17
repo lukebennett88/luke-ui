@@ -690,6 +690,18 @@ describe('pull requests', () => {
 		expect(new URL(list?.url ?? '').searchParams.get('check_name')).toBe('visual-review');
 	});
 
+	test('lists a clean record blocked for a newer comparison as comparing', async () => {
+		const { github, handle } = setup();
+		github.state.listedCheckRun = {
+			conclusion: 'ACTION_REQUIRED',
+			externalId: checkRun({ kind: 'clean', reasons: [] }).external_id,
+			title: 'Comparing',
+		};
+		const response = await handle(new Request(`${ORIGIN}/api/pulls`), env);
+		const { pulls } = (await response.json()) as { pulls: Array<{ review: unknown }> };
+		expect(pulls[0]?.review).toMatchObject({ kind: 'clean', state: 'comparing' });
+	});
+
 	test('lists a review that failed without a new record as failed', async () => {
 		const { github, handle } = setup();
 		github.state.listedCheckRun = {

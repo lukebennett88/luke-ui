@@ -76,12 +76,14 @@ route with `503 unconfigured`.
 [Visual regression testing](../../docs/VISUAL_TESTING.md#review-backend) lists the GitHub App and
 Pages settings.
 
-A review's `state` is `comparing` while a comparison runs, and nobody can decide it then. A check
-run can fail without a new record, for example when its baseline is replaced. A failed check run is
-`changes-requested` only when its record is a review and its title names the reviewer. Any other
-failed check run is `failed`. A decision applies only to the latest comparison: the newest
-`Visual regression` run for the head commit. Requesting a re-run makes the earlier attempt stale at
-once. The backend refuses a decision with `409` and one of these codes, and writes nothing:
+A review's `state` is `comparing` while a comparison runs, or while a newer comparison is not
+recorded yet, and nobody can decide it then. A `clean` record whose check run does not pass is
+`comparing` when its title is `Comparing`, and `failed` otherwise. A check run can fail without a
+new record, for example when its baseline is replaced. A failed check run is `changes-requested`
+only when its record is a review and its title names the reviewer. Any other failed check run is
+`failed`. A decision applies only to the latest comparison: the newest `Visual regression` run for
+the head commit. Requesting a re-run makes the earlier attempt stale at once. The backend refuses a
+decision with `409` and one of these codes, and writes nothing:
 
 - `not-reviewable`: the check run is not a completed comparison with changes to review.
 - `stale`: the pull request has a newer commit, or the check run's comparison is not the latest
