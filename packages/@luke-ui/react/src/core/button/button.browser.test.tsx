@@ -1323,7 +1323,9 @@ test('kitchen sink on overlay', { tags: ['visual'] }, async () => {
 				<Grid columns={3}>
 					<Button prominence="low">Cancel</Button>
 					<Button>Standard</Button>
-					<Button prominence="high">Save</Button>
+					<Button prominence="high">
+						{appearance.theme === 'tactile' && appearance.mode === 'light' ? 'Live probe' : 'Save'}
+					</Button>
 					<Button prominence="low" tone="danger">
 						Delete
 					</Button>
