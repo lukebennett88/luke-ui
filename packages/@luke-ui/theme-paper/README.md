@@ -47,7 +47,7 @@ but it still names Inter, so keep importing `fonts.css`.
 
 `fonts.css` declares Inter 4.1 (version 4.001), the Latin subset of the variable `wght` axis from
 100 to 900. The file is `inter-latin-wght-normal.woff2` from
-[`@fontsource-variable/inter` 5.3.0](https://www.npmjs.com/package/@fontsource-variable/inter/v/5.3.0),
+[`@fontsource-variable/inter` 5.3.0](https://npmx.dev/package/@fontsource-variable/inter/v/5.3.0),
 which distributes the Google Fonts build of [Inter](https://github.com/rsms/inter) by The Inter
 Project Authors. It is licensed under the SIL Open Font License 1.1, included as
 `dist/fonts/OFL.txt`.
