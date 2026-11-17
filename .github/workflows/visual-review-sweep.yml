@@ -10,6 +10,11 @@ name: Visual review sweep
 #   `Visual baseline`
 # - a check run that passes on a failed or `Comparing` record, because a review decision landed on
 #   a record written at the same moment and the review backend could not repair it
+# - a check run still in progress or needing action long after the latest comparison finished
+#   without a recorded result
+#
+# The sweep only fails check runs. It does not publish a report or record a result, so the remedy
+# for `Publishing the report failed` is to re-run the comparison.
 #
 # Only the publisher writes the check run's external id. The sweep writes how the check run reads
 # and nothing else, and sends no external id, so the response to its write names the record the
@@ -17,10 +22,11 @@ name: Visual review sweep
 # presentation again. A concurrency group shared with the publisher would not do: a queued sweep
 # would replace a queued publisher run and drop a publication.
 #
-# The sweep uses the same App credentials as the publisher, so it does not recover when the App
-# cannot authenticate: a revoked or rotated key, an uninstalled App, or a missing permission. Then
-# neither workflow can write, an approval already recorded on a commit can stay passing after a
-# later comparison of that commit, and the failed runs of both workflows are the signal.
+# The sweep does not recover from a failure of anything it shares with the publisher: the App
+# credentials, the script on `main`, the `visual-review` environment, and GitHub Actions itself.
+# Then neither workflow can write, and any pass already recorded on a commit can stay passing: an
+# approval or a `No visual changes` result, after a later comparison of that commit, or after a
+# dispatch or a re-run replaced its baseline. The failed runs of both workflows are the signal.
 #
 # The sweep never checks out or runs pull request code, and reads no artefacts.
 

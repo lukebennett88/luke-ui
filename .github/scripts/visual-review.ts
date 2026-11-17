@@ -729,8 +729,8 @@ export type SweepPlan =
  *   re-run without `main` changing
  *
  * A check run that does not pass already blocks merging, so it is left alone. That also makes the
- * sweep idempotent. The one exception is a comparison still shown as `Comparing` long after it
- * finished, which would otherwise never say that its publication failed.
+ * sweep idempotent. The one exception is a check run still waiting for a result long after the
+ * latest comparison finished, which would otherwise never say that its publication failed.
  */
 export function planSweep(options: {
 	state: Partial<CheckState>;
@@ -760,12 +760,12 @@ export function planSweep(options: {
 	};
 
 	if (options.conclusion !== 'success') {
-		const stuck =
-			state.kind === 'pending' &&
-			options.conclusion === 'action_required' &&
-			recordsLatest &&
-			pastGrace;
-		if (stuck) return notRecorded;
+		// A check run that is in progress or needs action waits for a result of the latest
+		// comparison. Once that comparison has long finished, none is coming, so the check run
+		// says so instead of reading `Comparing` or an older attempt's `Needs review` for ever.
+		const waiting = options.conclusion == null || options.conclusion === 'action_required';
+		const hasResult = recordsLatest && (state.kind === 'review' || state.kind === 'clean');
+		if (waiting && pastGrace && !hasResult) return notRecorded;
 		return { action: 'none', reason: 'The check run does not pass.' };
 	}
 
@@ -790,10 +790,13 @@ export function planSweep(options: {
 				title: statusText('pending'),
 			};
 		}
+		// The publisher may still be recording it, but the recorded result already no longer applies.
 		if (!pastGrace) {
 			return {
-				action: 'none',
-				reason: `${run} finished less than ${SWEEP_GRACE_MS / 60_000} minutes ago, so the publisher may still be recording it.`,
+				action: 'write',
+				conclusion: 'action_required',
+				historyEntry: `${run} finished and is not recorded yet`,
+				title: statusText('pending'),
 			};
 		}
 		return notRecorded;
@@ -910,7 +913,8 @@ export type SweepWrite =
  * between and the sweep overwrote how it reads: the sweep then writes that record's own
  * presentation, and checks that response the same way. `success` is written only to restore a clean
  * result. After {@link MAX_SWEEP_RESTORES} restores it leaves the check needing action, which cannot
- * pass.
+ * pass. A restore that fails is tried again, because giving up would leave the sweep's failure on a
+ * newer result.
  */
 export async function writeSweepPresentation(options: {
 	planned: ExistingCheckRun;
@@ -934,12 +938,10 @@ export async function writeSweepPresentation(options: {
 		target = stored.external_id;
 		presentation = restoredPresentation(stored);
 		if (restores === MAX_SWEEP_RESTORES) presentation.conclusion = 'action_required';
+		const body = presentationBody({ existing: stored, now: now(), presentation });
 		// Sequential: each response decides whether another write is needed.
 		// oxlint-disable-next-line no-await-in-loop
-		stored = await request({
-			body: presentationBody({ existing: stored, now: now(), presentation }),
-			method: 'PATCH',
-		});
+		stored = await withRetries(() => request({ body, method: 'PATCH' }));
 		if (restores === MAX_SWEEP_RESTORES) break;
 	}
 	return {
@@ -947,6 +949,21 @@ export async function writeSweepPresentation(options: {
 		title: presentation.title,
 		written: true,
 	};
+}
+
+const RESTORE_TRIES = 3;
+
+/** Runs `attempt` until it succeeds, at most {@link RESTORE_TRIES} times, then rethrows. */
+async function withRetries<T>(attempt: () => Promise<T>): Promise<T> {
+	for (let tries = 1; ; tries += 1) {
+		try {
+			// Sequential: a retry follows the failure before it.
+			// oxlint-disable-next-line no-await-in-loop
+			return await attempt();
+		} catch (error) {
+			if (tries === RESTORE_TRIES) throw error;
+		}
+	}
 }
 
 /**

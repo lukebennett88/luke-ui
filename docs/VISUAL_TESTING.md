@@ -145,9 +145,12 @@ downloading and deploying a report takes minutes. When the comparison it prepare
 latest, it writes nothing, and a later publisher run records the newer one. When that read fails,
 the step fails and the failure is recorded. It also reads the check run again and builds its write
 from that read, so history added in the meantime is kept. Publisher runs for one pull request are
-serialised, and each records only the comparison that is the latest just before its write, so an
-older comparison never replaces a newer result. What remains is a re-run requested in the instant
-after that read. The re-run's own `in_progress` event then resets the check run.
+serialised, and each records a state or a result only for the comparison that is the latest just
+before its write, so an older comparison never replaces a newer result. A failed publication is the
+exception: one for an older attempt can still replace a newer `Comparing` record with
+`Publishing the report failed`, but never a recorded result, and the newer comparison's own events
+record it afterwards. What remains is a re-run requested in the instant after that read. The
+re-run's own `in_progress` event then resets the check run.
 
 A re-run raises the attempt as soon as it is requested, so it makes the earlier result stale at
 once. GitHub sends no `requested` event for a re-run, so the `in_progress` event also reconciles.
@@ -202,18 +205,21 @@ and on demand. For each open pull request with a `visual-review` check run, it r
 comparison and the newest baseline.
 
 A check run that does not pass already blocks merging, so the sweep leaves it alone. The one
-exception is a check run still `Comparing` for a comparison that finished at least 30 minutes ago:
-it fails with `Publishing the report failed`.
+exception is a check run that is in progress or `action_required` when the latest comparison
+finished at least 30 minutes ago and the check run does not record that comparison's result. It
+fails with `Publishing the report failed`, so nothing reads `Comparing`, or an older attempt's
+`Needs review`, indefinitely. A result of the latest comparison that needs review is left alone.
 
 For a check run that passes:
 
 - A record that is not a result, because it is a failure or `Comparing`, fails with
   `Publishing the report failed`. A decision can land on a record the publisher wrote at the same
   moment, and the review backend's repair of it can fail.
-- A newer comparison than the one recorded that is still running sets the check run to
-  `action_required` with the title `Comparing`.
+- A newer comparison than the one recorded sets the check run to `action_required` with the title
+  `Comparing`, while it runs and for 30 minutes after it finishes. The 30 minutes leave the
+  publisher time to record it.
 - A newer comparison that finished at least 30 minutes ago and was never recorded fails with
-  `Publishing the report failed`. The 30 minutes leave the publisher time to record it.
+  `Publishing the report failed`.
 - A recorded result whose baseline is no longer the newest fails with `Baseline is out of date`. A
   skipped comparison compared nothing, so its baseline never goes out of date.
 
@@ -230,13 +236,19 @@ landed on. When that is not the record it planned against, a publication landed 
 sweep then writes how that record reads: `Comparing`, `Needs review`, `No visual changes`, or
 `Comparison failed`. A result also says the review app still has the report. Restoring
 `No visual changes` is the only time the sweep writes `success`. It checks each such write the same
-way, and after three it leaves the check run `action_required`.
+way, and after three it leaves the check run `action_required`. It tries a failed restore up to
+three times.
 
-The sweep uses the same GitHub App credentials as the publisher. It recovers from a transient
-failure of a publication: a failed step, a dropped event, or a brief API outage. It does not recover
-when the App cannot authenticate, because its key was revoked or rotated, it was uninstalled, or it
-lost a permission. Then neither workflow can write, and an approval already recorded on a commit can
-stay passing after a later comparison of that same commit. The failed `Visual review publish` and
+The sweep only fails check runs. It does not publish a report or record a result, so the remedy for
+`Publishing the report failed` is to re-run the comparison.
+
+The sweep recovers from a transient failure of a publication: a failed step, a dropped event, or a
+brief API outage. It does not recover from a failure of anything it shares with the publisher: the
+App credentials, the script on `main`, the `visual-review` environment, and GitHub Actions itself. A
+revoked or rotated key, an uninstalled App, a missing permission, a defect in the script, or an
+Actions outage stops both workflows writing. Any pass already recorded on a commit can then stay
+passing: an approval or a `No visual changes` result, after a later comparison of that same commit,
+or after a dispatch or a re-run replaced its baseline. The failed `Visual review publish` and
 `Visual review sweep` runs are the signal. A new commit never passes without a recorded result, and
 while a re-run is in progress the required `visual-regression` gate is pending.
 

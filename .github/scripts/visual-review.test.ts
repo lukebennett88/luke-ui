@@ -1522,10 +1522,10 @@ test('leaves a passing result of the latest comparison against the current basel
 	}
 });
 
-// A check run that does not pass already blocks merging, whatever went stale behind it.
-for (const conclusion of ['action_required', 'failure', 'neutral', null, undefined]) {
+// A failing check run already blocks merging and says why, whatever went stale behind it.
+for (const conclusion of ['failure', 'neutral', 'cancelled']) {
 	test(`leaves a check run that concludes ${JSON.stringify(conclusion)} alone`, () => {
-		for (const kind of ['review', 'clean', 'failed'] as const) {
+		for (const kind of ['review', 'clean', 'pending', 'failed'] as const) {
 			const swept = sweepPlan({
 				conclusion,
 				latest: finishedRun(SWEEP_GRACE_MS),
@@ -1537,29 +1537,45 @@ for (const conclusion of ['action_required', 'failure', 'neutral', null, undefin
 	});
 }
 
-test('fails a comparison still shown as comparing long after it finished', () => {
-	const latest = finishedRun(SWEEP_GRACE_MS, { run_attempt: 2 });
+test('leaves a result of the latest comparison that needs review alone', () => {
+	const swept = sweepPlan({
+		conclusion: 'action_required',
+		latest: finishedRun(SWEEP_GRACE_MS * 10, { run_attempt: 2 }),
+		newestBaseline: undefined,
+	});
 
-	expect(sweepPlan({ conclusion: 'action_required', latest, state: pendingRecord })).toEqual(
-		notRecorded('Comparison run 345 (attempt 2)'),
-	);
+	expect(swept.action).toBe('none');
 });
 
-test('leaves a pending comparison alone until it has finished for the grace period', () => {
-	const pending = { conclusion: 'action_required', state: pendingRecord };
-	const running = latestRun({ conclusion: null, status: 'in_progress' });
-	const justFinished = finishedRun(SWEEP_GRACE_MS - 1, { run_attempt: 2 });
-	const newerAttempt = finishedRun(SWEEP_GRACE_MS);
+// A new check run is created in progress, so it has no conclusion.
+for (const conclusion of [null, undefined, 'action_required']) {
+	test(`fails a check run that concludes ${JSON.stringify(conclusion)} long after the latest comparison finished`, () => {
+		const sameAttempt = finishedRun(SWEEP_GRACE_MS, { run_attempt: 2 });
+		const newerAttempt = finishedRun(SWEEP_GRACE_MS);
+		for (const [latest, state] of [
+			[sameAttempt, pendingRecord],
+			[sameAttempt, checkState({ kind: 'failed' })],
+			[newerAttempt, pendingRecord],
+			// A result of an older attempt, which an earlier sweep may have set to `Comparing`.
+			[newerAttempt, checkState({ kind: 'review' })],
+			[newerAttempt, checkState({ kind: 'clean' })],
+		] as const) {
+			expect(sweepPlan({ conclusion, latest, state })).toEqual(
+				notRecorded(`Comparison run 345 (attempt ${latest.run_attempt})`),
+			);
+		}
+	});
 
-	for (const latest of [running, justFinished, newerAttempt, undefined]) {
-		expect(sweepPlan({ ...pending, latest }).action).toBe('none');
-	}
-	// Once failed, the next sweep writes nothing more.
-	const finished = finishedRun(SWEEP_GRACE_MS, { run_attempt: 2 });
-	expect(sweepPlan({ ...pending, conclusion: 'failure', latest: finished }).action).toBe('none');
-	// A new check run that is still in progress has no conclusion.
-	expect(sweepPlan({ ...pending, conclusion: null, latest: finished }).action).toBe('none');
-});
+	test(`leaves a check run that concludes ${JSON.stringify(conclusion)} alone until the latest comparison has finished for the grace period`, () => {
+		const running = latestRun({ conclusion: null, run_attempt: 3, status: 'in_progress' });
+		const justFinished = finishedRun(SWEEP_GRACE_MS - 1);
+		for (const latest of [running, justFinished, undefined]) {
+			for (const state of [pendingRecord, checkState({ kind: 'review' })]) {
+				expect(sweepPlan({ conclusion, latest, state }).action).toBe('none');
+			}
+		}
+	});
+}
 
 for (const [kind, entry] of [
 	['failed', 'The check run passed on a failed result'],
@@ -1594,8 +1610,14 @@ test('shows a newer comparison that is still running as comparing', () => {
 	});
 });
 
-test('leaves a newer finished comparison to the publisher for the grace period', () => {
-	expect(sweepPlan({ latest: finishedRun(SWEEP_GRACE_MS - 1) }).action).toBe('none');
+test('shows a newer finished comparison as comparing until the publisher records it', () => {
+	// The recorded pass no longer applies, even while the publisher may still be writing.
+	expect(sweepPlan({ latest: finishedRun(SWEEP_GRACE_MS - 1) })).toEqual({
+		action: 'write',
+		conclusion: 'action_required',
+		historyEntry: 'Comparison run 345 (attempt 3) finished and is not recorded yet',
+		title: 'Comparing',
+	});
 });
 
 for (const [name, latest] of [
@@ -1681,6 +1703,26 @@ test('changes how a check run reads and never its record', () => {
 		status: 'completed',
 	});
 	for (const key of ['external_id', 'head_sha', 'name']) expect(body).not.toHaveProperty(key);
+});
+
+test('completes a check run that is still in progress', () => {
+	const inProgress = storedRun(pendingRecord, {
+		conclusion: null,
+		output: { summary: '**Status:** Comparing\n', text: SWEPT_HISTORY, title: 'Comparing' },
+		status: 'in_progress',
+	});
+	const presentation: SweepPresentation = {
+		conclusion: 'failure',
+		historyEntry: 'Comparison run 345 (attempt 2) was not recorded',
+		title: 'Publishing the report failed',
+	};
+
+	expect(presentationBody({ existing: inProgress, now: NOW, presentation })).toMatchObject({
+		completed_at: NOW.toISOString(),
+		conclusion: 'failure',
+		output: { summary: '**Status:** Publishing the report failed\n' },
+		status: 'completed',
+	});
 });
 
 test('writes the status line alone when the summary has none', () => {
@@ -1812,6 +1854,74 @@ test(`stops after ${MAX_SWEEP_RESTORES} restores and leaves the check needing ac
 	]);
 	// No request follows the final write.
 	expect(requests).toHaveLength(MAX_SWEEP_RESTORES + 3);
+});
+
+/** Answers like {@link stubRequests}, but rejects where the response is an `Error`. */
+function failingRequests(responses: Array<ExistingCheckRun | Error>) {
+	const methods: Array<string> = [];
+	const remaining = [...responses];
+	const request: CheckRunRequest = async (options) => {
+		methods.push(options.method);
+		const next = remaining.shift();
+		if (next === undefined) throw new Error('More requests than stubbed responses.');
+		if (next instanceof Error) throw next;
+		return next;
+	};
+	return { methods, request };
+}
+
+test('tries a restore that fails again', async () => {
+	const planned = storedRun({});
+	const landed = storedRun({ kind: 'clean', runAttempt: 3 });
+	const outage = new Error('GitHub API 502');
+	const stub = failingRequests([planned, landed, outage, outage, landed]);
+
+	const result = await writeSweepPresentation({
+		now: () => NOW,
+		planned,
+		presentation: outdated,
+		request: stub.request,
+	});
+
+	expect(result).toEqual({ restored: true, title: 'No visual changes', written: true });
+	expect(stub.methods).toEqual(['GET', 'PATCH', 'PATCH', 'PATCH', 'PATCH']);
+});
+
+test('gives up on a restore after three failed tries', async () => {
+	const planned = storedRun({});
+	const outage = new Error('GitHub API 502');
+	const stub = failingRequests([
+		planned,
+		storedRun({ kind: 'clean', runAttempt: 3 }),
+		outage,
+		outage,
+		outage,
+	]);
+
+	await expect(
+		writeSweepPresentation({
+			now: () => NOW,
+			planned,
+			presentation: outdated,
+			request: stub.request,
+		}),
+	).rejects.toThrow('GitHub API 502');
+	expect(stub.methods).toHaveLength(5);
+});
+
+test('does not retry its own write, which the next sweep plans again', async () => {
+	const planned = storedRun({});
+	const stub = failingRequests([planned, new Error('GitHub API 502')]);
+
+	await expect(
+		writeSweepPresentation({
+			now: () => NOW,
+			planned,
+			presentation: outdated,
+			request: stub.request,
+		}),
+	).rejects.toThrow('GitHub API 502');
+	expect(stub.methods).toEqual(['GET', 'PATCH']);
 });
 
 test('stops restoring as soon as a restore lands on the record it restored', async () => {
