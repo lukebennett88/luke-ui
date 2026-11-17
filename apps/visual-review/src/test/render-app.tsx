@@ -13,6 +13,7 @@ export async function renderApp(search: string) {
 	window.history.replaceState(null, '', `${window.location.pathname}${search}`);
 	const container = document.body.appendChild(document.createElement('div'));
 	container.style.blockSize = '100vh';
+	container.dataset.testid = 'app';
 	const root = createRoot(container);
 	await act(async () => {
 		root.render(<App />);
@@ -27,7 +28,9 @@ export async function renderApp(search: string) {
 
 	return {
 		container,
-		locator: page.elementLocator(container),
+		// `elementLocator` resolves to the first `div` in the page, which stops being the container
+		// once React Aria's live announcer adds its own `div` to the body.
+		locator: page.getByTestId('app'),
 		user: {
 			click: (...args: Parameters<typeof userEvent.click>) => {
 				return act(async () => {

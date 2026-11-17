@@ -5,8 +5,9 @@ and lists every open pull request with the state of its report.
 [Visual regression testing](../../docs/VISUAL_TESTING.md#visual-review-app) explains how reports are
 published and how the app is deployed.
 
-- `/` lists the repository's open pull requests from GitHub's public API and loads each one's
-  report.
+- `/` lists the repository's open pull requests with each one's review status and report counts.
+  Pull requests that need review come first. It reads the list from `GET /api/pulls`, or from
+  GitHub's public API, without statuses, where the review backend does not answer.
 - `/?pr=<number>` reviews one pull request.
 - `/?source=local` reviews the comparison in `.artifacts/visual-regression`. Only the development
   server serves it.
@@ -42,10 +43,30 @@ pnpm run check
 ```
 
 The browser tests in `src/review/review.browser.test.tsx` review the small report in
-`src/test/fixtures/report` through the same `?source=local` route.
+`src/test/fixtures/report` through the same `?source=local` route. The review bar and dashboard
+tests stub `fetch` for `/api/*`, and serve that report with a `meta` block as a pull request's.
 
 `pnpm test:visual` writes the comparison that `http://localhost:5175/?source=local` reviews. Set
 `VISUAL_REVIEW_LOCAL_DIR` to review a comparison in another directory.
+
+## Reviewing in the app
+
+A pull request's review shows its status under the header: comparing, needs review, approved or
+changes requested by a reviewer, no visual changes, or failed. It links to the `visual-review` check
+on GitHub, and says when the pull request changes visual testing infrastructure.
+
+Sign in with GitHub from that bar to review. A reviewer with write access can approve, or request
+changes with a note of up to 500 characters, and can change an earlier decision. A decision applies
+to the comparison on screen. When a newer commit or comparison exists, the bar says the report is
+out of date and turns the decisions off until the page reloads. Someone without write access sees
+the status only.
+
+The [scheduled sweep](../../docs/VISUAL_TESTING.md#review-check) can occasionally revoke a valid
+approval when it races another update. Refresh the page and approve again.
+
+The bar needs the review backend. On the development server it says review actions are only
+available on the deployed app. A local comparison (`?source=local`) has no pull request, so it shows
+no bar.
 
 ## Review backend
 

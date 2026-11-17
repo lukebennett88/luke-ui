@@ -239,6 +239,10 @@ sweep then writes how that record reads: `Comparing`, `Needs review`, `No visual
 way, and after three it leaves the check run `action_required`. It tries a failed restore up to
 three times.
 
+A sweep that races another update can occasionally revoke a valid approval. This fails closed and
+blocks merging. Refresh the review page and approve again. Further coordination is deferred unless
+this causes practical problems.
+
 The sweep only fails check runs. It does not publish a report or record a result, so the remedy for
 `Publishing the report failed` is to re-run the comparison.
 
@@ -348,13 +352,14 @@ The backend acts as a GitHub App. Create one with these settings:
 - Webhook: inactive.
 - Install it on this repository only.
 
-A reviewer signs in through the App's user authorisation flow. The session keeps the account's
-immutable GitHub user id. The backend reads the account's current login from that id, then allows a
-decision when GitHub reports the admin, maintain, or write role on the repository for the same id. A
-renamed account keeps its access, and an account that takes over an old login gains none. The
-backend asks GitHub again on every decision, so removing someone's access takes effect at once. The
-[app README](../apps/visual-review/README.md#review-backend) lists the freshness checks a decision
-must pass.
+A reviewer signs in through the App's user authorisation flow, from the review page's status bar.
+[Reviewing in the app](../apps/visual-review/README.md#reviewing-in-the-app) describes it. The
+session keeps the account's immutable GitHub user id. The backend reads the account's current login
+from that id, then allows a decision when GitHub reports the admin, maintain, or write role on the
+repository for the same id. A renamed account keeps its access, and an account that takes over an
+old login gains none. The backend asks GitHub again on every decision, so removing someone's access
+takes effect at once. The [app README](../apps/visual-review/README.md#review-backend) lists the
+freshness checks a decision must pass.
 
 The backend writes a check run's conclusion, title, summary, and history, but never its
 `external_id`. Only `Visual review publish` writes it. When a decision races a newer result, a
