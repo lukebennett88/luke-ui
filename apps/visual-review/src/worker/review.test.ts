@@ -228,6 +228,20 @@ describe('rewriteCommentStatus', () => {
 		);
 	});
 
+	test('shows the note as literal text and preserves report links and counts', () => {
+		const body =
+			'<!-- visual-review-status -->Needs review<!-- /visual-review-status -->\n3 changed\n[Report](https://example.com/report)';
+		expect(
+			rewriteCommentStatus(
+				body,
+				'Changes requested by @luke',
+				'Fix **bold** _text_ `code` [link](https://evil.test) ![image](x) <b> & "quote" @mona www.example.test &#42; <!-- /visual-review-status -->',
+			),
+		).toBe(
+			'<!-- visual-review-status -->\n**Status:** Changes requested by @luke\n\n**Note:**\n\n<pre>Fix **bold** _text_ `code` [link](https://evil.test) ![image](x) &lt;b&gt; &amp; "quote" @mona www.example.test &amp;#42; &lt;!-- /visual-review-status --&gt;</pre>\n<!-- /visual-review-status -->\n3 changed\n[Report](https://example.com/report)',
+		);
+	});
+
 	test('leaves a comment without a status section alone', () => {
 		expect(rewriteCommentStatus('<!-- luke-ui-visual-review -->', 'Approved by @luke')).toBe(
 			undefined,

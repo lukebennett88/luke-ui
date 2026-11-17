@@ -204,10 +204,16 @@ function escapeNote(note: string): string {
  * Rewrites the status section of the sticky comment, or returns `undefined` when the comment has
  * none.
  */
-export function rewriteCommentStatus(body: string, status: string): string | undefined {
+export function rewriteCommentStatus(
+	body: string,
+	status: string,
+	note?: string,
+): string | undefined {
 	if (!STATUS_SECTION.test(body)) return undefined;
+	const message = note ? `\n\n**Note:**\n\n<pre>${escapeNote(note)}</pre>` : '';
 	return body.replace(
 		STATUS_SECTION,
-		() => `<!-- visual-review-status -->\n${statusLine(status)}\n<!-- /visual-review-status -->`,
+		() =>
+			`<!-- visual-review-status -->\n${statusLine(status)}${message}\n<!-- /visual-review-status -->`,
 	);
 }
