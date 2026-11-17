@@ -45,6 +45,7 @@ const STYLING_AUTHORING_PACKAGES = new Set(['@vanilla-extract/css']);
 const STYLING_AUTHORING_SOURCE_PATTERN =
 	/^@luke-ui\/(?:react\/src\/core\/styles\/recipe\.ts|rainbow-sprinkles\/.*\/define-(?:properties|sprinkles)\.[jt]s)$/;
 const LUKE_SOURCE_PATTERN = /^@luke-ui\/react\/src\//;
+const GENERATED_CONTRACT_PATTERN = /^@luke-ui\/react\/dist\/contract\.css-[\w-]+\.js$/;
 
 describe('the packed @luke-ui/react', () => {
 	test('contains only published files and every export target', () => {
@@ -417,8 +418,13 @@ for (const consumer of consumers) {
 					([entry, file]) => !related.has(entry) && bundle.sources.includes(file),
 				);
 
-				// Without Luke UI source paths, the source maps did not resolve and nothing below is checked.
-				expect(bundle.sources.some((source) => LUKE_SOURCE_PATTERN.test(source))).toBe(true);
+				// Vanilla Extract's generated contract has an empty source map.
+				const sourcesResolved =
+					boundary.exportName === 'vars'
+						? bundle.sources.length === 1 &&
+							bundle.sources.every((source) => GENERATED_CONTRACT_PATTERN.test(source))
+						: bundle.sources.some((source) => LUKE_SOURCE_PATTERN.test(source));
+				expect(sourcesResolved).toBe(true);
 				expect({
 					stylingAuthoring: [
 						...bundle.packages.filter((name) => STYLING_AUTHORING_PACKAGES.has(name)),

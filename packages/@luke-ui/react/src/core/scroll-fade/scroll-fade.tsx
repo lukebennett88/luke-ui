@@ -163,8 +163,6 @@ function useScrollOverflow(
 
 		function scheduleMeasure() {
 			if (frameId !== null) return;
-			// The effect owns this cancellation handle, so reassigning it here is safe.
-			// oxlint-disable-next-line react/immutability
 			frameId = requestAnimationFrame(() => {
 				frameId = null;
 				measure();
