@@ -142,7 +142,7 @@ test('processed Markdown shows Button render props and callbacks with their defi
 		'##### `PressAction`\n\n```ts\ntype PressAction = () => void | Promise<void>;\n```',
 	);
 	expect(button).toMatch(
-		/##### `ChildrenOrFunction`\n\nDeclared in \[`react-aria-components`\]\(https:\/\/www\.npmjs\.com\/package\/react-aria-components\) \(`[^`]+\.d\.ts`\)\.\n\n```ts\ntype ChildrenOrFunction<T>/,
+		/##### `ChildrenOrFunction`\n\nDeclared in \[`react-aria-components`\]\(https:\/\/.npmx\.dev\/package\/react-aria-components\) \(`[^`]+\.d\.ts`\)\.\n\n```ts\ntype ChildrenOrFunction<T>/,
 	);
 });
 
@@ -236,7 +236,7 @@ Refers to \`Size\`.
 
 ##### \`KeyboardEvent\`
 
-Declared in [\`@react-types/shared\`](https://www.npmjs.com/package/@react-types/shared) (\`src/events.d.ts\`).
+Declared in [\`@react-types/shared\`](https://npmx.dev/package/@react-types/shared) (\`src/events.d.ts\`).
 
 \`\`\`ts
 type KeyboardEvent = BaseEvent<ReactKeyboardEvent<any>>;
@@ -246,7 +246,7 @@ Refers to \`KeyboardEvent\` from \`@types/react\`.
 
 ##### \`KeyboardEvent\` from \`@types/react\`
 
-Declared in [\`@types/react\`](https://www.npmjs.com/package/@types/react) (\`index.d.ts\`).`);
+Declared in [\`@types/react\`](https://npmx.dev/package/@types/react) (\`index.d.ts\`).`);
 });
 
 test('stringify fences a definition longer than the backtick runs inside it', () => {
