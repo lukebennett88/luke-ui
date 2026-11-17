@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite-plus';
 import { docsLintOverrides } from './apps/docs/lint.config.js';
 import { referenceAppLintOverrides } from './apps/reference-app/lint.config.js';
+import { visualReviewLintOverrides } from './apps/visual-review/lint.config.js';
 
 export default defineConfig({
 	staged: {
@@ -205,6 +206,7 @@ export default defineConfig({
 			},
 			...docsLintOverrides,
 			...referenceAppLintOverrides,
+			...visualReviewLintOverrides,
 			{
 				files: ['**/*.{test,browser.test}.{ts,tsx}'],
 				rules: {

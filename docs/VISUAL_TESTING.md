@@ -332,6 +332,62 @@ every Pages project in its account, because Cloudflare does not scope a token to
 
 Cloudflare keeps a closed pull request's deployments. Nothing removes them.
 
+### Review backend
+
+The app's production deployment includes a backend that records approvals on the `visual-review`
+check run. The [app README](../apps/visual-review/README.md#review-backend) describes its routes. It
+ships as `dist/_worker.js`, so `Visual review deploy` uploads it with the app. Report deployments
+upload only the allow-listed report, so they never run it.
+
+The backend acts as a GitHub App. Create one with these settings:
+
+- Repository permissions: Checks read and write, Pull requests read and write, Actions read, and
+  Metadata read. Actions read lets the backend check that a decision matches the latest comparison
+  and baseline runs.
+- Callback URL: `https://luke-ui-visual-review.pages.dev/api/auth/callback`.
+- Webhook: inactive.
+- Install it on this repository only.
+
+A reviewer signs in through the App's user authorisation flow. The session keeps the account's
+immutable GitHub user id. The backend reads the account's current login from that id, then allows a
+decision when GitHub reports the admin, maintain, or write role on the repository for the same id. A
+renamed account keeps its access, and an account that takes over an old login gains none. The
+backend asks GitHub again on every decision, so removing someone's access takes effect at once. The
+[app README](../apps/visual-review/README.md#review-backend) lists the freshness checks a decision
+must pass.
+
+The backend writes a check run's conclusion, title, summary, and history, but never its
+`external_id`. Only `Visual review publish` writes it. When a decision races a newer result, a
+comparison re-run, or a replaced baseline, the backend restores that result's presentation or
+withdraws the decision. It never passes the check unless it restores a clean result. It reports a
+check run that failed without a new record as failed, not as changes requested. The
+[app README](../apps/visual-review/README.md#review-backend) describes each repair.
+
+Set these variables as secrets on the Pages project's production environment only. Preview
+deployments, including every `pr-<number>` branch, then have no credentials, and the backend answers
+there with `503 unconfigured`.
+
+| Variable                   | Value                                                               |
+| -------------------------- | ------------------------------------------------------------------- |
+| `GITHUB_APP_ID`            | The App's numeric id                                                |
+| `GITHUB_APP_CLIENT_ID`     | The App's client id                                                 |
+| `GITHUB_APP_CLIENT_SECRET` | A client secret generated for the App                               |
+| `GITHUB_APP_PRIVATE_KEY`   | The App's private key, converted to PKCS#8 PEM                      |
+| `SESSION_SECRET`           | At least 32 random bytes, for example from `openssl rand -hex 32`   |
+| `GITHUB_REPOSITORY`        | The repository's `owner/name`, such as `lukebennett88/luke-ui`      |
+| `APP_ORIGIN`               | The app's origin, such as `https://luke-ui-visual-review.pages.dev` |
+
+GitHub issues App private keys as PKCS#1 (`BEGIN RSA PRIVATE KEY`). The Web Crypto API reads only
+PKCS#8, so convert the key before you store it:
+
+```sh
+openssl pkcs8 -topk8 -nocrypt -in app.private-key.pem -out app.pkcs8.pem
+```
+
+The converted file starts with `-----BEGIN PRIVATE KEY-----`. Store the whole file, newlines
+included, then delete both key files from your machine. Changing `SESSION_SECRET` signs every
+reviewer out.
+
 ## Capture freeze
 
 `freezeMotionForCapture` finishes transitions and animations before applying reduced-motion and
