@@ -97,8 +97,12 @@ function PullRequestReport({ pullRequest }: { pullRequest: PullRequest }) {
 	const state = reportState(result, pullRequest.headSha);
 
 	if (state.kind !== 'differences') {
-		// The review chip already says there is no report, or nothing changed.
-		if (pullRequest.review !== undefined && state.kind !== 'out-of-date') return null;
+		// Hide only a report label already shown by the review chip.
+		if (
+			pullRequest.review !== undefined &&
+			reviewChip(pullRequest.review).label === STATE_LABELS[state.kind]
+		)
+			return null;
 		return (
 			<Text color="secondary" typography="label">
 				{STATE_LABELS[state.kind]}

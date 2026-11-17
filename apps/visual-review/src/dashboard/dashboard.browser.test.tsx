@@ -51,8 +51,10 @@ test('lists pull requests that need review first, each with its review status', 
 	const text = rows.elements().map((row) => row.textContent ?? '');
 	expect(text[0]).toContain('#203');
 	expect(text[0]).toContain('Needs review');
+	expect(text[0]).toContain('No report');
 	expect(text[1]).toContain('#201');
 	expect(text[1]).toContain('Approved');
+	expect(text[1]).toContain('No report');
 	expect(text[2]).toContain('#202');
 	expect(text[2]).toContain('No report');
 	expect(text[3]).toContain('#204');

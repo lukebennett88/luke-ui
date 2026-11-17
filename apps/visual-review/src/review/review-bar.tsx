@@ -143,7 +143,12 @@ function ReviewControls(props: ReviewControlsProps) {
 	// A reviewer sees the decisions whenever there is something to decide, but can only make one on
 	// the comparison the review describes.
 	const isReviewer = review?.kind === 'review' && user?.user !== null && user?.canReview === true;
-	const canDecide = isReviewer && isCurrent;
+	const canDecide =
+		isReviewer &&
+		isCurrent &&
+		(review.state === 'needs-review' ||
+			review.state === 'approved' ||
+			review.state === 'changes-requested');
 
 	async function decide(decision: Decision, decisionNote?: string) {
 		if (!review) return;

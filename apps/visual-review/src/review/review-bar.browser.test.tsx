@@ -222,3 +222,22 @@ test('the review bar has no axe violations', async () => {
 	const result = await axe.run(app.locator.getByRole('region', { name: 'Review' }).element());
 	expect(result.violations).toEqual([]);
 });
+
+for (const state of ['failed', 'comparing']) {
+	test(`disables decisions for a ${state} check with matching report metadata`, async () => {
+		const { search } = setup({ pullReview: review({ state }) });
+		const app = await renderApp(search);
+
+		await expect
+			.element(
+				app.locator.getByText(state === 'failed' ? 'Comparison failed' : 'Comparing', {
+					exact: true,
+				}),
+			)
+			.toBeVisible();
+		await expect.element(app.locator.getByRole('button', { name: 'Approve' })).toBeDisabled();
+		await expect
+			.element(app.locator.getByRole('button', { name: 'Request changes' }))
+			.toBeDisabled();
+	});
+}
