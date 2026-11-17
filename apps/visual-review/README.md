@@ -73,7 +73,8 @@ no bar.
 `src/worker/` is the backend that records reviews. Reviewers with write access sign in with GitHub
 and approve or request changes on a pull request's `visual-review` check run. A decision completes
 the check run with a success or failure conclusion, adds a line to its history, and rewrites the
-status in the pull request's sticky comment. The browser app does not import the worker.
+status in the pull request's sticky comment. The comment shows the current decision's note as
+literal text and removes it when the status is replaced. The browser app does not import the worker.
 
 The build compiles the worker into `dist/_worker.js`, one ES module with its dependencies bundled,
 and writes `dist/_routes.json`, which sends only `/api/*` to it. Cloudflare Pages runs it as Pages

@@ -443,7 +443,7 @@ async function confirmDecision(
 	}
 	// The check run is the record of the decision. The comment only mirrors it, so a failure here
 	// does not fail a decision that has already been written.
-	await updateCommentStatus(context, write.number, write.status).catch(() => undefined);
+	await updateCommentStatus(context, write.number, write.status, write.note).catch(() => undefined);
 }
 
 /**
@@ -713,10 +713,15 @@ function snapshot(context: Context, run: RestCheckRun): CheckRunSnapshot {
 }
 
 /** Rewrites the sticky comment's status section. A pull request without one is left alone. */
-async function updateCommentStatus(context: Context, number: number, status: string) {
+async function updateCommentStatus(
+	context: Context,
+	number: number,
+	status: string,
+	note?: string,
+) {
 	const author = `${await context.github.appSlug(context.config)}[bot]`;
 	const comment = await findStickyComment(context, number, author, 1);
-	const body = comment ? rewriteCommentStatus(comment.body ?? '', status) : undefined;
+	const body = comment ? rewriteCommentStatus(comment.body ?? '', status, note) : undefined;
 	if (!comment || body === undefined) return;
 	const response = await installationFetch(
 		context,

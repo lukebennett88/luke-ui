@@ -761,7 +761,7 @@ describe('decisions', () => {
 		});
 	});
 
-	test('request changes records the note', async () => {
+	test('request changes records the note and shows it in the sticky comment', async () => {
 		const { github, handle } = setup();
 		const response = await handle(
 			await decisionRequest({
@@ -784,7 +784,44 @@ describe('decisions', () => {
 				title: 'Changes requested by @luke',
 			},
 		});
+		expect(patches(github.calls).at(-1)?.body).toEqual(
+			commentWith(
+				'Changes requested by @luke\n\n**Note:**\n\n<pre>The focus ring is clipped</pre>',
+			),
+		);
 	});
+
+	for (const later of ['approve', 'withdraw', 'repair'] as const) {
+		test(`clears a rejection note from the sticky comment on ${later}`, async () => {
+			const { github, handle } = setup();
+			const rejected = await handle(
+				await decisionRequest({ ...APPROVE, decision: 'request-changes', note: 'Fix the ring.' }),
+				env,
+			);
+			expect(rejected.status).toBe(200);
+			const comment = patches(github.calls).at(-1)?.body as { body: string };
+			expect(comment.body).toContain('<pre>Fix the ring.</pre>');
+			github.state.comments[1]!.body = comment.body;
+			if (later === 'withdraw') {
+				github.state.comparisons = [
+					comparisonRun(),
+					comparisonRun(),
+					comparisonRun(),
+					comparisonRun({ run_attempt: 2 }),
+				];
+			}
+			if (later === 'repair') github.state.storedExternalIds = [CLEAN_RERUN];
+
+			const response = await handle(await decisionRequest(APPROVE), env);
+			expect(response.status).toBe(later === 'approve' ? 200 : 409);
+			const status = {
+				approve: 'Approved by @luke',
+				withdraw: 'Needs review',
+				repair: 'No visual changes',
+			}[later];
+			expect(patches(github.calls).at(-1)?.body).toEqual(commentWith(status));
+		});
+	}
 
 	test('request changes needs a note', async () => {
 		const { github, handle } = setup();
