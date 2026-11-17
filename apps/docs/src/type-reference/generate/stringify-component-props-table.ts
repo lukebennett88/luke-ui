@@ -71,7 +71,7 @@ function typeDefinitionsToMarkdown(typeDefinitions: TypeDefinitionsPayload): str
 		const parts = [`##### ${typeLabel(key, definition)}${writtenAs}`];
 
 		if (definition.module !== undefined) {
-			const packageLink = `[\`${definition.module}\`](https://www.npmjs.com/package/${definition.module})`;
+			const packageLink = `[\`${definition.module}\`](https://npmx.dev/package/${definition.module})`;
 			const file = definition.source === undefined ? '' : ` (\`${definition.source}\`)`;
 			parts.push(`Declared in ${packageLink}${file}.`);
 		}

@@ -1,5 +1,5 @@
 // Visual workflow helpers. Subcommands keep the YAML thin without a CI framework:
-//   resolve-baseline — pick the newest Visual baseline run on main
+//   resolve-baseline — pick the newest Visual baseline run on main and its one baseline artefact
 //   check-captures   — fail when a capture directory has no PNGs
 //   summarise        — turn summary.json into the job summary and a change annotation
 
@@ -32,6 +32,13 @@ export type BaselineRun = {
 
 export type BaselineRunDecision =
 	| { ok: true; runId: number; runAttempt: number }
+	| { ok: false; reason: string };
+
+/** One entry of a workflow run's artefacts list. */
+export type RunArtifact = { id: number; name: string; expired: boolean };
+
+export type BaselineArtifactDecision =
+	| { ok: true; artifactId: number }
 	| { ok: false; reason: string };
 
 /** GitHub Actions run statuses that mean the newest baseline is not finished yet. */
@@ -106,6 +113,32 @@ export function decideBaselineRun(
 	return { ok: true, runId: run.id, runAttempt: run.run_attempt ?? 1 };
 }
 
+/**
+ * Picks the one `visual-baseline` artefact of the chosen run. The comparison downloads it by id, so
+ * the files compared are exactly the ones `baseline.json` names. A re-run of `Visual baseline`
+ * replaces the artefact with a new id, and a download of the old id then fails. Zero or several
+ * candidates fail rather than guess.
+ */
+export function decideBaselineArtifact(
+	artifacts: ReadonlyArray<RunArtifact>,
+	runId: number,
+): BaselineArtifactDecision {
+	const usable = artifacts.filter((artifact) => {
+		return artifact.name === ARTIFACT_NAME && !artifact.expired;
+	});
+	const [only] = usable;
+	if (usable.length !== 1 || only === undefined) {
+		return {
+			ok: false,
+			reason: `Visual baseline run ${runId} has ${usable.length} usable "${ARTIFACT_NAME}" artefacts, not exactly one. Re-run it on \`main\`, then re-run this job.`,
+		};
+	}
+	if (!Number.isSafeInteger(only.id) || only.id <= 0) {
+		return { ok: false, reason: 'GitHub returned an invalid artefact id.' };
+	}
+	return { artifactId: only.id, ok: true };
+}
+
 /** GitHub answers 404 when the workflow file is absent from `main` (bootstrap). */
 export function isWorkflowMissingStatus(status: number): boolean {
 	return status === 404;
@@ -136,7 +169,7 @@ export type WaitForNewestBaselineOptions = {
  */
 export async function waitForNewestBaseline(
 	options: WaitForNewestBaselineOptions,
-): Promise<number> {
+): Promise<{ runId: number; runAttempt: number }> {
 	const { fetchNewest, runUrl, sleep: delay, now, pollIntervalMs, timeoutMs } = options;
 	const log = options.info ?? (() => {});
 	const deadline = now() + timeoutMs;
@@ -198,7 +231,7 @@ export async function waitForNewestBaseline(
 			);
 		}
 
-		return decision.runId;
+		return { runAttempt: decision.runAttempt, runId: decision.runId };
 	}
 }
 
@@ -314,6 +347,34 @@ async function fetchNewestBaselineRun(
 	return data.workflow_runs[0];
 }
 
+async function fetchRunArtifacts(
+	token: string,
+	owner: string,
+	repo: string,
+	runId: number,
+): Promise<Array<RunArtifact>> {
+	const url = new URL(
+		`https://api.github.com/repos/${owner}/${repo}/actions/runs/${runId}/artifacts`,
+	);
+	url.searchParams.set('name', ARTIFACT_NAME);
+	url.searchParams.set('per_page', '100');
+
+	const response = await fetch(url, {
+		headers: {
+			Accept: 'application/vnd.github+json',
+			Authorization: `Bearer ${token}`,
+			'X-GitHub-Api-Version': '2022-11-28',
+		},
+	});
+	if (!response.ok) {
+		const body = await response.text();
+		throw new Error(`GitHub API ${response.status} listing run ${runId} artefacts: ${body}`);
+	}
+
+	const data = (await response.json()) as { artifacts: Array<RunArtifact> };
+	return data.artifacts;
+}
+
 function sleep(ms: number): Promise<void> {
 	return new Promise((resolve) => {
 		setTimeout(resolve, ms);
@@ -330,7 +391,7 @@ async function resolveBaseline() {
 	const runUrl = (runId: number) => `https://github.com/${owner}/${repo}/actions/runs/${runId}`;
 
 	try {
-		const runId = await waitForNewestBaseline({
+		const { runId, runAttempt } = await waitForNewestBaseline({
 			fetchNewest: () => fetchNewestBaselineRun(token, owner, repo),
 			runUrl,
 			sleep,
@@ -340,9 +401,17 @@ async function resolveBaseline() {
 			info,
 		});
 
-		info(`Baseline from Visual baseline run ${runId}: ${runUrl(runId)}`);
-		info(`Artifact "${ARTIFACT_NAME}" will be downloaded by actions/download-artifact.`);
+		const artifact = decideBaselineArtifact(
+			await fetchRunArtifacts(token, owner, repo, runId),
+			runId,
+		);
+		if (!artifact.ok) throw new Error(artifact.reason);
+
+		info(`Baseline from Visual baseline run ${runId} attempt ${runAttempt}: ${runUrl(runId)}`);
+		info(`Artifact ${artifact.artifactId} will be downloaded by actions/download-artifact.`);
 		await writeOutput('run-id', runId);
+		await writeOutput('run-attempt', runAttempt);
+		await writeOutput('artifact-id', artifact.artifactId);
 	} catch (error) {
 		fail(error instanceof Error ? error.message : String(error));
 	}

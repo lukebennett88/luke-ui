@@ -13,6 +13,7 @@ import type { ReportSource } from '../report/report-source.js';
 import type { Report } from '../report/schema.js';
 import { CaptureList } from './capture-list.js';
 import { CaptureViewer } from './capture-viewer.js';
+import { ReviewBar } from './review-bar.js';
 import {
 	filterCaptures,
 	parseReviewParams,
@@ -28,16 +29,25 @@ import { useReviewShortcuts } from './use-review-shortcuts.js';
 export function ReviewPage({ source }: { source: ReportSource }) {
 	const result = use(loadReport(source));
 
-	if (result.status !== 'ready')
-		return <ReportUnavailable source={source} status={result.status} />;
+	if (result.status !== 'ready') {
+		return (
+			<>
+				<PullRequestReviewBar report={undefined} source={source} />
+				<ReportUnavailable source={source} status={result.status} />
+			</>
+		);
+	}
 	if (result.report.captures.length === 0) {
 		return (
-			<Message title="No visual changes">
-				<Text elementType="p">
-					<ReportTitle report={result.report} source={source} />
-				</Text>
-				<ReportCounts report={result.report} />
-			</Message>
+			<>
+				<PullRequestReviewBar report={result.report} source={source} />
+				<Message title="No visual changes">
+					<Text elementType="p">
+						<ReportTitle report={result.report} source={source} />
+					</Text>
+					<ReportCounts report={result.report} />
+				</Message>
+			</>
 		);
 	}
 	return <Review baseUrl={result.baseUrl} report={result.report} source={source} />;
@@ -121,6 +131,7 @@ function Review({ baseUrl, report, source }: ReviewProps) {
 				</Heading>
 				<ReportCounts report={report} />
 			</Box>
+			<PullRequestReviewBar report={report} source={source} />
 			<div className={styles.layout}>
 				<CaptureList
 					areShortcutsEnabled={areShortcutsEnabled}
@@ -151,6 +162,18 @@ function Review({ baseUrl, report, source }: ReviewProps) {
 			</div>
 		</>
 	);
+}
+
+/** A local comparison has no pull request, so it has nothing to approve. */
+function PullRequestReviewBar({
+	report,
+	source,
+}: {
+	report: Report | undefined;
+	source: ReportSource;
+}) {
+	if (source.kind !== 'pull-request') return null;
+	return <ReviewBar number={source.number} report={report} />;
 }
 
 function ReportTitle({ report, source }: { report: Report; source: ReportSource }) {

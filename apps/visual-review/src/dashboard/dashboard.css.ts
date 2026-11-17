@@ -25,3 +25,12 @@ export const row = style({
 	justifyContent: 'space-between',
 	padding: vars.space['16'],
 });
+
+/** A status with a shape as well as a colour and a word. */
+export const chip = style({
+	border: `${vars.borderWidth.thin} solid currentColor`,
+	borderRadius: vars.radius.control,
+	paddingBlock: vars.space['4'],
+	paddingInline: vars.space['8'],
+	whiteSpace: 'nowrap',
+});

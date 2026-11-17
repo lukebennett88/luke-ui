@@ -70,6 +70,10 @@ jobs:
       # directory (the docs site's Pages Functions) into this deployment. Run from a workspace
       # directory, the action would try to install Wrangler into the pnpm workspace.
       #
+      # The review backend ships inside `dist` as Pages Functions in advanced mode. The build writes
+      # a self-contained `dist/_worker.js` and a `dist/_routes.json` that sends only `/api/*` to it,
+      # so the deployment needs no `functions/` directory and the working directory stays empty.
+      #
       # The action and Wrangler are pinned to exact versions because this job holds the Cloudflare
       # secrets.
       - name: Deploy to Cloudflare Pages

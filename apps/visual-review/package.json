@@ -3,7 +3,7 @@
 	"private": true,
 	"type": "module",
 	"scripts": {
-		"build": "vp build",
+		"build": "vp build && vp build --config vite.worker.config.ts",
 		"check:format": "vp fmt . --check",
 		"check:lint": "vp lint .",
 		"check:lint:types": "vp lint . --type-aware --tsconfig tsconfig.json",

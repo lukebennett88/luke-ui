@@ -12,5 +12,5 @@
 		"types": ["vite/client", "node"],
 		"verbatimModuleSyntax": true
 	},
-	"include": ["src", "vite.config.ts"]
+	"include": ["src", "vite.config.ts", "vite.worker.config.ts"]
 }
