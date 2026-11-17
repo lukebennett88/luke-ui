@@ -113,7 +113,12 @@ describe('reviewFromCheckRun', () => {
 		['review', 'failure', 'Baseline is out of date', 'failed', null],
 		['review', 'failure', 'Publishing the report failed', 'failed', null],
 		['review', 'failure', null, 'failed', null],
-		['review', 'action_required', 'Comparing', 'needs-review', null],
+		['review', 'action_required', 'Comparing', 'comparing', null],
+		['review', 'action_required', 'Needs review', 'needs-review', null],
+		['review', null, 'Needs review: 3 changed', 'needs-review', null],
+		['clean', 'action_required', 'Comparing', 'comparing', null],
+		['clean', 'action_required', 'No visual changes', 'failed', null],
+		['clean', null, 'No visual changes', 'failed', null],
 		['clean', 'failure', 'Baseline is out of date', 'failed', null],
 		['pending', 'failure', 'Publishing the report failed', 'failed', null],
 	] as const;

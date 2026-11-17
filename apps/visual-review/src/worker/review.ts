@@ -113,7 +113,9 @@ export function reviewFromCheckRun(run: CheckRunSnapshot): Review | null {
 /**
  * A check run can fail without a new record, because only the publish workflow writes
  * `external_id`. A failure on a `clean` or `pending` record, or on a `review` record without a
- * decision's title, is therefore a failed result and not a request for changes.
+ * decision's title, is therefore a failed result and not a request for changes. A `review` or
+ * `clean` record can likewise be blocked for a newer comparison that is not recorded yet, and a
+ * `clean` record passes only with the `success` conclusion.
  */
 function reviewState(
 	kind: ExternalId['kind'],
@@ -124,10 +126,10 @@ function reviewState(
 	if (conclusion === 'failure') {
 		return kind === 'review' && DECIDED_TITLE.test(title ?? '') ? 'changes-requested' : 'failed';
 	}
-	if (kind === 'clean') return 'clean';
 	if (kind === 'pending') return 'comparing';
-	if (conclusion === 'success') return 'approved';
-	return 'needs-review';
+	if (conclusion === 'success') return kind === 'clean' ? 'clean' : 'approved';
+	if (title === COMPARING_STATUS) return 'comparing';
+	return kind === 'clean' ? 'failed' : 'needs-review';
 }
 
 /** The status text a decision writes to the title, the summary and the comment. */
