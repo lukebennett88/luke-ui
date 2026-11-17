@@ -39,8 +39,8 @@ export const docs = defineDocs({
 	dir: 'content/docs',
 	docs: {
 		postprocess: {
-			// Plugins record Markdown with `replaceSource` (Fumadocs 16.17+).
-			includeProcessedMarkdown: true,
+			// String output preserves the Markdown plugins record with `replaceSource`.
+			includeProcessedMarkdown: { output: 'string' },
 		},
 		schema: pageSchema.extend({
 			/**
