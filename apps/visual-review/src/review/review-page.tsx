@@ -73,9 +73,18 @@ function Review({ baseUrl, report, source }: ReviewProps) {
 
 	const setParams = useCallback(
 		(updates: Record<string, string | undefined>) => {
-			navigate(hrefWithParams(search, updates), { replace: true });
+			let href = hrefWithParams(search, updates);
+			// A filter that hides the selected capture shows the first match, so the link names that.
+			const next = parseReviewParams(href);
+			if (next.capture !== undefined) {
+				const shown = filterCaptures(report.captures, next);
+				if (!shown.some((capture) => capture.id === next.capture)) {
+					href = hrefWithParams(href, { capture: shown[0]?.id });
+				}
+			}
+			navigate(href, { replace: true });
 		},
-		[search],
+		[report.captures, search],
 	);
 
 	const shortcuts = useMemo<ReviewShortcuts>(() => {

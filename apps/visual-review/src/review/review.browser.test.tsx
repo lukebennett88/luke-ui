@@ -161,6 +161,18 @@ test('the slash key focuses the filter, and typing there filters without running
 	await expect.element(app.locator.getByText('No captures match the filter.')).toBeVisible();
 });
 
+test('filtering out the selected capture puts the capture it shows in the URL', async () => {
+	const app = await renderApp(`?source=local&capture=${encodeURIComponent(PRIMARY)}`);
+	await expect.element(app.locator.getByRole('heading', { level: 2, name: PRIMARY })).toBeVisible();
+
+	await app.user.fill(app.locator.getByRole('searchbox', { name: 'Filter captures' }), 'text');
+
+	await expect
+		.element(app.locator.getByRole('heading', { level: 2, name: 'text/added-case' }))
+		.toBeVisible();
+	expect(currentParams().get('capture')).toBe('text/added-case');
+});
+
 test('turning keyboard shortcuts off stops single-key navigation and persists', async () => {
 	const app = await renderApp('?source=local');
 	await expect.element(app.locator.getByRole('heading', { level: 2, name: PRIMARY })).toBeVisible();

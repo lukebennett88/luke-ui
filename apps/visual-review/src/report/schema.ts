@@ -77,3 +77,19 @@ export function parseReport(data: unknown): Report {
 export function imageUrl(baseUrl: string, captureId: string, kind: ImageKind): string {
 	return `${baseUrl}/diff/${captureId}.${kind}.png`;
 }
+
+/**
+ * An image's size in pixels, where the report knows it. A report's size is the larger of the
+ * expected and actual images, which is always the diff's size. The other two have it unless their
+ * sizes differ, and a size change marks every pixel as differing.
+ */
+export function imageSize(
+	capture: Capture,
+	kind: ImageKind,
+): { height: number; width: number } | undefined {
+	const { height, mismatchedPixels, width } = capture;
+	if (width === undefined || height === undefined) return undefined;
+	if (kind === 'diff') return { height, width };
+	if (mismatchedPixels === undefined || mismatchedPixels >= width * height) return undefined;
+	return { height, width };
+}

@@ -3,7 +3,7 @@ import type { Report } from '../report/schema.js';
 
 /** The review's status as one line, such as `Approved by @luke`. */
 export function reviewStatusText(review: Review | null): string {
-	if (!review) return 'Not compared yet';
+	if (!review) return 'No review check yet';
 	switch (review.state) {
 		case 'approved':
 			return review.decidedBy ? `Approved by @${review.decidedBy}` : 'Approved';

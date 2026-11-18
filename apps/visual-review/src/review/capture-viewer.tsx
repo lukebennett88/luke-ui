@@ -9,7 +9,7 @@ import { Text } from '@luke-ui/react/text';
 import { cx } from '@luke-ui/react/utils';
 import { Suspense, use, useId } from 'react';
 import type { Capture, ImageKind } from '../report/schema.js';
-import { imageUrl } from '../report/schema.js';
+import { imageSize, imageUrl } from '../report/schema.js';
 import { loadDiffRegions } from './diff-regions.js';
 import type { ReviewParams, ViewMode, Zoom } from './review-params.js';
 import { STATUS_LABELS, VIEW_MODES, ZOOM_LEVELS } from './review-params.js';
@@ -215,6 +215,8 @@ function LabelledImage(props: CaptureImageProps) {
 function CaptureImage(props: CaptureImageProps) {
 	const { baseUrl, capture, kind, opacity, shouldHighlight, zoom } = props;
 	const scale = zoom === 'fit' ? undefined : Number(zoom);
+	// A known size reserves the image's space before it loads, so stepping does not shift the page.
+	const size = imageSize(capture, kind);
 	return (
 		<div className={styles.imageFrame} style={{ zoom: scale }}>
 			<img
@@ -225,8 +227,10 @@ function CaptureImage(props: CaptureImageProps) {
 					scale !== undefined && scale > 1 && styles.imagePixelated,
 				)}
 				draggable={false}
+				height={size?.height}
 				src={imageUrl(baseUrl, capture.id, kind)}
 				style={{ opacity }}
+				width={size?.width}
 			/>
 			{shouldHighlight && capture.status === 'changed' ? (
 				<Suspense>

@@ -105,9 +105,9 @@ describe('stepCapture', () => {
 });
 
 describe('stepZoom', () => {
-	test('steps from fit to actual size in either direction', () => {
+	test('zooms in from fit to actual size, and never zooms in when zooming out', () => {
 		expect(stepZoom('fit', 1)).toBe('1');
-		expect(stepZoom('fit', -1)).toBe('1');
+		expect(stepZoom('fit', -1)).toBe('fit');
 	});
 
 	test('steps through the fixed levels and stops at the smallest and largest', () => {

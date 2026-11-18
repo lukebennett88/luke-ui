@@ -98,11 +98,8 @@ function PullRequestReport({ pullRequest }: { pullRequest: PullRequest }) {
 
 	if (state.kind !== 'differences') {
 		// Hide only a report label already shown by the review chip.
-		if (
-			pullRequest.review !== undefined &&
-			reviewChip(pullRequest.review).label === STATE_LABELS[state.kind]
-		)
-			return null;
+		const chip = pullRequest.review === undefined ? undefined : reviewChip(pullRequest.review);
+		if (chip?.label === STATE_LABELS[state.kind]) return null;
 		return (
 			<Text color="secondary" typography="label">
 				{STATE_LABELS[state.kind]}
@@ -122,7 +119,9 @@ function PullRequestReport({ pullRequest }: { pullRequest: PullRequest }) {
 }
 
 function ReviewChip({ review }: { review: Review | null }) {
-	const { color, label } = reviewChip(review);
+	const chip = reviewChip(review);
+	if (!chip) return null;
+	const { color, label } = chip;
 	return (
 		<Text className={styles.chip} color={color} fontWeight="label" typography="caption">
 			{label}

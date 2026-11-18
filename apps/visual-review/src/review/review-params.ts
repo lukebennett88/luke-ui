@@ -58,8 +58,10 @@ export function stepCapture(
 
 /** The next zoom level in `direction`, stopping at the smallest and largest. */
 export function stepZoom(zoom: Zoom, direction: -1 | 1): Zoom {
-	// `fit` never scales up, so stepping from it starts at actual size.
-	const index = zoom === 'fit' ? ZOOM_LEVELS.indexOf('1') : ZOOM_LEVELS.indexOf(zoom) + direction;
+	// `fit` never scales up, so zooming in from it starts at actual size. Any fixed level could be
+	// larger than a fitted image, so zooming out from it stays at `fit`.
+	if (zoom === 'fit') return direction === 1 ? '1' : 'fit';
+	const index = ZOOM_LEVELS.indexOf(zoom) + direction;
 	return ZOOM_LEVELS[Math.min(Math.max(index, 1), ZOOM_LEVELS.length - 1)] ?? '1';
 }
 
