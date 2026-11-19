@@ -50,7 +50,7 @@ test('lists pull requests that need review first, each with its review status', 
 	});
 	const app = await renderApp('');
 
-	const rows = app.locator.getByRole('listitem');
+	const rows = app.locator.getByRole('list', { name: 'Open pull requests' }).getByRole('listitem');
 	await expect.poll(() => rows.elements()).toHaveLength(5);
 	await expect
 		.element(rows.nth(4).getByRole('link', { name: 'Review', exact: true }))
@@ -67,7 +67,7 @@ test('lists pull requests that need review first, each with its review status', 
 	expect(text[3]).toContain('#204');
 	expect(text[3]).toContain('Comparison failed');
 	expect(text[4]).toContain('#205');
-	expect(text[4]).toContain('2 changed');
+	expect(text[4]).toContain('4 changed');
 	expect(text[4]).not.toContain('No report');
 	const result = await axe.run(app.container);
 	expect(result.violations).toEqual([]);

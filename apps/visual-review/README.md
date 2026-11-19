@@ -12,19 +12,46 @@ published and how the app is deployed.
 - `/?source=local` reviews the comparison in `.artifacts/visual-regression`. Only the development
   server serves it.
 
-A review keeps its state in the query string, so every view is a link: the selected capture, the
-view (`side`, `overlay`, or `diff`), the zoom, the filter, and whether differences are outlined. The
-sidebar lists the single-key shortcuts and has a checkbox that turns them off. That choice is saved
-in the browser.
+A review is one scroll of examples. Captures that differ only by theme, such as
+`primary-paper-light` and `primary-tactile-dark`, are one example with a tab per theme. Each example
+shows one image at a time, Actual by default, with its differences outlined. The top bar names the
+example in view and acts on it: Viewed, stepping through the differences, the View options (image,
+layout, zoom, outlines, and the shortcuts switch), and a menu that marks every theme viewed or
+copies a link. Contents lists every example with its progress, the filters, Next unviewed, and Mark
+all viewed. On a phone the captures run edge to edge, Contents and the View options open as sheets,
+and a bottom bar holds Viewed, View, and Review.
+
+A review keeps its state in the query string, so every view is a link: the capture in view and its
+zoom, the image (`pane`) or layout (`view=side` or `view=overlay`), the filters, whether viewed
+examples are hidden, and whether differences are outlined. Links from before the single-image layout
+still open: `view=diff` shows the diff image. Single-key shortcuts are listed in the View options,
+which also has a switch that turns them off. That choice is saved in the browser.
+
+Marking a capture viewed folds its example to a labelled row once every theme is viewed, and offers
+Undo for a few seconds. Viewed captures are saved in the browser's `localStorage`, per repository
+and capture id, with the capture's fingerprint. A capture stays viewed in later commits and other
+pull requests while its images are the same. When its images change, it shows as changed since
+viewed. A published report's `fingerprint` is a SHA-256 of the expected and actual images. A report
+without one, such as a local comparison, falls back to the capture's size and differing pixel count.
 
 The app reads a report over HTTP: `summary.json`, and one PNG per image at
 `diff/<capture id>.<expected|actual|diff>.png`. `src/report/schema.ts` validates that contract with
 Zod. The app imports nothing from the scripts that write it. `src/review/diff-regions.ts` reads the
 diff image's pixels to outline where a capture differs.
 
-The app is built with Luke UI through its public entrypoints and the Tactile theme. React Aria's
-`RouterProvider` sends Luke UI `Link` navigation through the History API, and the app has no router
-dependency. [`FRICTION.md`](./FRICTION.md) records the gaps it found.
+The app is built with Luke UI through its public entrypoints. React Aria Components supplies the
+tabs, disclosures, menus, popovers, sheets, slider, and note field. Vanilla Extract owns the rest of
+the presentation, using the theme's public `vars`. React Aria's `RouterProvider` sends Luke UI
+`Link` navigation through the History API, and the app has no router dependency.
+[`FRICTION.md`](./FRICTION.md) records the gaps it found.
+
+The app has its own theme: cool neutrals, an indigo accent for actions, selection, and focus, flat
+square controls, and the system font, so the chrome stays distinct from the Paper and Tactile
+screenshots it frames. The source is `src/theme/input.ts`. A small Vite plugin in `vite.config.ts`
+passes it to `defineTheme` from `@luke-ui/react/theme/compiler` and serves the result as
+`virtual:visual-review-theme.css`, and `index.html` sets the theme's identity class on `<html>`.
+Colour mode follows the system. The few values the theme has no token for, such as the grey stage
+behind the screenshots and the red difference outline, are in `src/styles/app-tokens.css.ts`.
 
 Two build-time variables configure a deployment:
 
@@ -43,30 +70,34 @@ pnpm run check
 ```
 
 The browser tests in `src/review/review.browser.test.tsx` review the small report in
-`src/test/fixtures/report` through the same `?source=local` route. The review bar and dashboard
-tests stub `fetch` for `/api/*`, and serve that report with a `meta` block as a pull request's.
+`src/test/fixtures/report` through the same `?source=local` route. The Review popover and dashboard
+tests stub `fetch` for `/api/*`, and serve that report with a `meta` block, and optionally a
+fingerprint, as a pull request's.
 
 `pnpm test:visual` writes the comparison that `http://localhost:5175/?source=local` reviews. Set
 `VISUAL_REVIEW_LOCAL_DIR` to review a comparison in another directory.
 
 ## Reviewing in the app
 
-A pull request's review shows its status under the header: comparing, needs review, approved or
-changes requested by a reviewer, no visual changes, or failed. It links to the `visual-review` check
-on GitHub, and says when the pull request changes visual testing infrastructure.
+A pull request's review status sits beside the Review button in the top bar: comparing, needs
+review, approved or changes requested by a reviewer, no visual changes, or failed. The Review button
+opens a popover, or a full sheet on a phone, that links to the `visual-review` check on GitHub, says
+how many captures are viewed, and says when the pull request changes visual testing infrastructure.
 
-Sign in with GitHub from that bar to review. A reviewer with write access can approve, or request
-changes with a note of up to 500 characters, and can change an earlier decision. A decision applies
-to the comparison on screen. When a newer commit or comparison exists, the bar says the report is
-out of date and turns the decisions off until the page reloads. Someone without write access sees
-the status only.
+Sign in with GitHub from that popover to review. A reviewer with write access can approve, or
+request changes with a note of up to 500 characters, and can change an earlier decision. A note
+written before approving goes with the approval. Neither decision depends on how much has been
+viewed. A decision applies to the comparison on screen. When a newer commit or comparison exists,
+the popover says the report is out of date and turns the decisions off until the page reloads.
+Someone without write access sees the status only.
 
 The [scheduled sweep](../../docs/VISUAL_TESTING.md#review-check) can occasionally revoke a valid
 approval when it races another update. Refresh the page and approve again.
 
-The bar needs the review backend. On the development server it says review actions are only
-available on the deployed app. A local comparison (`?source=local`) has no pull request, so it shows
-no bar.
+The decisions need the review backend. On the development server the popover says review actions are
+only available on the deployed app. A local comparison (`?source=local`) has no pull request, so it
+has no Review button. A pull request whose report is missing still shows its status and the Review
+button above the message.
 
 ## Review backend
 

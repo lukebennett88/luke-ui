@@ -1,0 +1,55 @@
+import { breakpoints } from '@luke-ui/react/theme';
+import { createVar, globalStyle } from '@vanilla-extract/css';
+
+/**
+ * The app's own values that the theme has no token for. Colours have light and dark values; sizes
+ * change for the phone layout. Everything else comes from the theme's `vars`.
+ */
+export const appVars = {
+	/** Height of the bottom bar on phones, and zero elsewhere. */
+	bottomBarHeight: createVar(),
+	/**
+	 * The outline drawn around a difference. It sits over arbitrary screenshot content, not a theme
+	 * surface, so it is a vivid red with a light halo rather than the danger role.
+	 */
+	difference: createVar(),
+	differenceHalo: createVar(),
+	/** Minimum height of an example's sticky header. */
+	sectionHeadHeight: createVar(),
+	/** The neutral mid-grey the screenshots sit on, darker than every surface in light mode. */
+	stage: createVar(),
+	/** Height of the sticky top bar. */
+	topBarHeight: createVar(),
+};
+
+const compact = `(inline-size < ${breakpoints.bp768}px)`;
+
+// Set on `body`, so the size query measures the root container.
+globalStyle('body', {
+	'@container': {
+		[compact]: {
+			vars: {
+				[appVars.bottomBarHeight]: '60px',
+				[appVars.sectionHeadHeight]: '40px',
+				[appVars.topBarHeight]: '48px',
+			},
+		},
+	},
+	'@media': {
+		'(prefers-color-scheme: dark)': {
+			vars: {
+				[appVars.difference]: 'oklch(0.66 0.2 27)',
+				[appVars.differenceHalo]: 'oklch(0.15 0 0 / 0.9)',
+				[appVars.stage]: 'oklch(0.259 0.005 280)',
+			},
+		},
+	},
+	vars: {
+		[appVars.bottomBarHeight]: '0px',
+		[appVars.difference]: 'oklch(0.6 0.21 27)',
+		[appVars.differenceHalo]: 'oklch(1 0 0 / 0.9)',
+		[appVars.sectionHeadHeight]: '44px',
+		[appVars.stage]: 'oklch(0.924 0.002 280)',
+		[appVars.topBarHeight]: '48px',
+	},
+});

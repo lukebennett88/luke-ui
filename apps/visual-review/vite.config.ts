@@ -1,19 +1,22 @@
+import { randomUUID } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import type * as ThemeCompiler from '@luke-ui/react/theme/compiler';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 import react from '@vitejs/plugin-react';
 import { stat } from 'node:fs/promises';
 import type { Plugin } from 'vite-plus';
 import { defineConfig } from 'vite-plus';
 import { playwright } from 'vite-plus/test/browser-playwright';
+import { visualReviewThemeInput } from './src/theme/input.js';
 
 const LOCAL_REPORT_ROUTE = '/__local-report';
 const LOCAL_REPORT_FILE_PATTERN =
 	/^\/(?:summary\.json|diff\/[a-z0-9-]+\/[a-z0-9-]+\.(?:expected|actual|diff)\.png)$/;
 
 export default defineConfig({
-	plugins: [localReport(), vanillaExtractPlugin(), react()],
+	plugins: [visualReviewTheme(), localReport(), vanillaExtractPlugin(), react()],
 	server: {
 		port: 5175,
 	},
@@ -84,5 +87,27 @@ function localReport(): Plugin {
 			});
 		},
 		name: 'visual-review-local-report',
+	};
+}
+
+/**
+ * Serves the app theme as `virtual:visual-review-theme.css`. Vite restarts when `src/theme/input.ts`
+ * changes because it is a config dependency.
+ */
+function visualReviewTheme(): Plugin {
+	const id = 'virtual:visual-review-theme.css';
+	const resolvedId = `\0${id}`;
+	return {
+		async load(loadId) {
+			if (loadId !== resolvedId) return;
+			const compiler = new URL(import.meta.resolve('@luke-ui/react/theme/compiler'));
+			this.addWatchFile(fileURLToPath(compiler));
+			// Refresh Node's cached compiler when the workspace build changes.
+			compiler.search = `build=${randomUUID()}`;
+			const { defineTheme }: typeof ThemeCompiler = await import(compiler.href);
+			return defineTheme(visualReviewThemeInput);
+		},
+		name: 'visual-review-theme',
+		resolveId: (source) => (source === id ? resolvedId : undefined),
 	};
 }

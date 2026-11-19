@@ -12,6 +12,7 @@
 // built-ins only. It runs with secrets beside an artefact produced by pull request code. Treat
 // every byte of that artefact as hostile.
 
+import { createHash } from 'node:crypto';
 import { constants } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -29,6 +30,12 @@ export type PublishedResult = {
 	mismatchedPixels?: number;
 	expectedViewport?: string;
 	actualViewport?: string;
+	/**
+	 * SHA-256 of the capture's expected PNG followed by its actual PNG, whichever it has, in
+	 * lowercase hex. The review app stores it when a reviewer marks the capture viewed, so a capture
+	 * whose images change in a later commit shows as changed since viewed.
+	 */
+	fingerprint?: string;
 };
 
 export type PublishedMeta = {
@@ -534,6 +541,8 @@ export async function prepareSite(options: {
 			const label = imagePath(result.id, kind);
 			return {
 				file: path.join(artifactDir, ...label.split('/')),
+				id: result.id,
+				kind,
 				label,
 				maxBytes: MAX_IMAGE_BYTES,
 				root: diffRoot,
@@ -558,6 +567,8 @@ export async function prepareSite(options: {
 	await mkdir(outDir);
 
 	let publishedBytes = 0;
+	// IMAGE_KINDS lists expected before actual, so each hash reads them in that order.
+	const fingerprints = new Map<string, ReturnType<typeof createHash>>();
 	for (const image of images) {
 		// Sequential: at most one screenshot is held in memory at a time.
 		// oxlint-disable-next-line no-await-in-loop
@@ -567,6 +578,11 @@ export async function prepareSite(options: {
 		}
 		// Counts the bytes actually read, in case a file changed after the size check.
 		publishedBytes = addToBudget(publishedBytes, bytes.length);
+		if (image.kind !== 'diff') {
+			const hash = fingerprints.get(image.id) ?? createHash('sha256');
+			hash.update(bytes);
+			fingerprints.set(image.id, hash);
+		}
 
 		const destination = path.join(outDir, ...image.label.split('/'));
 		// oxlint-disable-next-line no-await-in-loop
@@ -575,6 +591,10 @@ export async function prepareSite(options: {
 		await writeFile(destination, bytes);
 	}
 
+	for (const result of results) {
+		const hash = fingerprints.get(result.id);
+		if (hash) result.fingerprint = hash.digest('hex');
+	}
 	const summary: PublishedSummary = {
 		schemaVersion: 1,
 		meta,

@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { mkdir, mkdtemp, open, readdir, readFile, symlink, writeFile } from 'node:fs/promises';
@@ -90,6 +91,12 @@ const artifactCounts = { added: 0, changed: 0, removed: 0, unchanged: 0 };
 
 function artifactSummary(results: Array<unknown>, extra: Record<string, unknown> = {}): string {
 	return JSON.stringify({ counts: artifactCounts, results, ...extra });
+}
+
+function sha256(...parts: Array<Buffer>): string {
+	const hash = createHash('sha256');
+	for (const part of parts) hash.update(part);
+	return hash.digest('hex');
 }
 
 /** Writes an artefact directory with `summary.json` and the given files, relative to its root. */
@@ -358,9 +365,14 @@ test('publishes the rewritten summary and exactly the images each status implies
 		meta,
 		counts: { added: 1, changed: 1, removed: 1, unchanged: 7 },
 		results: [
-			{ id: 'button/hover', mismatchedPixels: 3, status: 'changed' },
-			{ id: 'card/new', status: 'added' },
-			{ id: 'text/sizes', status: 'removed' },
+			{
+				fingerprint: sha256(PNG, PNG),
+				id: 'button/hover',
+				mismatchedPixels: 3,
+				status: 'changed',
+			},
+			{ fingerprint: sha256(PNG), id: 'card/new', status: 'added' },
+			{ fingerprint: sha256(PNG), id: 'text/sizes', status: 'removed' },
 		],
 	});
 	expect(JSON.parse(await readFile(path.join(outDir, 'summary.json'), 'utf8'))).toEqual(summary);
@@ -403,7 +415,35 @@ test('takes metadata and counts from the workflow, never from the artefact', asy
 	expect(summary.schemaVersion).toBe(1);
 	expect(summary.meta).toEqual(meta);
 	expect(summary.counts).toEqual({ added: 1, changed: 0, removed: 0, unchanged: 2 });
-	expect(summary.results).toEqual([{ id: 'card/new', status: 'added' }]);
+	expect(summary.results).toEqual([{ fingerprint: sha256(PNG), id: 'card/new', status: 'added' }]);
+});
+
+test('fingerprints each capture from its expected and actual images, not the diff', async () => {
+	const expected = Buffer.concat([PNG, Buffer.from('expected')]);
+	const actual = Buffer.concat([PNG, Buffer.from('actual')]);
+	const { artifactDir, outDir } = await createArtifact(
+		artifactSummary([
+			// The artefact cannot choose a fingerprint.
+			{ fingerprint: 'f'.repeat(64), id: 'button/hover', status: 'changed' },
+			{ id: 'button/press', status: 'changed' },
+		]),
+		{
+			'diff/button/hover.actual.png': actual,
+			'diff/button/hover.diff.png': PNG,
+			'diff/button/hover.expected.png': expected,
+			'diff/button/press.actual.png': actual,
+			'diff/button/press.diff.png': Buffer.concat([PNG, Buffer.from('another diff')]),
+			'diff/button/press.expected.png': expected,
+		},
+	);
+
+	const summary = await prepareSite({ artifactDir, meta: runMeta, outDir });
+
+	expect(summary.results.map((result) => result.fingerprint)).toEqual([
+		sha256(expected, actual),
+		sha256(expected, actual),
+	]);
+	expect(sha256(expected, actual)).not.toBe(sha256(actual, expected));
 });
 
 test('publishes a summary alone when nothing differs', async () => {

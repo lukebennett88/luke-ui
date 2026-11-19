@@ -665,12 +665,12 @@ importers:
 
   apps/visual-review:
     dependencies:
+      '@capsizecss/metrics':
+        specifier: 'catalog:'
+        version: 4.4.0
       '@luke-ui/react':
         specifier: workspace:*
         version: link:../../packages/@luke-ui/react
-      '@luke-ui/theme-tactile':
-        specifier: workspace:*
-        version: link:../../packages/@luke-ui/theme-tactile
       '@vanilla-extract/css':
         specifier: 'catalog:'
         version: 1.21.3

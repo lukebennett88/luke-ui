@@ -1,199 +1,318 @@
 import { vars } from '@luke-ui/react/theme';
-import { globalStyle, style } from '@vanilla-extract/css';
+import { globalStyle, keyframes, style } from '@vanilla-extract/css';
+import { appVars } from '../styles/app-tokens.css.js';
+import { belowWideQuery, compactQuery, regularQuery, wideQuery } from '../styles/queries.js';
+import { topBar } from '../styles/top-bar.css.js';
 
-const hairline = `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`;
-const focusRing = { outline: `2px solid ${vars.color.focus}`, outlineOffset: '-2px' };
-
-export const layout = style({
-	display: 'grid',
-	flexGrow: 1,
-	gridTemplateColumns: 'minmax(16rem, 20rem) minmax(0, 1fr)',
-	minBlockSize: 0,
+/** The review reads at label size: 14px, the smallest size the app uses for anything a reviewer reads. */
+export const app = style({
+	fontFamily: vars.font.label.fontFamily,
+	fontSize: vars.font.label.fontSize,
+	lineHeight: vars.font.label.lineHeight,
+	minBlockSize: '100dvh',
 });
 
-export const sidebar = style({
-	background: vars.color.background.surface.base,
-	borderInlineEnd: hairline,
-	display: 'flex',
-	flexDirection: 'column',
-	minBlockSize: 0,
+export const numeric = style({
+	fontVariantNumeric: 'tabular-nums',
 });
 
-export const sidebarSection = style({
-	borderBlockEnd: hairline,
-	padding: vars.space['12'],
+export const truncate = style({
+	minInlineSize: 0,
+	overflow: 'hidden',
+	textOverflow: 'ellipsis',
+	whiteSpace: 'nowrap',
 });
 
-export const captureScroll = style({
-	flexGrow: 1,
-	minBlockSize: 0,
-	overflowY: 'auto',
-	overscrollBehavior: 'contain',
-	padding: vars.space['8'],
-});
-
-export const captureGroup = style({
-	listStyle: 'none',
-	margin: 0,
-	padding: 0,
-});
-
-export const captureGroupHeading = style({
-	paddingBlock: vars.space['8'],
-	paddingInline: vars.space['8'],
-});
-
-export const captureLink = style({
-	alignItems: 'baseline',
-	borderRadius: vars.radius.control,
+export const secondary = style({
 	color: vars.color.foreground.secondary,
-	display: 'flex',
-	gap: vars.space['8'],
-	justifyContent: 'space-between',
-	paddingBlock: vars.space['8'],
-	paddingInline: vars.space['8'],
-	scrollMarginBlock: vars.space['32'],
+});
+
+/** A React Aria button with no chrome of its own, such as a section name or a Contents row. */
+export const plainButton = style({
+	appearance: 'none',
+	background: 'none',
+	border: 0,
+	color: 'inherit',
+	font: 'inherit',
+	margin: 0,
+	outline: 'none',
+	padding: 0,
+	textAlign: 'start',
 	selectors: {
-		'&:focus-visible': focusRing,
-		'&:hover': {
-			background: `color-mix(in oklab, ${vars.color.foreground.primary} 6%, transparent)`,
-			color: vars.color.foreground.primary,
+		'&[data-focus-visible]': {
+			outline: `2px solid ${vars.color.focus}`,
+			outlineOffset: '-2px',
 		},
-		'&[aria-current="true"]': {
-			background: vars.color.background.accent.subtle,
-			color: vars.color.foreground.primary,
+		'&[data-hovered]': {
+			background: vars.interaction.tint.hover,
+		},
+		'&[data-pressed]': {
+			background: vars.interaction.tint.pressed,
 		},
 	},
-	textDecoration: 'none',
 });
 
-export const captureStatus = style({
-	flexShrink: 0,
-});
+/* ----------------------------------------------------------------- top bar */
 
-export const shortcuts = style({
-	borderBlockStart: hairline,
+export const reviewTopBar = style([
+	topBar,
+	{
+		display: 'grid',
+		gridTemplateColumns: 'auto minmax(0, 1fr) auto',
+		'@container': {
+			[compactQuery]: {
+				gap: vars.space['8'],
+				gridTemplateColumns: 'minmax(0, 1fr) auto',
+				paddingInline: `${vars.space['4']} ${vars.space['16']}`,
+			},
+		},
+	},
+]);
+
+export const topStart = style({
+	alignItems: 'center',
 	display: 'flex',
-	flexWrap: 'wrap',
-	gap: vars.space['8'],
-	padding: vars.space['12'],
-});
-
-export const viewer = style({
-	display: 'flex',
-	flexDirection: 'column',
-	minBlockSize: 0,
+	gap: vars.space['12'],
 	minInlineSize: 0,
 });
 
-export const toolbar = style({
-	alignItems: 'end',
-	background: vars.color.background.surface.base,
-	borderBlockEnd: hairline,
-	display: 'flex',
-	flexWrap: 'wrap',
-	gap: vars.space['16'],
-	justifyContent: 'space-between',
-	paddingBlock: vars.space['12'],
-	paddingInline: vars.space['16'],
-});
+export const topEnd = style([topStart, { justifyContent: 'flex-end' }]);
 
-export const zoomField = style({
-	inlineSize: '7rem',
-});
+/** The report's title. Below the wide layout it stays in the accessibility tree only. */
+export const reportTitle = style([
+	truncate,
+	{
+		color: vars.color.foreground.secondary,
+		fontSize: 'inherit',
+		fontWeight: vars.font.weight.body,
+		lineHeight: 'inherit',
+		margin: 0,
+		maxInlineSize: '32ch',
+		'@container': {
+			[belowWideQuery]: {
+				blockSize: '1px',
+				clipPath: 'inset(50%)',
+				inlineSize: '1px',
+				position: 'absolute',
+			},
+		},
+	},
+]);
 
-export const opacityField = style({
+/** The capture in view, and what acts on it. */
+export const guide = style({
 	alignItems: 'center',
 	display: 'flex',
 	gap: vars.space['8'],
-});
-
-export const opacityInput = style({
-	accentColor: vars.color.background.accent.solid.rest,
-	inlineSize: '10rem',
-	selectors: {
-		'&:focus-visible': { ...focusRing, outlineOffset: '2px' },
-	},
-});
-
-export const stage = style({
-	flexGrow: 1,
-	minBlockSize: 0,
-	overflow: 'auto',
-	padding: vars.space['16'],
-	selectors: {
-		'&:focus-visible': focusRing,
-	},
-});
-
-export const sideBySide = style({
-	alignItems: 'start',
-	display: 'grid',
-	gap: vars.space['16'],
-	gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-});
-
-/** At a fixed zoom each column takes its image's size and the stage scrolls. */
-export const sideBySideFixed = style({
-	gridTemplateColumns: 'repeat(2, max-content)',
-});
-
-export const sideBySideStacked = style({
-	gridTemplateColumns: 'minmax(0, 1fr)',
-});
-
-export const figure = style({
-	display: 'grid',
-	gap: vars.space['8'],
-	justifyItems: 'start',
-	margin: 0,
+	justifyContent: 'center',
 	minInlineSize: 0,
 });
 
-/** Stacks the expected and actual images in one cell so they share an origin. */
-export const overlay = style({
+export const guideWords = style([
+	truncate,
+	{
+		color: vars.color.foreground.secondary,
+		flex: '0 1 auto',
+		margin: 0,
+		marginInlineEnd: vars.space['4'],
+		maxInlineSize: 'min(52ch, 36vw)',
+		'@container': {
+			[compactQuery]: {
+				maxInlineSize: 'none',
+			},
+		},
+	},
+]);
+
+export const guideName = style({
+	color: vars.color.foreground.primary,
+	fontWeight: vars.font.weight.heading,
+});
+
+/** On phones the guide words open Contents. */
+export const guideButton = style([
+	plainButton,
+	{
+		alignItems: 'center',
+		color: vars.color.foreground.secondary,
+		display: 'flex',
+		gap: vars.space['8'],
+		minBlockSize: '44px',
+		minInlineSize: 0,
+		paddingInline: '10px',
+	},
+]);
+
+export const viewedCheckbox = style({
+	flexShrink: 0,
+	paddingInline: vars.space['4'],
+});
+
+export const progress = style([
+	numeric,
+	{
+		alignItems: 'baseline',
+		color: vars.color.foreground.secondary,
+		display: 'inline-flex',
+		gap: vars.space['4'],
+		whiteSpace: 'nowrap',
+	},
+]);
+
+export const status = style({
+	alignItems: 'center',
+	display: 'inline-flex',
+	gap: vars.space['4'],
+	whiteSpace: 'nowrap',
+});
+
+export const differences = style({
+	alignItems: 'center',
+	color: vars.color.foreground.secondary,
+	display: 'flex',
+});
+
+export const differencesPosition = style([
+	numeric,
+	{
+		minInlineSize: '6ch',
+		textAlign: 'center',
+		whiteSpace: 'nowrap',
+	},
+]);
+
+export const viewButtonLabel = style({
+	display: 'inline-flex',
+	gap: '6px',
+});
+
+/** Touch targets on phones. */
+export const touchTarget = style({
+	'@container': {
+		[compactQuery]: {
+			minBlockSize: '44px',
+			minInlineSize: '44px',
+		},
+	},
+});
+
+/* ------------------------------------------------------------------ layout */
+
+export const layout = style({
 	display: 'grid',
-	justifyItems: 'start',
+	gridTemplateColumns: 'minmax(0, 1fr)',
 });
 
-globalStyle(`${overlay} > *`, {
-	gridArea: '1 / 1',
+export const layoutWithContents = style({
+	'@container': {
+		[wideQuery]: {
+			gridTemplateColumns: '300px minmax(0, 1fr)',
+		},
+	},
 });
 
-/** Sizes to its image so region outlines can be placed as a share of it. */
-export const imageFrame = style({
-	inlineSize: 'fit-content',
-	maxInlineSize: '100%',
-	position: 'relative',
+export const main = style({
+	boxSizing: 'border-box',
+	minInlineSize: 0,
+	// Room below the last section, so any section can scroll up to the top bar.
+	paddingBlock: `${vars.space['16']} calc(50dvh + ${appVars.bottomBarHeight})`,
+	paddingInline: vars.space['24'],
+	'@container': {
+		[compactQuery]: {
+			paddingBlock: `0 calc(40dvh + ${appVars.bottomBarHeight})`,
+			paddingInline: 0,
+		},
+	},
 });
 
-export const region = style({
-	borderRadius: vars.radius.detail,
-	boxShadow: `0 0 0 1px ${vars.color.background.surface.base}`,
-	outline: `2px solid ${vars.color.foreground.danger.rest}`,
-	pointerEvents: 'none',
-	position: 'absolute',
-	scrollMargin: vars.space['48'],
+export const empty = style({
+	color: vars.color.foreground.secondary,
+	display: 'grid',
+	gap: vars.space['12'],
+	justifyItems: 'center',
+	paddingBlock: vars.space['64'],
+	paddingInline: vars.space['24'],
 });
 
-export const image = style({
-	background: vars.color.background.surface.base,
-	display: 'block',
-	outline: hairline,
+/* -------------------------------------------------------------- bottom bar */
+
+export const bottomBar = style({
+	alignItems: 'center',
+	background: vars.color.background.surface.subdued,
+	blockSize: appVars.bottomBarHeight,
+	boxShadow: `0 -${vars.borderWidth.thin} 0 ${vars.color.border.decorative}`,
+	boxSizing: 'content-box',
+	display: 'flex',
+	gap: vars.space['4'],
+	insetBlockEnd: 0,
+	insetInline: 0,
+	justifyContent: 'space-between',
+	paddingBlockEnd: 'env(safe-area-inset-bottom)',
+	paddingInline: `${vars.space['8']} ${vars.space['12']}`,
+	position: 'fixed',
+	zIndex: 36,
+	'@container': {
+		[regularQuery]: {
+			display: 'none',
+		},
+	},
 });
 
-export const imageFit = style({
-	blockSize: 'auto',
-	maxInlineSize: '100%',
+export const bottomViewed = style({
+	marginInlineEnd: 'auto',
 });
 
-/** Keeps pixel edges crisp when an image is scaled up to inspect a small difference. */
-export const imagePixelated = style({
-	imageRendering: 'pixelated',
+globalStyle(`${bottomViewed} label, label${bottomViewed}`, {
+	alignItems: 'center',
+	minBlockSize: '44px',
 });
+
+/* ------------------------------------------------------------------- toast */
+
+const rise = keyframes({
+	from: { opacity: 0, translate: '0 24px' },
+});
+
+/** The undo offer after marking viewed: transient, bottom centre. */
+export const toast = style({
+	alignItems: 'center',
+	animation: `${rise} 220ms cubic-bezier(0.16, 1, 0.3, 1)`,
+	background: vars.color.background.surface.raised,
+	borderRadius: vars.radius.surface,
+	boxShadow: vars.shadow.floating,
+	boxSizing: 'border-box',
+	display: 'flex',
+	gap: vars.space['12'],
+	insetBlockEnd: `calc(${vars.space['16']} + ${appVars.bottomBarHeight} + env(safe-area-inset-bottom))`,
+	insetInlineStart: '50%',
+	maxInlineSize: `calc(100vw - ${vars.space['32']})`,
+	paddingBlock: '6px',
+	paddingInline: `${vars.space['16']} 6px`,
+	position: 'fixed',
+	translate: '-50% 0',
+	zIndex: 40,
+	'@media': {
+		'(prefers-reduced-motion: reduce)': {
+			animation: 'none',
+		},
+	},
+});
+
+/* --------------------------------------------------------- message pages */
+
+export const messageTopBar = style([
+	topBar,
+	{
+		display: 'flex',
+		justifyContent: 'space-between',
+		paddingInline: `${vars.space['16']} ${vars.space['12']}`,
+	},
+]);
 
 export const message = style({
+	boxSizing: 'border-box',
 	marginInline: 'auto',
-	maxInlineSize: '36rem',
-	padding: vars.space['32'],
+	maxInlineSize: '40rem',
+	paddingBlock: vars.space['64'],
+	paddingInline: vars.space['16'],
 });

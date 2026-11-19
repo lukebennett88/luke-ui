@@ -1,12 +1,13 @@
-import { Cluster } from '@luke-ui/react/cluster';
-import { Container } from '@luke-ui/react/container';
+import { Box } from '@luke-ui/react/box';
 import { Heading } from '@luke-ui/react/heading';
+import { Icon } from '@luke-ui/react/icon';
 import { Link } from '@luke-ui/react/link';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
-import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
+import type { ReactNode } from 'react';
 import { Suspense, use } from 'react';
 import type { Review } from '../api/review-api.js';
+import { AppHeader } from '../app-header.js';
 import { isLocalSourceAvailable, repository } from '../config.js';
 import { loadReport } from '../report/load-report.js';
 import * as styles from './dashboard.css.js';
@@ -27,66 +28,104 @@ export function DashboardPage() {
 	const result = use(loadOpenPullRequests());
 
 	return (
-		<div className={styles.page}>
+		<>
 			<title>Visual review</title>
-			<Container maxInlineSize="container.896" paddingBlock="space.32" paddingInline="space.16">
-				<Stack gap="space.24">
-					<Stack gap="space.12">
-						<Heading level={1}>Open pull requests</Heading>
-						<Text color="secondary" elementType="p">
-							{`Visual differences between each pull request and main in ${repository}.`}
-						</Text>
-					</Stack>
-					{isLocalSourceAvailable ? (
-						<Text elementType="p">
-							<Link href="?source=local">Review the local comparison</Link>
-						</Text>
-					) : null}
-					<PullRequestList result={result} />
-				</Stack>
-			</Container>
-		</div>
+			<AppHeader />
+			<main className={styles.main}>
+				<div className={styles.intro}>
+					<Heading level={1} typography="heading3">
+						Open pull requests
+					</Heading>
+					<Text color="secondary" elementType="p">
+						{`Visual differences between each pull request and main in ${repository}.`}
+					</Text>
+				</div>
+				<PullRequestList result={result} />
+				{isLocalSourceAvailable ? (
+					<section aria-labelledby="local-title" className={styles.group}>
+						<Heading className={styles.groupTitle} id="local-title" level={2} typography="label">
+							On this machine
+						</Heading>
+						<ul className={styles.list}>
+							<Row
+								meta=".artifacts/visual-regression"
+								title={<Link href="?source=local">Local comparison</Link>}
+							>
+								<Link appearance="button" href="?source=local" size="small">
+									Review
+								</Link>
+							</Row>
+						</ul>
+					</section>
+				) : null}
+			</main>
+		</>
+	);
+}
+
+type RowProps = { children: ReactNode; meta: string; title: ReactNode };
+
+/** One report to review. The title's link covers the row; `children` sit at its end. */
+function Row({ children, meta, title }: RowProps) {
+	return (
+		<Box backgroundColor="surface.subdued" className={styles.row} elementType="li">
+			<div className={styles.rowText}>
+				<Text className={styles.title} fontWeight="label">
+					{title}
+				</Text>
+				<Text className={styles.meta} color="secondary" typography="caption">
+					{meta}
+				</Text>
+			</div>
+			<div className={styles.rowEnd}>{children}</div>
+		</Box>
 	);
 }
 
 function PullRequestList({ result }: { result: PullRequestsResult }) {
 	if (result.status !== 'ready') {
 		return (
-			<Text color="secondary" elementType="p" role="status">
-				{result.status === 'rate-limited'
-					? 'GitHub has rate limited this address. Try again in a few minutes, or open a pull request’s review from its comment.'
-					: 'The list of open pull requests could not be loaded from GitHub.'}
-			</Text>
+			<Box
+				backgroundColor="surface.subdued"
+				className={styles.notice}
+				elementType="div"
+				role="status"
+			>
+				<Text color="secondary" elementType="p">
+					{result.status === 'rate-limited'
+						? 'GitHub has rate limited this address. Try again in a few minutes, or open a pull request’s review from its comment.'
+						: 'The list of open pull requests could not be loaded from GitHub.'}
+				</Text>
+			</Box>
 		);
 	}
 	if (result.pullRequests.length === 0) {
 		return (
-			<Text color="secondary" elementType="p">
-				No pull requests are open.
-			</Text>
+			<Box backgroundColor="surface.subdued" className={styles.notice} elementType="div">
+				<Text color="secondary" elementType="p">
+					No pull requests are open.
+				</Text>
+			</Box>
 		);
 	}
 	return (
-		<ul className={styles.list}>
+		<ul aria-label="Open pull requests" className={styles.list}>
 			{orderByReview(result.pullRequests).map((pullRequest) => (
-				<li className={styles.row} key={pullRequest.number}>
-					<Stack gap="space.8" minInlineSize="0">
-						<Text fontWeight="label">
-							<Link href={`?pr=${pullRequest.number}`}>
-								{`#${pullRequest.number} ${pullRequest.title}`}
-							</Link>
-						</Text>
-						<Text color="secondary" typography="caption">
-							{describePullRequest(pullRequest)}
-						</Text>
-					</Stack>
-					<Cluster gap="space.16">
-						{pullRequest.review === undefined ? null : <ReviewChip review={pullRequest.review} />}
-						<Suspense fallback={<LoadingSpinner aria-label="Loading report" size="small" />}>
-							<PullRequestReport pullRequest={pullRequest} />
-						</Suspense>
-					</Cluster>
-				</li>
+				<Row
+					key={pullRequest.number}
+					meta={describePullRequest(pullRequest)}
+					title={
+						<Link href={`?pr=${pullRequest.number}`}>
+							<span className={styles.number}>{`#${pullRequest.number}`}</span>
+							{pullRequest.title}
+						</Link>
+					}
+				>
+					{pullRequest.review === undefined ? null : <ReviewStatus review={pullRequest.review} />}
+					<Suspense fallback={<LoadingSpinner aria-label="Loading report" size="small" />}>
+						<PullRequestReport pullRequest={pullRequest} />
+					</Suspense>
+				</Row>
 			))}
 		</ul>
 	);
@@ -97,34 +136,35 @@ function PullRequestReport({ pullRequest }: { pullRequest: PullRequest }) {
 	const state = reportState(result, pullRequest.headSha);
 
 	if (state.kind !== 'differences') {
-		// Hide only a report label already shown by the review chip.
+		// Hide only a report label already shown by the review status.
 		const chip = pullRequest.review === undefined ? undefined : reviewChip(pullRequest.review);
 		if (chip?.label === STATE_LABELS[state.kind]) return null;
-		return (
-			<Text color="secondary" typography="label">
-				{STATE_LABELS[state.kind]}
-			</Text>
-		);
+		return <Text color="secondary">{STATE_LABELS[state.kind]}</Text>;
 	}
 	return (
-		<Cluster gap="space.16">
-			<Text color="warning" typography="label">
-				{describeDifferences(state)}
-			</Text>
+		<>
+			<Text color="secondary">{describeDifferences(state)}</Text>
 			<Link appearance="button" href={`?pr=${pullRequest.number}`} size="small">
 				Review
 			</Link>
-		</Cluster>
+		</>
 	);
 }
 
-function ReviewChip({ review }: { review: Review | null }) {
+const STATUS_ICONS = { approved: 'check', 'changes-requested': 'exclamationTriangle' } as const;
+
+/** The review's state in its role colour, as the review page's top bar shows it. */
+function ReviewStatus({ review }: { review: Review | null }) {
 	const chip = reviewChip(review);
-	if (!chip) return null;
-	const { color, label } = chip;
+	if (!chip || !review) return null;
+	const icon =
+		review.state === 'approved' || review.state === 'changes-requested'
+			? STATUS_ICONS[review.state]
+			: undefined;
 	return (
-		<Text className={styles.chip} color={color} fontWeight="label" typography="caption">
-			{label}
+		<Text className={styles.status} color={chip.color} fontWeight="label">
+			{icon ? <Icon name={icon} size="xsmall" /> : null}
+			{chip.label}
 		</Text>
 	);
 }

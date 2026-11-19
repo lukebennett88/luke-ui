@@ -1,35 +1,71 @@
 import type { Capture, CaptureStatus } from '../report/schema.js';
 
-export const VIEW_MODES = ['side', 'overlay', 'diff'] as const;
-export type ViewMode = (typeof VIEW_MODES)[number];
+/** One image at a time, or both images side by side, or the actual image over the expected one. */
+export const LAYOUTS = ['single', 'side', 'overlay'] as const;
+export type Layout = (typeof LAYOUTS)[number];
 
-/** `fit` scales an image down to the available width. A number is a fixed scale. */
-export const ZOOM_LEVELS = ['fit', '0.5', '1', '2', '4'] as const;
+/** The image the single layout shows. */
+export const PANES = ['expected', 'actual', 'diff'] as const;
+export type Pane = (typeof PANES)[number];
+
+/**
+ * `fit` fits an image to the available width without scaling it up. `screen` fits the whole image
+ * on screen. A number is a fixed scale.
+ */
+const ZOOM_LEVELS = ['fit', 'screen', '0.5', '1', '2', '4'] as const;
 export type Zoom = (typeof ZOOM_LEVELS)[number];
+export const FIXED_ZOOMS = ['0.5', '1', '2', '4'] as const;
 
 export const STATUS_FILTERS = ['all', 'changed', 'added', 'removed'] as const;
 export type StatusFilter = (typeof STATUS_FILTERS)[number];
 
 /** Review state kept in the query string, so every view is a link. */
 export type ReviewParams = {
+	/** The capture in view. */
 	capture: string | undefined;
 	/** Whether to outline where the images differ. */
 	highlight: boolean;
+	/** Whether examples with every theme viewed are left out. */
+	hideViewed: boolean;
+	layout: Layout;
+	pane: Pane;
 	query: string;
 	status: StatusFilter;
-	view: ViewMode;
+	/** The zoom of the capture in view. */
 	zoom: Zoom;
 };
 
+/**
+ * Reads the review state. Links from before the single-image layout keep working: `view=diff`
+ * shows the diff image, and `view=side` and `view=overlay` open those layouts.
+ */
 export function parseReviewParams(search: string): ReviewParams {
 	const params = new URLSearchParams(search);
+	const view = params.get('view');
 	return {
 		capture: params.get('capture') ?? undefined,
+		hideViewed: params.get('hide') === 'viewed',
 		highlight: params.get('highlight') !== 'off',
+		layout: oneOf(LAYOUTS, view, 'single'),
+		pane: view === 'diff' ? 'diff' : oneOf(PANES, params.get('pane'), 'actual'),
 		query: params.get('q') ?? '',
 		status: oneOf(STATUS_FILTERS, params.get('status'), 'all'),
-		view: oneOf(VIEW_MODES, params.get('view'), 'side'),
 		zoom: oneOf(ZOOM_LEVELS, params.get('zoom'), 'fit'),
+	};
+}
+
+/** The query string values for a review state, leaving out each default. */
+export function reviewParamValues(
+	params: Omit<ReviewParams, 'capture'>,
+): Record<string, string | undefined> {
+	return {
+		hide: params.hideViewed ? 'viewed' : undefined,
+		highlight: params.highlight ? undefined : 'off',
+		pane: params.layout === 'single' && params.pane !== 'actual' ? params.pane : undefined,
+		q: params.query || undefined,
+		status: params.status === 'all' ? undefined : params.status,
+		view: params.layout === 'single' ? undefined : params.layout,
+		zoom: params.zoom === 'fit' ? undefined : params.zoom,
 	};
 }
 
@@ -45,24 +81,13 @@ export function filterCaptures(
 	});
 }
 
-/** The capture `offset` places from `currentId`, stopping at either end of the list. */
-export function stepCapture(
-	captures: ReadonlyArray<Capture>,
-	currentId: string | undefined,
-	offset: number,
-): Capture | undefined {
-	const index = captures.findIndex((capture) => capture.id === currentId);
-	if (index === -1) return captures[0];
-	return captures[Math.min(Math.max(index + offset, 0), captures.length - 1)];
-}
-
 /** The next zoom level in `direction`, stopping at the smallest and largest. */
 export function stepZoom(zoom: Zoom, direction: -1 | 1): Zoom {
-	// `fit` never scales up, so zooming in from it starts at actual size. Any fixed level could be
-	// larger than a fitted image, so zooming out from it stays at `fit`.
-	if (zoom === 'fit') return direction === 1 ? '1' : 'fit';
-	const index = ZOOM_LEVELS.indexOf(zoom) + direction;
-	return ZOOM_LEVELS[Math.min(Math.max(index, 1), ZOOM_LEVELS.length - 1)] ?? '1';
+	// A fitted image is never scaled up, so zooming in from it starts at actual size. Any fixed level
+	// could be larger than a fitted image, so zooming out from a fit keeps it.
+	if (zoom === 'fit' || zoom === 'screen') return direction === 1 ? '1' : zoom;
+	const index = FIXED_ZOOMS.indexOf(zoom) + direction;
+	return FIXED_ZOOMS[Math.min(Math.max(index, 0), FIXED_ZOOMS.length - 1)] ?? '1';
 }
 
 export const STATUS_LABELS = {

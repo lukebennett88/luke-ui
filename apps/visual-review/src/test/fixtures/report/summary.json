@@ -1,5 +1,10 @@
 {
-	"counts": { "added": 1, "changed": 2, "removed": 1, "unchanged": 5 },
+	"counts": {
+		"added": 1,
+		"changed": 4,
+		"removed": 1,
+		"unchanged": 5
+	},
 	"results": [
 		{
 			"actualViewport": "1024x800",
@@ -19,7 +24,33 @@
 			"status": "changed",
 			"width": 200
 		},
-		{ "actualViewport": "1024x800", "id": "text/added-case", "status": "added" },
-		{ "expectedViewport": "1024x800", "id": "text/removed-case", "status": "removed" }
+		{
+			"actualViewport": "1024x800",
+			"expectedViewport": "1024x800",
+			"height": 300,
+			"id": "checkbox/states-paper-dark",
+			"mismatchedPixels": 260,
+			"status": "changed",
+			"width": 200
+		},
+		{
+			"actualViewport": "1024x800",
+			"expectedViewport": "1024x800",
+			"height": 300,
+			"id": "checkbox/states-paper-light",
+			"mismatchedPixels": 260,
+			"status": "changed",
+			"width": 200
+		},
+		{
+			"actualViewport": "1024x800",
+			"id": "text/added-case",
+			"status": "added"
+		},
+		{
+			"expectedViewport": "1024x800",
+			"id": "text/removed-case",
+			"status": "removed"
+		}
 	]
 }

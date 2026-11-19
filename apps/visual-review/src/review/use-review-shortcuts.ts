@@ -14,6 +14,8 @@ export function useReviewShortcuts(shortcuts: ReviewShortcuts, isEnabled: boolea
 		function handleKeyDown(event: KeyboardEvent) {
 			if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
 			if (isTyping(event.target)) return;
+			// A focused control, or a capture that scrolls, uses the arrow keys itself.
+			if (event.key.startsWith('Arrow') && isFocusedElement(event.target)) return;
 			const handler = shortcuts[event.key];
 			if (!handler) return;
 			event.preventDefault();
@@ -32,4 +34,8 @@ function isTyping(target: EventTarget | null) {
 	if (target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement) return true;
 	// Range, radio, and checkbox inputs take no text, so shortcuts stay live while they have focus.
 	return target instanceof HTMLInputElement && !NON_TEXT_INPUT_TYPES.has(target.type);
+}
+
+function isFocusedElement(target: EventTarget | null) {
+	return target instanceof HTMLElement && target !== document.body;
 }

@@ -45,6 +45,21 @@ describe('parseReport', () => {
 		expect(report.captures[0]).not.toHaveProperty('actual');
 	});
 
+	test('keeps the fingerprint a published report writes, and rejects one it could not have', () => {
+		const fingerprint = 'c'.repeat(64);
+
+		expect(
+			parseReport({ counts, results: [{ fingerprint, id: 'text/added', status: 'added' }] })
+				.captures[0]?.fingerprint,
+		).toBe(fingerprint);
+		expect(() =>
+			parseReport({
+				counts,
+				results: [{ fingerprint: '<script>', id: 'text/added', status: 'added' }],
+			}),
+		).toThrow('Invalid string');
+	});
+
 	test('keeps the commit a published report was rendered from', () => {
 		const meta = {
 			generatedAt: '2026-11-16T00:00:00.000Z',
