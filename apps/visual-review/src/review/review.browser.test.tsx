@@ -176,10 +176,12 @@ test('d and Shift D step through the differences in the capture in view', async 
 	await app.user.keyboard('D');
 
 	await expect.poll(() => differences.element().textContent).toContain('1 of 2');
-	// The difference stepped to is drawn more strongly than the rest.
+	// The difference stepped to carries the stepper's number, and the rest step back.
 	const [active, other] = outlines(app.container, PRIMARY);
-	expect(getComputedStyle(active ?? document.body).outlineWidth).toBe('3px');
-	expect(getComputedStyle(other ?? document.body).outlineWidth).toBe('2px');
+	expect(active?.textContent).toBe('1');
+	expect(other?.textContent).toBe('');
+	await expect.poll(() => getComputedStyle(other ?? document.body).opacity).toBe('0.4');
+	expect(getComputedStyle(active ?? document.body).opacity).toBe('1');
 });
 
 test('zoom keys scale the capture in view only, and its zoom is in the link', async () => {

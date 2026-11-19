@@ -348,7 +348,12 @@ function CaptureImage(props: CaptureImageProps) {
 				? regions?.map((region, index) => (
 						<span
 							aria-hidden
-							className={cx(styles.region, index === activeRegion && styles.regionActive)}
+							className={cx(
+								styles.region,
+								index === activeRegion && styles.regionActive,
+								activeRegion !== undefined && index !== activeRegion && styles.regionMuted,
+							)}
+							data-active={index === activeRegion ? true : undefined}
 							data-region={index}
 							key={`${region.x}-${region.y}`}
 							style={{
@@ -357,11 +362,34 @@ function CaptureImage(props: CaptureImageProps) {
 								insetBlockStart: `${(region.y / size.height) * 100}%`,
 								insetInlineStart: `${(region.x / size.width) * 100}%`,
 							}}
-						/>
+						>
+							{index === activeRegion ? (
+								<span className={cx(styles.regionBadge, badgePlacement(region, size, box))}>
+									{index + 1}
+								</span>
+							) : null}
+						</span>
 					))
 				: null}
 		</div>
 	);
+}
+
+/** Room a difference's number needs beside its marker, in screen pixels. */
+const BADGE_ROOM = 28;
+
+/**
+ * Where the active difference's number goes: above its marker, else beside it, else inside its
+ * corner, so it never falls on a neighbouring marker or outside the capture.
+ */
+function badgePlacement(
+	region: DiffRegion,
+	size: { height: number; width: number },
+	box: { height: number; width: number },
+) {
+	if ((region.y / size.height) * box.height >= BADGE_ROOM) return undefined;
+	const after = ((size.width - region.x - region.width) / size.width) * box.width;
+	return after >= BADGE_ROOM ? styles.regionBadgeAfter : styles.regionBadgeInside;
 }
 
 /** A capture at least 80% as tall as it is wide. */

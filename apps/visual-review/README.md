@@ -52,7 +52,7 @@ screenshots it frames. The source is `src/theme/input.ts`. A small Vite plugin i
 passes it to `defineTheme` from `@luke-ui/react/theme/compiler` and serves the result as
 `virtual:visual-review-theme.css`, and `index.html` sets the theme's identity class on `<html>`.
 Colour mode follows the system. The few values the theme has no token for, such as the grey stage
-behind the screenshots and the red difference outline, are in `src/styles/app-tokens.css.ts`.
+behind the screenshots and the magenta difference marker, are in `src/styles/app-tokens.css.ts`.
 
 Two build-time variables configure a deployment:
 

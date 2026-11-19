@@ -68,11 +68,12 @@ any touch-first layout.
 ### App-only colour and size tokens
 
 The theme has no token for a backdrop darker than every surface, so the grey stage the screenshots
-sit on is an app token with light and dark values. The difference outline is a vivid red with a
-light halo, because it draws over arbitrary screenshot content rather than a theme surface, where
-the danger role's colours are tuned for. The top bar, section header, and bottom bar heights are app
-tokens too. All of them live in `src/styles/app-tokens.css.ts`. "Changed since viewed" uses the
-warning role's foreground.
+sit on is an app token with light and dark values. The difference marker is a magenta stroke between
+a white and a dark line. It draws over screenshots of Luke UI's own themes rather than a theme
+surface, and those screenshots use the danger, warning, success, info, and accent colours for their
+states, so no theme role can mark a difference without blending in. The top bar, section header, and
+bottom bar heights are app tokens too. All of them live in `src/styles/app-tokens.css.ts`. "Changed
+since viewed" uses the warning role's foreground.
 
 ### Accent for checked settings
 

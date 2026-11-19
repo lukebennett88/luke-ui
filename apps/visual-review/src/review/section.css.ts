@@ -385,16 +385,61 @@ export const pixelated = style({
 	imageRendering: 'pixelated',
 });
 
+/**
+ * A difference's marker: a white line inside a magenta stroke, inside a dark line, so it stands out
+ * on light and dark captures alike.
+ */
 export const region = style({
 	borderRadius: '2px',
-	boxShadow: `0 0 0 1px ${appVars.differenceHalo}`,
-	outline: `2px solid ${appVars.difference}`,
+	boxShadow: `inset 0 0 0 1px oklch(1 0 0 / 0.85), 0 0 0 2px ${appVars.difference}, 0 0 0 3px oklch(0.15 0 0 / 0.55)`,
 	pointerEvents: 'none',
 	position: 'absolute',
+	transition: 'opacity 120ms ease-out',
+	'@media': {
+		'(prefers-reduced-motion: reduce)': { transition: 'none' },
+	},
+});
+
+/** While a difference is stepped to, the others step back. */
+export const regionMuted = style({
+	opacity: 0.4,
 });
 
 export const regionActive = style({
-	boxShadow: `0 0 0 2px ${appVars.differenceHalo}`,
-	outlineWidth: '3px',
+	boxShadow: `inset 0 0 0 1px oklch(1 0 0 / 0.85), 0 0 0 3px ${appVars.difference}, 0 0 0 4px oklch(0.15 0 0 / 0.55)`,
 	zIndex: 1,
+});
+
+/** The active difference's number, matching the stepper's "2 of 6". */
+export const regionBadge = style({
+	alignItems: 'center',
+	background: appVars.difference,
+	borderRadius: '3px',
+	boxShadow: '0 0 0 1px oklch(0.15 0 0 / 0.55)',
+	boxSizing: 'border-box',
+	color: 'oklch(1 0 0)',
+	display: 'flex',
+	font: `${vars.font.weight.emphasis} 12px/1 ${vars.font.family.body}`,
+	fontVariantNumeric: 'tabular-nums',
+	insetBlockEnd: 'calc(100% + 5px)',
+	insetInlineStart: '-3px',
+	justifyContent: 'center',
+	minBlockSize: '18px',
+	minInlineSize: '18px',
+	paddingInline: '4px',
+	position: 'absolute',
+});
+
+/** Near the top of the capture, the badge sits beside the marker, so the frame never clips it. */
+export const regionBadgeAfter = style({
+	insetBlockEnd: 'auto',
+	insetBlockStart: '-3px',
+	insetInlineStart: 'calc(100% + 6px)',
+});
+
+/** With no room above or beside, the badge sits inside the marker's corner. */
+export const regionBadgeInside = style({
+	insetBlockEnd: 'auto',
+	insetBlockStart: '2px',
+	insetInlineStart: '2px',
 });
