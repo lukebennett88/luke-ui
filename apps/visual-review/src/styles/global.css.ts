@@ -1,6 +1,7 @@
 import './app-tokens.css.js';
 import { vars } from '@luke-ui/react/theme';
 import { globalStyle } from '@vanilla-extract/css';
+import { ROOT_CONTAINER } from './queries.js';
 
 // The document scrolls, so sticky bars and section headers stay in view on every page.
 globalStyle('body', {
@@ -17,5 +18,6 @@ globalStyle('::selection', {
 });
 
 globalStyle('html', {
+	containerName: ROOT_CONTAINER,
 	scrollbarColor: `${vars.color.border.control.rest} transparent`,
 });

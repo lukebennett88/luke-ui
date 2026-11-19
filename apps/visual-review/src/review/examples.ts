@@ -8,7 +8,11 @@ import { STATUS_LABELS } from './review-params.js';
 export type Example = {
 	captures: Array<Capture>;
 	component: string;
-	/** `component/name`, without the theme. */
+	/**
+	 * `component/name` for an example captured in themes. A capture with no theme suffix is an example
+	 * of its own, with the id `capture:<capture id>`, so it never joins a themed example of the same
+	 * name.
+	 */
 	id: string;
 	name: string;
 };
@@ -31,8 +35,9 @@ const THEME_ORDER = [
 export function groupExamples(captures: ReadonlyArray<Capture>): Array<Example> {
 	const examples = new Map<string, Example>();
 	for (const capture of captures) {
+		const isThemed = THEME_PATTERN.test(capture.name);
 		const name = capture.name.replace(THEME_PATTERN, '');
-		const id = `${capture.component}/${name}`;
+		const id = isThemed ? `${capture.component}/${name}` : `capture:${capture.id}`;
 		const example = examples.get(id);
 		if (example) example.captures.push(capture);
 		else examples.set(id, { captures: [capture], component: capture.component, id, name });

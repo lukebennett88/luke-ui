@@ -580,6 +580,8 @@ export async function prepareSite(options: {
 		publishedBytes = addToBudget(publishedBytes, bytes.length);
 		if (image.kind !== 'diff') {
 			const hash = fingerprints.get(image.id) ?? createHash('sha256');
+			// The role keeps an added capture's fingerprint apart from a removed one with the same bytes.
+			hash.update(`${image.kind}\n`);
 			hash.update(bytes);
 			fingerprints.set(image.id, hash);
 		}

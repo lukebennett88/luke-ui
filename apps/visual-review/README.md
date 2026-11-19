@@ -28,11 +28,12 @@ still open: `view=diff` shows the diff image. Single-key shortcuts are listed in
 which also has a switch that turns them off. That choice is saved in the browser.
 
 Marking a capture viewed folds its example to a labelled row once every theme is viewed, and offers
-Undo for a few seconds. Viewed captures are saved in the browser's `localStorage`, per repository
-and capture id, with the capture's fingerprint. A capture stays viewed in later commits and other
-pull requests while its images are the same. When its images change, it shows as changed since
-viewed. A published report's `fingerprint` is a SHA-256 of the expected and actual images. A report
-without one, such as a local comparison, falls back to the capture's size and differing pixel count.
+Undo for a few seconds. Viewed captures are saved in the browser's `localStorage`, one entry per
+repository and capture id, with the capture's fingerprint, so tabs never overwrite each other. A
+capture stays viewed in later commits and other pull requests while its images are the same. When
+its images change, it shows as changed since viewed. A published report's `fingerprint` is a SHA-256
+of each image's role and bytes, expected before actual. A report without one, such as a local
+comparison, falls back to the capture's size and differing pixel count.
 
 The app reads a report over HTTP: `summary.json`, and one PNG per image at
 `diff/<capture id>.<expected|actual|diff>.png`. `src/report/schema.ts` validates that contract with

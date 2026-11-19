@@ -312,7 +312,12 @@ type CaptureImageProps = {
 
 function CaptureImage(props: CaptureImageProps) {
 	const { activeRegion, baseUrl, box, capture, className, kind, opacity, regions } = props;
-	const size = imageSize(capture, kind) ?? {
+	// The report's size is the larger of the two images, so it is this image's own size only when
+	// they match. Otherwise the image keeps its natural size at the same scale, inside the frame.
+	const ownSize = imageSize(capture, kind);
+	const [naturalSize, setNaturalSize] = useState<{ height: number; width: number }>();
+	const drawn = ownSize ?? naturalSize;
+	const size = ownSize ?? {
 		height: capture.height ?? 0,
 		width: capture.width ?? 0,
 	};
@@ -328,11 +333,16 @@ function CaptureImage(props: CaptureImageProps) {
 				className={cx(styles.image, box.scale > 1 && styles.pixelated)}
 				decoding="async"
 				draggable={false}
-				height={box.height}
+				height={drawn ? Math.floor(drawn.height * box.scale) : undefined}
 				loading="lazy"
+				onLoad={(event) => {
+					if (ownSize) return;
+					const { naturalHeight, naturalWidth } = event.currentTarget;
+					setNaturalSize({ height: naturalHeight, width: naturalWidth });
+				}}
 				src={imageUrl(baseUrl, capture.id, kind)}
 				style={{ opacity }}
-				width={box.width}
+				width={drawn ? Math.floor(drawn.width * box.scale) : undefined}
 			/>
 			{size.width > 0 && size.height > 0
 				? regions?.map((region, index) => (

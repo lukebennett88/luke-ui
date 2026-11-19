@@ -1,6 +1,7 @@
 import axe from 'axe-core';
 import { afterEach, expect, test, vi } from 'vite-plus/test';
 import { page } from 'vite-plus/test/context';
+import { repository } from '../config.js';
 import { json, mockApi, publishedReport } from '../test/mock-api.js';
 import { cleanupApps, renderApp } from '../test/render-app.js';
 
@@ -339,6 +340,48 @@ test('viewed captures persist in this browser, and a capture changed since is fl
 		.toHaveAttribute('aria-expanded', 'false');
 });
 
+test('Undo puts back a capture that had changed since it was viewed', async () => {
+	const comparison = { headSha: 'a'.repeat(40), runAttempt: 1, runId: 1 };
+	mockApi({
+		'GET https://pr-301.reports.test/summary.json': () =>
+			publishedReport(301, comparison, { fingerprint: '1'.repeat(64) }),
+		'GET https://pr-302.reports.test/summary.json': () =>
+			publishedReport(302, comparison, { fingerprint: '2'.repeat(64) }),
+		'GET /api/session': () => json({ user: null }),
+	});
+	let app = await renderApp('?pr=301');
+	await expect.poll(() => currentParams().get('capture')).toBe(PRIMARY);
+	await app.user.click(inView(app).getByText('Viewed'));
+	await expect.element(app.locator.getByText(`1 of ${TOTAL} viewed`)).toBeVisible();
+	cleanupApps();
+	app = await renderApp('?pr=302');
+	const changed = app.locator.getByRole('region', {
+		name: `Actual screenshot of ${PRIMARY}, changed since viewed`,
+	});
+	await expect.element(changed).toBeVisible();
+
+	await app.user.click(inView(app).getByText('Viewed'));
+	await expect.element(app.locator.getByText(`1 of ${TOTAL} viewed`)).toBeVisible();
+	await app.user.click(app.locator.getByRole('button', { name: 'Undo' }));
+
+	await expect.element(changed).toBeVisible();
+	await expect.element(app.locator.getByText(`0 of ${TOTAL} viewed`)).toBeVisible();
+});
+
+test('marking a capture viewed keeps what another tab marked meanwhile', async () => {
+	const app = await renderApp('?source=local');
+	await expect.poll(() => currentParams().get('capture')).toBe(PRIMARY);
+	// Another tab marks a capture viewed after this one read its record.
+	const otherTab = `visual-review:seen:${repository}:${SECONDARY}`;
+	localStorage.setItem(otherTab, 'from another tab');
+
+	await app.user.click(inView(app).getByText('Viewed'));
+
+	await expect.element(app.locator.getByText(/^\d+ of 6 viewed$/).first()).toBeVisible();
+	expect(localStorage.getItem(otherTab)).toBe('from another tab');
+	expect(localStorage.getItem(`visual-review:seen:${repository}:${PRIMARY}`)).not.toBeNull();
+});
+
 test('a deep link opens its theme, image and zoom', async () => {
 	const app = await renderApp(
 		`?source=local&capture=${encodeURIComponent(STATES_DARK)}&view=diff&zoom=2`,
@@ -409,6 +452,21 @@ test('on a phone, a bottom bar holds Viewed and View, and Contents opens as a sh
 	await expect.poll(() => currentParams().get('capture')).toBe(SECONDARY);
 	const result = await axe.run(document.body);
 	expect(result.violations).toEqual([]);
+});
+
+test('on a phone, the View sheet can still turn single-key shortcuts off', async () => {
+	await page.viewport(375, 812);
+	const app = await renderApp('?source=local');
+	const bar = app.locator.getByRole('navigation', { name: 'Capture in view' });
+
+	await app.user.click(bar.getByRole('button', { name: /^View/ }));
+	const sheet = page.getByRole('dialog');
+	await app.user.click(sheet.getByText('Single-key shortcuts'));
+
+	await expect
+		.element(sheet.getByRole('switch', { name: 'Single-key shortcuts' }))
+		.not.toBeChecked();
+	expect(localStorage.getItem('visual-review:shortcuts')).toBe('off');
 });
 
 test('the review has one top-level heading and no axe violations', async () => {

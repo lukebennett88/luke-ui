@@ -8,30 +8,39 @@ export type SeenState = 'changed' | 'seen' | 'unseen';
 /** Capture id to the fingerprint the reviewer viewed. */
 type SeenRecord = Readonly<Record<string, string>>;
 
+/** Capture id to a stored fingerprint, or `undefined` for a capture with none. */
+export type SeenEntries = Readonly<Record<string, string | undefined>>;
+
 /**
- * One record per repository, so a capture viewed in one commit of a pull request stays viewed in
- * the next, and in any other pull request that shows the same images.
+ * One storage entry per capture, keyed by repository, so a capture viewed in one commit of a pull
+ * request stays viewed in the next, and in any other pull request that shows the same images. Tabs
+ * that mark different captures write different entries, so neither overwrites the other.
  */
-const STORAGE_KEY = `visual-review:seen:${repository}`;
+const KEY_PREFIX = `visual-review:seen:${repository}:`;
 const EMPTY: SeenRecord = {};
 const listeners = new Set<() => void>();
-/** The last stored text and what it parsed to, so an unchanged store keeps one snapshot. */
-let cache: { raw: string | null; record: SeenRecord } = { raw: null, record: EMPTY };
-/** What storage refused to keep. It then lasts until the page reloads. */
-let unsaved: SeenRecord | undefined;
+/** The record last read, kept while storage holds the same entries so each read is stable. */
+let cache: SeenRecord = EMPTY;
+/** Entries storage refused to keep, which then last until the page reloads. */
+const unsaved = new Map<string, string | undefined>();
 
 /**
  * The reviewer's viewed captures in this browser. Each is stored with its fingerprint, so a capture
  * whose images change in a later commit reads as `changed` rather than `seen`.
  */
 export function useSeen(): {
+	restoreSeen: (entries: SeenEntries) => void;
 	setSeen: (captures: ReadonlyArray<Capture>, isSeen: boolean) => void;
 	stateOf: (capture: Capture) => SeenState;
+	storedFor: (captures: ReadonlyArray<Capture>) => SeenEntries;
 } {
 	const record = useSyncExternalStore(subscribe, readSeen);
 	return {
+		restoreSeen: writeEntries,
 		setSeen,
 		stateOf: (capture) => seenState(record, capture),
+		storedFor: (captures) =>
+			Object.fromEntries(captures.map((capture) => [capture.id, record[capture.id]])),
 	};
 }
 
@@ -54,47 +63,56 @@ export function captureFingerprint(capture: Capture): string {
 }
 
 function setSeen(captures: ReadonlyArray<Capture>, isSeen: boolean) {
-	const next: Record<string, string> = { ...readSeen() };
-	for (const capture of captures) {
-		if (isSeen) next[capture.id] = captureFingerprint(capture);
-		else delete next[capture.id];
-	}
-	try {
-		localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-		unsaved = undefined;
-	} catch {
-		// Storage can be unavailable or full.
-		unsaved = next;
+	writeEntries(
+		Object.fromEntries(
+			captures.map((capture) => [capture.id, isSeen ? captureFingerprint(capture) : undefined]),
+		),
+	);
+}
+
+/** Stores each fingerprint, and removes the entry of each capture without one. */
+function writeEntries(entries: SeenEntries) {
+	for (const [id, fingerprint] of Object.entries(entries)) {
+		try {
+			if (fingerprint === undefined) localStorage.removeItem(KEY_PREFIX + id);
+			else localStorage.setItem(KEY_PREFIX + id, fingerprint);
+			unsaved.delete(id);
+		} catch {
+			// Storage can be unavailable or full.
+			unsaved.set(id, fingerprint);
+		}
 	}
 	notify();
 }
 
 function readSeen(): SeenRecord {
-	if (unsaved) return unsaved;
-	let raw: string | null;
-	try {
-		raw = localStorage.getItem(STORAGE_KEY);
-	} catch {
-		return EMPTY;
-	}
-	if (raw === cache.raw) return cache.record;
-	cache = { raw, record: parseRecord(raw) };
-	return cache.record;
+	const record = readStorage();
+	if (!isSameRecord(record, cache)) cache = record;
+	return cache;
 }
 
-function parseRecord(raw: string | null): SeenRecord {
-	if (raw === null) return EMPTY;
+function isSameRecord(a: SeenRecord, b: SeenRecord): boolean {
+	const keys = Object.keys(a);
+	return keys.length === Object.keys(b).length && keys.every((key) => a[key] === b[key]);
+}
+
+function readStorage(): SeenRecord {
+	const record: Record<string, string> = {};
 	try {
-		const value: unknown = JSON.parse(raw);
-		if (typeof value !== 'object' || value === null || Array.isArray(value)) return EMPTY;
-		const record: Record<string, string> = {};
-		for (const [id, fingerprint] of Object.entries(value)) {
-			if (typeof fingerprint === 'string') record[id] = fingerprint;
+		for (let index = 0; index < localStorage.length; index++) {
+			const key = localStorage.key(index);
+			if (!key?.startsWith(KEY_PREFIX)) continue;
+			const fingerprint = localStorage.getItem(key);
+			if (fingerprint !== null) record[key.slice(KEY_PREFIX.length)] = fingerprint;
 		}
-		return record;
 	} catch {
-		return EMPTY;
+		// Storage can be unavailable. What this page could not store still counts.
 	}
+	for (const [id, fingerprint] of unsaved) {
+		if (fingerprint === undefined) delete record[id];
+		else record[id] = fingerprint;
+	}
+	return Object.keys(record).length === 0 ? EMPTY : record;
 }
 
 function notify() {
@@ -102,8 +120,9 @@ function notify() {
 }
 
 function onStorage(event: StorageEvent) {
-	// Another tab marked captures viewed.
-	if (event.key === STORAGE_KEY || event.key === null) notify();
+	// Another tab marked captures viewed, or cleared storage.
+	if (event.key !== null && !event.key.startsWith(KEY_PREFIX)) return;
+	notify();
 }
 
 function subscribe(listener: () => void) {

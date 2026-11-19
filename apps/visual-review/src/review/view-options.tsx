@@ -211,14 +211,15 @@ export function ViewOptions(props: ViewOptionsProps) {
 				</p>
 			) : null}
 			{exampleActions}
+			{/* A phone can have a keyboard too, so the switch that turns shortcuts off stays. */}
+			<SwitchField
+				isSelected={areShortcutsEnabled}
+				label="Single-key shortcuts"
+				onChange={onShortcuts}
+				size={isCompact ? 'medium' : 'small'}
+			/>
 			{isCompact ? null : (
 				<>
-					<SwitchField
-						isSelected={areShortcutsEnabled}
-						label="Single-key shortcuts"
-						onChange={onShortcuts}
-						size="small"
-					/>
 					{areShortcutsEnabled ? (
 						<Disclosure className={styles.shortcuts}>
 							<AriaButton className={styles.shortcutsTrigger} slot="trigger">

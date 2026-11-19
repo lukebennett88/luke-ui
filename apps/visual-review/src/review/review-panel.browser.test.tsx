@@ -296,6 +296,8 @@ test('the review popover has no axe violations', async () => {
 	const app = await renderApp(search);
 	const panel = await openReview(app);
 	await expect.element(panel.getByRole('textbox', { name: /^Note/ })).toHaveFocus();
+	// The popover fades in. Contrast is measured once it is fully opaque.
+	await Promise.all(document.getAnimations().map((animation) => animation.finished));
 
 	const result = await axe.run(panel.element());
 	expect(result.violations).toEqual([]);

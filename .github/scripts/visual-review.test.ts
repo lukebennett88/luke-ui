@@ -93,9 +93,11 @@ function artifactSummary(results: Array<unknown>, extra: Record<string, unknown>
 	return JSON.stringify({ counts: artifactCounts, results, ...extra });
 }
 
-function sha256(...parts: Array<Buffer>): string {
+/** The publisher's fingerprint: each image's role, then its bytes, expected before actual. */
+function fingerprintOf(images: { actual?: Buffer; expected?: Buffer }): string {
 	const hash = createHash('sha256');
-	for (const part of parts) hash.update(part);
+	if (images.expected) hash.update('expected\n').update(images.expected);
+	if (images.actual) hash.update('actual\n').update(images.actual);
 	return hash.digest('hex');
 }
 
@@ -366,13 +368,13 @@ test('publishes the rewritten summary and exactly the images each status implies
 		counts: { added: 1, changed: 1, removed: 1, unchanged: 7 },
 		results: [
 			{
-				fingerprint: sha256(PNG, PNG),
+				fingerprint: fingerprintOf({ actual: PNG, expected: PNG }),
 				id: 'button/hover',
 				mismatchedPixels: 3,
 				status: 'changed',
 			},
-			{ fingerprint: sha256(PNG), id: 'card/new', status: 'added' },
-			{ fingerprint: sha256(PNG), id: 'text/sizes', status: 'removed' },
+			{ fingerprint: fingerprintOf({ actual: PNG }), id: 'card/new', status: 'added' },
+			{ fingerprint: fingerprintOf({ expected: PNG }), id: 'text/sizes', status: 'removed' },
 		],
 	});
 	expect(JSON.parse(await readFile(path.join(outDir, 'summary.json'), 'utf8'))).toEqual(summary);
@@ -415,7 +417,9 @@ test('takes metadata and counts from the workflow, never from the artefact', asy
 	expect(summary.schemaVersion).toBe(1);
 	expect(summary.meta).toEqual(meta);
 	expect(summary.counts).toEqual({ added: 1, changed: 0, removed: 0, unchanged: 2 });
-	expect(summary.results).toEqual([{ fingerprint: sha256(PNG), id: 'card/new', status: 'added' }]);
+	expect(summary.results).toEqual([
+		{ fingerprint: fingerprintOf({ actual: PNG }), id: 'card/new', status: 'added' },
+	]);
 });
 
 test('fingerprints each capture from its expected and actual images, not the diff', async () => {
@@ -440,10 +444,23 @@ test('fingerprints each capture from its expected and actual images, not the dif
 	const summary = await prepareSite({ artifactDir, meta: runMeta, outDir });
 
 	expect(summary.results.map((result) => result.fingerprint)).toEqual([
-		sha256(expected, actual),
-		sha256(expected, actual),
+		fingerprintOf({ actual, expected }),
+		fingerprintOf({ actual, expected }),
 	]);
-	expect(sha256(expected, actual)).not.toBe(sha256(actual, expected));
+});
+
+test('fingerprints an added capture apart from a removed one with the same bytes', async () => {
+	const added = await createArtifact(artifactSummary([{ id: 'card/new', status: 'added' }]), {
+		'diff/card/new.actual.png': PNG,
+	});
+	const removed = await createArtifact(artifactSummary([{ id: 'card/new', status: 'removed' }]), {
+		'diff/card/new.expected.png': PNG,
+	});
+
+	const [addition] = (await prepareSite({ ...added, meta: runMeta })).results;
+	const [removal] = (await prepareSite({ ...removed, meta: runMeta })).results;
+
+	expect(addition?.fingerprint).not.toBe(removal?.fingerprint);
 });
 
 test('publishes a summary alone when nothing differs', async () => {

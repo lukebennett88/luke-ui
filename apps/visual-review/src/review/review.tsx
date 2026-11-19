@@ -45,6 +45,7 @@ import {
 	stickyTop,
 	stuckHeaderHeight,
 } from './scroll-position.js';
+import type { SeenEntries } from './seen-store.js';
 import { useSeen } from './seen-store.js';
 import { setShortcutsEnabled, useShortcutsEnabled } from './shortcuts-preference.js';
 import type { CaptureView, StageMetrics } from './stage.js';
@@ -55,12 +56,20 @@ import { useReviewShortcuts } from './use-review-shortcuts.js';
 import { showingLabel, ViewOptions } from './view-options.js';
 
 const DEFAULT_VIEW: CaptureView = { activeRegion: undefined, zoom: 'fit' };
+/** About two seconds of frames to wait for a difference's outline to render. */
+const MAX_DIFFERENCE_FRAMES = 120;
 /** How long the offer to undo a mark stays. It is a convenience, not a step. */
 const UNDO_DURATION = 6000;
 /** The top bar's height, which the fit-screen zoom leaves room for. */
 const TOP_BAR_HEIGHT = 48;
 
-type Undo = { captureIds: Array<string>; exampleId: string | undefined; label: string };
+type Undo = {
+	captureIds: Array<string>;
+	exampleId: string | undefined;
+	label: string;
+	/** What each marked capture had stored before, so Undo puts back a `changed` state too. */
+	previous: SeenEntries;
+};
 
 type ReviewProps = { baseUrl: string; report: Report; source: ReportSource };
 
@@ -72,7 +81,7 @@ type ReviewProps = { baseUrl: string; report: Report; source: ReportSource };
  */
 export function Review({ baseUrl, report, source }: ReviewProps) {
 	const params = parseReviewParams(useLocationSearch());
-	const { setSeen, stateOf } = useSeen();
+	const { restoreSeen, setSeen, stateOf, storedFor } = useSeen();
 	const areShortcutsEnabled = useShortcutsEnabled();
 	const pullRequestReview = usePullRequestReview(
 		source.kind === 'pull-request' ? source.number : undefined,
@@ -107,6 +116,8 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 	const mainWidth = useContentWidth(mainRef);
 	const filterRef = useRef<HTMLInputElement>(null);
 	const afterRender = useRef<(() => void) | undefined>(undefined);
+	/** The difference waiting to scroll into view, until its outline renders. */
+	const differenceScroll = useRef<symbol | undefined>(undefined);
 	const deepLink = useRef(initial?.example.id);
 	const { hideViewed, highlight: shouldOutline, layout, pane, query, status } = params;
 
@@ -237,6 +248,11 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		run?.();
 	});
 
+	// A difference still waiting to render belongs to the capture it was asked for.
+	useEffect(() => {
+		differenceScroll.current = undefined;
+	}, [currentCapture?.id]);
+
 	useEffect(() => {
 		if (!undo) return;
 		const timer = window.setTimeout(() => setUndo(undefined), UNDO_DURATION);
@@ -281,6 +297,7 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 
 	function setViewed(example: Example, capture: Capture, isViewed: boolean) {
 		const wasSeen = stateOf(capture) === 'seen';
+		const stored = storedFor([capture]);
 		setSeen([capture], isViewed);
 		const viewed = viewedCount + (isViewed && !wasSeen ? 1 : 0) - (!isViewed && wasSeen ? 1 : 0);
 		setAnnouncement(
@@ -298,13 +315,19 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 			setActiveTheme((previous) => ({ ...previous, [example.id]: nextTheme.id }));
 			return;
 		}
-		setUndo({ captureIds: [capture.id], exampleId: example.id, label: `${example.name} viewed` });
+		setUndo({
+			captureIds: [capture.id],
+			exampleId: example.id,
+			label: `${example.name} viewed`,
+			previous: stored,
+		});
 		collapse(example);
 		moveOnFrom(example);
 	}
 
 	function markExampleViewed(example: Example) {
 		const marked = example.captures.filter((capture) => stateOf(capture) !== 'seen');
+		const previous = storedFor(marked);
 		setSeen(example.captures, true);
 		collapse(example);
 		setAnnouncement(`All ${example.captures.length} themes of ${example.id} marked viewed.`);
@@ -312,12 +335,14 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 			captureIds: marked.map((capture) => capture.id),
 			exampleId: example.id,
 			label: `${example.name}: ${example.captures.length} themes viewed`,
+			previous,
 		});
 		moveOnFrom(example);
 	}
 
 	function markReportViewed() {
 		const marked = report.captures.filter((capture) => stateOf(capture) !== 'seen');
+		const previous = storedFor(marked);
 		setSeen(marked, true);
 		setExpanded({});
 		setAnnouncement(`All ${total} captures marked viewed.`);
@@ -325,16 +350,13 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 			captureIds: marked.map((capture) => capture.id),
 			exampleId: undefined,
 			label: `All ${total} viewed`,
+			previous,
 		});
 	}
 
 	function undoLast() {
 		if (!undo) return;
-		const ids = new Set(undo.captureIds);
-		setSeen(
-			report.captures.filter((capture) => ids.has(capture.id)),
-			false,
-		);
+		restoreSeen(undo.previous);
 		setUndo(undefined);
 		setAnnouncement('Undone.');
 		const { exampleId } = undo;
@@ -448,11 +470,21 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		const captureId = currentCapture.id;
 		const exampleId = currentExample.id;
 		const kind = layout === 'single' ? paneFor(currentCapture, pane) : 'actual';
-		afterRender.current = () => {
+		const request = Symbol('difference');
+		differenceScroll.current = request;
+		// A folded example loads its regions only once it opens, so the target can render a few
+		// frames after this one. Keep trying until it does, or a newer request or capture replaces it.
+		const attempt = (frames: number) => {
+			if (differenceScroll.current !== request) return;
 			const target = document.querySelector<HTMLElement>(
 				`[data-capture="${CSS.escape(captureId)}"] [data-kind="${kind}"] [data-region="${index}"]`,
 			);
-			if (!target) return;
+			if (!target) {
+				if (frames < MAX_DIFFERENCE_FRAMES) requestAnimationFrame(() => attempt(frames + 1));
+				else differenceScroll.current = undefined;
+				return;
+			}
+			differenceScroll.current = undefined;
 			const box = target.getBoundingClientRect();
 			const top = stickyTop() + stuckHeaderHeight(exampleId);
 			const bottom = stickyBottom() - 24;
@@ -467,6 +499,7 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 				stage.scrollLeft += box.left + box.width / 2 - (stageBox.left + stageBox.width / 2);
 			}
 		};
+		afterRender.current = () => attempt(0);
 	}
 
 	function openFilter() {

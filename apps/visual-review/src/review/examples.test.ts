@@ -39,8 +39,21 @@ describe('groupExamples', () => {
 	test('makes a capture with no theme an example of its own', () => {
 		const [example] = groupExamples([capture('text/added-case', { status: 'added' })]);
 
-		expect(example?.id).toBe('text/added-case');
+		expect(example?.id).toBe('capture:text/added-case');
 		expect(example && hasThemes(example)).toBe(false);
+	});
+
+	test('keeps a capture with no theme apart from a themed example of the same name', () => {
+		const examples = groupExamples([
+			capture('button/primary'),
+			capture('button/primary-paper-light'),
+		]);
+
+		expect(examples.map((example) => example.captures.map((item) => item.id))).toEqual([
+			['button/primary'],
+			['button/primary-paper-light'],
+		]);
+		expect(new Set(examples.map((example) => example.id)).size).toBe(2);
 	});
 });
 
