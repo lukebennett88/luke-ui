@@ -52,6 +52,37 @@ const SHORTCUTS = [
 	['t /', 'Contents, filter'],
 ] as const;
 
+type PaneSwitchProps = {
+	areKeysHidden: boolean;
+	className?: string;
+	layout: Layout;
+	onPane: (pane: Pane) => void;
+	pane: Pane;
+};
+
+/** Expected, Actual, or Diff. Nothing is selected while a layout shows two images. */
+export function PaneSwitch({ areKeysHidden, className, layout, onPane, pane }: PaneSwitchProps) {
+	return (
+		<ToggleButtonGroup
+			aria-label="Image"
+			className={`${styles.segmented} ${styles.segmentedFill}${className ? ` ${className}` : ''}`}
+			disallowEmptySelection
+			onSelectionChange={(keys) => {
+				const [key] = keys;
+				if (typeof key === 'string') onPane(key as Pane);
+			}}
+			selectedKeys={layout === 'single' ? [pane] : []}
+		>
+			{PANES.map((id) => (
+				<ToggleButton className={styles.segment} id={id} key={id}>
+					<span>{PANE_LABELS[id]}</span>
+					<ShortcutHint isHidden={areKeysHidden} keys={KEYS[id]} />
+				</ToggleButton>
+			))}
+		</ToggleButtonGroup>
+	);
+}
+
 /** What the View button names: the image on screen, or the layout. */
 export function showingLabel(layout: Layout, pane: Pane): string {
 	return layout === 'single' ? PANE_LABELS[pane] : LAYOUT_LABELS[layout];
@@ -93,23 +124,10 @@ export function ViewOptions(props: ViewOptionsProps) {
 
 	return (
 		<div className={styles.options}>
-			<ToggleButtonGroup
-				aria-label="Image"
-				className={`${styles.segmented} ${styles.segmentedFill}`}
-				disallowEmptySelection
-				onSelectionChange={(keys) => {
-					const [key] = keys;
-					if (typeof key === 'string') onPane(key as Pane);
-				}}
-				selectedKeys={layout === 'single' ? [pane] : []}
-			>
-				{PANES.map((id) => (
-					<ToggleButton className={styles.segment} id={id} key={id}>
-						<span>{PANE_LABELS[id]}</span>
-						<ShortcutHint isHidden={areKeysHidden} keys={KEYS[id]} />
-					</ToggleButton>
-				))}
-			</ToggleButtonGroup>
+			{/* A phone has the image switch in its bottom bar, beside the image it acts on. */}
+			{isCompact ? null : (
+				<PaneSwitch areKeysHidden={areKeysHidden} layout={layout} onPane={onPane} pane={pane} />
+			)}
 			<RadioGroup
 				label="Layout"
 				onChange={(value) => onLayout(LAYOUTS.find((mode) => mode === value) ?? 'single')}

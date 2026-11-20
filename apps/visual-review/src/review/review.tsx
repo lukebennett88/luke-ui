@@ -21,7 +21,7 @@ import type { Capture, Report } from '../report/schema.js';
 import { Contents } from './contents.js';
 import { ExampleSection, SEEN_STATE_TEXT } from './example-section.js';
 import type { Example } from './examples.js';
-import { exampleLabel, groupExamples, hasThemes, themeLabel } from './examples.js';
+import { describeShare, exampleLabel, groupExamples, hasThemes, themeLabel } from './examples.js';
 import {
 	COMPACT_QUERY,
 	DRAWER_QUERY,
@@ -53,7 +53,7 @@ import { PANE_LABELS, paneFor, useRegions } from './stage.js';
 import { CaptureMenu, ContentsIcon, DiffStepper, GuideWords, Progress } from './top-bar-parts.js';
 import { usePullRequestReview } from './use-pull-request-review.js';
 import { useReviewShortcuts } from './use-review-shortcuts.js';
-import { showingLabel, ViewOptions } from './view-options.js';
+import { PaneSwitch, showingLabel, ViewOptions } from './view-options.js';
 
 const DEFAULT_VIEW: CaptureView = { activeRegion: undefined, zoom: 'fit' };
 /** About two seconds of frames to wait for a difference's outline to render. */
@@ -62,6 +62,8 @@ const MAX_DIFFERENCE_FRAMES = 120;
 const UNDO_DURATION = 6000;
 /** The top bar's height, which the fit-screen zoom leaves room for. */
 const TOP_BAR_HEIGHT = 48;
+/** The phone bottom bar: the image switch and stepper above Viewed, View and Review. */
+const BOTTOM_BAR_HEIGHT = 108;
 
 type Undo = {
 	captureIds: Array<string>;
@@ -452,6 +454,16 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		setZoom(stepZoom(currentView.zoom, direction));
 	}
 
+	/**
+	 * The zoom to step to a difference at. On a phone a capture fitted to the width is usually too
+	 * small to judge, so stepping shows it at actual size, panned to the difference.
+	 */
+	function differenceZoom(zoom: Zoom): Zoom {
+		const isScaledDown = (currentCapture?.width ?? 0) > metrics.availableWidth;
+		if (isCompact && isScaledDown && (zoom === 'fit' || zoom === 'screen')) return '1';
+		return zoom === 'screen' ? 'fit' : zoom;
+	}
+
 	/** Centres the next difference on screen. A zoomed capture also scrolls sideways to it. */
 	function stepDifference(offset: number) {
 		if (!currentCapture || !currentExample || !currentRegions?.length) return;
@@ -462,7 +474,7 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		const index = (from + offset + count) % count;
 		updateView(currentCapture.id, {
 			activeRegion: index,
-			zoom: currentView.zoom === 'screen' ? 'fit' : currentView.zoom,
+			zoom: differenceZoom(currentView.zoom),
 		});
 		if (isCompact) setAnnouncement(`Difference ${index + 1} of ${count}`);
 		if (!shouldOutline) setParams({ highlight: true });
@@ -542,7 +554,7 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		availableWidth: Math.max(mainWidth - (isCompact ? 0 : 48), 120),
 		gap: isCompact ? 12 : 24,
 		screenHeight: Math.max(
-			viewportHeight - TOP_BAR_HEIGHT - (isCompact ? 60 + 16 : 44 + 36 + 24 + 16),
+			viewportHeight - TOP_BAR_HEIGHT - (isCompact ? BOTTOM_BAR_HEIGHT + 16 : 44 + 36 + 24 + 16),
 			160,
 		),
 	};
@@ -616,13 +628,31 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 			<DiffStepper
 				active={currentView.activeRegion}
 				isCompact={isCompact}
-				onStep={(offset) => {
-					if (isCompact) setIsViewOpen(false);
-					stepDifference(offset);
-				}}
+				onStep={stepDifference}
 				regions={currentRegions}
 			/>
 		) : null;
+
+	/** The phone's image switch, or the one image an added or removed capture has. */
+	const compareControl = (() => {
+		if (!currentCapture) return <span />;
+		if (currentCapture.status !== 'changed') {
+			return (
+				<span className={styles.bottomNote}>
+					{`${describeShare(currentCapture)}: ${PANE_LABELS[paneFor(currentCapture, pane)]} only`}
+				</span>
+			);
+		}
+		return (
+			<PaneSwitch
+				areKeysHidden
+				className={styles.bottomPanes}
+				layout={layout}
+				onPane={showPane}
+				pane={pane}
+			/>
+		);
+	})();
 
 	const viewedCheckbox =
 		currentCapture && currentExample ? (
@@ -823,44 +853,50 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 					elementType="nav"
 					{...{ [CHROME_ATTRIBUTE.bottomBar]: '' }}
 				>
-					{viewedCheckbox ?? <span />}
-					<DialogTrigger isOpen={isViewOpen} onOpenChange={setIsViewOpen}>
-						<Button
-							aria-label={`View options, showing ${showingLabel(layout, pane)}`}
-							className={styles.touchTarget}
-							endContent={<Icon name="chevronUp" size="xsmall" />}
-							prominence="low"
-						>
-							View
-						</Button>
-						<ModalOverlay className={overlayStyles.modalOverlay} isDismissable>
-							<Modal className={overlayStyles.sheet}>
-								<Dialog aria-labelledby="review-view-title" className={overlayStyles.dialog}>
-									<Box backgroundColor="surface.raised" className={overlayStyles.dialogBody}>
-										<div className={overlayStyles.sheetHead}>
-											<AriaHeading
-												className={overlayStyles.dialogTitle}
-												id="review-view-title"
-												slot="title"
-											>
-												View
-											</AriaHeading>
-											<IconButton
-												aria-label="Close"
-												className={styles.touchTarget}
-												icon="close"
-												onPress={() => setIsViewOpen(false)}
-												prominence="low"
-											/>
-										</div>
-										{differences}
-										{viewOptions}
-									</Box>
-								</Dialog>
-							</Modal>
-						</ModalOverlay>
-					</DialogTrigger>
-					{review}
+					{/* What the reviewer compares with, beside the image it acts on. */}
+					<div className={styles.bottomCompare}>
+						{compareControl}
+						{differences}
+					</div>
+					<div className={styles.bottomActions}>
+						{viewedCheckbox ?? <span />}
+						<DialogTrigger isOpen={isViewOpen} onOpenChange={setIsViewOpen}>
+							<Button
+								aria-label={`View options, showing ${showingLabel(layout, pane)}`}
+								className={styles.touchTarget}
+								endContent={<Icon name="chevronUp" size="xsmall" />}
+								prominence="low"
+							>
+								View
+							</Button>
+							<ModalOverlay className={overlayStyles.modalOverlay} isDismissable>
+								<Modal className={overlayStyles.sheet}>
+									<Dialog aria-labelledby="review-view-title" className={overlayStyles.dialog}>
+										<Box backgroundColor="surface.raised" className={overlayStyles.dialogBody}>
+											<div className={overlayStyles.sheetHead}>
+												<AriaHeading
+													className={overlayStyles.dialogTitle}
+													id="review-view-title"
+													slot="title"
+												>
+													View
+												</AriaHeading>
+												<IconButton
+													aria-label="Close"
+													className={styles.touchTarget}
+													icon="close"
+													onPress={() => setIsViewOpen(false)}
+													prominence="low"
+												/>
+											</div>
+											{viewOptions}
+										</Box>
+									</Dialog>
+								</Modal>
+							</ModalOverlay>
+						</DialogTrigger>
+						{review}
+					</div>
 				</Box>
 			) : null}
 

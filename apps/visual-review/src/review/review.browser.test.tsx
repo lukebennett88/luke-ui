@@ -456,6 +456,23 @@ test('on a phone, a bottom bar holds Viewed and View, and Contents opens as a sh
 	expect(result.violations).toEqual([]);
 });
 
+test('on a phone, the bottom bar switches the image and steps through differences', async () => {
+	await page.viewport(375, 812);
+	const app = await renderApp('?source=local');
+	const bar = app.locator.getByRole('navigation', { name: 'Capture in view' });
+	const differences = bar.getByRole('group', { name: 'Differences in the capture in view' });
+	await expect.poll(() => differences.element().textContent).toContain('2 differences');
+
+	await app.user.click(bar.getByRole('radio', { name: 'Diff' }));
+	await expect
+		.element(app.locator.getByRole('img', { name: `Diff screenshot of ${PRIMARY}` }))
+		.toBeVisible();
+	await app.user.click(differences.getByRole('button', { name: 'Next difference' }));
+
+	await expect.poll(() => differences.element().textContent).toContain('1 of 2');
+	expect(currentParams().get('pane')).toBe('diff');
+});
+
 test('on a phone, the View sheet can still turn single-key shortcuts off', async () => {
 	await page.viewport(375, 812);
 	const app = await renderApp('?source=local');

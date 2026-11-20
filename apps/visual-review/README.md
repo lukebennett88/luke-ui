@@ -18,8 +18,10 @@ shows one image at a time, Actual by default, with its differences outlined. The
 example in view and acts on it: Viewed, stepping through the differences, the View options (image,
 layout, zoom, outlines, and the shortcuts switch), and a menu that marks every theme viewed or
 copies a link. Contents lists every example with its progress, the filters, Next unviewed, and Mark
-all viewed. On a phone the captures run edge to edge, Contents and the View options open as sheets,
-and a bottom bar holds Viewed, View, and Review.
+all viewed. On a phone the captures run edge to edge, and Contents and the View options open as
+sheets. A two-row bottom bar holds the Expected, Actual, and Diff switch and the difference stepper
+above Viewed, View, and Review. Stepping to a difference in a capture scaled down to fit shows it at
+actual size, panned to that difference.
 
 A review keeps its state in the query string, so every view is a link: the capture in view and its
 zoom, the image (`pane`) or layout (`view=side` or `view=overlay`), the filters, whether viewed

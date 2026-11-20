@@ -181,6 +181,9 @@ export const tabList = style({
 	position: 'relative',
 	'@container': {
 		[compactQuery]: {
+			// Every theme and its viewed mark stays on screen: tabs wrap instead of scrolling away.
+			flexWrap: 'wrap',
+			inlineSize: 'auto',
 			marginInline: vars.space['4'],
 			paddingBlock: `0 ${vars.space['4']}`,
 		},
@@ -217,6 +220,7 @@ export const tab = style({
 	'@container': {
 		[compactQuery]: {
 			minBlockSize: '44px',
+			paddingInline: '8px',
 		},
 	},
 });

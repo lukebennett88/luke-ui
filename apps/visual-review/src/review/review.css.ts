@@ -236,18 +236,20 @@ export const empty = style({
 
 /* -------------------------------------------------------------- bottom bar */
 
+/**
+ * The phone's controls for the capture in view, in two rows: what to compare above, and what to do
+ * about it below.
+ */
 export const bottomBar = style({
-	alignItems: 'center',
 	background: vars.color.background.surface.subdued,
-	blockSize: appVars.bottomBarHeight,
+	blockSize: `calc(${appVars.bottomBarHeight} + env(safe-area-inset-bottom))`,
 	boxShadow: `0 -${vars.borderWidth.thin} 0 ${vars.color.border.decorative}`,
-	boxSizing: 'content-box',
-	display: 'flex',
-	gap: vars.space['4'],
+	boxSizing: 'border-box',
+	display: 'grid',
+	gridTemplateRows: '44px 1fr',
 	insetBlockEnd: 0,
 	insetInline: 0,
-	justifyContent: 'space-between',
-	paddingBlockEnd: 'env(safe-area-inset-bottom)',
+	paddingBlock: `${vars.space['4']} env(safe-area-inset-bottom)`,
 	paddingInline: `${vars.space['8']} ${vars.space['12']}`,
 	position: 'fixed',
 	zIndex: 36,
@@ -256,6 +258,31 @@ export const bottomBar = style({
 			display: 'none',
 		},
 	},
+});
+
+export const bottomCompare = style({
+	alignItems: 'center',
+	display: 'flex',
+	gap: vars.space['8'],
+	justifyContent: 'space-between',
+	minInlineSize: 0,
+});
+
+export const bottomPanes = style({
+	flex: '1 1 auto',
+	maxInlineSize: '16rem',
+});
+
+export const bottomNote = style({
+	color: vars.color.foreground.secondary,
+	paddingInline: vars.space['4'],
+});
+
+export const bottomActions = style({
+	alignItems: 'center',
+	display: 'flex',
+	gap: vars.space['4'],
+	justifyContent: 'space-between',
 });
 
 export const bottomViewed = style({

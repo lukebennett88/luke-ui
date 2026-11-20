@@ -27,7 +27,7 @@ globalStyle('body', {
 	'@container': {
 		[compactQuery]: {
 			vars: {
-				[appVars.bottomBarHeight]: '60px',
+				[appVars.bottomBarHeight]: '108px',
 				[appVars.sectionHeadHeight]: '40px',
 				[appVars.topBarHeight]: '48px',
 			},
