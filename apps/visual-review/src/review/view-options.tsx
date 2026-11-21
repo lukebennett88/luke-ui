@@ -43,6 +43,7 @@ const SHORTCUTS = [
 	['[ ]', 'Previous, next theme'],
 	['v', 'Toggle viewed'],
 	['u', 'Next unviewed'],
+	['z', 'Undo the last mark'],
 	['d D', 'Next, previous difference'],
 	['1 2 3', 'Expected, actual, diff'],
 	['← →', 'Flip expected, actual'],

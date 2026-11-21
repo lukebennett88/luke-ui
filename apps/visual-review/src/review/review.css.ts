@@ -20,10 +20,6 @@ export const truncate = style({
 	whiteSpace: 'nowrap',
 });
 
-export const secondary = style({
-	color: vars.color.foreground.secondary,
-});
-
 /** A React Aria button with no chrome of its own, such as a section name or a Contents row. */
 export const plainButton = style({
 	appearance: 'none',
@@ -51,33 +47,15 @@ export const plainButton = style({
 
 /* ----------------------------------------------------------------- top bar */
 
-export const reportTitle = style([
-	truncate,
-	{
-		color: vars.color.foreground.secondary,
-		fontSize: 'inherit',
-		fontWeight: vars.font.weight.body,
-		lineHeight: 'inherit',
-		margin: 0,
-		maxInlineSize: '32ch',
-	},
-]);
+export const reportTitle = style([truncate, { maxInlineSize: '32ch' }]);
 
 export const viewedCheckbox = style({
 	flexShrink: 0,
-	paddingInline: vars.space['4'],
 });
 
-export const progress = style([
-	numeric,
-	{
-		alignItems: 'baseline',
-		color: vars.color.foreground.secondary,
-		display: 'inline-flex',
-		gap: vars.space['4'],
-		whiteSpace: 'nowrap',
-	},
-]);
+export const progress = style({
+	whiteSpace: 'nowrap',
+});
 
 export const status = style({
 	alignItems: 'center',
@@ -88,22 +66,14 @@ export const status = style({
 
 export const differences = style({
 	alignItems: 'center',
-	color: vars.color.foreground.secondary,
 	display: 'flex',
 });
 
-export const differencesPosition = style([
-	numeric,
-	{
-		minInlineSize: '6ch',
-		textAlign: 'center',
-		whiteSpace: 'nowrap',
-	},
-]);
-
-export const viewButtonLabel = style({
-	display: 'inline-flex',
-	gap: '6px',
+/** Wide enough for `9 of 12`, so the arrows stay put as the position changes. */
+export const differencesPosition = style({
+	minInlineSize: '6ch',
+	textAlign: 'center',
+	whiteSpace: 'nowrap',
 });
 
 /** Touch targets on phones. */
@@ -210,16 +180,14 @@ export const empty = style({
  * about it below.
  */
 export const bottomBar = style({
-	background: vars.color.background.surface.subdued,
 	blockSize: `calc(${appVars.bottomBarHeight} + env(safe-area-inset-bottom))`,
 	boxShadow: `0 -${vars.borderWidth.thin} 0 ${vars.color.border.decorative}`,
 	boxSizing: 'border-box',
 	display: 'grid',
-	gridTemplateRows: '44px 1fr',
+	gridTemplateRows: '44px 44px',
 	insetBlockEnd: 0,
 	insetInline: 0,
-	paddingBlock: `${vars.space['4']} env(safe-area-inset-bottom)`,
-	paddingInline: `${vars.space['8']} ${vars.space['12']}`,
+	paddingBlock: `${vars.space['8']} calc(${vars.space['8']} + env(safe-area-inset-bottom))`,
 	position: 'fixed',
 	zIndex: 36,
 	'@container': {

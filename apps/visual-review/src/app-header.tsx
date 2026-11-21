@@ -57,7 +57,6 @@ export function AppHeader({
 					endContent={<Icon name="externalLink" size="xsmall" />}
 					href={`https://github.com/${repository}/pulls`}
 					prominence="low"
-					size="small"
 					target="_blank"
 				>
 					{repository}

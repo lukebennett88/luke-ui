@@ -1,5 +1,6 @@
 import { createIcon } from '@luke-ui/react/icon';
 import { IconButton } from '@luke-ui/react/icon-button';
+import { Text } from '@luke-ui/react/text';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import { Menu, MenuItem, MenuTrigger, Popover } from 'react-aria-components';
 import type { DiffRegion } from './diff-regions.js';
@@ -41,13 +42,29 @@ export function Progress({
 }) {
 	if (isCompact) {
 		return (
-			<span className={styles.progress}>
+			<Text
+				className={styles.progress}
+				color="secondary"
+				fontVariantNumeric="tabular-nums"
+				fontWeight="body"
+				typography="label"
+			>
 				{`${viewed}/${total}`}
 				<VisuallyHidden> viewed</VisuallyHidden>
-			</span>
+			</Text>
 		);
 	}
-	return <span className={styles.progress}>{`${viewed} of ${total} viewed`}</span>;
+	return (
+		<Text
+			className={styles.progress}
+			color="secondary"
+			fontVariantNumeric="tabular-nums"
+			fontWeight="body"
+			typography="label"
+		>
+			{`${viewed} of ${total} viewed`}
+		</Text>
+	);
 }
 
 type DiffStepperProps = {
@@ -64,7 +81,6 @@ export function DiffStepper({ active, isCompact, onStep, regions }: DiffStepperP
 		active === undefined
 			? `${count} difference${count === 1 ? '' : 's'}`
 			: `${active + 1} of ${count}`;
-	const size = isCompact ? 'medium' : 'small';
 	return (
 		<div
 			aria-label="Differences in the capture in view"
@@ -77,18 +93,25 @@ export function DiffStepper({ active, isCompact, onStep, regions }: DiffStepperP
 				icon="chevronUp"
 				onPress={() => onStep(-1)}
 				prominence="low"
-				size={size}
+				size="medium"
 			/>
-			<span aria-live={isCompact ? undefined : 'polite'} className={styles.differencesPosition}>
+			<Text
+				aria-live={isCompact ? undefined : 'polite'}
+				className={styles.differencesPosition}
+				color="secondary"
+				fontVariantNumeric="tabular-nums"
+				fontWeight="body"
+				typography="label"
+			>
 				{position}
-			</span>
+			</Text>
 			<IconButton
 				aria-label={isCompact ? 'Next difference' : 'Next difference (D)'}
 				className={styles.touchTarget}
 				icon="chevronDown"
 				onPress={() => onStep(1)}
 				prominence="low"
-				size={size}
+				size="medium"
 			/>
 		</div>
 	);
@@ -112,7 +135,7 @@ export function CaptureMenu(props: CaptureMenuProps) {
 				aria-label={`More for ${name}`}
 				icon={<MoreIcon />}
 				prominence="low"
-				size="small"
+				size="medium"
 			/>
 			<Popover className={overlayStyles.popover} offset={8} placement="bottom end">
 				<Menu

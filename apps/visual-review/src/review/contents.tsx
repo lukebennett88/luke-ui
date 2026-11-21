@@ -1,12 +1,15 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { CheckboxField } from '@luke-ui/react/checkbox-field';
+import { Heading } from '@luke-ui/react/heading';
 import { Icon } from '@luke-ui/react/icon';
 import { IconButton } from '@luke-ui/react/icon-button';
 import { Kbd } from '@luke-ui/react/kbd';
 import { Link } from '@luke-ui/react/link';
 import { Lockup, LockupBody, LockupRail } from '@luke-ui/react/lockup';
 import { SelectField, SelectItem } from '@luke-ui/react/select-field';
+import { Stack } from '@luke-ui/react/stack';
+import { Text } from '@luke-ui/react/text';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import { cx } from '@luke-ui/react/utils';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
@@ -83,22 +86,22 @@ export function Contents(props: ContentsProps) {
 		>
 			<Box
 				alignItems="flex-start"
-				paddingBlockStart="space.12"
+				paddingBlockStart="space.16"
 				paddingInlineStart="space.16"
 				paddingInlineEnd="space.8"
 				display="flex"
 				gap="space.8"
 				justifyContent="space-between"
 			>
-				<div>
-					<h2 className={styles.title} id="review-contents-title">
+				<Stack gap="space.4" minInlineSize="0">
+					<Heading id="review-contents-title" level={2} typography="body">
 						Contents
-					</h2>
-					<p className={styles.summary}>
+					</Heading>
+					<Text color="secondary" fontVariantNumeric="tabular-nums" typography="label">
 						{`${viewed} of ${total} viewed`}
 						{changedCount > 0 ? ` · ${changedCount} changed since viewed` : ''}
-					</p>
-				</div>
+					</Text>
+				</Stack>
 				{isOverlay ? (
 					<IconButton
 						aria-label="Close contents"
@@ -111,23 +114,13 @@ export function Contents(props: ContentsProps) {
 				) : null}
 			</Box>
 			{isCompact ? (
-				<Box
-					className={styles.summary}
-					renderRoot={(domProps) => <p {...domProps} />}
-					paddingBlockStart="space.8"
-					paddingBlockEnd="space.12"
-					paddingInline="space.16"
-				>
-					{reportTitle}
+				<Box paddingBlockStart="space.12" paddingInline="space.16">
+					<Text color="secondary" elementType="p" typography="label">
+						{reportTitle}
+					</Text>
 				</Box>
 			) : null}
-			<Box
-				display="grid"
-				gap="space.8"
-				paddingBlockStart="space.8"
-				paddingBlockEnd="space.12"
-				paddingInline="space.16"
-			>
+			<Stack gap="space.12" paddingBlock="space.16" paddingInline="space.16">
 				<TextInputField
 					aria-label="Filter captures"
 					inputRef={filterRef}
@@ -139,29 +132,40 @@ export function Contents(props: ContentsProps) {
 					type="search"
 					value={query}
 				/>
-				<Box alignItems="center" display="flex" gap="space.12" justifyContent="space-between">
-					<SelectField
-						aria-label="Status"
-						className={styles.filterGrow}
-						items={STATUS_ITEMS}
-						onChange={(value) => onStatus(STATUS_FILTERS.find((id) => id === value) ?? 'all')}
-						size={size}
-						value={status}
-					>
-						{(item) => <SelectItem id={item.id}>{item.label}</SelectItem>}
-					</SelectField>
-					<CheckboxField
-						isSelected={hideViewed}
-						label="Hide viewed"
-						onChange={onHideViewed}
-						size={size}
-					/>
-				</Box>
-				<Box alignItems="center" display="flex" gap="space.12" justifyContent="space-between">
-					<Button onPress={onNextUnviewed} size={size}>
-						Next unviewed
-					</Button>
-					{areKeysShown ? <Kbd aria-hidden>u</Kbd> : null}
+				<Lockup gap="space.12" railAlignment="center">
+					<LockupBody>
+						<SelectField
+							aria-label="Status"
+							items={STATUS_ITEMS}
+							onChange={(value) => onStatus(STATUS_FILTERS.find((id) => id === value) ?? 'all')}
+							size={size}
+							value={status}
+						>
+							{(item) => <SelectItem id={item.id}>{item.label}</SelectItem>}
+						</SelectField>
+					</LockupBody>
+					<LockupRail>
+						<CheckboxField
+							isSelected={hideViewed}
+							label="Hide viewed"
+							onChange={onHideViewed}
+							size={size}
+						/>
+					</LockupRail>
+				</Lockup>
+				<Box
+					alignItems="center"
+					display="flex"
+					flexWrap="wrap"
+					gap="space.8"
+					justifyContent="space-between"
+				>
+					<Box alignItems="center" display="flex" gap="space.8">
+						<Button onPress={onNextUnviewed} size={size}>
+							Next unviewed
+						</Button>
+						{areKeysShown ? <Kbd aria-hidden>u</Kbd> : null}
+					</Box>
 					<Button
 						className={styles.pushEnd}
 						isDisabled={viewed === total}
@@ -172,18 +176,40 @@ export function Contents(props: ContentsProps) {
 						Mark all viewed
 					</Button>
 				</Box>
-			</Box>
-			<div className={styles.list} ref={listRef}>
+			</Stack>
+			<Box
+				className={styles.list}
+				flexGrow="1"
+				minBlockSize="0"
+				overflowY="auto"
+				overscrollBehavior="contain"
+				paddingBlockEnd="space.24"
+				paddingInline="space.8"
+				position="relative"
+				ref={listRef}
+			>
 				{examples.length === 0 ? (
-					<p className={styles.groupHeading} role="status">
-						No captures match the filter.
-					</p>
+					<Box padding="space.8" role="status">
+						<Text color="secondary" typography="label">
+							No captures match the filter.
+						</Text>
+					</Box>
 				) : null}
 				{groupByComponent(examples).map(([component, items]) => (
-					<ul aria-label={component} className={styles.group} key={component}>
-						<li aria-hidden className={styles.groupHeading}>
-							{component}
-						</li>
+					<Stack
+						aria-label={component}
+						className={styles.group}
+						elementType="ul"
+						gap="0"
+						key={component}
+						marginBlockEnd="space.12"
+						padding="0"
+					>
+						<Box aria-hidden elementType="li" paddingBlock="space.4" paddingInline="space.8">
+							<Text color="secondary" fontWeight="emphasis" typography="label">
+								{component}
+							</Text>
+						</Box>
 						{items.map((example) => (
 							<ContentsItem
 								example={example}
@@ -193,12 +219,12 @@ export function Contents(props: ContentsProps) {
 								stateOf={stateOf}
 							/>
 						))}
-					</ul>
+					</Stack>
 				))}
-			</div>
-			<div className={styles.foot}>
+			</Box>
+			<Box paddingBlock="space.12" paddingInline="space.16">
 				<Link href={window.location.pathname}>All open pull requests</Link>
-			</div>
+			</Box>
 		</Box>
 	);
 }
@@ -219,6 +245,7 @@ function ContentsItem({ example, isCurrent, onSelect, stateOf }: ContentsItemPro
 			<Lockup
 				className={styles.item}
 				gap="space.8"
+				paddingInline="space.8"
 				railAlignment="center"
 				renderRoot={(domProps) => {
 					return (
@@ -239,7 +266,15 @@ function ContentsItem({ example, isCurrent, onSelect, stateOf }: ContentsItemPro
 				</LockupBody>
 				<LockupRail aria-hidden className={styles.itemState} elementType="span">
 					{hasChanged ? <span className={styles.changedDot} /> : null}
-					{seen === total ? <Icon name="check" size="xsmall" /> : <span>{`${seen}/${total}`}</span>}
+					{seen === total ? (
+						<Icon name="check" size="xsmall" />
+					) : (
+						<Text
+							color="secondary"
+							fontVariantNumeric="tabular-nums"
+							typography="label"
+						>{`${seen}/${total}`}</Text>
+					)}
 				</LockupRail>
 			</Lockup>
 		</li>

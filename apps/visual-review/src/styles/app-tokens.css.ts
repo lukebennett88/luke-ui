@@ -27,7 +27,7 @@ globalStyle('body', {
 	'@container': {
 		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			vars: {
-				[appVars.bottomBarHeight]: '108px',
+				[appVars.bottomBarHeight]: '112px',
 				[appVars.sectionHeadHeight]: '40px',
 				[appVars.topBarHeight]: '48px',
 			},
@@ -45,6 +45,6 @@ globalStyle('body', {
 		[appVars.difference]: 'oklch(0.56 0.26 345)',
 		[appVars.sectionHeadHeight]: '44px',
 		[appVars.stage]: 'oklch(0.924 0.002 280)',
-		[appVars.topBarHeight]: '48px',
+		[appVars.topBarHeight]: '56px',
 	},
 });

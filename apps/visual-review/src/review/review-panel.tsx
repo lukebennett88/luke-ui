@@ -8,7 +8,7 @@ import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { cx } from '@luke-ui/react/utils';
 import type { SubmitEvent } from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef } from 'react';
 import {
 	Dialog,
 	DialogTrigger,
@@ -70,11 +70,7 @@ export function ReviewTrigger(props: ReviewTriggerProps) {
 		<>
 			<ReviewStatus isCompact={isCompact} review={review} />
 			<DialogTrigger isOpen={isOpen} onOpenChange={onOpenChange}>
-				<Button
-					className={reviewStyles.touchTarget}
-					prominence="high"
-					size={isCompact ? 'medium' : 'small'}
-				>
+				<Button className={reviewStyles.touchTarget} prominence="high" size="medium">
 					Review
 				</Button>
 				{isCompact ? (
@@ -108,7 +104,7 @@ function ReviewStatus({ isCompact, review }: { isCompact: boolean; review: PullR
 	const { state } = pullReview.data.review;
 	const icon = { approved: 'check', 'changes-requested': 'exclamationTriangle' } as const;
 	return (
-		<Text className={reviewStyles.status} color={STATUS_COLORS[state]} fontWeight="label">
+		<Text className={reviewStyles.status} color={STATUS_COLORS[state]} typography="label">
 			{state === 'approved' || state === 'changes-requested' ? (
 				<Icon name={icon[state]} size="xsmall" />
 			) : null}
@@ -188,16 +184,13 @@ type ReviewControlsProps = {
 	session: ApiResult<Session>;
 };
 
-type Pending = Decision | 'sign-out' | undefined;
-
 function ReviewControls(props: ReviewControlsProps) {
 	const { isCompact, progress, report, review, reviewState, session } = props;
 	const { number, onReview, refreshSession } = reviewState;
-	const [pending, setPending] = useState<Pending>();
-	const [announcement, setAnnouncement] = useState('');
-	const [note, setNote] = useState('');
-	const [noteError, setNoteError] = useState<string>();
-	const [isStale, setIsStale] = useState(false);
+	const [{ announcement, isStale, note, noteError, pending }, dispatch] = useReducer(
+		controlsReducer,
+		INITIAL_CONTROLS_STATE,
+	);
 	const noteRef = useRef<HTMLTextAreaElement>(null);
 
 	const isCurrent = review ? isReportCurrent(report, review) && !isStale : false;
@@ -221,12 +214,11 @@ function ReviewControls(props: ReviewControlsProps) {
 		if (!review || !canDecide || pending !== undefined) return;
 		const trimmed = note.trim();
 		if (decision === 'request-changes' && trimmed === '') {
-			setNoteError('Say what needs to change.');
+			dispatch({ message: 'Say what needs to change.', type: 'noteRejected' });
 			noteRef.current?.focus();
 			return;
 		}
-		setPending(decision);
-		setAnnouncement('');
+		dispatch({ pending: decision, type: 'started' });
 		const result = await postDecision(number, {
 			decision,
 			headSha: review.headSha,
@@ -234,16 +226,20 @@ function ReviewControls(props: ReviewControlsProps) {
 			runAttempt: review.runAttempt,
 			runId: review.runId,
 		});
-		setPending(undefined);
 		if (result.kind === 'ok') {
 			onReview(result.data.review);
-			setNote('');
-			setAnnouncement(`Saved. ${reviewStatusText(result.data.review)}.`);
+			dispatch({
+				announcement: `Saved. ${reviewStatusText(result.data.review)}.`,
+				type: 'decided',
+			});
 			return;
 		}
-		setAnnouncement(decisionErrorMessage(result));
+		dispatch({
+			announcement: decisionErrorMessage(result),
+			isStale: result.kind === 'error' && result.code === 'stale',
+			type: 'settled',
+		});
 		if (result.kind !== 'error') return;
-		if (result.code === 'stale') setIsStale(true);
 		// The session or the account's access changed, so show what it is now.
 		if (result.status === 401 || result.code === 'forbidden') refreshSession();
 	}
@@ -254,11 +250,13 @@ function ReviewControls(props: ReviewControlsProps) {
 	}
 
 	async function signOut() {
-		setPending('sign-out');
-		setAnnouncement('');
+		dispatch({ pending: 'sign-out', type: 'started' });
 		const isSignedOut = await postLogout();
-		setPending(undefined);
-		setAnnouncement(isSignedOut ? 'Signed out.' : 'Signing out failed. Try again.');
+		dispatch({
+			announcement: isSignedOut ? 'Signed out.' : 'Signing out failed. Try again.',
+			isStale: false,
+			type: 'settled',
+		});
 		if (isSignedOut) refreshSession();
 	}
 
@@ -310,10 +308,7 @@ function ReviewControls(props: ReviewControlsProps) {
 						isDisabled={!canDecide || isBusy}
 						isInvalid={noteError !== undefined}
 						maxLength={MAX_NOTE_LENGTH}
-						onChange={(value) => {
-							setNote(value);
-							setNoteError(undefined);
-						}}
+						onChange={(value) => dispatch({ note: value, type: 'noteChanged' })}
 						value={note}
 					>
 						<Label className={styles.noteLabel}>
@@ -391,6 +386,53 @@ function ReviewControls(props: ReviewControlsProps) {
 			</p>
 		</>
 	);
+}
+
+/** A decision or sign-out in flight, its outcome, and the note a decision sends. */
+type ControlsState = {
+	announcement: string;
+	/** A decision was refused because a newer comparison exists, so this report cannot be decided. */
+	isStale: boolean;
+	note: string;
+	noteError: string | undefined;
+	pending: Decision | 'sign-out' | undefined;
+};
+
+type ControlsAction =
+	| { note: string; type: 'noteChanged' }
+	| { message: string; type: 'noteRejected' }
+	| { pending: Decision | 'sign-out'; type: 'started' }
+	/** A decision is saved, so its note is sent and cleared. */
+	| { announcement: string; type: 'decided' }
+	/** A decision failed, or a sign-out finished either way. */
+	| { announcement: string; isStale: boolean; type: 'settled' };
+
+const INITIAL_CONTROLS_STATE: ControlsState = {
+	announcement: '',
+	isStale: false,
+	note: '',
+	noteError: undefined,
+	pending: undefined,
+};
+
+function controlsReducer(state: ControlsState, action: ControlsAction): ControlsState {
+	switch (action.type) {
+		case 'noteChanged':
+			return { ...state, note: action.note, noteError: undefined };
+		case 'noteRejected':
+			return { ...state, noteError: action.message };
+		case 'started':
+			return { ...state, announcement: '', pending: action.pending };
+		case 'decided':
+			return { ...state, announcement: action.announcement, note: '', pending: undefined };
+		case 'settled':
+			return {
+				...state,
+				announcement: action.announcement,
+				isStale: state.isStale || action.isStale,
+				pending: undefined,
+			};
+	}
 }
 
 /** Why the decisions are limited or off, in the reviewer's terms. */

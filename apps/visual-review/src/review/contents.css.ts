@@ -13,23 +13,6 @@ export const contentsInOverlay = style({
 	blockSize: '100%',
 });
 
-export const title = style({
-	fontSize: 'inherit',
-	fontWeight: vars.font.weight.heading,
-	lineHeight: 'inherit',
-	margin: 0,
-});
-
-export const summary = style({
-	color: vars.color.foreground.secondary,
-	margin: 0,
-});
-
-export const filterGrow = style({
-	flex: '1 1 auto',
-	minInlineSize: 0,
-});
-
 export const pushEnd = style({
 	marginInlineStart: 'auto',
 });
@@ -51,20 +34,13 @@ export const group = style({
 	padding: 0,
 });
 
-export const groupHeading = style({
-	color: vars.color.foreground.secondary,
-	fontWeight: vars.font.weight.heading,
-	paddingBlock: `${vars.space['12']} ${vars.space['4']}`,
-	paddingInline: vars.space['8'],
-});
-
 export const item = style([
 	plainButton,
 	{
 		boxSizing: 'border-box',
 		color: vars.color.foreground.primary,
 		inlineSize: '100%',
-		minBlockSize: '32px',
+		minBlockSize: '36px',
 		paddingInline: vars.space['8'],
 		selectors: {
 			'&[aria-current="true"]': {
@@ -91,9 +67,4 @@ export const changedDot = style({
 	borderRadius: vars.radius.full,
 	flexShrink: 0,
 	inlineSize: '6px',
-});
-
-export const foot = style({
-	paddingBlock: '10px',
-	paddingInline: vars.space['16'],
 });

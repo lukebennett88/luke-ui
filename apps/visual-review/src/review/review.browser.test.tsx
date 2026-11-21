@@ -281,6 +281,23 @@ test('Hide viewed leaves viewed examples out, and an empty result offers to clea
 	expect(currentParams().has('hide')).toBe(false);
 });
 
+test('Mark all viewed offers Undo until it is dismissed', async () => {
+	const app = await renderApp('?source=local');
+	await app.user.click(app.locator.getByRole('button', { name: 'Show contents sidebar' }));
+	await app.user.click(app.locator.getByRole('button', { name: 'Mark all viewed' }));
+	const progress = app.locator.getByRole('banner');
+	await expect.element(progress.getByText(`${TOTAL} of ${TOTAL} viewed`)).toBeVisible();
+
+	await app.user.click(app.locator.getByRole('button', { name: 'Undo' }));
+
+	await expect.element(progress.getByText(`0 of ${TOTAL} viewed`)).toBeVisible();
+	await app.user.click(app.locator.getByRole('button', { name: 'Mark all viewed' }));
+	await app.user.click(app.locator.getByRole('button', { name: 'Dismiss' }));
+
+	await expect.element(app.locator.getByRole('button', { name: 'Undo' })).not.toBeInTheDocument();
+	await expect.element(progress.getByText(`${TOTAL} of ${TOTAL} viewed`)).toBeVisible();
+});
+
 test('marking an example viewed folds it to a labelled row, and Undo opens it again', async () => {
 	const app = await renderApp('?source=local');
 	const toggle = section(app, PRIMARY).getByRole('button', { name: /^button \/ primary/ });
@@ -322,6 +339,13 @@ test('viewing one theme moves to the next without marking it, and the menu marks
 		.toHaveAttribute('aria-selected', 'true');
 	await expect.poll(() => currentParams().get('capture')).toBe(STATES_DARK);
 	await expect.element(inView(app).getByRole('checkbox')).not.toBeChecked();
+
+	await app.user.keyboard('z');
+
+	await expect
+		.element(themes.getByRole('tab', { name: themeTab('Paper light', 'not viewed') }))
+		.toHaveAttribute('aria-selected', 'true');
+	await expect.element(app.locator.getByRole('button', { name: 'Undo' })).not.toBeInTheDocument();
 
 	await app.user.click(app.locator.getByRole('button', { name: 'More for states' }));
 	await app.user.click(page.getByRole('menuitem', { name: 'Mark all 2 themes viewed' }));

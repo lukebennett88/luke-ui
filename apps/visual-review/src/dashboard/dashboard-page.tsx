@@ -6,7 +6,7 @@ import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import type { ReactNode } from 'react';
-import { Suspense, use, useId } from 'react';
+import { Suspense, use } from 'react';
 import type { Review } from '../api/review-api.js';
 import { AppHeader } from '../app-header.js';
 import { isLocalSourceAvailable, pullRequestUrl, repository } from '../config.js';
@@ -52,10 +52,12 @@ export function DashboardPage() {
 					<PullRequestList result={result} />
 					{isLocalSourceAvailable ? (
 						<Stack aria-labelledby="local-title" elementType="section" gap="space.8">
-							<Heading className={styles.groupTitle} id="local-title" level={2} typography="label">
-								On this machine
-							</Heading>
-							<Stack className={styles.list} elementType="ul" gap="space.4">
+							<Box paddingInline="space.4">
+								<Heading id="local-title" level={2} typography="label">
+									On this machine
+								</Heading>
+							</Box>
+							<Stack className={styles.list} elementType="ul">
 								<Row
 									destination="review"
 									href="?source=local"
@@ -80,28 +82,26 @@ type RowProps = {
 };
 
 function Row({ children, destination, href, meta, title }: RowProps) {
-	const id = useId();
 	const isGitHub = destination === 'github';
 	return (
 		<li>
 			<Box
+				alignItems="center"
 				backgroundColor="surface.subdued"
+				borderRadius="surface"
 				className={styles.row}
-				renderRoot={(domProps) => (
-					<Link
-						{...domProps}
-						aria-describedby={children == null ? undefined : `${id}-status`}
-						aria-labelledby={`${id}-title ${id}-destination`}
-						href={href}
-						prominence="low"
-					/>
-				)}
+				columnGap="space.24"
+				display="grid"
+				paddingBlock="space.16"
+				paddingInline={{ initial: 'space.16', bp768: 'space.24' }}
+				renderRoot={(domProps) => <Link {...domProps} href={href} prominence="low" />}
+				rowGap="space.12"
 			>
-				<Stack className={styles.rowText} gap="space.4">
-					<Text className={styles.truncate} color="primary" fontWeight="label" id={`${id}-title`}>
+				<Stack gap="space.4" minInlineSize="0">
+					<Text color="primary" fontWeight="label" lineClamp typography="body">
 						{title}
 					</Text>
-					<Text className={styles.truncate} color="secondary" typography="caption">
+					<Text color="secondary" lineClamp typography="caption">
 						{meta}
 					</Text>
 				</Stack>
@@ -114,23 +114,11 @@ function Row({ children, destination, href, meta, title }: RowProps) {
 					rowGap="space.8"
 				>
 					{children != null ? (
-						<Box
-							alignItems="center"
-							display="flex"
-							flexWrap="wrap"
-							gap="space.8"
-							id={`${id}-status`}
-						>
+						<Box alignItems="center" display="flex" flexWrap="wrap" gap="space.8">
 							{children}
 						</Box>
 					) : null}
-					<Box
-						alignItems="center"
-						display="flex"
-						gap="space.8"
-						id={`${id}-destination`}
-						marginInlineStart="auto"
-					>
+					<Box alignItems="center" display="flex" gap="space.8" marginInlineStart="auto">
 						<Text color="primary" typography="label">
 							{isGitHub ? 'Open on GitHub' : 'Review'}
 						</Text>
@@ -147,9 +135,8 @@ function PullRequestList({ result }: { result: PullRequestsResult }) {
 		return (
 			<Box
 				backgroundColor="surface.subdued"
-				className={styles.notice}
-				elementType="div"
-				padding="space.16"
+				borderRadius="surface"
+				padding={{ initial: 'space.16', bp768: 'space.24' }}
 				role="status"
 			>
 				<Text color="secondary" elementType="p">
@@ -164,9 +151,8 @@ function PullRequestList({ result }: { result: PullRequestsResult }) {
 		return (
 			<Box
 				backgroundColor="surface.subdued"
-				className={styles.notice}
-				elementType="div"
-				padding="space.16"
+				borderRadius="surface"
+				padding={{ initial: 'space.16', bp768: 'space.24' }}
 			>
 				<Text color="secondary" elementType="p">
 					No pull requests are open.
@@ -175,7 +161,7 @@ function PullRequestList({ result }: { result: PullRequestsResult }) {
 		);
 	}
 	return (
-		<Stack aria-label="Open pull requests" className={styles.list} elementType="ul" gap="space.4">
+		<Stack aria-label="Open pull requests" className={styles.list} elementType="ul" gap="space.8">
 			{orderByReview(result.pullRequests).map((pullRequest) => (
 				<Suspense
 					key={pullRequest.number}
@@ -199,7 +185,9 @@ function PullRequestReport({ pullRequest }: { pullRequest: PullRequest }) {
 	if (state.kind === 'differences') {
 		return (
 			<PullRequestRow pullRequest={pullRequest} reviewHref={`?pr=${pullRequest.number}`}>
-				<Text color="secondary">{describeDifferences(state)}</Text>
+				<Text color="secondary" typography="label">
+					{describeDifferences(state)}
+				</Text>
 			</PullRequestRow>
 		);
 	}
@@ -208,7 +196,11 @@ function PullRequestReport({ pullRequest }: { pullRequest: PullRequest }) {
 	const chip = pullRequest.review === undefined ? undefined : reviewChip(pullRequest.review);
 	return (
 		<PullRequestRow pullRequest={pullRequest}>
-			{chip?.label === label ? null : <Text color="secondary">{label}</Text>}
+			{chip?.label === label ? null : (
+				<Text color="secondary" typography="label">
+					{label}
+				</Text>
+			)}
 		</PullRequestRow>
 	);
 }
@@ -250,7 +242,7 @@ function ReviewStatus({ review }: { review: Review | null }) {
 			? STATUS_ICONS[review.state]
 			: undefined;
 	return (
-		<Text className={styles.status} color={chip.color} fontWeight="label">
+		<Text className={styles.status} color={chip.color} typography="label">
 			{icon ? <Icon name={icon} size="xsmall" /> : null}
 			{chip.label}
 		</Text>

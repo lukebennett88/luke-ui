@@ -176,6 +176,8 @@ export const tabList = style({
 export const tab = style({
 	alignItems: 'center',
 	color: vars.color.foreground.primary,
+	// A tab is a control: the arrow, as on Luke UI's buttons, not a text cursor over its label.
+	cursor: 'default',
 	display: 'inline-flex',
 	flexShrink: 0,
 	gap: '6px',

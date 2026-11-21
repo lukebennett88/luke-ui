@@ -1,20 +1,15 @@
 import { Box } from '@luke-ui/react/box';
 import { Button } from '@luke-ui/react/button';
 import { CheckboxField } from '@luke-ui/react/checkbox-field';
+import { Heading } from '@luke-ui/react/heading';
 import { Icon } from '@luke-ui/react/icon';
 import { IconButton } from '@luke-ui/react/icon-button';
 import { Lockup, LockupBody, LockupRail } from '@luke-ui/react/lockup';
+import { Text } from '@luke-ui/react/text';
 import { cx } from '@luke-ui/react/utils';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
-import { useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import {
-	Dialog,
-	DialogTrigger,
-	Heading as AriaHeading,
-	Modal,
-	ModalOverlay,
-	Popover,
-} from 'react-aria-components';
+import { useEffect, useEffectEvent, useLayoutEffect, useMemo, useReducer, useRef } from 'react';
+import { Dialog, DialogTrigger, Modal, ModalOverlay, Popover } from 'react-aria-components';
 import { AppHeader } from '../app-header.js';
 import { hrefWithParams, navigate, useLocationSearch } from '../navigation/location.js';
 import type { ReportSource } from '../report/report-source.js';
@@ -35,6 +30,8 @@ import { ReportTitle, sourceLabel } from './report-title.js';
 import { ReviewTrigger } from './review-panel.js';
 import type { Layout, Pane, ReviewParams, StatusFilter, Zoom } from './review-params.js';
 import { filterCaptures, parseReviewParams, reviewParamValues, stepZoom } from './review-params.js';
+import type { ReviewDialog } from './review-state.js';
+import { DEFAULT_VIEW, initialReviewState, reviewReducer } from './review-state.js';
 import * as styles from './review.css.js';
 import {
 	CHROME_ATTRIBUTE,
@@ -46,7 +43,6 @@ import {
 	stickyTop,
 	stuckHeaderHeight,
 } from './scroll-position.js';
-import type { SeenEntries } from './seen-store.js';
 import { useSeen } from './seen-store.js';
 import { setShortcutsEnabled, useShortcutsEnabled } from './shortcuts-preference.js';
 import type { CaptureView, StageMetrics } from './stage.js';
@@ -56,23 +52,14 @@ import { usePullRequestReview } from './use-pull-request-review.js';
 import { useReviewShortcuts } from './use-review-shortcuts.js';
 import { PaneSwitch, showingLabel, ViewOptions } from './view-options.js';
 
-const DEFAULT_VIEW: CaptureView = { activeRegion: undefined, zoom: 'fit' };
 /** About two seconds of frames to wait for a difference's outline to render. */
 const MAX_DIFFERENCE_FRAMES = 120;
-/** How long the offer to undo a mark stays. It is a convenience, not a step. */
-const UNDO_DURATION = 6000;
-/** The top bar's height, which the fit-screen zoom leaves room for. */
-const TOP_BAR_HEIGHT = 48;
+/** How long the offer to undo a mark stays, paused while it is hovered or focused. */
+const UNDO_DURATION = 10_000;
+/** The top bar's height on desktop and on phones, which the fit-screen zoom leaves room for. */
+const TOP_BAR_HEIGHT = { compact: 48, regular: 56 };
 /** The phone bottom bar: the image switch and stepper above Viewed, View and Review. */
-const BOTTOM_BAR_HEIGHT = 108;
-
-type Undo = {
-	captureIds: Array<string>;
-	exampleId: string | undefined;
-	label: string;
-	/** What each marked capture had stored before, so Undo puts back a `changed` state too. */
-	previous: SeenEntries;
-};
+const BOTTOM_BAR_HEIGHT = 112;
 
 type ReviewProps = { baseUrl: string; report: Report; source: ReportSource };
 
@@ -90,28 +77,13 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		source.kind === 'pull-request' ? source.number : undefined,
 	);
 	const allExamples = useMemo(() => groupExamples(report.captures), [report.captures]);
-	const [initial] = useState(() => {
-		const example = allExamples.find((candidate) =>
-			candidate.captures.some((capture) => capture.id === params.capture),
-		);
-		return example && params.capture ? { captureId: params.capture, example } : undefined;
-	});
-	const [current, setCurrent] = useState(initial?.example.id);
-	const [activeTheme, setActiveTheme] = useState<Record<string, string>>(() =>
-		initial ? { [initial.example.id]: initial.captureId } : {},
+	const [state, dispatch] = useReducer(
+		reviewReducer,
+		{ captureId: params.capture, examples: allExamples, zoom: params.zoom },
+		initialReviewState,
 	);
-	const [expanded, setExpanded] = useState<Record<string, boolean>>(() =>
-		initial ? { [initial.example.id]: true } : {},
-	);
-	const [views, setViews] = useState<Record<string, CaptureView>>(() =>
-		initial ? { [initial.captureId]: { activeRegion: undefined, zoom: params.zoom } } : {},
-	);
-	const [opacity, setOpacity] = useState(50);
-	const [isContentsOpen, setIsContentsOpen] = useState(false);
-	const [isViewOpen, setIsViewOpen] = useState(false);
-	const [isReviewOpen, setIsReviewOpen] = useState(false);
-	const [announcement, setAnnouncement] = useState('');
-	const [undo, setUndo] = useState<Undo>();
+	const { activeTheme, announcement, current, dialog, expanded, isContentsOpen, undo, views } =
+		state;
 	const isCompact = useMediaQuery(COMPACT_QUERY);
 	const isDrawer = useMediaQuery(DRAWER_QUERY);
 	const viewportHeight = useViewportHeight();
@@ -122,7 +94,8 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 	const afterRender = useRef<(() => void) | undefined>(undefined);
 	/** The difference waiting to scroll into view, until its outline renders. */
 	const differenceScroll = useRef<symbol | undefined>(undefined);
-	const deepLink = useRef(initial?.example.id);
+	/** A deep link opens with its example current, which it scrolls to once laid out. */
+	const deepLink = useRef(current);
 	const { hideViewed, highlight: shouldOutline, layout, pane, query, status } = params;
 
 	function isExampleViewed(example: Example) {
@@ -156,14 +129,18 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		return expanded[example.id] ?? !isExampleViewed(example);
 	}
 	const viewOf = (captureId: string) => views[captureId] ?? DEFAULT_VIEW;
-	function updateView(captureId: string, patch: Partial<CaptureView>) {
-		setViews((previous) => ({
-			...previous,
-			[captureId]: { ...(previous[captureId] ?? DEFAULT_VIEW), ...patch },
-		}));
+	function announce(message: string) {
+		dispatch({ message, type: 'announced' });
 	}
-	function expand(exampleId: string) {
-		setExpanded((previous) => ({ ...previous, [exampleId]: true }));
+	function setDialogOpen(name: ReviewDialog, isNowOpen: boolean) {
+		dispatch({ dialog: name, isOpen: isNowOpen, type: 'dialogOpenChanged' });
+	}
+	function setUndoHeld(isHeld: boolean) {
+		dispatch({ isHeld, type: 'undoHeldChanged' });
+	}
+	/** Opens an example folded by hand or by viewing, leaving one already open as it is. */
+	function openIfFolded(example: Example) {
+		if (!isOpen(example)) dispatch({ exampleId: example.id, type: 'opened' });
 	}
 
 	const openExamples = examples.filter(isOpen);
@@ -195,7 +172,7 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 	const readCurrent = useEffectEvent(() => currentExample?.id);
 	// A sheet or drawer locks the page's scroll, which can move it. The example in view stays put.
 	const isPageCovered = useEffectEvent(
-		() => (isDrawer && isContentsOpen) || (isCompact && (isViewOpen || isReviewOpen)),
+		() => (isDrawer && isContentsOpen) || (isCompact && dialog !== undefined),
 	);
 	/*
 	 * The example in view is the last open one whose top has passed the reading line, or, above the
@@ -235,7 +212,7 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 				return;
 			}
 			const next = sections[candidate]?.dataset.exampleId;
-			if (next && next !== currentId) setCurrent(next);
+			if (next && next !== currentId) dispatch({ exampleId: next, type: 'wentTo' });
 		}
 		// Sections move when they open, close, filter or zoom, as well as on scroll.
 		const frame = requestAnimationFrame(spy);
@@ -258,8 +235,8 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 	}, [currentCapture?.id]);
 
 	useEffect(() => {
-		if (!undo) return;
-		const timer = window.setTimeout(() => setUndo(undefined), UNDO_DURATION);
+		if (!undo || undo.offer.isPersistent || undo.isHeld) return;
+		const timer = window.setTimeout(() => dispatch({ type: 'undoDismissed' }), UNDO_DURATION);
 		return () => window.clearTimeout(timer);
 	}, [undo]);
 
@@ -267,8 +244,8 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		replaceParams(reviewParamValues({ ...params, ...next }));
 	}
 
-	function goToExample(exampleId: string, { focus = false, scroll = true } = {}) {
-		setCurrent(exampleId);
+	/** Scrolls to an example, and can focus it, once the render that shows it has committed. */
+	function revealAfterRender(exampleId: string, { focus = false, scroll = true } = {}) {
 		afterRender.current = () => {
 			if (scroll) scrollToExample(exampleId);
 			if (focus) {
@@ -279,53 +256,51 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		};
 	}
 
-	function selectTheme(example: Example, captureId: string) {
-		setActiveTheme((previous) => ({ ...previous, [example.id]: captureId }));
-		setCurrent(example.id);
-	}
-
 	/** Once every theme of an example is viewed it folds away, and the next open one takes over. */
 	function moveOnFrom(example: Example) {
 		const index = examples.findIndex((candidate) => candidate.id === example.id);
 		const next = examples.slice(index + 1).find((candidate) => isOpen(candidate));
-		if (next) goToExample(next.id, { focus: !isCompact, scroll: isHeaderStuck(example.id) });
-	}
-
-	function collapse(example: Example) {
-		setExpanded((previous) => {
-			const next = { ...previous };
-			delete next[example.id];
-			return next;
-		});
+		if (!next) return;
+		dispatch({ exampleId: next.id, type: 'wentTo' });
+		revealAfterRender(next.id, { focus: !isCompact, scroll: isHeaderStuck(example.id) });
 	}
 
 	function setViewed(example: Example, capture: Capture, isViewed: boolean) {
 		const wasSeen = stateOf(capture) === 'seen';
-		const stored = storedFor([capture]);
+		const previous = storedFor([capture]);
 		setSeen([capture], isViewed);
 		const viewed = viewedCount + (isViewed && !wasSeen ? 1 : 0) - (!isViewed && wasSeen ? 1 : 0);
-		setAnnouncement(
+		announce(
 			`${exampleLabel(example, capture)} ${isViewed ? 'marked viewed' : 'marked not viewed'}. ${viewed} of ${total} viewed.`,
 		);
 		if (!isViewed) {
-			expand(example.id);
+			dispatch({ exampleId: example.id, type: 'unviewed' });
 			return;
 		}
 		// Move to the next theme still to view, without marking it.
 		const index = example.captures.findIndex((candidate) => candidate.id === capture.id);
 		const ordered = [...example.captures.slice(index + 1), ...example.captures.slice(0, index)];
 		const nextTheme = ordered.find((candidate) => stateOf(candidate) !== 'seen');
-		if (nextTheme) {
-			setActiveTheme((previous) => ({ ...previous, [example.id]: nextTheme.id }));
-			return;
-		}
-		setUndo({
+		const offer = {
 			captureIds: [capture.id],
 			exampleId: example.id,
-			label: `${example.name} viewed`,
-			previous: stored,
+			isPersistent: false,
+			previous,
+		};
+		if (nextTheme) {
+			dispatch({
+				exampleId: example.id,
+				nextCaptureId: nextTheme.id,
+				offer: { ...offer, isFolded: false, label: `${exampleLabel(example, capture)} viewed` },
+				type: 'themeViewed',
+			});
+			return;
+		}
+		dispatch({
+			exampleId: example.id,
+			offer: { ...offer, isFolded: true, label: `${example.name} viewed` },
+			type: 'exampleViewed',
 		});
-		collapse(example);
 		moveOnFrom(example);
 	}
 
@@ -333,13 +308,21 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		const marked = example.captures.filter((capture) => stateOf(capture) !== 'seen');
 		const previous = storedFor(marked);
 		setSeen(example.captures, true);
-		collapse(example);
-		setAnnouncement(`All ${example.captures.length} themes of ${example.id} marked viewed.`);
-		setUndo({
-			captureIds: marked.map((capture) => capture.id),
+		announce(`All ${example.captures.length} themes of ${example.id} marked viewed.`);
+		dispatch({
 			exampleId: example.id,
-			label: `${example.name}: ${example.captures.length} themes viewed`,
-			previous,
+			offer:
+				marked.length > 0
+					? {
+							captureIds: marked.map((capture) => capture.id),
+							exampleId: example.id,
+							isFolded: true,
+							isPersistent: false,
+							label: `${example.name}: ${example.captures.length} themes viewed`,
+							previous,
+						}
+					: undefined,
+			type: 'exampleViewed',
 		});
 		moveOnFrom(example);
 	}
@@ -348,33 +331,34 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		const marked = report.captures.filter((capture) => stateOf(capture) !== 'seen');
 		const previous = storedFor(marked);
 		setSeen(marked, true);
-		setExpanded({});
-		setAnnouncement(`All ${total} captures marked viewed.`);
-		setUndo({
-			captureIds: marked.map((capture) => capture.id),
-			exampleId: undefined,
-			label: `All ${total} viewed`,
-			previous,
+		announce(`All ${total} captures marked viewed.`);
+		dispatch({
+			offer:
+				marked.length > 0
+					? {
+							captureIds: marked.map((capture) => capture.id),
+							exampleId: undefined,
+							isFolded: false,
+							isPersistent: true,
+							label: `All ${total} viewed`,
+							previous,
+						}
+					: undefined,
+			type: 'reportViewed',
 		});
 	}
 
 	function undoLast() {
 		if (!undo) return;
-		restoreSeen(undo.previous);
-		setUndo(undefined);
-		setAnnouncement('Undone.');
-		const { exampleId } = undo;
-		const [firstId] = undo.captureIds;
-		if (exampleId) {
-			if (firstId) setActiveTheme((previous) => ({ ...previous, [exampleId]: firstId }));
-			expand(exampleId);
-			goToExample(exampleId);
-		}
+		const { exampleId, isFolded, label, previous } = undo.offer;
+		restoreSeen(previous);
+		announce(`Undone: ${label}.`);
+		dispatch({ type: 'undone' });
+		if (exampleId) revealAfterRender(exampleId, { scroll: isFolded });
 	}
 
 	function setOpen(example: Example, isNowOpen: boolean) {
-		setExpanded((previous) => ({ ...previous, [example.id]: isNowOpen }));
-		if (isNowOpen) setCurrent(example.id);
+		dispatch({ exampleId: example.id, type: isNowOpen ? 'opened' : 'folded' });
 	}
 
 	/** `j` and `k` walk the open examples. Viewed rows are done, so they are stepped over. */
@@ -382,7 +366,9 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		const list = openExamples.length > 0 ? openExamples : examples;
 		const index = list.findIndex((example) => example.id === currentExample?.id);
 		const target = list[Math.min(Math.max(index + offset, 0), list.length - 1)];
-		if (target) goToExample(target.id);
+		if (!target) return;
+		dispatch({ exampleId: target.id, type: 'wentTo' });
+		revealAfterRender(target.id);
 	}
 
 	function stepTheme(example: Example, offset: number) {
@@ -391,9 +377,9 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		const index = list.findIndex((capture) => capture.id === activeCaptureOf(example)?.id);
 		const target = list[(index + offset + list.length) % list.length];
 		if (!target) return;
-		selectTheme(example, target.id);
-		setAnnouncement(`${example.name}: ${themeLabel(target)}, ${SEEN_STATE_TEXT[stateOf(target)]}.`);
-		if (!isOpen(example)) expand(example.id);
+		openIfFolded(example);
+		dispatch({ captureId: target.id, exampleId: example.id, type: 'themeSelected' });
+		announce(`${example.name}: ${themeLabel(target)}, ${SEEN_STATE_TEXT[stateOf(target)]}.`);
 	}
 
 	function nextUnviewed() {
@@ -404,23 +390,23 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		const ordered = [...flat.slice(index + 1), ...flat.slice(0, index + 1)];
 		const target = ordered.find((entry) => stateOf(entry.capture) !== 'seen');
 		if (!target) {
-			setAnnouncement(
+			announce(
 				hideViewed || query || status !== 'all'
 					? 'Nothing unviewed matches the filter.'
 					: 'Every capture is viewed.',
 			);
 			return;
 		}
-		setActiveTheme((previous) => ({ ...previous, [target.example.id]: target.capture.id }));
-		expand(target.example.id);
-		goToExample(target.example.id, {
-			scroll: target.example.id !== currentExample?.id || !isHeaderStuck(target.example.id),
+		const exampleId = target.example.id;
+		dispatch({ captureId: target.capture.id, exampleId, type: 'opened' });
+		revealAfterRender(exampleId, {
+			scroll: exampleId !== currentExample?.id || !isHeaderStuck(exampleId),
 		});
 	}
 
 	function toggleViewed() {
 		if (!currentExample || !currentCapture) return;
-		if (!isOpen(currentExample)) expand(currentExample.id);
+		openIfFolded(currentExample);
 		setViewed(currentExample, currentCapture, stateOf(currentCapture) !== 'seen');
 	}
 
@@ -428,24 +414,28 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		const url = new URL(window.location.href);
 		url.searchParams.set('capture', capture.id);
 		void navigator.clipboard?.writeText(url.toString()).then(
-			() => setAnnouncement('Link to this capture copied.'),
-			() => setAnnouncement('The link could not be copied.'),
+			() => announce('Link to this capture copied.'),
+			() => announce('The link could not be copied.'),
 		);
 	}
 
 	function showPane(next: Pane) {
 		setParams({ layout: 'single', pane: next });
-		setAnnouncement(`Showing ${PANE_LABELS[next]}.`);
+		announce(`Showing ${PANE_LABELS[next]}.`);
 	}
 
 	function toggleLayout(next: Layout) {
 		setParams({ layout: layout === next ? 'single' : next });
 	}
 
+	function changeView(example: Example, capture: Capture, patch: Partial<CaptureView>) {
+		dispatch({ captureId: capture.id, exampleId: example.id, patch, type: 'viewChanged' });
+	}
+
 	function setZoom(zoom: Zoom) {
 		if (!currentCapture || !currentExample) return;
-		updateView(currentCapture.id, { zoom });
-		if (!isOpen(currentExample)) expand(currentExample.id);
+		openIfFolded(currentExample);
+		changeView(currentExample, currentCapture, { zoom });
 		// Keep the header in sight, so a zoom change does not lose the reviewer's place.
 		const top = sectionElement(currentExample.id)?.getBoundingClientRect().top ?? Infinity;
 		const exampleId = currentExample.id;
@@ -474,13 +464,13 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		// With no difference selected, stepping forward starts at the first and back at the last.
 		const from = active ?? (offset > 0 ? -1 : count);
 		const index = (from + offset + count) % count;
-		updateView(currentCapture.id, {
+		openIfFolded(currentExample);
+		changeView(currentExample, currentCapture, {
 			activeRegion: index,
 			zoom: differenceZoom(currentView.zoom),
 		});
-		if (isCompact) setAnnouncement(`Difference ${index + 1} of ${count}`);
+		if (isCompact) announce(`Difference ${index + 1} of ${count}`);
 		if (!shouldOutline) setParams({ highlight: true });
-		if (!isOpen(currentExample)) expand(currentExample.id);
 		const captureId = currentCapture.id;
 		const exampleId = currentExample.id;
 		const kind = layout === 'single' ? paneFor(currentCapture, pane) : 'actual';
@@ -516,15 +506,24 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		afterRender.current = () => attempt(0);
 	}
 
+	function setContentsOpen(isNowOpen: boolean) {
+		dispatch({ isOpen: isNowOpen, type: 'contentsOpenChanged' });
+	}
+
+	/** Contents as a drawer covers the review, so acting from it closes it. A sidebar stays. */
+	function closeContentsDrawer() {
+		if (isDrawer) setContentsOpen(false);
+	}
+
 	function toggleContents() {
 		if (isContentsOpen && document.activeElement?.closest('#review-contents')) {
 			contentsToggleRef.current?.focus();
 		}
-		setIsContentsOpen(!isContentsOpen);
+		setContentsOpen(!isContentsOpen);
 	}
 
 	function openFilter() {
-		setIsContentsOpen(true);
+		setContentsOpen(true);
 		// After the Contents drawer has opened and placed its own focus.
 		requestAnimationFrame(() => filterRef.current?.focus());
 	}
@@ -554,8 +553,9 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 			t: toggleContents,
 			u: nextUnviewed,
 			v: toggleViewed,
+			z: undoLast,
 		},
-		areShortcutsEnabled && !isReviewOpen && !isViewOpen && !(isDrawer && isContentsOpen),
+		areShortcutsEnabled && dialog === undefined && !(isDrawer && isContentsOpen),
 	);
 
 	const metrics: StageMetrics = {
@@ -563,7 +563,9 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		availableWidth: Math.max(mainWidth - (isCompact ? 0 : 48), 120),
 		gap: isCompact ? 12 : 24,
 		screenHeight: Math.max(
-			viewportHeight - TOP_BAR_HEIGHT - (isCompact ? BOTTOM_BAR_HEIGHT + 16 : 44 + 36 + 24 + 16),
+			viewportHeight -
+				(isCompact ? TOP_BAR_HEIGHT.compact : TOP_BAR_HEIGHT.regular) -
+				(isCompact ? BOTTOM_BAR_HEIGHT + 16 : 44 + 36 + 24 + 16),
 			160,
 		),
 	};
@@ -585,7 +587,7 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 								className={styles.touchTarget}
 								isDisabled={isExampleViewed(currentExample)}
 								onPress={() => {
-									setIsViewOpen(false);
+									setDialogOpen('view', false);
 									markExampleViewed(currentExample);
 								}}
 							>
@@ -596,7 +598,7 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 							className={styles.touchTarget}
 							onPress={() => {
 								copyLink(currentCapture);
-								setIsViewOpen(false);
+								setDialogOpen('view', false);
 							}}
 							prominence="low"
 						>
@@ -608,12 +610,12 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 			isCompact={isCompact}
 			layout={layout}
 			onLayout={(next) => setParams({ layout: next })}
-			onOpacity={setOpacity}
+			onOpacity={(opacity) => dispatch({ opacity, type: 'opacityChanged' })}
 			onOutlines={(isOn) => setParams({ highlight: isOn })}
 			onPane={showPane}
 			onShortcuts={setShortcutsEnabled}
 			onZoom={setZoom}
-			opacity={opacity}
+			opacity={state.opacity}
 			pane={pane}
 			shouldOutline={shouldOutline}
 			target={target}
@@ -624,8 +626,8 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 	const review = pullRequestReview ? (
 		<ReviewTrigger
 			isCompact={isCompact}
-			isOpen={isReviewOpen}
-			onOpenChange={setIsReviewOpen}
+			isOpen={dialog === 'review'}
+			onOpenChange={(isNowOpen) => setDialogOpen('review', isNowOpen)}
 			progress={progress}
 			report={report}
 			review={pullRequestReview}
@@ -691,21 +693,21 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 			hideViewed={hideViewed}
 			isCompact={isCompact}
 			isOverlay={isDrawer}
-			onClose={() => setIsContentsOpen(false)}
+			onClose={() => setContentsOpen(false)}
 			onHideViewed={(isHidden) => setParams({ hideViewed: isHidden })}
 			onMarkAllViewed={() => {
-				if (isDrawer) setIsContentsOpen(false);
+				closeContentsDrawer();
 				markReportViewed();
 			}}
 			onNextUnviewed={() => {
-				if (isDrawer) setIsContentsOpen(false);
+				closeContentsDrawer();
 				nextUnviewed();
 			}}
 			onQuery={(next) => setParams({ query: next })}
 			onSelect={(exampleId) => {
-				if (isDrawer) setIsContentsOpen(false);
-				expand(exampleId);
-				goToExample(exampleId, { focus: !isCompact });
+				closeContentsDrawer();
+				dispatch({ exampleId, type: 'opened' });
+				revealAfterRender(exampleId, { focus: !isCompact });
 			}}
 			onStatus={(next: StatusFilter) => setParams({ status: next })}
 			query={query}
@@ -739,7 +741,7 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 					isCompact ? (
 						<Progress isCompact total={total} viewed={viewedCount} />
 					) : (
-						<Box alignItems="center" display="flex" gap="space.12">
+						<Box alignItems="center" display="flex" gap="space.16">
 							<Box
 								alignItems="center"
 								aria-label="Capture in view"
@@ -748,15 +750,21 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 								role="group"
 							>
 								{differences}
-								<DialogTrigger isOpen={isViewOpen} onOpenChange={setIsViewOpen}>
+								<DialogTrigger
+									isOpen={dialog === 'view'}
+									onOpenChange={(isNowOpen) => setDialogOpen('view', isNowOpen)}
+								>
 									<Button
 										endContent={<Icon name="chevronDown" size="xsmall" />}
 										prominence="low"
-										size="small"
+										size="medium"
 									>
-										<span className={styles.viewButtonLabel}>
-											<span className={styles.secondary}>View</span> {showingLabel(layout, pane)}
-										</span>
+										<Box alignItems="center" display="inline-flex" elementType="span" gap="space.4">
+											<Text color="secondary" typography="label">
+												View
+											</Text>{' '}
+											<Text typography="label">{showingLabel(layout, pane)}</Text>
+										</Box>
 									</Button>
 									<Popover
 										className={cx(overlayStyles.popover, overlayStyles.viewPopover)}
@@ -767,9 +775,9 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 											<Box
 												alignContent="start"
 												backgroundColor="surface.raised"
-												className={overlayStyles.dialogBody}
 												display="grid"
 												gap="space.16"
+												padding="space.16"
 											>
 												{viewOptions}
 											</Box>
@@ -797,7 +805,17 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 					isDrawer ? (
 						<VisuallyHidden elementType="h1">{sourceLabel(source)}</VisuallyHidden>
 					) : (
-						<h1 className={styles.reportTitle}>{title}</h1>
+						<Heading
+							className={styles.reportTitle}
+							color="secondary"
+							fontWeight="body"
+
+							level={1}
+							shouldDisableTrim
+							typography="label"
+						>
+							{title}
+						</Heading>
 					)
 				}
 			>
@@ -856,12 +874,11 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 										onFlip={(direction) => showPane(direction < 0 ? 'expected' : 'actual')}
 										onOpenChange={(isNowOpen) => setOpen(example, isNowOpen)}
 										onPane={showPane}
-										onSelectTheme={(captureId) => selectTheme(example, captureId)}
-										onZoom={(zoom) => {
-											updateView(capture.id, { zoom });
-											setCurrent(example.id);
-										}}
-										opacity={opacity}
+										onSelectTheme={(captureId) =>
+											dispatch({ captureId, exampleId: example.id, type: 'themeSelected' })
+										}
+										onZoom={(zoom) => changeView(example, capture, { zoom })}
+										opacity={state.opacity}
 										pane={pane}
 										shouldOutline={shouldOutline}
 										stateOf={stateOf}
@@ -879,6 +896,8 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 					backgroundColor="surface.subdued"
 					className={styles.bottomBar}
 					elementType="nav"
+					gap="space.8"
+					paddingInline="space.16"
 					{...{ [CHROME_ATTRIBUTE.bottomBar]: '' }}
 				>
 					{/* What the reviewer compares with, beside the image it acts on. */}
@@ -892,9 +911,12 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 						{compareControl}
 						{differences}
 					</Box>
-					<Box alignItems="center" display="flex" gap="space.4" justifyContent="space-between">
+					<Box alignItems="center" display="flex" gap="space.8" justifyContent="space-between">
 						{viewedCheckbox ?? <span />}
-						<DialogTrigger isOpen={isViewOpen} onOpenChange={setIsViewOpen}>
+						<DialogTrigger
+							isOpen={dialog === 'view'}
+							onOpenChange={(isNowOpen) => setDialogOpen('view', isNowOpen)}
+						>
 							<Button
 								aria-label={`View options, showing ${showingLabel(layout, pane)}`}
 								className={styles.touchTarget}
@@ -909,29 +931,24 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 										<Box
 											alignContent="start"
 											backgroundColor="surface.raised"
-											className={overlayStyles.dialogBody}
 											display="grid"
-											gap="space.16"
+											gap="space.24"
+											padding="space.16"
 										>
 											<Box
 												alignItems="center"
-												className={overlayStyles.sheetHead}
 												display="flex"
-												gap="space.8"
+												gap="space.12"
 												justifyContent="space-between"
 											>
-												<AriaHeading
-													className={overlayStyles.dialogTitle}
-													id="review-view-title"
-													slot="title"
-												>
+												<Heading id="review-view-title" level={2} typography="lead">
 													View
-												</AriaHeading>
+												</Heading>
 												<IconButton
 													aria-label="Close"
 													className={styles.touchTarget}
 													icon="close"
-													onPress={() => setIsViewOpen(false)}
+													onPress={() => setDialogOpen('view', false)}
 													prominence="low"
 												/>
 											</Box>
@@ -951,7 +968,7 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 					className={overlayStyles.drawerOverlay}
 					isDismissable
 					isOpen={isContentsOpen}
-					onOpenChange={setIsContentsOpen}
+					onOpenChange={setContentsOpen}
 				>
 					<Modal className={overlayStyles.drawer}>
 						<Dialog aria-label="Contents" className={overlayStyles.dialog}>
@@ -962,19 +979,35 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 			) : null}
 
 			{undo ? (
-				<Lockup
+				<div
 					className={styles.toast}
-					gap="space.12"
-					railAlignment="center"
-					renderRoot={(domProps) => <Box {...domProps} backgroundColor="surface.raised" />}
+					onBlur={(event) => {
+						if (!event.currentTarget.contains(event.relatedTarget)) setUndoHeld(false);
+					}}
+					onFocus={() => setUndoHeld(true)}
+					onPointerEnter={() => setUndoHeld(true)}
+					onPointerLeave={() => setUndoHeld(false)}
 				>
-					<LockupBody className={styles.truncate}>{undo.label}</LockupBody>
-					<LockupRail>
-						<Button onPress={undoLast} prominence="low" size="small">
-							Undo
-						</Button>
-					</LockupRail>
-				</Lockup>
+					<Lockup gap="space.12" railAlignment="center">
+						<LockupBody className={styles.truncate}>{undo.offer.label}</LockupBody>
+						<LockupRail>
+							<Box alignItems="center" display="flex" gap="space.4">
+								<Button onPress={undoLast} prominence="low" size="small">
+									Undo
+								</Button>
+								{undo.offer.isPersistent ? (
+									<IconButton
+										aria-label="Dismiss"
+										icon="close"
+										onPress={() => dispatch({ type: 'undoDismissed' })}
+										prominence="low"
+										size="small"
+									/>
+								) : null}
+							</Box>
+						</LockupRail>
+					</Lockup>
+				</div>
 			) : null}
 
 			<VisuallyHidden aria-live="polite" elementType="p" role="status">
