@@ -1,5 +1,5 @@
+import { breakpoints } from '@luke-ui/react/theme';
 import { createVar, globalStyle } from '@vanilla-extract/css';
-import { compactQuery } from './queries.js';
 
 /**
  * The app's own values that the theme has no token for. Colours have light and dark values; sizes
@@ -25,7 +25,7 @@ export const appVars = {
 // Set on `body`, so the size query measures the root container.
 globalStyle('body', {
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			vars: {
 				[appVars.bottomBarHeight]: '108px',
 				[appVars.sectionHeadHeight]: '40px',

@@ -5,6 +5,7 @@ import { Icon } from '@luke-ui/react/icon';
 import { IconButton } from '@luke-ui/react/icon-button';
 import { Kbd } from '@luke-ui/react/kbd';
 import { Link } from '@luke-ui/react/link';
+import { Lockup, LockupBody, LockupRail } from '@luke-ui/react/lockup';
 import { SelectField, SelectItem } from '@luke-ui/react/select-field';
 import { TextInputField } from '@luke-ui/react/text-input-field';
 import { cx } from '@luke-ui/react/utils';
@@ -73,12 +74,22 @@ export function Contents(props: ContentsProps) {
 	return (
 		<Box
 			aria-labelledby="review-contents-title"
-			backgroundColor={isOverlay && isCompact ? 'surface.raised' : 'surface.subdued'}
+			backgroundColor={isOverlay ? 'surface.raised' : 'surface.subdued'}
 			className={cx(styles.contents, isOverlay && styles.contentsInOverlay)}
+			display="flex"
+			flexDirection="column"
 			elementType="nav"
 			id="review-contents"
 		>
-			<div className={styles.head}>
+			<Box
+				alignItems="flex-start"
+				paddingBlockStart="space.12"
+				paddingInlineStart="space.16"
+				paddingInlineEnd="space.8"
+				display="flex"
+				gap="space.8"
+				justifyContent="space-between"
+			>
 				<div>
 					<h2 className={styles.title} id="review-contents-title">
 						Contents
@@ -88,17 +99,35 @@ export function Contents(props: ContentsProps) {
 						{changedCount > 0 ? ` · ${changedCount} changed since viewed` : ''}
 					</p>
 				</div>
-				<IconButton
-					aria-label="Close contents"
-					className={touchTarget}
-					icon="close"
-					onPress={onClose}
-					prominence="low"
-					size={size}
-				/>
-			</div>
-			{isCompact ? <p className={cx(styles.summary, styles.filters)}>{reportTitle}</p> : null}
-			<div className={styles.filters}>
+				{isOverlay ? (
+					<IconButton
+						aria-label="Close contents"
+						className={touchTarget}
+						icon="close"
+						onPress={onClose}
+						prominence="low"
+						size={size}
+					/>
+				) : null}
+			</Box>
+			{isCompact ? (
+				<Box
+					className={styles.summary}
+					renderRoot={(domProps) => <p {...domProps} />}
+					paddingBlockStart="space.8"
+					paddingBlockEnd="space.12"
+					paddingInline="space.16"
+				>
+					{reportTitle}
+				</Box>
+			) : null}
+			<Box
+				display="grid"
+				gap="space.8"
+				paddingBlockStart="space.8"
+				paddingBlockEnd="space.12"
+				paddingInline="space.16"
+			>
 				<TextInputField
 					aria-label="Filter captures"
 					inputRef={filterRef}
@@ -110,7 +139,7 @@ export function Contents(props: ContentsProps) {
 					type="search"
 					value={query}
 				/>
-				<div className={styles.filterRow}>
+				<Box alignItems="center" display="flex" gap="space.12" justifyContent="space-between">
 					<SelectField
 						aria-label="Status"
 						className={styles.filterGrow}
@@ -127,8 +156,8 @@ export function Contents(props: ContentsProps) {
 						onChange={onHideViewed}
 						size={size}
 					/>
-				</div>
-				<div className={styles.filterRow}>
+				</Box>
+				<Box alignItems="center" display="flex" gap="space.12" justifyContent="space-between">
 					<Button onPress={onNextUnviewed} size={size}>
 						Next unviewed
 					</Button>
@@ -142,8 +171,8 @@ export function Contents(props: ContentsProps) {
 					>
 						Mark all viewed
 					</Button>
-				</div>
-			</div>
+				</Box>
+			</Box>
 			<div className={styles.list} ref={listRef}>
 				{examples.length === 0 ? (
 					<p className={styles.groupHeading} role="status">
@@ -187,21 +216,32 @@ function ContentsItem({ example, isCurrent, onSelect, stateOf }: ContentsItemPro
 	const hasChanged = example.captures.some((capture) => stateOf(capture) === 'changed');
 	return (
 		<li>
-			<AriaButton
-				aria-current={isCurrent ? 'true' : undefined}
+			<Lockup
 				className={styles.item}
-				data-id={example.id}
-				onPress={() => onSelect(example.id)}
+				gap="space.8"
+				railAlignment="center"
+				renderRoot={(domProps) => {
+					return (
+						<AriaButton
+							{...domProps}
+							aria-current={isCurrent ? 'true' : undefined}
+							data-id={example.id}
+							onPress={() => onSelect(example.id)}
+						/>
+					);
+				}}
 			>
-				<span className={truncate}>{example.name}</span>
-				<span aria-hidden className={styles.itemState}>
+				<LockupBody className={truncate} elementType="span">
+					{example.name}
+					<VisuallyHidden>
+						{`, ${seen} of ${total} viewed${hasChanged ? ', changed since viewed' : ''}`}
+					</VisuallyHidden>
+				</LockupBody>
+				<LockupRail aria-hidden className={styles.itemState} elementType="span">
 					{hasChanged ? <span className={styles.changedDot} /> : null}
 					{seen === total ? <Icon name="check" size="xsmall" /> : <span>{`${seen}/${total}`}</span>}
-				</span>
-				<VisuallyHidden>
-					{`, ${seen} of ${total} viewed${hasChanged ? ', changed since viewed' : ''}`}
-				</VisuallyHidden>
-			</AriaButton>
+				</LockupRail>
+			</Lockup>
 		</li>
 	);
 }

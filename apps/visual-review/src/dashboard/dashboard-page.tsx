@@ -3,12 +3,13 @@ import { Heading } from '@luke-ui/react/heading';
 import { Icon } from '@luke-ui/react/icon';
 import { Link } from '@luke-ui/react/link';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import type { ReactNode } from 'react';
-import { Suspense, use } from 'react';
+import { Suspense, use, useId } from 'react';
 import type { Review } from '../api/review-api.js';
 import { AppHeader } from '../app-header.js';
-import { isLocalSourceAvailable, repository } from '../config.js';
+import { isLocalSourceAvailable, pullRequestUrl, repository } from '../config.js';
 import { loadReport } from '../report/load-report.js';
 import * as styles from './dashboard.css.js';
 import type { PullRequest, PullRequestsResult } from './open-pull-requests.js';
@@ -31,54 +32,113 @@ export function DashboardPage() {
 		<>
 			<title>Visual review</title>
 			<AppHeader />
-			<main className={styles.main}>
-				<div className={styles.intro}>
-					<Heading level={1} typography="heading3">
-						Open pull requests
-					</Heading>
-					<Text color="secondary" elementType="p">
-						{`Visual differences between each pull request and main in ${repository}.`}
-					</Text>
-				</div>
-				<PullRequestList result={result} />
-				{isLocalSourceAvailable ? (
-					<section aria-labelledby="local-title" className={styles.group}>
-						<Heading className={styles.groupTitle} id="local-title" level={2} typography="label">
-							On this machine
+			<Box backgroundColor="surface.base" className={styles.panel}>
+				<Box
+					className={styles.main}
+					display="grid"
+					elementType="main"
+					gap={{ initial: 'space.24', bp768: 'space.32' }}
+					paddingBlock={{ initial: 'space.40', bp768: 'space.64' }}
+					paddingInline={{ initial: 'space.12', bp768: 'space.24' }}
+				>
+					<Stack gap="space.24" paddingInline="space.4">
+						<Heading level={1} typography="heading2">
+							Open pull requests
 						</Heading>
-						<ul className={styles.list}>
-							<Row
-								meta=".artifacts/visual-regression"
-								title={<Link href="?source=local">Local comparison</Link>}
-							>
-								<Link appearance="button" href="?source=local" size="small">
-									Review
-								</Link>
-							</Row>
-						</ul>
-					</section>
-				) : null}
-			</main>
+						<Text color="secondary" elementType="p" typography="lead">
+							{`Visual differences between each pull request and main in ${repository}.`}
+						</Text>
+					</Stack>
+					<PullRequestList result={result} />
+					{isLocalSourceAvailable ? (
+						<Stack aria-labelledby="local-title" elementType="section" gap="space.8">
+							<Heading className={styles.groupTitle} id="local-title" level={2} typography="label">
+								On this machine
+							</Heading>
+							<Stack className={styles.list} elementType="ul" gap="space.4">
+								<Row
+									destination="review"
+									href="?source=local"
+									meta=".artifacts/visual-regression"
+									title="Local comparison"
+								/>
+							</Stack>
+						</Stack>
+					) : null}
+				</Box>
+			</Box>
 		</>
 	);
 }
 
-type RowProps = { children: ReactNode; meta: string; title: ReactNode };
+type RowProps = {
+	children?: ReactNode;
+	destination: 'github' | 'review';
+	href: string;
+	meta: string;
+	title: ReactNode;
+};
 
-/** One report to review. The title's link covers the row; `children` sit at its end. */
-function Row({ children, meta, title }: RowProps) {
+function Row({ children, destination, href, meta, title }: RowProps) {
+	const id = useId();
+	const isGitHub = destination === 'github';
 	return (
-		<Box backgroundColor="surface.subdued" className={styles.row} elementType="li">
-			<div className={styles.rowText}>
-				<Text className={styles.title} fontWeight="label">
-					{title}
-				</Text>
-				<Text className={styles.meta} color="secondary" typography="caption">
-					{meta}
-				</Text>
-			</div>
-			<div className={styles.rowEnd}>{children}</div>
-		</Box>
+		<li>
+			<Box
+				backgroundColor="surface.subdued"
+				className={styles.row}
+				renderRoot={(domProps) => (
+					<Link
+						{...domProps}
+						aria-describedby={children == null ? undefined : `${id}-status`}
+						aria-labelledby={`${id}-title ${id}-destination`}
+						href={href}
+						prominence="low"
+					/>
+				)}
+			>
+				<Stack className={styles.rowText} gap="space.4">
+					<Text className={styles.truncate} color="primary" fontWeight="label" id={`${id}-title`}>
+						{title}
+					</Text>
+					<Text className={styles.truncate} color="secondary" typography="caption">
+						{meta}
+					</Text>
+				</Stack>
+				<Box
+					alignItems="center"
+					columnGap="space.16"
+					display="flex"
+					flexWrap="wrap"
+					justifyContent={{ initial: 'space-between', bp768: 'flex-end' }}
+					rowGap="space.8"
+				>
+					{children != null ? (
+						<Box
+							alignItems="center"
+							display="flex"
+							flexWrap="wrap"
+							gap="space.8"
+							id={`${id}-status`}
+						>
+							{children}
+						</Box>
+					) : null}
+					<Box
+						alignItems="center"
+						display="flex"
+						gap="space.8"
+						id={`${id}-destination`}
+						marginInlineStart="auto"
+					>
+						<Text color="primary" typography="label">
+							{isGitHub ? 'Open on GitHub' : 'Review'}
+						</Text>
+						<Icon name={isGitHub ? 'externalLink' : 'arrowRight'} size="xsmall" />
+					</Box>
+				</Box>
+			</Box>
+		</li>
 	);
 }
 
@@ -89,6 +149,7 @@ function PullRequestList({ result }: { result: PullRequestsResult }) {
 				backgroundColor="surface.subdued"
 				className={styles.notice}
 				elementType="div"
+				padding="space.16"
 				role="status"
 			>
 				<Text color="secondary" elementType="p">
@@ -101,7 +162,12 @@ function PullRequestList({ result }: { result: PullRequestsResult }) {
 	}
 	if (result.pullRequests.length === 0) {
 		return (
-			<Box backgroundColor="surface.subdued" className={styles.notice} elementType="div">
+			<Box
+				backgroundColor="surface.subdued"
+				className={styles.notice}
+				elementType="div"
+				padding="space.16"
+			>
 				<Text color="secondary" elementType="p">
 					No pull requests are open.
 				</Text>
@@ -109,25 +175,20 @@ function PullRequestList({ result }: { result: PullRequestsResult }) {
 		);
 	}
 	return (
-		<ul aria-label="Open pull requests" className={styles.list}>
+		<Stack aria-label="Open pull requests" className={styles.list} elementType="ul" gap="space.4">
 			{orderByReview(result.pullRequests).map((pullRequest) => (
-				<Row
+				<Suspense
 					key={pullRequest.number}
-					meta={describePullRequest(pullRequest)}
-					title={
-						<Link href={`?pr=${pullRequest.number}`}>
-							<span className={styles.number}>{`#${pullRequest.number}`}</span>
-							{pullRequest.title}
-						</Link>
+					fallback={
+						<PullRequestRow pullRequest={pullRequest}>
+							<LoadingSpinner aria-label="Loading report" size="small" />
+						</PullRequestRow>
 					}
 				>
-					{pullRequest.review === undefined ? null : <ReviewStatus review={pullRequest.review} />}
-					<Suspense fallback={<LoadingSpinner aria-label="Loading report" size="small" />}>
-						<PullRequestReport pullRequest={pullRequest} />
-					</Suspense>
-				</Row>
+					<PullRequestReport pullRequest={pullRequest} />
+				</Suspense>
 			))}
-		</ul>
+		</Stack>
 	);
 }
 
@@ -135,19 +196,46 @@ function PullRequestReport({ pullRequest }: { pullRequest: PullRequest }) {
 	const result = use(loadReport({ kind: 'pull-request', number: pullRequest.number }));
 	const state = reportState(result, pullRequest.headSha);
 
-	if (state.kind !== 'differences') {
-		// Hide only a report label already shown by the review status.
-		const chip = pullRequest.review === undefined ? undefined : reviewChip(pullRequest.review);
-		if (chip?.label === STATE_LABELS[state.kind]) return null;
-		return <Text color="secondary">{STATE_LABELS[state.kind]}</Text>;
+	if (state.kind === 'differences') {
+		return (
+			<PullRequestRow pullRequest={pullRequest} reviewHref={`?pr=${pullRequest.number}`}>
+				<Text color="secondary">{describeDifferences(state)}</Text>
+			</PullRequestRow>
+		);
 	}
+
+	const label = STATE_LABELS[state.kind];
+	const chip = pullRequest.review === undefined ? undefined : reviewChip(pullRequest.review);
 	return (
-		<>
-			<Text color="secondary">{describeDifferences(state)}</Text>
-			<Link appearance="button" href={`?pr=${pullRequest.number}`} size="small">
-				Review
-			</Link>
-		</>
+		<PullRequestRow pullRequest={pullRequest}>
+			{chip?.label === label ? null : <Text color="secondary">{label}</Text>}
+		</PullRequestRow>
+	);
+}
+
+function PullRequestRow({
+	children,
+	pullRequest,
+	reviewHref,
+}: {
+	children: ReactNode;
+	pullRequest: PullRequest;
+	reviewHref?: string;
+}) {
+	return (
+		<Row
+			destination={reviewHref === undefined ? 'github' : 'review'}
+			href={reviewHref ?? pullRequestUrl(pullRequest.number)}
+			meta={describePullRequest(pullRequest)}
+			title={
+				<>
+					<span className={styles.number}>{`#${pullRequest.number}`}</span> {pullRequest.title}
+				</>
+			}
+		>
+			{pullRequest.review === undefined ? null : <ReviewStatus review={pullRequest.review} />}
+			{children}
+		</Row>
 	);
 }
 

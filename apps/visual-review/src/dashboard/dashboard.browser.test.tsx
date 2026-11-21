@@ -53,8 +53,14 @@ test('lists pull requests that need review first, each with its review status', 
 	const rows = app.locator.getByRole('list', { name: 'Open pull requests' }).getByRole('listitem');
 	await expect.poll(() => rows.elements()).toHaveLength(5);
 	await expect
-		.element(rows.nth(4).getByRole('link', { name: 'Review', exact: true }))
-		.toBeVisible();
+		.element(rows.nth(4).getByRole('link', { name: '#205 Pull request 205 Review' }))
+		.toHaveAttribute('href', '?pr=205');
+	await expect
+		.element(rows.nth(0).getByRole('link', { name: '#203 Pull request 203 Open on GitHub' }))
+		.toHaveAttribute('href', 'https://github.com/lukebennett88/luke-ui/pull/203');
+	for (const row of rows.elements()) {
+		expect(row.querySelectorAll('a')).toHaveLength(1);
+	}
 	const text = rows.elements().map((row) => row.textContent ?? '');
 	expect(text[0]).toContain('#203');
 	expect(text[0]).toContain('Needs review');
@@ -71,4 +77,14 @@ test('lists pull requests that need review first, each with its review status', 
 	expect(text[4]).not.toContain('No report');
 	const result = await axe.run(app.container);
 	expect(result.violations).toEqual([]);
+
+	const local = app.locator.getByRole('region', { name: 'On this machine' });
+	await expect
+		.element(local.getByRole('link', { name: 'Local comparison Review' }))
+		.toHaveAttribute('href', '?source=local');
+	expect(local.getByRole('link').elements()).toHaveLength(1);
+	await app.user.click(local.getByText('.artifacts/visual-regression'));
+	await expect
+		.element(app.locator.getByRole('heading', { name: 'Local comparison' }))
+		.toBeVisible();
 });

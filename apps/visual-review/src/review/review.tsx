@@ -3,11 +3,11 @@ import { Button } from '@luke-ui/react/button';
 import { CheckboxField } from '@luke-ui/react/checkbox-field';
 import { Icon } from '@luke-ui/react/icon';
 import { IconButton } from '@luke-ui/react/icon-button';
+import { Lockup, LockupBody, LockupRail } from '@luke-ui/react/lockup';
 import { cx } from '@luke-ui/react/utils';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import { useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import {
-	Button as AriaButton,
 	Dialog,
 	DialogTrigger,
 	Heading as AriaHeading,
@@ -15,6 +15,7 @@ import {
 	ModalOverlay,
 	Popover,
 } from 'react-aria-components';
+import { AppHeader } from '../app-header.js';
 import { hrefWithParams, navigate, useLocationSearch } from '../navigation/location.js';
 import type { ReportSource } from '../report/report-source.js';
 import type { Capture, Report } from '../report/schema.js';
@@ -50,7 +51,7 @@ import { useSeen } from './seen-store.js';
 import { setShortcutsEnabled, useShortcutsEnabled } from './shortcuts-preference.js';
 import type { CaptureView, StageMetrics } from './stage.js';
 import { PANE_LABELS, paneFor, useRegions } from './stage.js';
-import { CaptureMenu, ContentsIcon, DiffStepper, GuideWords, Progress } from './top-bar-parts.js';
+import { CaptureMenu, DiffStepper, Progress, SidebarIcon } from './top-bar-parts.js';
 import { usePullRequestReview } from './use-pull-request-review.js';
 import { useReviewShortcuts } from './use-review-shortcuts.js';
 import { PaneSwitch, showingLabel, ViewOptions } from './view-options.js';
@@ -117,6 +118,7 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 	const mainRef = useRef<HTMLElement>(null);
 	const mainWidth = useContentWidth(mainRef);
 	const filterRef = useRef<HTMLInputElement>(null);
+	const contentsToggleRef = useRef<HTMLButtonElement>(null);
 	const afterRender = useRef<(() => void) | undefined>(undefined);
 	/** The difference waiting to scroll into view, until its outline renders. */
 	const differenceScroll = useRef<symbol | undefined>(undefined);
@@ -514,6 +516,13 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		afterRender.current = () => attempt(0);
 	}
 
+	function toggleContents() {
+		if (isContentsOpen && document.activeElement?.closest('#review-contents')) {
+			contentsToggleRef.current?.focus();
+		}
+		setIsContentsOpen(!isContentsOpen);
+	}
+
 	function openFilter() {
 		setIsContentsOpen(true);
 		// After the Contents drawer has opened and placed its own focus.
@@ -542,7 +551,7 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 			k: () => stepExample(-1),
 			o: () => toggleLayout('overlay'),
 			s: () => toggleLayout('side'),
-			t: () => setIsContentsOpen((isNowOpen) => !isNowOpen),
+			t: toggleContents,
 			u: nextUnviewed,
 			v: toggleViewed,
 		},
@@ -570,7 +579,7 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 			capture={currentCapture}
 			exampleActions={
 				isCompact && currentExample && currentCapture ? (
-					<div className={overlayStyles.sheetActions}>
+					<Box display="grid" gap="space.8">
 						{currentExample.captures.length > 1 ? (
 							<Button
 								className={styles.touchTarget}
@@ -593,7 +602,7 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 						>
 							Copy link to this capture
 						</Button>
-					</div>
+					</Box>
 				) : undefined
 			}
 			isCompact={isCompact}
@@ -708,50 +717,36 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 		/>
 	);
 
+	const contentsToggle = (
+		<IconButton
+			aria-controls={!isDrawer || isContentsOpen ? 'review-contents' : undefined}
+			aria-expanded={isContentsOpen}
+			aria-label={isContentsOpen ? 'Hide contents sidebar' : 'Show contents sidebar'}
+			className={styles.touchTarget}
+			icon={<SidebarIcon />}
+			onPress={toggleContents}
+			prominence="low"
+			ref={contentsToggleRef}
+			size="medium"
+		/>
+	);
+
 	return (
 		<div className={styles.app}>
 			<title>{`${currentCapture?.id ?? 'Review'} · ${sourceLabel(source)} · Visual review`}</title>
-			<Box
-				backgroundColor="surface.subdued"
-				className={styles.reviewTopBar}
-				elementType="header"
-				{...{ [CHROME_ATTRIBUTE.topBar]: '' }}
-			>
-				{isCompact ? (
-					<>
-						<h1 className={styles.reportTitle}>{title}</h1>
-						<AriaButton
-							aria-expanded={isContentsOpen}
-							aria-label={`Contents. In view: ${target || 'nothing'}`}
-							className={styles.guideButton}
-							onPress={() => setIsContentsOpen(true)}
-						>
-							<ContentsIcon size="small" />
-							<GuideWords capture={currentCapture} example={currentExample} isCompact />
-						</AriaButton>
-						<span className={styles.topEnd}>
-							<Progress isCompact total={total} viewed={viewedCount} />
-						</span>
-					</>
-				) : (
-					<>
-						<div className={styles.topStart}>
-							<Button
-								aria-controls={isContentsOpen && !isDrawer ? 'review-contents' : undefined}
-								aria-expanded={isContentsOpen}
-								onPress={() => setIsContentsOpen((isNowOpen) => !isNowOpen)}
-								prominence="low"
-								size="small"
-								startContent={<ContentsIcon />}
+			<AppHeader
+				actions={
+					isCompact ? (
+						<Progress isCompact total={total} viewed={viewedCount} />
+					) : (
+						<Box alignItems="center" display="flex" gap="space.12">
+							<Box
+								alignItems="center"
+								aria-label="Capture in view"
+								display="flex"
+								gap="space.8"
+								role="group"
 							>
-								Contents
-							</Button>
-							<h1 className={styles.reportTitle}>{title}</h1>
-						</div>
-						<div aria-label="Capture in view" className={styles.guide} role="group">
-							<GuideWords capture={currentCapture} example={currentExample} isCompact={false} />
-							{/* Viewed comes last: a control that changes width only moves the ones before it. */}
-							<div className={styles.guideControls}>
 								{differences}
 								<DialogTrigger isOpen={isViewOpen} onOpenChange={setIsViewOpen}>
 									<Button
@@ -769,7 +764,13 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 										placement="bottom"
 									>
 										<Dialog aria-label="View options" className={overlayStyles.dialog}>
-											<Box backgroundColor="surface.raised" className={overlayStyles.dialogBody}>
+											<Box
+												alignContent="start"
+												backgroundColor="surface.raised"
+												className={overlayStyles.dialogBody}
+												display="grid"
+												gap="space.16"
+											>
 												{viewOptions}
 											</Box>
 										</Dialog>
@@ -786,21 +787,45 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 									/>
 								) : null}
 								{viewedCheckbox}
-							</div>
-						</div>
-						<div className={styles.topEnd}>
+							</Box>
 							<Progress isCompact={false} total={total} viewed={viewedCount} />
 							{review}
-						</div>
-					</>
-				)}
-			</Box>
+						</Box>
+					)
+				}
+				reportTitle={
+					isDrawer ? (
+						<VisuallyHidden elementType="h1">{sourceLabel(source)}</VisuallyHidden>
+					) : (
+						<h1 className={styles.reportTitle}>{title}</h1>
+					)
+				}
+			>
+				{contentsToggle}
+			</AppHeader>
 
-			<div className={cx(styles.layout, isContentsOpen && !isDrawer && styles.layoutWithContents)}>
-				{isContentsOpen && !isDrawer ? contents : null}
-				<main aria-label="Comparisons" className={styles.main} ref={mainRef}>
+			<div className={styles.layout} data-contents-open={isContentsOpen ? '' : undefined}>
+				{!isDrawer ? (
+					<aside className={styles.sidebar} inert={!isContentsOpen}>
+						{contents}
+					</aside>
+				) : null}
+				<Box
+					aria-label="Comparisons"
+					backgroundColor="surface.base"
+					className={styles.main}
+					elementType="main"
+					ref={mainRef}
+				>
 					{examples.length === 0 ? (
-						<div className={styles.empty}>
+						<Box
+							className={styles.empty}
+							display="grid"
+							gap="space.12"
+							justifyItems="center"
+							paddingBlock="space.64"
+							paddingInline="space.24"
+						>
 							<p>No captures match the filter.</p>
 							<Button
 								onPress={() => setParams({ hideViewed: false, query: '', status: 'all' })}
@@ -808,7 +833,7 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 							>
 								Clear filter
 							</Button>
-						</div>
+						</Box>
 					) : null}
 					{mainWidth > 0
 						? examples.map((example) => {
@@ -845,7 +870,7 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 								);
 							})
 						: null}
-				</main>
+				</Box>
 			</div>
 
 			{isCompact ? (
@@ -857,11 +882,17 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 					{...{ [CHROME_ATTRIBUTE.bottomBar]: '' }}
 				>
 					{/* What the reviewer compares with, beside the image it acts on. */}
-					<div className={styles.bottomCompare}>
+					<Box
+						alignItems="center"
+						className={styles.bottomCompare}
+						display="flex"
+						gap="space.8"
+						justifyContent="space-between"
+					>
 						{compareControl}
 						{differences}
-					</div>
-					<div className={styles.bottomActions}>
+					</Box>
+					<Box alignItems="center" display="flex" gap="space.4" justifyContent="space-between">
 						{viewedCheckbox ?? <span />}
 						<DialogTrigger isOpen={isViewOpen} onOpenChange={setIsViewOpen}>
 							<Button
@@ -875,8 +906,20 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 							<ModalOverlay className={overlayStyles.modalOverlay} isDismissable>
 								<Modal className={overlayStyles.sheet}>
 									<Dialog aria-labelledby="review-view-title" className={overlayStyles.dialog}>
-										<Box backgroundColor="surface.raised" className={overlayStyles.dialogBody}>
-											<div className={overlayStyles.sheetHead}>
+										<Box
+											alignContent="start"
+											backgroundColor="surface.raised"
+											className={overlayStyles.dialogBody}
+											display="grid"
+											gap="space.16"
+										>
+											<Box
+												alignItems="center"
+												className={overlayStyles.sheetHead}
+												display="flex"
+												gap="space.8"
+												justifyContent="space-between"
+											>
 												<AriaHeading
 													className={overlayStyles.dialogTitle}
 													id="review-view-title"
@@ -891,7 +934,7 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 													onPress={() => setIsViewOpen(false)}
 													prominence="low"
 												/>
-											</div>
+											</Box>
 											{viewOptions}
 										</Box>
 									</Dialog>
@@ -899,22 +942,18 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 							</ModalOverlay>
 						</DialogTrigger>
 						{review}
-					</div>
+					</Box>
 				</Box>
 			) : null}
 
 			{isDrawer ? (
 				<ModalOverlay
-					className={cx(overlayStyles.modalOverlay, !isCompact && overlayStyles.drawerOverlay)}
+					className={overlayStyles.drawerOverlay}
 					isDismissable
 					isOpen={isContentsOpen}
 					onOpenChange={setIsContentsOpen}
 				>
-					<Modal
-						className={
-							isCompact ? cx(overlayStyles.sheet, overlayStyles.sheetFull) : overlayStyles.drawer
-						}
-					>
+					<Modal className={overlayStyles.drawer}>
 						<Dialog aria-label="Contents" className={overlayStyles.dialog}>
 							{contents}
 						</Dialog>
@@ -923,12 +962,19 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 			) : null}
 
 			{undo ? (
-				<Box backgroundColor="surface.raised" className={styles.toast}>
-					<span className={styles.truncate}>{undo.label}</span>
-					<Button onPress={undoLast} prominence="low" size="small">
-						Undo
-					</Button>
-				</Box>
+				<Lockup
+					className={styles.toast}
+					gap="space.12"
+					railAlignment="center"
+					renderRoot={(domProps) => <Box {...domProps} backgroundColor="surface.raised" />}
+				>
+					<LockupBody className={styles.truncate}>{undo.label}</LockupBody>
+					<LockupRail>
+						<Button onPress={undoLast} prominence="low" size="small">
+							Undo
+						</Button>
+					</LockupRail>
+				</Lockup>
 			) : null}
 
 			<VisuallyHidden aria-live="polite" elementType="p" role="status">

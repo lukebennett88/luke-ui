@@ -1,3 +1,4 @@
+import { Box } from '@luke-ui/react/box';
 import { Icon } from '@luke-ui/react/icon';
 import { Kbd } from '@luke-ui/react/kbd';
 import { RadioField, RadioGroup } from '@luke-ui/react/radio-group';
@@ -123,7 +124,7 @@ export function ViewOptions(props: ViewOptionsProps) {
 	const areKeysHidden = isCompact || !areShortcutsEnabled;
 
 	return (
-		<div className={styles.options}>
+		<Box className={styles.options} display="grid" gap="space.16">
 			{/* A phone has the image switch in its bottom bar, beside the image it acts on. */}
 			{isCompact ? null : (
 				<PaneSwitch areKeysHidden={areKeysHidden} layout={layout} onPane={onPane} pane={pane} />
@@ -239,7 +240,11 @@ export function ViewOptions(props: ViewOptionsProps) {
 			{isCompact ? null : (
 				<>
 					{areShortcutsEnabled ? (
-						<Disclosure className={styles.shortcuts}>
+						<Box
+							display="grid"
+							gap="space.8"
+							renderRoot={(domProps) => <Disclosure {...domProps} />}
+						>
 							<AriaButton className={styles.shortcutsTrigger} slot="trigger">
 								All shortcuts
 								<Icon className={styles.shortcutsChevron} name="chevronDown" size="xsmall" />
@@ -256,11 +261,11 @@ export function ViewOptions(props: ViewOptionsProps) {
 									))}
 								</dl>
 							</DisclosurePanel>
-						</Disclosure>
+						</Box>
 					) : null}
 				</>
 			)}
-		</div>
+		</Box>
 	);
 }
 

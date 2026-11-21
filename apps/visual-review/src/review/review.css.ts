@@ -1,8 +1,6 @@
-import { vars } from '@luke-ui/react/theme';
-import { globalStyle, keyframes, style } from '@vanilla-extract/css';
+import { breakpoints, vars } from '@luke-ui/react/theme';
+import { createVar, globalStyle, keyframes, style } from '@vanilla-extract/css';
 import { appVars } from '../styles/app-tokens.css.js';
-import { belowWideQuery, compactQuery, regularQuery, wideQuery } from '../styles/queries.js';
-import { topBar } from '../styles/top-bar.css.js';
 
 /** The review reads at label size: 14px, the smallest size the app uses for anything a reviewer reads. */
 export const app = style({
@@ -17,7 +15,6 @@ export const numeric = style({
 });
 
 export const truncate = style({
-	minInlineSize: 0,
 	overflow: 'hidden',
 	textOverflow: 'ellipsis',
 	whiteSpace: 'nowrap',
@@ -54,31 +51,6 @@ export const plainButton = style({
 
 /* ----------------------------------------------------------------- top bar */
 
-export const reviewTopBar = style([
-	topBar,
-	{
-		display: 'grid',
-		gridTemplateColumns: 'auto minmax(0, 1fr) auto',
-		'@container': {
-			[compactQuery]: {
-				gap: vars.space['8'],
-				gridTemplateColumns: 'minmax(0, 1fr) auto',
-				paddingInline: `${vars.space['4']} ${vars.space['16']}`,
-			},
-		},
-	},
-]);
-
-export const topStart = style({
-	alignItems: 'center',
-	display: 'flex',
-	gap: vars.space['12'],
-	minInlineSize: 0,
-});
-
-export const topEnd = style([topStart, { justifyContent: 'flex-end' }]);
-
-/** The report's title. Below the wide layout it stays in the accessibility tree only. */
 export const reportTitle = style([
 	truncate,
 	{
@@ -88,59 +60,6 @@ export const reportTitle = style([
 		lineHeight: 'inherit',
 		margin: 0,
 		maxInlineSize: '32ch',
-		'@container': {
-			[belowWideQuery]: {
-				blockSize: '1px',
-				clipPath: 'inset(50%)',
-				inlineSize: '1px',
-				position: 'absolute',
-			},
-		},
-	},
-]);
-
-/**
- * The capture in view, and what acts on it. The name takes the space left over and truncates; the
- * controls keep their place at the end, so they don't move as names change length while scrolling.
- */
-export const guide = style({
-	alignItems: 'center',
-	columnGap: vars.space['16'],
-	display: 'grid',
-	gridTemplateColumns: 'minmax(0, 1fr) auto',
-	minInlineSize: 0,
-});
-
-export const guideControls = style({
-	alignItems: 'center',
-	display: 'flex',
-	gap: vars.space['8'],
-});
-
-export const guideWords = style([
-	truncate,
-	{
-		color: vars.color.foreground.secondary,
-		margin: 0,
-	},
-]);
-
-export const guideName = style({
-	color: vars.color.foreground.primary,
-	fontWeight: vars.font.weight.heading,
-});
-
-/** On phones the guide words open Contents. */
-export const guideButton = style([
-	plainButton,
-	{
-		alignItems: 'center',
-		color: vars.color.foreground.secondary,
-		display: 'flex',
-		gap: vars.space['8'],
-		minBlockSize: '44px',
-		minInlineSize: 0,
-		paddingInline: '10px',
 	},
 ]);
 
@@ -190,7 +109,7 @@ export const viewButtonLabel = style({
 /** Touch targets on phones. */
 export const touchTarget = style({
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			minBlockSize: '44px',
 			minInlineSize: '44px',
 		},
@@ -199,40 +118,89 @@ export const touchTarget = style({
 
 /* ------------------------------------------------------------------ layout */
 
+const sidebarMotion = '300ms ease-in-out';
+const sidebarWidth = '300px';
+const sidebarOffset = createVar();
+const reducedMotion = '(prefers-reduced-motion: reduce)';
+
 export const layout = style({
 	display: 'grid',
 	gridTemplateColumns: 'minmax(0, 1fr)',
+	marginInlineStart: vars.space['16'],
+	minBlockSize: `calc(100dvh - ${appVars.topBarHeight})`,
+	'@container': {
+		[`(inline-size >= ${breakpoints.bp1280}px)`]: {
+			gridTemplateColumns: `${vars.space['24']} minmax(0, 1fr)`,
+			marginInlineStart: 0,
+			transition: `grid-template-columns ${sidebarMotion}`,
+			selectors: {
+				'&[data-contents-open]': { gridTemplateColumns: `${sidebarWidth} minmax(0, 1fr)` },
+			},
+			'@media': {
+				[reducedMotion]: { transition: 'none' },
+			},
+		},
+	},
 });
 
-export const layoutWithContents = style({
-	'@container': {
-		[wideQuery]: {
-			gridTemplateColumns: '300px minmax(0, 1fr)',
+export const sidebar = style({
+	alignSelf: 'start',
+	gridColumn: 1,
+	gridRow: 1,
+	inlineSize: sidebarWidth,
+	insetBlockStart: appVars.topBarHeight,
+	position: 'sticky',
+	transition: `translate ${sidebarMotion}, opacity ${sidebarMotion}, visibility 0s`,
+	translate: '0 0',
+	vars: { [sidebarOffset]: '-100%' },
+	selectors: {
+		'&:dir(rtl)': { vars: { [sidebarOffset]: '100%' } },
+		'&[inert]': {
+			opacity: 0,
+			transition: `translate ${sidebarMotion}, opacity ${sidebarMotion}, visibility 0s 300ms`,
+			translate: `${sidebarOffset} 0`,
+			visibility: 'hidden',
+		},
+	},
+	'@media': {
+		[reducedMotion]: {
+			transition: 'opacity 100ms ease-in-out, visibility 0s',
+			selectors: {
+				'&[inert]': {
+					transition: 'opacity 100ms ease-in-out, visibility 0s 100ms',
+					translate: 'none',
+				},
+			},
 		},
 	},
 });
 
 export const main = style({
+	borderStartEndRadius: vars.radius.surface,
+	borderStartStartRadius: vars.radius.surface,
 	boxSizing: 'border-box',
+	gridColumn: 1,
+	gridRow: 1,
 	minInlineSize: 0,
+	overflow: 'clip',
 	// Room below the last section, so any section can scroll up to the top bar.
 	paddingBlock: `${vars.space['16']} calc(50dvh + ${appVars.bottomBarHeight})`,
 	paddingInline: vars.space['24'],
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			paddingBlock: `0 calc(40dvh + ${appVars.bottomBarHeight})`,
 			paddingInline: 0,
+		},
+		[`(inline-size >= ${breakpoints.bp1280}px)`]: {
+			borderEndStartRadius: vars.radius.surface,
+			borderStartEndRadius: 0,
+			gridColumn: 2,
 		},
 	},
 });
 
 export const empty = style({
 	color: vars.color.foreground.secondary,
-	display: 'grid',
-	gap: vars.space['12'],
-	justifyItems: 'center',
-	paddingBlock: vars.space['64'],
-	paddingInline: vars.space['24'],
 });
 
 /* -------------------------------------------------------------- bottom bar */
@@ -255,17 +223,13 @@ export const bottomBar = style({
 	position: 'fixed',
 	zIndex: 36,
 	'@container': {
-		[regularQuery]: {
+		[`(inline-size >= ${breakpoints.bp768}px)`]: {
 			display: 'none',
 		},
 	},
 });
 
 export const bottomCompare = style({
-	alignItems: 'center',
-	display: 'flex',
-	gap: vars.space['8'],
-	justifyContent: 'space-between',
 	minInlineSize: 0,
 });
 
@@ -277,13 +241,6 @@ export const bottomPanes = style({
 export const bottomNote = style({
 	color: vars.color.foreground.secondary,
 	paddingInline: vars.space['4'],
-});
-
-export const bottomActions = style({
-	alignItems: 'center',
-	display: 'flex',
-	gap: vars.space['4'],
-	justifyContent: 'space-between',
 });
 
 export const bottomViewed = style({
@@ -303,14 +260,11 @@ const rise = keyframes({
 
 /** The undo offer after marking viewed: transient, bottom centre. */
 export const toast = style({
-	alignItems: 'center',
 	animation: `${rise} 220ms cubic-bezier(0.16, 1, 0.3, 1)`,
 	background: vars.color.background.surface.raised,
 	borderRadius: vars.radius.surface,
 	boxShadow: vars.shadow.floating,
 	boxSizing: 'border-box',
-	display: 'flex',
-	gap: vars.space['12'],
 	insetBlockEnd: `calc(${vars.space['16']} + ${appVars.bottomBarHeight} + env(safe-area-inset-bottom))`,
 	insetInlineStart: '50%',
 	maxInlineSize: `calc(100vw - ${vars.space['32']})`,
@@ -328,14 +282,14 @@ export const toast = style({
 
 /* --------------------------------------------------------- message pages */
 
-export const messageTopBar = style([
-	topBar,
-	{
-		display: 'flex',
-		justifyContent: 'space-between',
-		paddingInline: `${vars.space['16']} ${vars.space['12']}`,
+export const messagePanel = style({
+	borderStartStartRadius: vars.radius.surface,
+	marginInlineStart: vars.space['16'],
+	minBlockSize: `calc(100dvh - ${appVars.topBarHeight})`,
+	'@container': {
+		[`(inline-size >= ${breakpoints.bp768}px)`]: { marginInlineStart: vars.space['24'] },
 	},
-]);
+});
 
 export const message = style({
 	boxSizing: 'border-box',

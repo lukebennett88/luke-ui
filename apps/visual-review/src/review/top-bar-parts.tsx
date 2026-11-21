@@ -2,25 +2,21 @@ import { createIcon } from '@luke-ui/react/icon';
 import { IconButton } from '@luke-ui/react/icon-button';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
 import { Menu, MenuItem, MenuTrigger, Popover } from 'react-aria-components';
-import type { Capture } from '../report/schema.js';
 import type { DiffRegion } from './diff-regions.js';
-import type { Example } from './examples.js';
-import { hasThemes, themeLabel } from './examples.js';
 import * as overlayStyles from './overlays.css.js';
 import * as styles from './review.css.js';
 
-/** Luke UI's icon set has no list or overflow glyph, so these follow its 16px grid. */
-export const ContentsIcon = createIcon({
+export const SidebarIcon = createIcon({
 	path: (
 		<path
-			d="M2.5 4h11M2.5 8h7M2.5 12h9"
+			d="M3.75 6.75A2.25 2.25 0 0 1 6 4.5h12a2.25 2.25 0 0 1 2.25 2.25v10.5A2.25 2.25 0 0 1 18 19.5H6a2.25 2.25 0 0 1-2.25-2.25V6.75ZM9 4.5v15"
 			fill="none"
 			stroke="currentColor"
 			strokeLinecap="round"
-			strokeWidth="1.5"
+			strokeLinejoin="round"
+			strokeWidth={1.5}
 		/>
 	),
-	viewBox: '0 0 16 16',
 });
 
 const MoreIcon = createIcon({
@@ -33,27 +29,6 @@ const MoreIcon = createIcon({
 	),
 	viewBox: '0 0 16 16',
 });
-
-/** Names the capture in view: `component / name · Theme`. Phones drop the component. */
-export function GuideWords({
-	capture,
-	example,
-	isCompact,
-}: {
-	capture: Capture | undefined;
-	example: Example | undefined;
-	isCompact: boolean;
-}) {
-	if (!capture || !example) return <span />;
-	return (
-		<p className={styles.guideWords} title={capture.id}>
-			<VisuallyHidden>In view: </VisuallyHidden>
-			{isCompact ? null : `${example.component} / `}
-			<strong className={styles.guideName}>{example.name}</strong>
-			{hasThemes(example) ? ` · ${themeLabel(capture)}` : null}
-		</p>
-	);
-}
 
 export function Progress({
 	isCompact,
@@ -128,7 +103,7 @@ type CaptureMenuProps = {
 	onMarkAllViewed: () => void;
 };
 
-/** The one overflow menu, beside the guide words. */
+/** Actions for the capture in view. */
 export function CaptureMenu(props: CaptureMenuProps) {
 	const { count, isAllViewed, name, onCollapse, onCopyLink, onMarkAllViewed } = props;
 	return (

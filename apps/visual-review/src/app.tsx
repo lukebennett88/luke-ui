@@ -16,9 +16,15 @@ export function App() {
 
 	return (
 		<RouterProvider navigate={navigate}>
-			<Suspense fallback={<PageLoading />}>
-				{source ? <ReviewPage key={reportSourceKey(source)} source={source} /> : <DashboardPage />}
-			</Suspense>
+			<Box backgroundColor="surface.subdued">
+				<Suspense fallback={<PageLoading />}>
+					{source ? (
+						<ReviewPage key={reportSourceKey(source)} source={source} />
+					) : (
+						<DashboardPage />
+					)}
+				</Suspense>
+			</Box>
 		</RouterProvider>
 	);
 }

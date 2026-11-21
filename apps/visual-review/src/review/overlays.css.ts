@@ -1,11 +1,10 @@
-import { vars } from '@luke-ui/react/theme';
-import { globalStyle, keyframes, style } from '@vanilla-extract/css';
-import { compactQuery } from '../styles/queries.js';
+import { breakpoints, vars } from '@luke-ui/react/theme';
+import { createVar, globalStyle, keyframes, style } from '@vanilla-extract/css';
 import { plainButton } from './review.css.js';
 
 const fadeIn = keyframes({ from: { opacity: 0 } });
 const rise = keyframes({ from: { opacity: 0, translate: '0 24px' } });
-const slide = keyframes({ from: { opacity: 0, translate: '-16px 0' } });
+const drawerOffset = createVar();
 const easeOut = 'cubic-bezier(0.16, 1, 0.3, 1)';
 const reducedMotion = '(prefers-reduced-motion: reduce)';
 
@@ -51,9 +50,6 @@ export const dialog = style({
 });
 
 export const dialogBody = style({
-	alignContent: 'start',
-	display: 'grid',
-	gap: vars.space['16'],
 	padding: vars.space['16'],
 });
 
@@ -89,8 +85,18 @@ export const modalOverlay = style({
 });
 
 export const drawerOverlay = style({
-	alignItems: 'stretch',
-	justifyContent: 'flex-start',
+	backgroundColor: vars.color.background.backdrop,
+	inset: 0,
+	position: 'fixed',
+	transition: `background-color ${vars.motion.enter.duration} ${vars.motion.enter.easing}`,
+	zIndex: 60,
+	selectors: {
+		'&[data-entering], &[data-exiting]': { backgroundColor: 'transparent' },
+		'&[data-exiting]': {
+			pointerEvents: 'none',
+			transition: `background-color ${vars.motion.exit.duration} ${vars.motion.exit.easing}`,
+		},
+	},
 });
 
 /** A phone sheet that rises from the bottom. */
@@ -128,34 +134,34 @@ export const sheetFull = style({
 });
 
 export const sheetHead = style({
-	alignItems: 'center',
-	display: 'flex',
-	gap: vars.space['8'],
-	justifyContent: 'space-between',
 	marginBlock: '-6px -4px',
 	marginInlineEnd: '-8px',
 });
 
-/** Contents as a drawer from the start edge, below the wide layout. */
 export const drawer = style({
-	blockSize: '100dvh',
+	blockSize: '100%',
 	boxShadow: vars.shadow.overlay,
 	fontFamily: vars.font.label.fontFamily,
 	fontSize: vars.font.label.fontSize,
-	inlineSize: '320px',
+	inlineSize: 'min(22rem, 90vw)',
 	lineHeight: vars.font.label.lineHeight,
-	maxInlineSize: '88vw',
+	marginInlineStart: 'auto',
 	outline: 'none',
+	position: 'relative',
+	transition: `translate ${vars.motion.enter.duration} ${vars.motion.enter.easing}`,
+	translate: 'none',
+	vars: { [drawerOffset]: '100%' },
 	selectors: {
-		'&[data-entering]': {
-			animation: `${slide} 200ms ${easeOut}`,
+		'&:dir(rtl)': { vars: { [drawerOffset]: '-100%' } },
+		'&[data-entering], &[data-exiting]': { translate: `${drawerOffset} 0` },
+		'&[data-exiting]': {
+			transition: `translate ${vars.motion.exit.duration} ${vars.motion.exit.easing}`,
 		},
 	},
 	'@media': {
 		[reducedMotion]: {
-			selectors: {
-				'&[data-entering]': { animation: `${fadeIn} 160ms ease-out` },
-			},
+			transition: 'none',
+			selectors: { '&[data-entering], &[data-exiting]': { translate: 'none', transition: 'none' } },
 		},
 	},
 });
@@ -186,15 +192,12 @@ export const menuItem = style({
 
 /* ----------------------------------------------------------- view options */
 
-export const options = style({
-	display: 'grid',
-	gap: vars.space['16'],
-});
+export const options = style({});
 
 // Each choice is a 44px touch target on a phone.
 globalStyle(`${options} label`, {
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			alignItems: 'center',
 			minBlockSize: '44px',
 		},
@@ -253,7 +256,7 @@ export const segment = style({
 		},
 	},
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			minBlockSize: '44px',
 		},
 	},
@@ -287,7 +290,7 @@ export const sliderTrack = style({
 		},
 	},
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			blockSize: '44px',
 		},
 	},
@@ -312,11 +315,6 @@ export const details = style({
 	color: vars.color.foreground.secondary,
 	fontVariantNumeric: 'tabular-nums',
 	margin: 0,
-});
-
-export const shortcuts = style({
-	display: 'grid',
-	gap: vars.space['8'],
 });
 
 export const shortcutsTrigger = style([
@@ -360,9 +358,4 @@ export const shortcutKeys = style({
 export const shortcutLabel = style({
 	color: vars.color.foreground.secondary,
 	margin: 0,
-});
-
-export const sheetActions = style({
-	display: 'grid',
-	gap: vars.space['8'],
 });

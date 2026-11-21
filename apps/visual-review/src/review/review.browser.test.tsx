@@ -59,14 +59,33 @@ test('loads the report and shows the first example’s actual image, outlined', 
 	await expect
 		.element(app.locator.getByRole('img', { name: `Actual screenshot of ${PRIMARY}` }))
 		.toBeVisible();
-	await expect.poll(() => inView(app).element().textContent).toContain('button / primary');
-	await expect.element(app.locator.getByText(`0 of ${TOTAL} viewed`)).toBeVisible();
+	await expect
+		.element(section(app, PRIMARY).getByRole('heading', { name: 'button / primary (in view)' }))
+		.toBeVisible();
+	await expect
+		.element(app.locator.getByRole('banner').getByText('button / primary'))
+		.not.toBeInTheDocument();
+	await expect
+		.element(app.locator.getByRole('banner').getByText(`0 of ${TOTAL} viewed`))
+		.toBeVisible();
 	await expect.poll(() => currentParams().get('capture')).toBe(PRIMARY);
 	// The fixture's diff marks two clusters of pixels.
 	await expect.poll(() => outlines(app.container, PRIMARY)).toHaveLength(2);
 	expect(
 		app.locator.getByRole('img', { name: `Expected screenshot of ${PRIMARY}` }).elements(),
 	).toHaveLength(0);
+});
+
+test('the global header’s wordmark returns to the dashboard', async () => {
+	const app = await renderApp('?source=local');
+	const header = app.locator.getByRole('banner');
+
+	await app.user.click(header.getByRole('link', { name: 'Visual review' }));
+
+	await expect
+		.element(app.locator.getByRole('heading', { name: 'Open pull requests' }))
+		.toBeVisible();
+	expect(currentParams().has('source')).toBe(false);
 });
 
 test('an example’s themes are tabs, and the tab chosen is the capture in view', async () => {
@@ -80,7 +99,9 @@ test('an example’s themes are tabs, and the tab chosen is the capture in view'
 	await app.user.click(themes.getByRole('tab', { name: /Paper dark/ }));
 
 	await expect.poll(() => currentParams().get('capture')).toBe(STATES_DARK);
-	await expect.poll(() => inView(app).element().textContent).toContain('states · Paper dark');
+	await expect
+		.element(themes.getByRole('tab', { name: themeTab('Paper dark', 'not viewed') }))
+		.toHaveAttribute('aria-selected', 'true');
 	await expect
 		.element(app.locator.getByRole('img', { name: `Actual screenshot of ${STATES_DARK}` }))
 		.toBeVisible();
@@ -94,7 +115,9 @@ test('j and k step through the examples and keep the capture in view in the URL'
 	await expect.poll(() => currentParams().get('capture')).toBe(SECONDARY);
 	await app.user.keyboard('j');
 	await expect.poll(() => currentParams().get('capture')).toBe(STATES_LIGHT);
-	await expect.poll(() => inView(app).element().textContent).toContain('states · Paper light');
+	await expect
+		.element(app.locator.getByRole('tab', { name: themeTab('Paper light', 'not viewed') }))
+		.toHaveAttribute('aria-selected', 'true');
 
 	await app.user.keyboard('k');
 
@@ -238,9 +261,11 @@ test('a status filter keeps only the examples it matches', async () => {
 
 test('Hide viewed leaves viewed examples out, and an empty result offers to clear', async () => {
 	const app = await renderApp('?source=local');
-	await app.user.click(app.locator.getByRole('button', { name: 'Contents', exact: true }));
+	await app.user.click(app.locator.getByRole('button', { name: 'Show contents sidebar' }));
 	await app.user.click(app.locator.getByRole('button', { name: 'Mark all viewed' }));
-	await expect.element(app.locator.getByText(`${TOTAL} of ${TOTAL} viewed`).first()).toBeVisible();
+	await expect
+		.element(app.locator.getByRole('banner').getByText(`${TOTAL} of ${TOTAL} viewed`))
+		.toBeVisible();
 
 	await app.user.click(app.locator.getByText('Hide viewed'));
 
@@ -265,21 +290,27 @@ test('marking an example viewed folds it to a labelled row, and Undo opens it ag
 
 	await expect.element(toggle).toHaveAttribute('aria-expanded', 'false');
 	await expect.element(toggle).toHaveAccessibleDescription('Viewed');
-	await expect.element(app.locator.getByText(`1 of ${TOTAL} viewed`)).toBeVisible();
-	// The next example still to view takes over the top bar.
+	await expect
+		.element(app.locator.getByRole('banner').getByText(`1 of ${TOTAL} viewed`))
+		.toBeVisible();
+	// Viewing an example advances to the next one still to review.
 	await expect.poll(() => currentParams().get('capture')).toBe(SECONDARY);
 
 	await app.user.click(app.locator.getByRole('button', { name: 'Undo' }));
 
 	await expect.element(toggle).toHaveAttribute('aria-expanded', 'true');
-	await expect.element(app.locator.getByText(`0 of ${TOTAL} viewed`)).toBeVisible();
+	await expect
+		.element(app.locator.getByRole('banner').getByText(`0 of ${TOTAL} viewed`))
+		.toBeVisible();
 	await expect.poll(() => currentParams().get('capture')).toBe(PRIMARY);
 });
 
 test('viewing one theme moves to the next without marking it, and the menu marks them all', async () => {
 	const app = await renderApp(`?source=local&capture=${encodeURIComponent(STATES_LIGHT)}`);
 	const themes = app.locator.getByRole('tablist', { name: 'states themes' });
-	await expect.poll(() => inView(app).element().textContent).toContain('states · Paper light');
+	await expect
+		.element(app.locator.getByRole('tab', { name: themeTab('Paper light', 'not viewed') }))
+		.toHaveAttribute('aria-selected', 'true');
 
 	await app.user.click(inView(app).getByText('Viewed'));
 
@@ -296,7 +327,9 @@ test('viewing one theme moves to the next without marking it, and the menu marks
 	await app.user.click(page.getByRole('menuitem', { name: 'Mark all 2 themes viewed' }));
 
 	await expect.element(section(app, 'checkbox/states').getByText('2 themes viewed')).toBeVisible();
-	await expect.element(app.locator.getByText(`2 of ${TOTAL} viewed`)).toBeVisible();
+	await expect
+		.element(app.locator.getByRole('banner').getByText(`2 of ${TOTAL} viewed`))
+		.toBeVisible();
 });
 
 test('viewed captures persist in this browser, and a capture changed since is flagged', async () => {
@@ -313,7 +346,9 @@ test('viewed captures persist in this browser, and a capture changed since is fl
 	let app = await renderApp('?pr=301');
 	await expect.poll(() => currentParams().get('capture')).toBe(PRIMARY);
 	await app.user.click(inView(app).getByText('Viewed'));
-	await expect.element(app.locator.getByText(`1 of ${TOTAL} viewed`)).toBeVisible();
+	await expect
+		.element(app.locator.getByRole('banner').getByText(`1 of ${TOTAL} viewed`))
+		.toBeVisible();
 	cleanupApps();
 
 	// A later commit whose images differ.
@@ -326,8 +361,10 @@ test('viewed captures persist in this browser, and a capture changed since is fl
 			}),
 		)
 		.toBeVisible();
-	await expect.element(app.locator.getByText(`0 of ${TOTAL} viewed`)).toBeVisible();
-	await app.user.click(app.locator.getByRole('button', { name: 'Contents', exact: true }));
+	await expect
+		.element(app.locator.getByRole('banner').getByText(`0 of ${TOTAL} viewed`))
+		.toBeVisible();
+	await app.user.click(app.locator.getByRole('button', { name: 'Show contents sidebar' }));
 	await expect
 		.poll(() => app.locator.getByRole('navigation', { name: 'Contents' }).element().textContent)
 		.toContain('1 changed since viewed');
@@ -336,7 +373,9 @@ test('viewed captures persist in this browser, and a capture changed since is fl
 	// A commit whose images match what was viewed.
 	app = await renderApp('?pr=303');
 
-	await expect.element(app.locator.getByText(`1 of ${TOTAL} viewed`)).toBeVisible();
+	await expect
+		.element(app.locator.getByRole('banner').getByText(`1 of ${TOTAL} viewed`))
+		.toBeVisible();
 	await expect
 		.element(section(app, PRIMARY).getByRole('button', { name: /^button \/ primary/ }))
 		.toHaveAttribute('aria-expanded', 'false');
@@ -354,7 +393,9 @@ test('Undo puts back a capture that had changed since it was viewed', async () =
 	let app = await renderApp('?pr=301');
 	await expect.poll(() => currentParams().get('capture')).toBe(PRIMARY);
 	await app.user.click(inView(app).getByText('Viewed'));
-	await expect.element(app.locator.getByText(`1 of ${TOTAL} viewed`)).toBeVisible();
+	await expect
+		.element(app.locator.getByRole('banner').getByText(`1 of ${TOTAL} viewed`))
+		.toBeVisible();
 	cleanupApps();
 	app = await renderApp('?pr=302');
 	const changed = app.locator.getByRole('region', {
@@ -363,11 +404,15 @@ test('Undo puts back a capture that had changed since it was viewed', async () =
 	await expect.element(changed).toBeVisible();
 
 	await app.user.click(inView(app).getByText('Viewed'));
-	await expect.element(app.locator.getByText(`1 of ${TOTAL} viewed`)).toBeVisible();
+	await expect
+		.element(app.locator.getByRole('banner').getByText(`1 of ${TOTAL} viewed`))
+		.toBeVisible();
 	await app.user.click(app.locator.getByRole('button', { name: 'Undo' }));
 
 	await expect.element(changed).toBeVisible();
-	await expect.element(app.locator.getByText(`0 of ${TOTAL} viewed`)).toBeVisible();
+	await expect
+		.element(app.locator.getByRole('banner').getByText(`0 of ${TOTAL} viewed`))
+		.toBeVisible();
 });
 
 test('marking a capture viewed keeps what another tab marked meanwhile', async () => {
@@ -440,17 +485,17 @@ test('turning single-key shortcuts off stops them, and the choice persists', asy
 	expect(currentParams().has('pane')).toBe(false);
 });
 
-test('on a phone, a bottom bar holds Viewed and View, and Contents opens as a sheet', async () => {
+test('on a phone, a bottom bar holds Viewed and View, and Contents opens as a drawer', async () => {
 	await page.viewport(375, 812);
 	const app = await renderApp('?source=local');
 	const bar = app.locator.getByRole('navigation', { name: 'Capture in view' });
 	await expect.element(bar.getByRole('checkbox', { name: 'Viewed primary' })).toBeVisible();
 
-	await app.user.click(app.locator.getByRole('button', { name: /^Contents\. In view: primary/ }));
+	await app.user.click(app.locator.getByRole('button', { name: 'Show contents sidebar' }));
 
-	const sheet = page.getByRole('dialog', { name: 'Contents' });
-	await expect.element(sheet.getByRole('searchbox', { name: 'Filter captures' })).toBeVisible();
-	await app.user.click(sheet.getByRole('button', { name: /^secondary/ }));
+	const drawer = page.getByRole('dialog', { name: 'Contents' });
+	await expect.element(drawer.getByRole('searchbox', { name: 'Filter captures' })).toBeVisible();
+	await app.user.click(drawer.getByRole('button', { name: /^secondary/ }));
 	await expect.poll(() => currentParams().get('capture')).toBe(SECONDARY);
 	const result = await axe.run(document.body);
 	expect(result.violations).toEqual([]);
@@ -488,13 +533,21 @@ test('on a phone, the View sheet can still turn single-key shortcuts off', async
 	expect(localStorage.getItem('visual-review:shortcuts')).toBe('off');
 });
 
-test('the review has one top-level heading and no axe violations', async () => {
+test('the desktop sidebar toggles, and the review has no axe violations', async () => {
 	const app = await renderApp('?source=local');
 	await expect.poll(() => outlines(app.container, PRIMARY)).toHaveLength(2);
-	await app.user.click(app.locator.getByRole('button', { name: 'Contents', exact: true }));
+	await app.user.click(app.locator.getByRole('button', { name: 'Show contents sidebar' }));
 	await expect.element(app.locator.getByRole('navigation', { name: 'Contents' })).toBeVisible();
 
 	expect(app.locator.getByRole('heading', { level: 1 }).elements()).toHaveLength(1);
 	const result = await axe.run(app.container);
 	expect(result.violations).toEqual([]);
+
+	await app.user.click(app.locator.getByRole('button', { name: 'Hide contents sidebar' }));
+	await expect
+		.element(app.locator.getByRole('button', { name: 'Show contents sidebar' }))
+		.toHaveAttribute('aria-expanded', 'false');
+	await expect
+		.element(app.locator.getByRole('navigation', { name: 'Contents' }))
+		.not.toBeInTheDocument();
 });

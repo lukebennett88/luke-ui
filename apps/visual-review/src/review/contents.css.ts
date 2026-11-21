@@ -1,37 +1,16 @@
-import { vars } from '@luke-ui/react/theme';
+import { breakpoints, vars } from '@luke-ui/react/theme';
 import { style } from '@vanilla-extract/css';
 import { appVars } from '../styles/app-tokens.css.js';
-import { compactQuery } from '../styles/queries.js';
 import { plainButton } from './review.css.js';
 
-/** Beside the captures on wide screens; inside a drawer or sheet elsewhere. */
+/** Beside the captures on wide screens and inside the drawer elsewhere. */
 export const contents = style({
-	background: vars.color.background.surface.subdued,
 	blockSize: `calc(100dvh - ${appVars.topBarHeight})`,
 	boxSizing: 'border-box',
-	display: 'flex',
-	flexDirection: 'column',
-	insetBlockStart: appVars.topBarHeight,
-	position: 'sticky',
 });
 
 export const contentsInOverlay = style({
 	blockSize: '100%',
-	position: 'static',
-	'@container': {
-		[compactQuery]: {
-			background: vars.color.background.surface.raised,
-		},
-	},
-});
-
-export const head = style({
-	alignItems: 'flex-start',
-	display: 'flex',
-	gap: vars.space['8'],
-	justifyContent: 'space-between',
-	paddingBlock: `${vars.space['12']} 0`,
-	paddingInline: `${vars.space['16']} ${vars.space['8']}`,
 });
 
 export const title = style({
@@ -44,20 +23,6 @@ export const title = style({
 export const summary = style({
 	color: vars.color.foreground.secondary,
 	margin: 0,
-});
-
-export const filters = style({
-	display: 'grid',
-	gap: vars.space['8'],
-	paddingBlock: `${vars.space['8']} ${vars.space['12']}`,
-	paddingInline: vars.space['16'],
-});
-
-export const filterRow = style({
-	alignItems: 'center',
-	display: 'flex',
-	gap: vars.space['12'],
-	justifyContent: 'space-between',
 });
 
 export const filterGrow = style({
@@ -96,11 +61,8 @@ export const groupHeading = style({
 export const item = style([
 	plainButton,
 	{
-		alignItems: 'center',
 		boxSizing: 'border-box',
 		color: vars.color.foreground.primary,
-		display: 'flex',
-		gap: vars.space['8'],
 		inlineSize: '100%',
 		minBlockSize: '32px',
 		paddingInline: vars.space['8'],
@@ -110,7 +72,7 @@ export const item = style([
 			},
 		},
 		'@container': {
-			[compactQuery]: {
+			[`(inline-size < ${breakpoints.bp768}px)`]: {
 				minBlockSize: '44px',
 			},
 		},
@@ -118,11 +80,8 @@ export const item = style([
 ]);
 
 export const itemState = style({
-	alignItems: 'center',
 	color: vars.color.foreground.secondary,
-	display: 'inline-flex',
 	gap: '6px',
-	marginInlineStart: 'auto',
 });
 
 /** Marks a capture that changed since the reviewer viewed it. Paired with text for assistive tech. */

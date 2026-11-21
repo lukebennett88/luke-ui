@@ -1,6 +1,5 @@
-import { vars } from '@luke-ui/react/theme';
+import { breakpoints, vars } from '@luke-ui/react/theme';
 import { style } from '@vanilla-extract/css';
-import { compactQuery } from '../styles/queries.js';
 
 export const statusLine = style({
 	color: vars.color.foreground.secondary,
@@ -57,7 +56,7 @@ export const textArea = style({
 		},
 	},
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			// 16px keeps iOS from zooming into the field.
 			fontSize: vars.font.body.fontSize,
 			minBlockSize: '168px',
@@ -67,9 +66,6 @@ export const textArea = style({
 
 export const noteMeta = style({
 	color: vars.color.foreground.secondary,
-	display: 'flex',
-	gap: vars.space['8'],
-	justifyContent: 'space-between',
 	minBlockSize: '20px',
 });
 
@@ -78,12 +74,8 @@ export const error = style({
 });
 
 export const actions = style({
-	alignItems: 'center',
-	display: 'flex',
-	flexWrap: 'wrap',
-	gap: vars.space['8'],
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			display: 'grid',
 			gridTemplateColumns: '1fr',
 		},
@@ -91,8 +83,6 @@ export const actions = style({
 });
 
 export const notes = style({
-	display: 'grid',
-	gap: vars.space['4'],
 	margin: 0,
 	paddingInlineStart: 0,
 	listStyle: 'none',

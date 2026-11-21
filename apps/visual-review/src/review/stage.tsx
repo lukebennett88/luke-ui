@@ -1,3 +1,4 @@
+import { Box } from '@luke-ui/react/box';
 import { cx } from '@luke-ui/react/utils';
 import type { ReactNode, TouchEvent } from 'react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -209,7 +210,13 @@ export function Stage(props: StageProps) {
 					{label}
 				</span>
 			) : null}
-			<div className={styles.caption}>
+			<Box
+				alignItems="center"
+				className={styles.caption}
+				display="flex"
+				gap="space.12"
+				justifyContent="space-between"
+			>
 				<span className={cx(styles.captionLabel, !isNamed && styles.onDemand)}>{label}</span>
 				<span className={cx(styles.captionEnd, styles.onDemand)}>
 					<span>{details}</span>
@@ -232,7 +239,7 @@ export function Stage(props: StageProps) {
 						</ToggleButtonGroup>
 					) : null}
 				</span>
-			</div>
+			</Box>
 			{/* A tap zooms on a phone. The keyboard has the zoom keys and the View options. */}
 			{/* oxlint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-noninteractive-element-interactions */}
 			<div

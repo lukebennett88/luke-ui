@@ -43,10 +43,10 @@ Zod. The app imports nothing from the scripts that write it. `src/review/diff-re
 diff image's pixels to outline where a capture differs.
 
 The app is built with Luke UI through its public entrypoints. React Aria Components supplies the
-tabs, disclosures, menus, popovers, sheets, slider, and note field. Vanilla Extract owns the rest of
-the presentation, using the theme's public `vars`. React Aria's `RouterProvider` sends Luke UI
-`Link` navigation through the History API, and the app has no router dependency.
-[`FRICTION.md`](./FRICTION.md) records the gaps it found.
+tabs, disclosures, menus, popovers, sheets, slider, and note field. App-specific Vanilla Extract
+styles use the theme's public `vars`. React Aria's `RouterProvider` sends Luke UI `Link` navigation
+through the History API, and the app has no router dependency. [`FRICTION.md`](./FRICTION.md)
+records the gaps it found.
 
 The app has its own theme: cool neutrals, an indigo accent for actions, selection, and focus, flat
 square controls, and the system font, so the chrome stays distinct from the Paper and Tactile

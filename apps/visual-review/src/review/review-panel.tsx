@@ -4,6 +4,7 @@ import { Icon } from '@luke-ui/react/icon';
 import { IconButton } from '@luke-ui/react/icon-button';
 import { Link } from '@luke-ui/react/link';
 import { LoadingSpinner } from '@luke-ui/react/loading-spinner';
+import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import { cx } from '@luke-ui/react/utils';
 import type { SubmitEvent } from 'react';
@@ -129,8 +130,20 @@ type ReviewPanelProps = {
 function ReviewPanel({ isCompact, onClose, progress, report, review }: ReviewPanelProps) {
 	const { number, pullReview, session } = review;
 	return (
-		<Box backgroundColor="surface.raised" className={overlayStyles.dialogBody}>
-			<div className={overlayStyles.sheetHead}>
+		<Box
+			alignContent="start"
+			backgroundColor="surface.raised"
+			className={overlayStyles.dialogBody}
+			display="grid"
+			gap="space.16"
+		>
+			<Box
+				alignItems="center"
+				className={overlayStyles.sheetHead}
+				display="flex"
+				gap="space.8"
+				justifyContent="space-between"
+			>
 				<AriaHeading className={overlayStyles.dialogTitle} id="review-panel-title" slot="title">
 					{`Review #${number}`}
 				</AriaHeading>
@@ -143,7 +156,7 @@ function ReviewPanel({ isCompact, onClose, progress, report, review }: ReviewPan
 						prominence="low"
 					/>
 				) : null}
-			</div>
+			</Box>
 			{!pullReview || !session ? <LoadingSpinner aria-label="Loading the review" /> : null}
 			{pullReview && pullReview.kind !== 'ok' ? (
 				<p className={styles.statusLine}>
@@ -277,16 +290,21 @@ function ReviewControls(props: ReviewControlsProps) {
 				) : null}
 			</div>
 			{notes.length > 0 ? (
-				<ul className={styles.notes}>
+				<Stack className={styles.notes} elementType="ul" gap="space.4">
 					{notes.map((text) => (
 						<li className={styles.statusLine} key={text}>
 							{text}
 						</li>
 					))}
-				</ul>
+				</Stack>
 			) : null}
 			{isReviewer ? (
-				<form className={overlayStyles.options} noValidate onSubmit={submit}>
+				<Box
+					className={overlayStyles.options}
+					display="grid"
+					gap="space.16"
+					renderRoot={(domProps) => <form {...domProps} noValidate onSubmit={submit} />}
+				>
 					<TextField
 						className={styles.note}
 						isDisabled={!canDecide || isBusy}
@@ -307,14 +325,25 @@ function ReviewControls(props: ReviewControlsProps) {
 							placeholder="What should change, and in which captures?"
 							ref={noteRef}
 						/>
-						<div className={styles.noteMeta}>
+						<Box
+							className={styles.noteMeta}
+							display="flex"
+							gap="space.8"
+							justifyContent="space-between"
+						>
 							<span className={styles.error} role={noteError ? 'alert' : undefined}>
 								{noteError ?? ''}
 							</span>
 							<span className={reviewStyles.numeric}>{`${note.length}/${MAX_NOTE_LENGTH}`}</span>
-						</div>
+						</Box>
 					</TextField>
-					<div className={styles.actions}>
+					<Box
+						alignItems="center"
+						className={styles.actions}
+						display="flex"
+						flexWrap="wrap"
+						gap="space.8"
+					>
 						<Button
 							isDisabled={!canDecide || (isBusy && pending !== 'approve')}
 							isPending={pending === 'approve'}
@@ -337,8 +366,8 @@ function ReviewControls(props: ReviewControlsProps) {
 								Reload
 							</Button>
 						) : null}
-					</div>
-				</form>
+					</Box>
+				</Box>
 			) : null}
 			{user?.user ? (
 				<p className={styles.statusLine}>

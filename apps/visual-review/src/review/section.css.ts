@@ -1,22 +1,16 @@
-import { vars } from '@luke-ui/react/theme';
+import { breakpoints, vars } from '@luke-ui/react/theme';
 import { globalStyle, style } from '@vanilla-extract/css';
 import { appVars } from '../styles/app-tokens.css.js';
-import { compactQuery, regularQuery } from '../styles/queries.js';
 import { plainButton, truncate } from './review.css.js';
-
-const sectionContainer = 'review-section';
-const narrowSection = `${sectionContainer} (inline-size < 1120px)`;
 
 /** One example: a header that names it and holds its theme tabs, over the capture on its stage. */
 export const section = style({
 	background: appVars.stage,
-	containerName: sectionContainer,
-	containerType: 'inline-size',
 	marginBlockEnd: vars.space['24'],
 	overflow: 'clip',
 	scrollMarginBlockStart: appVars.topBarHeight,
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			marginBlockEnd: vars.space['16'],
 		},
 	},
@@ -28,7 +22,7 @@ export const sectionCollapsed = style({
 	marginBlockEnd: vars.space['4'],
 	overflow: 'visible',
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			marginBlockEnd: 0,
 		},
 	},
@@ -38,7 +32,7 @@ export const sectionCollapsed = style({
 globalStyle(`${sectionCollapsed} + ${section}:not(${sectionCollapsed})`, {
 	marginBlockStart: '20px',
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			marginBlockStart: vars.space['12'],
 		},
 	},
@@ -58,7 +52,7 @@ export const head = style({
 	position: 'sticky',
 	zIndex: 10,
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			gridTemplateAreas: '"name" "tabs"',
 			gridTemplateColumns: 'minmax(0, 1fr)',
 			paddingInline: vars.space['4'],
@@ -80,7 +74,7 @@ export const headCollapsed = style({
 		},
 	},
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			gridTemplateAreas: '"name meta"',
 			gridTemplateColumns: 'minmax(0, 1fr) auto',
 			minBlockSize: '44px',
@@ -98,15 +92,13 @@ export const name = style({
 export const nameButton = style([
 	plainButton,
 	{
-		alignItems: 'center',
 		boxSizing: 'border-box',
-		display: 'flex',
 		gap: '6px',
 		maxInlineSize: '100%',
 		minBlockSize: '36px',
 		paddingInline: '6px 8px',
 		'@container': {
-			[compactQuery]: {
+			[`(inline-size < ${breakpoints.bp768}px)`]: {
 				minBlockSize: '44px',
 			},
 		},
@@ -115,7 +107,6 @@ export const nameButton = style([
 
 export const chevron = style({
 	color: vars.color.foreground.secondary,
-	flexShrink: 0,
 	transition: 'rotate 150ms ease-out',
 	selectors: {
 		[`${nameButton}[aria-expanded="false"] &`]: {
@@ -142,18 +133,10 @@ export const nameText = style([
 	},
 ]);
 
-/** The component prefix. Narrow sections and phones drop it to keep one row. */
+/** The component prefix. Narrow layouts drop it to leave room for the example name. */
 export const componentPrefix = style({
 	color: vars.color.foreground.secondary,
 	fontWeight: vars.font.weight.body,
-	'@container': {
-		[compactQuery]: {
-			display: 'none',
-		},
-		[narrowSection]: {
-			display: 'none',
-		},
-	},
 });
 
 export const collapsedMeta = style({
@@ -180,7 +163,7 @@ export const tabList = style({
 	paddingBlock: vars.space['4'],
 	position: 'relative',
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			// Every theme and its viewed mark stays on screen: tabs wrap instead of scrolling away.
 			flexWrap: 'wrap',
 			inlineSize: 'auto',
@@ -218,7 +201,7 @@ export const tab = style({
 		},
 	},
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			minBlockSize: '44px',
 			paddingInline: '8px',
 		},
@@ -238,7 +221,7 @@ export const stage = style({
 	paddingInline: vars.space['24'],
 	position: 'relative',
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			padding: 0,
 		},
 	},
@@ -246,15 +229,11 @@ export const stage = style({
 
 /** Above the capture on wider screens: the image's name, and its details on hover or focus. */
 export const caption = style({
-	alignItems: 'center',
 	color: vars.color.foreground.secondary,
-	display: 'flex',
-	gap: vars.space['12'],
-	justifyContent: 'space-between',
 	marginBlockEnd: vars.space['4'],
 	minBlockSize: '36px',
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			display: 'none',
 		},
 	},
@@ -306,7 +285,7 @@ export const chip = style({
 	position: 'absolute',
 	zIndex: 2,
 	'@container': {
-		[regularQuery]: {
+		[`(inline-size >= ${breakpoints.bp768}px)`]: {
 			display: 'none',
 		},
 	},
@@ -319,7 +298,7 @@ export const scroller = style({
 	position: 'relative',
 	scrollbarWidth: 'thin',
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			cursor: 'zoom-in',
 			touchAction: 'pan-y pinch-zoom',
 		},
@@ -328,7 +307,7 @@ export const scroller = style({
 
 export const scrollerZoomed = style({
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			cursor: 'zoom-out',
 			touchAction: 'pan-x pan-y pinch-zoom',
 		},
@@ -341,7 +320,7 @@ export const comparison = style({
 	inlineSize: 'max-content',
 	marginInline: 'auto',
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			gap: 0,
 		},
 	},
@@ -362,7 +341,7 @@ export const figcaption = style({
 	color: vars.color.foreground.secondary,
 	lineHeight: '20px',
 	'@container': {
-		[compactQuery]: {
+		[`(inline-size < ${breakpoints.bp768}px)`]: {
 			display: 'none',
 		},
 	},

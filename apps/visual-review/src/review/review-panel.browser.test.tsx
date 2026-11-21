@@ -284,7 +284,7 @@ test('a pull request without a report still shows its review status', async () =
 
 test('a local comparison has no pull request, so it has no Review button', async () => {
 	const app = await renderApp('?source=local');
-	await expect.element(app.locator.getByText('0 of 6 viewed')).toBeVisible();
+	await expect.element(app.locator.getByRole('banner').getByText('0 of 6 viewed')).toBeVisible();
 
 	expect(app.locator.getByRole('button', { name: 'Review', exact: true }).elements()).toHaveLength(
 		0,

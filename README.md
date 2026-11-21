@@ -58,7 +58,7 @@ orchestration.
 - [Documentation](docs/DOCUMENTATION.md): what to document, writing style, examples, and MDX
   structure.
 - [Public API](docs/PUBLIC_API.md): public exports, props, and types.
-- [Styling](docs/STYLING.md): cascade layers, recipes, and styling utilities.
+- [Styling](docs/STYLING.md): app styling, cascade layers, recipes, and styling utilities.
 - [Testing](docs/TESTING.md): test type, placement, and writing rules.
 - [Visual testing](docs/VISUAL_TESTING.md): visual regression workflow.
 - [Workflows](docs/WORKFLOWS.md): commands, prerequisites, task orchestration, and CI.

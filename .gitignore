@@ -5,13 +5,14 @@ __screenshots__/
 .claude/worktrees/
 .DS_Store
 .env
+.impeccable/
 .source/
 .tanstack/
 .turbo/
 .visual-captures/
-.wrangler/
 .vitest-attachments/
 .vitest/
+.wrangler/
 *.local
 *.log
 apps/docs/.story/

@@ -1,5 +1,6 @@
 import { Box } from '@luke-ui/react/box';
 import { Icon } from '@luke-ui/react/icon';
+import { Lockup, LockupBody, LockupRail } from '@luke-ui/react/lockup';
 import { ScrollFade } from '@luke-ui/react/scroll-fade';
 import { cx } from '@luke-ui/react/utils';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
@@ -99,20 +100,36 @@ export function ExampleSection(props: ExampleSectionProps) {
 				{...{ [CHROME_ATTRIBUTE.sectionHead]: '' }}
 			>
 				<h2 className={styles.name}>
-					<AriaButton
-						aria-describedby={!isOpen && isViewed ? `${id}-viewed` : undefined}
+					<Lockup
 						className={styles.nameButton}
-						data-focus-target
-						id={`${id}-toggle`}
-						slot="trigger"
+						railAlignment="center"
+						renderRoot={(domProps) => {
+							return (
+								<AriaButton
+									{...domProps}
+									aria-describedby={!isOpen && isViewed ? `${id}-viewed` : undefined}
+									data-focus-target
+									id={`${id}-toggle`}
+									slot="trigger"
+								/>
+							);
+						}}
 					>
-						<Icon className={styles.chevron} name="chevronDown" size="xsmall" />
-						<span className={styles.nameText}>
-							<span className={styles.componentPrefix}>{example.component} / </span>
+						<LockupRail elementType="span">
+							<Icon className={styles.chevron} name="chevronDown" size="xsmall" />
+						</LockupRail>
+						<LockupBody className={styles.nameText} elementType="span">
+							<Box
+								className={styles.componentPrefix}
+								display={{ initial: 'none', bp1024: 'inline' }}
+								elementType="span"
+							>
+								{example.component} /{' '}
+							</Box>
 							{example.name}
-						</span>
-						{isCurrent ? <VisuallyHidden> (in view)</VisuallyHidden> : null}
-					</AriaButton>
+							{isCurrent ? <VisuallyHidden> (in view)</VisuallyHidden> : null}
+						</LockupBody>
+					</Lockup>
 				</h2>
 				{isOpen && hasTabs ? (
 					<ScrollFade aria-label={`${example.name} themes, scrollable`} className={styles.tabsFade}>

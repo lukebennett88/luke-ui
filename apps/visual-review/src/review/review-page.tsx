@@ -5,6 +5,7 @@ import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import type { ReactNode } from 'react';
 import { use, useState } from 'react';
+import { AppHeader } from '../app-header.js';
 import type { ReportResult } from '../report/load-report.js';
 import { loadReport } from '../report/load-report.js';
 import type { ReportSource } from '../report/report-source.js';
@@ -59,12 +60,9 @@ function MessagePage({ children, report, source, title }: MessagePageProps) {
 	return (
 		<div className={styles.app}>
 			<title>{`${sourceLabel(source)} · Visual review`}</title>
-			<Box backgroundColor="surface.subdued" className={styles.messageTopBar} elementType="header">
-				<Text className={styles.truncate} color="secondary">
-					<ReportTitle report={report} source={source} />
-				</Text>
-				<div className={styles.topEnd}>
-					{review ? (
+			<AppHeader
+				actions={
+					review ? (
 						<ReviewTrigger
 							isCompact={isCompact}
 							isOpen={isReviewOpen}
@@ -73,20 +71,27 @@ function MessagePage({ children, report, source, title }: MessagePageProps) {
 							report={report}
 							review={review}
 						/>
-					) : null}
-				</div>
-			</Box>
-			<main className={styles.message}>
-				<Stack gap="space.16">
-					<Heading level={1} typography="heading3">
-						{title}
-					</Heading>
-					{children}
-					<Text elementType="p">
-						<Link href={window.location.pathname}>All open pull requests</Link>
+					) : null
+				}
+				reportTitle={
+					<Text className={styles.truncate} color="secondary" elementType="div" shouldDisableTrim>
+						<ReportTitle report={report} source={source} />
 					</Text>
-				</Stack>
-			</main>
+				}
+			/>
+			<Box backgroundColor="surface.base" className={styles.messagePanel} elementType="main">
+				<Box className={styles.message}>
+					<Stack gap="space.16">
+						<Heading level={1} typography="heading3">
+							{title}
+						</Heading>
+						{children}
+						<Text elementType="p">
+							<Link href={window.location.pathname}>All open pull requests</Link>
+						</Text>
+					</Stack>
+				</Box>
+			</Box>
 		</div>
 	);
 }
