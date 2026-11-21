@@ -99,28 +99,29 @@ export const reportTitle = style([
 	},
 ]);
 
-/** The capture in view, and what acts on it. */
+/**
+ * The capture in view, and what acts on it. The name takes the space left over and truncates; the
+ * controls keep their place at the end, so they don't move as names change length while scrolling.
+ */
 export const guide = style({
+	alignItems: 'center',
+	columnGap: vars.space['16'],
+	display: 'grid',
+	gridTemplateColumns: 'minmax(0, 1fr) auto',
+	minInlineSize: 0,
+});
+
+export const guideControls = style({
 	alignItems: 'center',
 	display: 'flex',
 	gap: vars.space['8'],
-	justifyContent: 'center',
-	minInlineSize: 0,
 });
 
 export const guideWords = style([
 	truncate,
 	{
 		color: vars.color.foreground.secondary,
-		flex: '0 1 auto',
 		margin: 0,
-		marginInlineEnd: vars.space['4'],
-		maxInlineSize: 'min(52ch, 36vw)',
-		'@container': {
-			[compactQuery]: {
-				maxInlineSize: 'none',
-			},
-		},
 	},
 ]);
 

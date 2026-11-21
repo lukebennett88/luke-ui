@@ -750,40 +750,43 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 						</div>
 						<div aria-label="Capture in view" className={styles.guide} role="group">
 							<GuideWords capture={currentCapture} example={currentExample} isCompact={false} />
-							{viewedCheckbox}
-							{differences}
-							<DialogTrigger isOpen={isViewOpen} onOpenChange={setIsViewOpen}>
-								<Button
-									endContent={<Icon name="chevronDown" size="xsmall" />}
-									prominence="low"
-									size="small"
-								>
-									<span className={styles.viewButtonLabel}>
-										<span className={styles.secondary}>View</span> {showingLabel(layout, pane)}
-									</span>
-								</Button>
-								<Popover
-									className={cx(overlayStyles.popover, overlayStyles.viewPopover)}
-									offset={8}
-									placement="bottom"
-								>
-									<Dialog aria-label="View options" className={overlayStyles.dialog}>
-										<Box backgroundColor="surface.raised" className={overlayStyles.dialogBody}>
-											{viewOptions}
-										</Box>
-									</Dialog>
-								</Popover>
-							</DialogTrigger>
-							{currentExample && currentCapture ? (
-								<CaptureMenu
-									count={currentExample.captures.length}
-									isAllViewed={isExampleViewed(currentExample)}
-									name={currentExample.name}
-									onCollapse={() => setOpen(currentExample, false)}
-									onCopyLink={() => copyLink(currentCapture)}
-									onMarkAllViewed={() => markExampleViewed(currentExample)}
-								/>
-							) : null}
+							{/* Viewed comes last: a control that changes width only moves the ones before it. */}
+							<div className={styles.guideControls}>
+								{differences}
+								<DialogTrigger isOpen={isViewOpen} onOpenChange={setIsViewOpen}>
+									<Button
+										endContent={<Icon name="chevronDown" size="xsmall" />}
+										prominence="low"
+										size="small"
+									>
+										<span className={styles.viewButtonLabel}>
+											<span className={styles.secondary}>View</span> {showingLabel(layout, pane)}
+										</span>
+									</Button>
+									<Popover
+										className={cx(overlayStyles.popover, overlayStyles.viewPopover)}
+										offset={8}
+										placement="bottom"
+									>
+										<Dialog aria-label="View options" className={overlayStyles.dialog}>
+											<Box backgroundColor="surface.raised" className={overlayStyles.dialogBody}>
+												{viewOptions}
+											</Box>
+										</Dialog>
+									</Popover>
+								</DialogTrigger>
+								{currentExample && currentCapture ? (
+									<CaptureMenu
+										count={currentExample.captures.length}
+										isAllViewed={isExampleViewed(currentExample)}
+										name={currentExample.name}
+										onCollapse={() => setOpen(currentExample, false)}
+										onCopyLink={() => copyLink(currentCapture)}
+										onMarkAllViewed={() => markExampleViewed(currentExample)}
+									/>
+								) : null}
+								{viewedCheckbox}
+							</div>
 						</div>
 						<div className={styles.topEnd}>
 							<Progress isCompact={false} total={total} viewed={viewedCount} />
