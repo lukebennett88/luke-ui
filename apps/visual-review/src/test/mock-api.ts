@@ -40,12 +40,19 @@ export function json(body: unknown, status = 200): Response {
 	});
 }
 
-/** A pull request's published report: the committed fixture with `meta` for its comparison. */
+/**
+ * A pull request's published report: the committed fixture with `meta` for its comparison. A
+ * `fingerprint` is given to every capture, as the publisher writes one per capture.
+ */
 export async function publishedReport(
 	number: number,
 	meta: { headSha: string; runAttempt: number; runId: number },
+	{ fingerprint }: { fingerprint?: string } = {},
 ) {
 	const response = await fetch('/__local-report/summary.json');
-	const summary = (await response.json()) as Record<string, unknown>;
+	const summary = (await response.json()) as { results: Array<Record<string, unknown>> };
+	if (fingerprint) {
+		for (const result of summary.results) result.fingerprint = fingerprint;
+	}
 	return json({ ...summary, meta: { generatedAt: '', pullRequest: number, ...meta } });
 }

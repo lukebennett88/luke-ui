@@ -12,7 +12,6 @@ const mountedApps = new Set<() => void>();
 export async function renderApp(search: string) {
 	window.history.replaceState(null, '', `${window.location.pathname}${search}`);
 	const container = document.body.appendChild(document.createElement('div'));
-	container.style.blockSize = '100vh';
 	container.dataset.testid = 'app';
 	const root = createRoot(container);
 	await act(async () => {

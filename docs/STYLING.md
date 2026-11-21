@@ -684,13 +684,12 @@ Generated CSS keeps its cascade layers and source order.
 Only links use `cursor: pointer`. Buttons and other controls keep the platform default cursor. Do
 not set `cursor: pointer` on non-link interactive elements.
 
-### Docs app styling
+### App styling
 
-In `apps/docs`, use Luke UI components and layout primitives (`Button`, `Text`, `Box`, `Stack`,
-`Cluster`, `Grid`) for ordinary chrome, spacing, and alignment. Use a docs-local `*.css.ts` file
-only for what they cannot express, such as container queries, separators, Monaco-matched surfaces,
-specialised interaction states, positioning, and motion. Do not recreate Button, Text, or Box
-styling in a docs `*.css.ts` file.
+In repository apps, use Luke UI components and layout primitives (`Button`, `Text`, `Box`, `Stack`,
+`Cluster`, `Grid`) for ordinary chrome, spacing, and alignment. Use app-local `*.css.ts` files for
+what they cannot easily express, such as container queries, separators, specialised interaction
+states, positioning, and motion.
 
 ### Implementation rules
 

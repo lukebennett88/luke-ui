@@ -103,7 +103,10 @@ pull request's report live in one Cloudflare Pages project that takes direct upl
   production branch. A pull request cannot change the deployed app.
 - The `Visual review publish` workflow deploys a pull request's report to the `pr-<number>` branch
   of the same project, at `https://pr-<number>.<project>.pages.dev`. A report is `summary.json` and
-  the differing captures' PNGs. The baseline stays in the `visual-baseline` artefact.
+  the differing captures' PNGs. The baseline stays in the `visual-baseline` artefact. Each capture
+  in the published `summary.json` has a `fingerprint`: a SHA-256 of each PNG's role (`expected` or
+  `actual`) and bytes, expected first, for whichever it has, that `prepare` computes from the bytes
+  it publishes. The app uses it to tell a capture a reviewer viewed from one that has changed since.
 
 `Visual review publish` then records the `visual-review` check run for the commit and writes one
 comment on the pull request, which it updates on each run. The comment gives the review status and

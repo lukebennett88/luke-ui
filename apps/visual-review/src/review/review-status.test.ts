@@ -43,7 +43,7 @@ test('describes reviews without a decision', () => {
 		'Comparison failed',
 	);
 	expect(reviewStatusText({ ...REVIEW, kind: 'pending', state: 'comparing' })).toBe('Comparing');
-	expect(reviewStatusText(null)).toBe('Not compared yet');
+	expect(reviewStatusText(null)).toBe('No review check yet');
 });
 
 test('a report is current only for the review’s commit, run, and attempt', () => {

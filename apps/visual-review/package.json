@@ -19,8 +19,8 @@
 		"test": "vp test run"
 	},
 	"dependencies": {
+		"@capsizecss/metrics": "catalog:",
 		"@luke-ui/react": "workspace:*",
-		"@luke-ui/theme-tactile": "workspace:*",
 		"@vanilla-extract/css": "catalog:",
 		"react": "catalog:",
 		"react-aria-components": "catalog:",

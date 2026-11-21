@@ -18,13 +18,13 @@ function review(state: Review['state']): Review {
 }
 
 test('labels each review state, and a pull request without one', () => {
-	expect(reviewChip(review('needs-review')).label).toBe('Needs review');
-	expect(reviewChip(review('approved')).label).toBe('Approved');
-	expect(reviewChip(review('changes-requested')).label).toBe('Changes requested');
-	expect(reviewChip(review('clean')).label).toBe('No visual changes');
-	expect(reviewChip(review('failed')).label).toBe('Comparison failed');
-	expect(reviewChip(review('comparing')).label).toBe('Comparing');
-	expect(reviewChip(null).label).toBe('No report');
+	expect(reviewChip(review('needs-review'))?.label).toBe('Needs review');
+	expect(reviewChip(review('approved'))?.label).toBe('Approved');
+	expect(reviewChip(review('changes-requested'))?.label).toBe('Changes requested');
+	expect(reviewChip(review('clean'))?.label).toBe('No visual changes');
+	expect(reviewChip(review('failed'))?.label).toBe('Comparison failed');
+	expect(reviewChip(review('comparing'))?.label).toBe('Comparing');
+	expect(reviewChip(null)).toBeUndefined();
 });
 
 test('puts pull requests that need review first and keeps each group’s order', () => {

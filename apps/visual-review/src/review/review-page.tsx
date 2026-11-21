@@ -4,225 +4,102 @@ import { Link } from '@luke-ui/react/link';
 import { Stack } from '@luke-ui/react/stack';
 import { Text } from '@luke-ui/react/text';
 import type { ReactNode } from 'react';
-import { use, useCallback, useMemo, useRef, useState } from 'react';
-import { commitUrl, pullRequestUrl } from '../config.js';
-import { hrefWithParams, navigate, useLocationSearch } from '../navigation/location.js';
+import { use, useState } from 'react';
+import { AppHeader } from '../app-header.js';
 import type { ReportResult } from '../report/load-report.js';
 import { loadReport } from '../report/load-report.js';
 import type { ReportSource } from '../report/report-source.js';
 import type { Report } from '../report/schema.js';
-import { CaptureList } from './capture-list.js';
-import { CaptureViewer } from './capture-viewer.js';
-import { ReviewBar } from './review-bar.js';
-import {
-	filterCaptures,
-	parseReviewParams,
-	stepCapture,
-	stepZoom,
-	VIEW_MODES,
-} from './review-params.js';
+import { COMPACT_QUERY, useMediaQuery } from './layout-hooks.js';
+import { ReportTitle, sourceLabel } from './report-title.js';
+import { ReviewTrigger } from './review-panel.js';
 import * as styles from './review.css.js';
-import { useShortcutsEnabled } from './shortcuts-preference.js';
-import type { ReviewShortcuts } from './use-review-shortcuts.js';
-import { useReviewShortcuts } from './use-review-shortcuts.js';
+import { Review } from './review.js';
+import { usePullRequestReview } from './use-pull-request-review.js';
 
+/**
+ * Reviews one report. A report that cannot be loaded, or that has no differences, gets a message
+ * instead, with the pull request's review status still in reach.
+ */
 export function ReviewPage({ source }: { source: ReportSource }) {
 	const result = use(loadReport(source));
 
 	if (result.status !== 'ready') {
 		return (
-			<>
-				<PullRequestReviewBar report={undefined} source={source} />
-				<ReportUnavailable source={source} status={result.status} />
-			</>
+			<MessagePage report={undefined} source={source} title={unavailableTitle(source)}>
+				<Text color="secondary" elementType="p">
+					{unavailableReason(source, result.status)}
+				</Text>
+			</MessagePage>
 		);
 	}
 	if (result.report.captures.length === 0) {
+		const { added, changed, removed, unchanged } = result.report.counts;
 		return (
-			<>
-				<PullRequestReviewBar report={result.report} source={source} />
-				<Message title="No visual changes">
-					<Text elementType="p">
-						<ReportTitle report={result.report} source={source} />
-					</Text>
-					<ReportCounts report={result.report} />
-				</Message>
-			</>
+			<MessagePage report={result.report} source={source} title="No visual changes">
+				<Text color="secondary" elementType="p">
+					{`${changed} changed · ${added} added · ${removed} removed · ${unchanged} unchanged`}
+				</Text>
+			</MessagePage>
 		);
 	}
 	return <Review baseUrl={result.baseUrl} report={result.report} source={source} />;
 }
 
-type ReviewProps = { baseUrl: string; report: Report; source: ReportSource };
-
-function Review({ baseUrl, report, source }: ReviewProps) {
-	const search = useLocationSearch();
-	const params = parseReviewParams(search);
-	const [opacity, setOpacity] = useState(50);
-	const filterRef = useRef<HTMLDivElement>(null);
-	const areShortcutsEnabled = useShortcutsEnabled();
-
-	const captures = useMemo(
-		() => filterCaptures(report.captures, { query: params.query, status: params.status }),
-		[report.captures, params.query, params.status],
-	);
-	const selected = captures.find((capture) => capture.id === params.capture) ?? captures[0];
-	const selectedId = selected?.id;
-	const isComparable = selected?.status === 'changed';
-	const { highlight, view, zoom } = params;
-
-	const setParams = useCallback(
-		(updates: Record<string, string | undefined>) => {
-			navigate(hrefWithParams(search, updates), { replace: true });
-		},
-		[search],
-	);
-
-	const shortcuts = useMemo<ReviewShortcuts>(() => {
-		const step = (offset: number) => {
-			setParams({ capture: stepCapture(captures, selectedId, offset)?.id });
-		};
-		const setZoom = (next: string) => setParams({ zoom: next === 'fit' ? undefined : next });
-		return {
-			'-': () => setZoom(stepZoom(zoom, -1)),
-			'/': () => filterRef.current?.querySelector('input')?.focus(),
-			'+': () => setZoom(stepZoom(zoom, 1)),
-			'=': () => setZoom(stepZoom(zoom, 1)),
-			'0': () => setZoom('fit'),
-			// An added or removed capture has one image, so it has no views to switch between.
-			...(isComparable
-				? {
-						'1': () => setParams({ view: undefined }),
-						'2': () => setParams({ view: VIEW_MODES[1] }),
-						'3': () => setParams({ view: VIEW_MODES[2] }),
-						f: () => {
-							if (view !== 'overlay') setParams({ view: 'overlay' });
-							setOpacity((current) => (current < 50 ? 100 : 0));
-						},
-					}
-				: null),
-			h: () => setParams({ highlight: highlight ? 'off' : undefined }),
-			j: () => step(1),
-			k: () => step(-1),
-		};
-	}, [captures, highlight, isComparable, selectedId, setParams, view, zoom]);
-	useReviewShortcuts(shortcuts, areShortcutsEnabled);
-
-	return (
-		<>
-			<title>{`${selectedId ?? 'Review'} · ${sourceLabel(source)} · Visual review`}</title>
-			<Box
-				alignItems="center"
-				backgroundColor="surface.base"
-				borderBlockEndWidth="thin"
-				borderColor="decorative"
-				borderStyle="solid"
-				borderWidth="none"
-				display="flex"
-				flexShrink="0"
-				flexWrap="wrap"
-				gap="space.16"
-				justifyContent="space-between"
-				paddingBlock="space.12"
-				paddingInline="space.16"
-			>
-				<Heading level={1} typography="body">
-					<ReportTitle report={report} source={source} />
-				</Heading>
-				<ReportCounts report={report} />
-			</Box>
-			<PullRequestReviewBar report={report} source={source} />
-			<div className={styles.layout}>
-				<CaptureList
-					areShortcutsEnabled={areShortcutsEnabled}
-					allCaptures={report.captures}
-					captures={captures}
-					filterRef={filterRef}
-					onParamsChange={setParams}
-					params={params}
-					search={search}
-					selectedId={selectedId}
-				/>
-				{selected ? (
-					<CaptureViewer
-						baseUrl={baseUrl}
-						capture={selected}
-						onOpacityChange={setOpacity}
-						onParamsChange={setParams}
-						onStep={(offset) => {
-							setParams({ capture: stepCapture(captures, selectedId, offset)?.id });
-						}}
-						opacity={opacity}
-						params={params}
-						position={{ index: captures.indexOf(selected), total: captures.length }}
-					/>
-				) : (
-					<Message headingLevel={2} title="No captures match the filter" />
-				)}
-			</div>
-		</>
-	);
-}
-
-/** A local comparison has no pull request, so it has nothing to approve. */
-function PullRequestReviewBar({
-	report,
-	source,
-}: {
+type MessagePageProps = {
+	children: ReactNode;
 	report: Report | undefined;
 	source: ReportSource;
-}) {
-	if (source.kind !== 'pull-request') return null;
-	return <ReviewBar number={source.number} report={report} />;
-}
+	title: string;
+};
 
-function ReportTitle({ report, source }: { report: Report; source: ReportSource }) {
+function MessagePage({ children, report, source, title }: MessagePageProps) {
+	const isCompact = useMediaQuery(COMPACT_QUERY);
+	const [isReviewOpen, setIsReviewOpen] = useState(false);
+	const review = usePullRequestReview(source.kind === 'pull-request' ? source.number : undefined);
 	return (
-		<>
-			{source.kind === 'pull-request' ? (
-				<Link href={pullRequestUrl(source.number)} target="_blank">
-					{sourceLabel(source)}
-				</Link>
-			) : (
-				sourceLabel(source)
-			)}
-			{report.meta ? (
-				<>
-					{' at '}
-					<Link href={commitUrl(report.meta.headSha)} target="_blank">
-						{report.meta.headSha.slice(0, 7)}
-					</Link>
-				</>
-			) : null}
-		</>
-	);
-}
-
-function ReportCounts({ report }: { report: Report }) {
-	const { added, changed, removed, unchanged } = report.counts;
-	return (
-		<Text color="secondary" typography="caption">
-			{`${changed} changed · ${added} added · ${removed} removed · ${unchanged} unchanged`}
-		</Text>
+		<div className={styles.app}>
+			<title>{`${sourceLabel(source)} · Visual review`}</title>
+			<AppHeader
+				actions={
+					review ? (
+						<ReviewTrigger
+							isCompact={isCompact}
+							isOpen={isReviewOpen}
+							onOpenChange={setIsReviewOpen}
+							progress={undefined}
+							report={report}
+							review={review}
+						/>
+					) : null
+				}
+				reportTitle={
+					<Text className={styles.truncate} color="secondary" elementType="div" shouldDisableTrim>
+						<ReportTitle report={report} source={source} />
+					</Text>
+				}
+			/>
+			<Box backgroundColor="surface.base" className={styles.messagePanel} elementType="main">
+				<Box className={styles.message}>
+					<Stack gap="space.16">
+						<Heading level={1} typography="heading3">
+							{title}
+						</Heading>
+						{children}
+						<Text elementType="p">
+							<Link href={window.location.pathname}>All open pull requests</Link>
+						</Text>
+					</Stack>
+				</Box>
+			</Box>
+		</div>
 	);
 }
 
 type UnavailableStatus = Exclude<ReportResult['status'], 'ready'>;
 
-function ReportUnavailable({
-	source,
-	status,
-}: {
-	source: ReportSource;
-	status: UnavailableStatus;
-}) {
-	return (
-		<Message title={`No report for ${sourceLabel(source).toLowerCase()}`}>
-			<Text color="secondary" elementType="p">
-				{unavailableReason(source, status)}
-			</Text>
-		</Message>
-	);
+function unavailableTitle(source: ReportSource) {
+	return `No report for ${sourceLabel(source).toLowerCase()}`;
 }
 
 function unavailableReason(source: ReportSource, status: UnavailableStatus) {
@@ -235,24 +112,4 @@ function unavailableReason(source: ReportSource, status: UnavailableStatus) {
 	return source.kind === 'local'
 		? 'Run pnpm test:visual to write a comparison to .artifacts/visual-regression.'
 		: 'The comparison may still be running, or the pull request may change only documentation.';
-}
-
-type MessageProps = { children?: ReactNode; headingLevel?: 1 | 2; title: string };
-
-function Message({ children, headingLevel = 1, title }: MessageProps) {
-	return (
-		<Stack className={styles.message} gap="space.16">
-			<Heading level={headingLevel} typography="heading3">
-				{title}
-			</Heading>
-			{children}
-			<Text elementType="p">
-				<Link href={window.location.pathname}>All open pull requests</Link>
-			</Text>
-		</Stack>
-	);
-}
-
-function sourceLabel(source: ReportSource) {
-	return source.kind === 'local' ? 'Local comparison' : `Pull request #${source.number}`;
 }

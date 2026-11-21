@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vite-plus/test';
 import type { Capture } from '../report/schema.js';
-import { filterCaptures, parseReviewParams, stepCapture, stepZoom } from './review-params.js';
+import { filterCaptures, parseReviewParams, reviewParamValues, stepZoom } from './review-params.js';
 
 const captures: Array<Capture> = [
 	{
@@ -24,37 +24,89 @@ const captures: Array<Capture> = [
 ];
 
 describe('parseReviewParams', () => {
-	test('defaults to side by side, fitted, unfiltered, with outlines', () => {
+	test('defaults to the actual image, fitted, unfiltered, with outlines', () => {
 		expect(parseReviewParams('?pr=12')).toEqual({
 			capture: undefined,
+			hideViewed: false,
 			highlight: true,
+			layout: 'single',
+			pane: 'actual',
 			query: '',
 			status: 'all',
-			view: 'side',
 			zoom: 'fit',
 		});
 	});
 
 	test('reads a deep link', () => {
 		const search =
-			'?pr=12&capture=button%2Fprimary-paper-dark&view=overlay&zoom=2&q=dark&status=changed&highlight=off';
+			'?pr=12&capture=button%2Fprimary-paper-dark&view=overlay&zoom=2&q=dark&status=changed&highlight=off&hide=viewed';
 
 		expect(parseReviewParams(search)).toEqual({
 			capture: 'button/primary-paper-dark',
+			hideViewed: true,
 			highlight: false,
+			layout: 'overlay',
+			pane: 'actual',
 			query: 'dark',
 			status: 'changed',
-			view: 'overlay',
 			zoom: '2',
 		});
 	});
 
+	test('reads the image shown and the fit-screen zoom', () => {
+		expect(parseReviewParams('?pane=expected&zoom=screen')).toMatchObject({
+			layout: 'single',
+			pane: 'expected',
+			zoom: 'screen',
+		});
+	});
+
+	test('opens a link from before the single-image layout on the same view', () => {
+		expect(parseReviewParams('?view=diff')).toMatchObject({ layout: 'single', pane: 'diff' });
+		expect(parseReviewParams('?view=side')).toMatchObject({ layout: 'side', pane: 'actual' });
+	});
+
 	test('falls back to the defaults for values it does not know', () => {
-		expect(parseReviewParams('?view=sideways&zoom=3&status=flaky')).toMatchObject({
+		expect(parseReviewParams('?view=sideways&pane=both&zoom=3&status=flaky')).toMatchObject({
+			layout: 'single',
+			pane: 'actual',
 			status: 'all',
-			view: 'side',
 			zoom: 'fit',
 		});
+	});
+});
+
+describe('reviewParamValues', () => {
+	test('leaves every default out of the link', () => {
+		expect(reviewParamValues(parseReviewParams(''))).toEqual({
+			hide: undefined,
+			highlight: undefined,
+			pane: undefined,
+			q: undefined,
+			status: undefined,
+			view: undefined,
+			zoom: undefined,
+		});
+	});
+
+	test('writes back what it reads', () => {
+		const search = '?hide=viewed&highlight=off&q=dark&status=added&view=side&zoom=4';
+		const values = reviewParamValues(parseReviewParams(search));
+
+		expect(values).toEqual({
+			hide: 'viewed',
+			highlight: 'off',
+			pane: undefined,
+			q: 'dark',
+			status: 'added',
+			view: 'side',
+			zoom: '4',
+		});
+	});
+
+	test('names the image only in the single layout', () => {
+		expect(reviewParamValues(parseReviewParams('?pane=diff')).pane).toBe('diff');
+		expect(reviewParamValues(parseReviewParams('?pane=diff&view=overlay')).pane).toBeUndefined();
 	});
 });
 
@@ -76,38 +128,12 @@ describe('filterCaptures', () => {
 	});
 });
 
-describe('stepCapture', () => {
-	test('moves to the neighbouring capture', () => {
-		expect(stepCapture(captures, 'button/primary-paper-dark', 1)?.id).toBe(
-			'button/primary-paper-light',
-		);
-		expect(stepCapture(captures, 'button/primary-paper-light', -1)?.id).toBe(
-			'button/primary-paper-dark',
-		);
-	});
-
-	test('stops at either end of the list', () => {
-		expect(stepCapture(captures, 'button/primary-paper-dark', -1)?.id).toBe(
-			'button/primary-paper-dark',
-		);
-		expect(stepCapture(captures, 'radio-group/states-paper-dark', 1)?.id).toBe(
-			'radio-group/states-paper-dark',
-		);
-	});
-
-	test('starts from the first capture when the current one is filtered out', () => {
-		expect(stepCapture(captures, 'text/body', 1)?.id).toBe('button/primary-paper-dark');
-	});
-
-	test('has nothing to select in an empty list', () => {
-		expect(stepCapture([], undefined, 1)).toBeUndefined();
-	});
-});
-
 describe('stepZoom', () => {
-	test('steps from fit to actual size in either direction', () => {
+	test('zooms in from a fit to actual size, and never zooms in when zooming out', () => {
 		expect(stepZoom('fit', 1)).toBe('1');
-		expect(stepZoom('fit', -1)).toBe('1');
+		expect(stepZoom('fit', -1)).toBe('fit');
+		expect(stepZoom('screen', 1)).toBe('1');
+		expect(stepZoom('screen', -1)).toBe('screen');
 	});
 
 	test('steps through the fixed levels and stops at the smallest and largest', () => {

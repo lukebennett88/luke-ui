@@ -2,9 +2,12 @@ import type { Review } from '../api/review-api.js';
 
 type ChipColor = 'danger' | 'secondary' | 'success' | 'warning';
 
-/** The dashboard's status chip for a pull request's review. `null` means no check run yet. */
-export function reviewChip(review: Review | null): { color: ChipColor; label: string } {
-	if (!review) return { color: 'secondary', label: 'No report' };
+/**
+ * The dashboard's status chip for a pull request's review. `null` means the head commit has no
+ * review check run, which says nothing about its report, so it has no chip.
+ */
+export function reviewChip(review: Review | null): { color: ChipColor; label: string } | undefined {
+	if (!review) return undefined;
 	return REVIEW_CHIPS[review.state];
 }
 
