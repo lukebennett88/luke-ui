@@ -83,7 +83,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: ${{ runner.temp }}/visual-review-deploy
           packageManager: npm
-          wranglerVersion: '4.162.0'
+          wranglerVersion: '4.165.0'
           command: >-
             pages deploy ${{ github.workspace }}/apps/visual-review/dist --project-name=${{
             vars.VISUAL_REVIEW_PAGES_PROJECT }} --branch=main --commit-hash=${{ github.sha }}
