@@ -1,44 +1,39 @@
-import { defineConfig } from 'vite-plus';
+import type { OxlintOverride } from 'vite-plus/lint';
 
-export const visualReviewLintOverrides =
-	defineConfig({
-		lint: {
-			overrides: [
+export const visualReviewLintOverrides = [
+	{
+		// The Pages worker runs on Cloudflare, not Node, and bundles only its own modules.
+		files: ['apps/visual-review/src/worker/**/*.ts'],
+		rules: {
+			'import/no-nodejs-modules': 'error',
+			'no-restricted-imports': [
+				'error',
 				{
-					// The Pages worker runs on Cloudflare, not Node, and bundles only its own modules.
-					files: ['apps/visual-review/src/worker/**/*.ts'],
-					rules: {
-						'import/no-nodejs-modules': 'error',
-						'no-restricted-imports': [
-							'error',
-							{
-								patterns: [
-									{
-										group: ['../*'],
-										message: 'The worker must not import the browser app.',
-									},
-								],
-							},
-						],
-					},
-				},
-				{
-					excludeFiles: ['apps/visual-review/src/worker/**'],
-					files: ['apps/visual-review/src/**/*.{ts,tsx}'],
-					rules: {
-						'no-restricted-imports': [
-							'error',
-							{
-								patterns: [
-									{
-										group: ['**/worker/**'],
-										message: 'The browser app must not bundle the worker.',
-									},
-								],
-							},
-						],
-					},
+					patterns: [
+						{
+							group: ['../*'],
+							message: 'The worker must not import the browser app.',
+						},
+					],
 				},
 			],
 		},
-	}).lint?.overrides ?? [];
+	},
+	{
+		excludeFiles: ['apps/visual-review/src/worker/**'],
+		files: ['apps/visual-review/src/**/*.{ts,tsx}'],
+		rules: {
+			'no-restricted-imports': [
+				'error',
+				{
+					patterns: [
+						{
+							group: ['**/worker/**'],
+							message: 'The browser app must not bundle the worker.',
+						},
+					],
+				},
+			],
+		},
+	},
+] satisfies Array<OxlintOverride>;
