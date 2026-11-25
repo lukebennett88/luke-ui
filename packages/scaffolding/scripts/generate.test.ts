@@ -61,7 +61,7 @@ describe('scaffolding CLI', () => {
 
 		expect(result.status).toBe(1);
 		expect(result.stderr).toContain(
-			'Invalid docs group: expected one of actions, feedback, forms, layout, typography, visuals.',
+			'Invalid docs group: expected one of actions, feedback, forms, layout, overlays, typography, visuals.',
 		);
 	});
 

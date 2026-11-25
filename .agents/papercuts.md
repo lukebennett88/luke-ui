@@ -128,3 +128,16 @@ not help. Silence in this log is not evidence.
   style, forbids prose semicolons; the write-docs workflow requires consulting the guide.
 - Problem: Agent-authored prose breached the required writing rule before the check caught it.
   Correcting the prose does not establish that the workflow applies the rule.
+
+## Agent-authored docs state one rule in two places
+
+- Seen: 2026-11-14 (PR #1087, #799). Independent review of `fa6577d` found the Dialog guide's Forms
+  section and the Dialog primitives page's Size section stating the same control-size rule, and the
+  Dialog guide's Accessibility section repeating the focus-return sentences from its Open state
+  section.
+- Where: `apps/docs/content/docs/components/overlays/dialog.mdx` and
+  `apps/docs/content/docs/components/primitives/dialog.mdx`. `docs/DOCUMENTATION.md`, Writing style,
+  says to explain a rule on the page that owns it and link to it from the others. The write-docs
+  workflow requires consulting that guide.
+- Problem: Agent-authored documentation repeated rules despite the required guidance. Correcting the
+  pages does not establish that the workflow applies the rule.
