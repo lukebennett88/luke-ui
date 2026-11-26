@@ -1,17 +1,4 @@
-export type ErrorCode =
-	| 'bad-origin'
-	| 'forbidden'
-	| 'internal'
-	| 'invalid'
-	| 'method-not-allowed'
-	| 'not-found'
-	| 'not-reviewable'
-	| 'stale'
-	| 'stale-baseline'
-	| 'unauthenticated'
-	| 'unconfigured'
-	| 'unverified-baseline'
-	| 'upstream';
+import type { ErrorBody, ErrorCode } from '../api/contract.js';
 
 /** A failure that becomes an `{ error, message }` response with its status. */
 export class ApiError extends Error {
@@ -64,8 +51,8 @@ export function noContent(cookies: Array<string>): Response {
 export function errorResponse(error: unknown, options: ResponseOptions = {}): Response {
 	const apiError =
 		error instanceof ApiError ? error : new ApiError(500, 'internal', 'The request failed.');
-	return json(
-		{ error: apiError.code, message: apiError.message },
-		{ ...options, status: apiError.status },
-	);
+	return json({ error: apiError.code, message: apiError.message } satisfies ErrorBody, {
+		...options,
+		status: apiError.status,
+	});
 }

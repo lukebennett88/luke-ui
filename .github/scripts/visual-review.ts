@@ -12,6 +12,7 @@
 // built-ins only. It runs with secrets beside an artefact produced by pull request code. Treat
 // every byte of that artefact as hostile.
 
+import { createHash } from 'node:crypto';
 import { constants } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -29,6 +30,12 @@ export type PublishedResult = {
 	mismatchedPixels?: number;
 	expectedViewport?: string;
 	actualViewport?: string;
+	/**
+	 * SHA-256, in lowercase hex, of each PNG the capture has, expected before actual, each preceded by
+	 * its role and a newline. The review app stores it when a reviewer marks the capture viewed, so a capture
+	 * whose images change in a later commit shows as changed since viewed.
+	 */
+	fingerprint?: string;
 };
 
 export type PublishedMeta = {
@@ -534,6 +541,8 @@ export async function prepareSite(options: {
 			const label = imagePath(result.id, kind);
 			return {
 				file: path.join(artifactDir, ...label.split('/')),
+				id: result.id,
+				kind,
 				label,
 				maxBytes: MAX_IMAGE_BYTES,
 				root: diffRoot,
@@ -558,6 +567,8 @@ export async function prepareSite(options: {
 	await mkdir(outDir);
 
 	let publishedBytes = 0;
+	// IMAGE_KINDS lists expected before actual, so each hash reads them in that order.
+	const fingerprints = new Map<string, ReturnType<typeof createHash>>();
 	for (const image of images) {
 		// Sequential: at most one screenshot is held in memory at a time.
 		// oxlint-disable-next-line no-await-in-loop
@@ -567,6 +578,13 @@ export async function prepareSite(options: {
 		}
 		// Counts the bytes actually read, in case a file changed after the size check.
 		publishedBytes = addToBudget(publishedBytes, bytes.length);
+		if (image.kind !== 'diff') {
+			const hash = fingerprints.get(image.id) ?? createHash('sha256');
+			// The role keeps an added capture's fingerprint apart from a removed one with the same bytes.
+			hash.update(`${image.kind}\n`);
+			hash.update(bytes);
+			fingerprints.set(image.id, hash);
+		}
 
 		const destination = path.join(outDir, ...image.label.split('/'));
 		// oxlint-disable-next-line no-await-in-loop
@@ -575,6 +593,10 @@ export async function prepareSite(options: {
 		await writeFile(destination, bytes);
 	}
 
+	for (const result of results) {
+		const hash = fingerprints.get(result.id);
+		if (hash) result.fingerprint = hash.digest('hex');
+	}
 	const summary: PublishedSummary = {
 		schemaVersion: 1,
 		meta,
@@ -1145,6 +1167,10 @@ function canonicalJson(value: unknown): string {
 	return JSON.stringify(value);
 }
 
+const TOP_LEVEL_KEY_PATTERN = /^[^\s#]/;
+const CATALOG_KEY_PATTERN = /^catalogs?:/;
+const YAML_ANCHOR_PATTERN = /(?:^|[\s:,[{-])&\S/;
+
 /**
  * Removes the top-level `catalog:` and `catalogs:` blocks from a `pnpm-workspace.yaml`. A block runs
  * from its key line to the next line that starts at column 0 and is neither blank nor a comment.
@@ -1155,12 +1181,12 @@ export function stripCatalogBlocks(text: string): string | undefined {
 	const kept: Array<string> = [];
 	let inCatalog = false;
 	for (const line of text.split('\n')) {
-		if (/^[^\s#]/.test(line)) inCatalog = /^catalogs?:/.test(line);
+		if (TOP_LEVEL_KEY_PATTERN.test(line)) inCatalog = CATALOG_KEY_PATTERN.test(line);
 		if (!inCatalog) {
 			kept.push(line);
 			continue;
 		}
-		if (/(?:^|[\s:,[{-])&\S/.test(line)) return undefined;
+		if (YAML_ANCHOR_PATTERN.test(line)) return undefined;
 	}
 	return kept.join('\n');
 }

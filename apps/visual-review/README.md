@@ -1,30 +1,27 @@
 # Visual review
 
-A review interface for the visual regression comparison. It shows one pull request's differences,
-and lists every open pull request with the state of its report.
+The visual review app shows a pull request's screenshot differences and records the reviewer's
+decision on its `visual-review` check run.
 [Visual regression testing](../../docs/VISUAL_TESTING.md#visual-review-app) explains how reports are
-published and how the app is deployed.
+published and how the app and its backend are deployed.
 
-- `/` lists the repository's open pull requests with each one's review status and report counts.
-  Pull requests that need review come first. It reads the list from `GET /api/pulls`, or from
-  GitHub's public API, without statuses, where the review backend does not answer.
+- `/` lists the open pull requests with their review status and report counts.
 - `/?pr=<number>` reviews one pull request.
 - `/?source=local` reviews the comparison in `.artifacts/visual-regression`. Only the development
   server serves it.
 
-A review keeps its state in the query string, so every view is a link: the selected capture, the
-view (`side`, `overlay`, or `diff`), the zoom, the filter, and whether differences are outlined. The
-sidebar lists the single-key shortcuts and has a checkbox that turns them off. That choice is saved
-in the browser.
+## Development
 
-The app reads a report over HTTP: `summary.json`, and one PNG per image at
-`diff/<capture id>.<expected|actual|diff>.png`. `src/report/schema.ts` validates that contract with
-Zod. The app imports nothing from the scripts that write it. `src/review/diff-regions.ts` reads the
-diff image's pixels to outline where a capture differs.
+Run these commands from the repository root:
 
-The app is built with Luke UI through its public entrypoints and the Tactile theme. React Aria's
-`RouterProvider` sends Luke UI `Link` navigation through the History API, and the app has no router
-dependency. [`FRICTION.md`](./FRICTION.md) records the gaps it found.
+```bash
+pnpm test:visual
+pnpm run dev:visual-review
+```
+
+`pnpm test:visual` writes the comparison that `http://localhost:5175/?source=local` reviews. Set
+`VISUAL_REVIEW_LOCAL_DIR` to review a comparison in another directory. Decisions need the review
+backend, so only the deployed app offers them.
 
 Two build-time variables configure a deployment:
 
@@ -33,118 +30,53 @@ Two build-time variables configure a deployment:
 - `VITE_VISUAL_REVIEW_REPOSITORY` is the `owner/name` of the GitHub repository. It defaults to
   `lukebennett88/luke-ui`.
 
-Run commands from the repository root:
+## Reports
 
-```bash
-pnpm test:visual
-pnpm run dev:visual-review
-pnpm exec turbo run test --filter=visual-review
-pnpm run check
-```
+The app reads a report over HTTP: `summary.json`, and one PNG per image at
+`diff/<capture id>.<expected|actual|diff>.png`. `src/report/schema.ts` validates that contract with
+Zod. The app imports nothing from the scripts that write it.
 
-The browser tests in `src/review/review.browser.test.tsx` review the small report in
-`src/test/fixtures/report` through the same `?source=local` route. The review bar and dashboard
-tests stub `fetch` for `/api/*`, and serve that report with a `meta` block as a pull request's.
+The app stores viewed progress only in `localStorage`, keyed by repository and capture id. It
+compares the saved fingerprint with the capture's `fingerprint` in `summary.json`. A capture stays
+viewed in later commits while its images are the same. The Mark viewed button requires a fingerprint
+and is disabled for captures without one, including local comparisons.
 
-`pnpm test:visual` writes the comparison that `http://localhost:5175/?source=local` reviews. Set
-`VISUAL_REVIEW_LOCAL_DIR` to review a comparison in another directory.
+## Theme
 
-## Reviewing in the app
-
-A pull request's review shows its status under the header: comparing, needs review, approved or
-changes requested by a reviewer, no visual changes, or failed. It links to the `visual-review` check
-on GitHub, and says when the pull request changes visual testing infrastructure.
-
-Sign in with GitHub from that bar to review. A reviewer with write access can approve, or request
-changes with a note of up to 500 characters, and can change an earlier decision. A decision applies
-to the comparison on screen. When a newer commit or comparison exists, the bar says the report is
-out of date and turns the decisions off until the page reloads. Someone without write access sees
-the status only.
-
-The [scheduled sweep](../../docs/VISUAL_TESTING.md#review-check) can occasionally revoke a valid
-approval when it races another update. Refresh the page and approve again.
-
-The bar needs the review backend. On the development server it says review actions are only
-available on the deployed app. A local comparison (`?source=local`) has no pull request, so it shows
-no bar.
+The app has its own theme, so its chrome stays distinct from the screenshots it frames. A Vite
+plugin in `vite.config.ts` compiles `src/theme/input.ts` and serves it as
+`virtual:visual-review-theme.css`. Values the theme has no token for are in
+`src/styles/app-tokens.css.ts`.
 
 ## Review backend
 
-`src/worker/` is the backend that records reviews. Reviewers with write access sign in with GitHub
-and approve or request changes on a pull request's `visual-review` check run. A decision completes
-the check run with a success or failure conclusion, adds a line to its history, and rewrites the
-status in the pull request's sticky comment. The comment shows the current decision's note as
-literal text and removes it when the status is replaced. The browser app does not import the worker.
+`src/worker/` is the backend that records decisions. The build compiles it into `dist/_worker.js`,
+and `dist/_routes.json` sends only `/api/*` to it. The browser app does not import the worker. Both
+read the API's shapes from the Zod schemas in `src/api/contract.ts`.
 
-The build compiles the worker into `dist/_worker.js`, one ES module with its dependencies bundled,
-and writes `dist/_routes.json`, which sends only `/api/*` to it. Cloudflare Pages runs it as Pages
-Functions in advanced mode. `vite.worker.config.ts` holds that build and fails it if the worker
-would import anything at runtime.
-
-| Route                               | Purpose                                                         |
-| ----------------------------------- | --------------------------------------------------------------- |
-| `GET /api/auth/login?return=<path>` | Starts GitHub sign-in, then returns to the path                 |
-| `GET /api/auth/callback`            | Finishes sign-in and sets an eight-hour session cookie          |
-| `POST /api/auth/logout`             | Ends the session                                                |
-| `GET /api/session`                  | The signed-in account, and whether it can review                |
-| `GET /api/pulls`                    | Open pull requests with their head commit's review, cached 30 s |
-| `GET /api/pulls/<number>/review`    | The review of a pull request's head commit                      |
-| `POST /api/pulls/<number>/decision` | Approves or requests changes on that review                     |
+| Route                               | Purpose                                                |
+| ----------------------------------- | ------------------------------------------------------ |
+| `GET /api/auth/login?return=<path>` | Starts GitHub sign-in, then returns to the path        |
+| `GET /api/auth/callback`            | Finishes sign-in and sets an eight-hour session cookie |
+| `POST /api/auth/logout`             | Ends the session                                       |
+| `GET /api/session`                  | The signed-in account, and whether it can review       |
+| `GET /api/pulls`                    | Open pull requests with their head commit's review     |
+| `GET /api/pulls/<number>/review`    | The review of a pull request's head commit             |
+| `POST /api/pulls/<number>/decision` | Approves or requests changes on that review            |
 
 A `POST` must send `Content-Type: application/json` and an `Origin` header equal to `APP_ORIGIN`.
-Report deployments on `pr-<number>` subdomains are same-site with the app, so the session cookie's
-`SameSite` setting alone does not block them. Without its configuration, the worker answers every
-route with `503 unconfigured`.
-[Visual regression testing](../../docs/VISUAL_TESTING.md#review-backend) lists the GitHub App and
-Pages settings.
+Without its configuration, the worker answers every route with `503 unconfigured`.
 
-A review's `state` is `comparing` while a comparison runs, or while a newer comparison is not
-recorded yet, and nobody can decide it then. A `clean` record whose check run does not pass is
-`comparing` when its title is `Comparing`, and `failed` otherwise. A check run can fail without a
-new record, for example when its baseline is replaced. A failed check run is `changes-requested`
-only when its record is a review and its title names the reviewer. Any other failed check run is
-`failed`. A decision applies only to the latest comparison: the newest `Visual regression` run for
-the head commit. Requesting a re-run makes the earlier attempt stale at once. The backend refuses a
-decision with `409` and one of these codes, and writes nothing:
+A decision applies only to the latest comparison for the head commit. The backend refuses it with
+`409`, writes nothing, and answers with one of these codes:
 
 - `not-reviewable`: the check run is not a completed comparison with changes to review.
-- `stale`: the pull request has a newer commit, or the check run's comparison is not the latest
-  comparison or did not succeed.
-- `unverified-baseline`: the comparison has no verified baseline run and attempt. Re-run the
-  comparison.
-- `stale-baseline`: the comparison's baseline run and attempt are not the newest successful
-  `Visual baseline` run on `main` from a push or a manual dispatch in this repository. A re-run of
-  that baseline also makes it stale. Update the branch, or re-run the comparison.
+- `stale`: the pull request has a newer commit, or the comparison is not the latest one.
+- `unverified-baseline`: the comparison has no verified baseline run. Re-run the comparison.
+- `stale-baseline`: a newer `Visual baseline` run on `main` replaced the comparison's baseline.
+  Update the branch, or re-run the comparison.
 
 GitHub has no conditional write for check runs, so the backend checks a decision again after it
-writes it. It registers the write and that check with `waitUntil` before the write starts, so a
-reviewer who disconnects cannot cancel either.
-
-The backend never writes the check run's `external_id`. Only `Visual review publish` writes it, so
-the response to each backend write names the record that the write landed on:
-
-- When the decision's response names another record, a workflow recorded it in between. The backend
-  restores that record's conclusion and title, and answers `409 stale`. The summary then says that
-  the review app still has the report.
-- Otherwise it reads the latest comparison again. When a re-run was requested in between, it
-  withdraws the decision: the check run goes back to `Needs review` with the `action_required`
-  conclusion, and the backend answers `409 stale`. `Visual review publish` records the re-run
-  itself.
-- It then reads the newest baseline again, because a replaced baseline changes no record. When the
-  baseline is not the one the comparison used, it withdraws the decision and answers
-  `409 stale-baseline`.
-- When either read fails, it withdraws the decision and answers `502 upstream`.
-- When the decision's write fails, the write may still have landed. The backend withdraws the
-  decision, restores any newer record that the withdrawal's response names, and answers
-  `502 upstream`.
-
-A repair never passes the check, except when it restores a `clean` record. When a repair's own
-response names yet another record, the backend restores that record instead. After three attempts it
-writes `action_required` for the last record named, which blocks merging, and stops. A repair write
-that fails is tried up to three times before the backend answers `502 upstream`. Each repair adds a
-line to the check run's history and rewrites the sticky comment's status to match.
-
-GitHub keeps a completed check run completed, so a `Comparing` check run has the `action_required`
-conclusion, and its state comes from the `pending` kind in its `external_id`.
-
-The unit tests in `src/worker/` run the request handler against a stubbed `fetch`.
+writes it. When a newer record, a re-run, or a replaced baseline landed in between, it restores that
+record or withdraws the decision, and answers `409` or `502 upstream`. A repair never passes the
+check, except when it restores a clean record.

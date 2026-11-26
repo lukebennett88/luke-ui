@@ -1,30 +1,42 @@
+import * as z from 'zod';
+import { positiveIntegerSchema } from '../api/contract.js';
 import { decodeBase64Url, encodeBase64Url } from './base64url.js';
 
-export const SESSION_COOKIE = 'vr_session';
-export const LOGIN_COOKIE = 'vr_login';
+/**
+ * The `__Host-` prefix makes the browser refuse the cookie unless it is `Secure`, has `Path=/` and
+ * no `Domain`. A `pr-<number>.<project>.pages.dev` deployment therefore cannot plant one for the
+ * app's host.
+ */
+export const SESSION_COOKIE = '__Host-vr_session';
+export const LOGIN_COOKIE = '__Host-vr_login';
 export const SESSION_SECONDS = 8 * 60 * 60;
 export const LOGIN_SECONDS = 10 * 60;
 
 const LOGIN_PATTERN = /^[A-Za-z0-9-]{1,39}$/;
 const MAX_RETURN_PATH_LENGTH = 2048;
 // Control characters and backslashes: browsers read `/\host` as a protocol-relative URL.
-const UNSAFE_PATH_CHARACTERS = /[\p{Cc}\\]/u;
+const UNSAFE_PATH_CHARACTER_PATTERN = /[\p{Cc}\\]/u;
 
 const encoder = new TextEncoder();
 
-export interface Session {
-	avatarUrl: string;
-	exp: number;
-	id: number;
-	login: string;
-}
+/** Every signed token carries its expiry, in seconds since the epoch. */
+const expirySchema = z.object({ exp: z.number() });
 
-export interface LoginState {
-	exp: number;
-	return: string;
-	state: string;
-	verifier: string;
-}
+/** The session cookie's payload. */
+export const sessionSchema = expirySchema.extend({
+	avatarUrl: z.string(),
+	id: positiveIntegerSchema,
+	login: z.string().regex(LOGIN_PATTERN),
+});
+
+export type Session = z.infer<typeof sessionSchema>;
+
+/** The sign-in cookie's payload, from the start of sign-in to its callback. */
+export const loginStateSchema = expirySchema.extend({
+	return: z.string().refine((value) => parseReturnPath(value) === value),
+	state: z.string(),
+	verifier: z.string(),
+});
 
 function hmacKey(secret: string): Promise<CryptoKey> {
 	return crypto.subtle.importKey(
@@ -51,15 +63,17 @@ export async function signToken(secret: string, purpose: string, payload: object
 }
 
 /**
- * Returns the payload of a token signed by `signToken` for `purpose`, or `undefined` when it is
- * malformed, its signature does not verify, or its numeric `exp` (seconds) has passed.
+ * Returns the payload of a token signed by `signToken` for `purpose`, read through `schema`, or
+ * `undefined` when it is malformed, its signature does not verify, it does not match `schema`, or
+ * its `exp` has passed.
  */
-export async function verifyToken(
+export async function verifyToken<T extends z.infer<typeof expirySchema>>(
 	secret: string,
 	purpose: string,
 	token: string | undefined,
 	nowSeconds: number,
-): Promise<Record<string, unknown> | undefined> {
+	schema: z.ZodType<T>,
+): Promise<T | undefined> {
 	const [body, signatureText, ...rest] = token?.split('.') ?? [];
 	if (body === undefined || signatureText === undefined || rest.length > 0) return undefined;
 	const signature = decodeBase64Url(signatureText);
@@ -79,31 +93,9 @@ export async function verifyToken(
 	} catch {
 		return undefined;
 	}
-	if (typeof payload !== 'object' || payload === null) return undefined;
-	const { exp } = payload as { exp?: unknown };
-	if (typeof exp !== 'number' || exp <= nowSeconds) return undefined;
-	return payload as Record<string, unknown>;
-}
-
-export function parseSession(payload: Record<string, unknown> | undefined): Session | undefined {
-	if (!payload) return undefined;
-	const { avatarUrl, exp, id, login } = payload;
-	if (typeof login !== 'string' || !isLogin(login)) return undefined;
-	if (typeof id !== 'number' || !Number.isSafeInteger(id) || id <= 0) return undefined;
-	if (typeof avatarUrl !== 'string' || typeof exp !== 'number') return undefined;
-	return { avatarUrl, exp, id, login };
-}
-
-export function parseLoginState(
-	payload: Record<string, unknown> | undefined,
-): LoginState | undefined {
-	if (!payload) return undefined;
-	const { exp, return: returnPath, state, verifier } = payload;
-	if (typeof state !== 'string' || typeof verifier !== 'string') return undefined;
-	if (typeof returnPath !== 'string' || parseReturnPath(returnPath) !== returnPath)
-		return undefined;
-	if (typeof exp !== 'number') return undefined;
-	return { exp, return: returnPath, state, verifier };
+	const parsed = schema.safeParse(payload);
+	if (!parsed.success || parsed.data.exp <= nowSeconds) return undefined;
+	return parsed.data;
 }
 
 export function isLogin(value: string): boolean {
@@ -118,7 +110,7 @@ export function parseReturnPath(value: string | null): string | undefined {
 	if (value === null || value === '') return '/';
 	if (value.length > MAX_RETURN_PATH_LENGTH) return undefined;
 	if (!value.startsWith('/') || value.startsWith('//')) return undefined;
-	if (UNSAFE_PATH_CHARACTERS.test(value)) return undefined;
+	if (UNSAFE_PATH_CHARACTER_PATTERN.test(value)) return undefined;
 	return value;
 }
 
@@ -153,21 +145,24 @@ export function readCookie(request: Request, name: string): string | undefined {
 	return undefined;
 }
 
-interface CookieOptions {
-	maxAge: number;
-	path: string;
-	sameSite: 'Lax' | 'Strict';
-}
-
-/** A host-only `HttpOnly; Secure` cookie. A `maxAge` of 0 clears it. */
-function serializeCookie(name: string, value: string, options: CookieOptions): string {
-	return `${name}=${value}; Max-Age=${options.maxAge}; Path=${options.path}; HttpOnly; Secure; SameSite=${options.sameSite}`;
+/**
+ * A host-only `HttpOnly; Secure` cookie on `/`, as its `__Host-` name requires. A `maxAge` of 0
+ * clears it.
+ */
+function serializeCookie(
+	name: string,
+	value: string,
+	maxAge: number,
+	sameSite: 'Lax' | 'Strict',
+): string {
+	return `${name}=${value}; Max-Age=${maxAge}; Path=/; HttpOnly; Secure; SameSite=${sameSite}`;
 }
 
 export function sessionCookie(value: string, maxAge = SESSION_SECONDS): string {
-	return serializeCookie(SESSION_COOKIE, value, { maxAge, path: '/', sameSite: 'Strict' });
+	return serializeCookie(SESSION_COOKIE, value, maxAge, 'Strict');
 }
 
+/** `Lax`, because GitHub's redirect to the callback is a cross-site navigation. */
 export function loginCookie(value: string, maxAge = LOGIN_SECONDS): string {
-	return serializeCookie(LOGIN_COOKIE, value, { maxAge, path: '/api/auth', sameSite: 'Lax' });
+	return serializeCookie(LOGIN_COOKIE, value, maxAge, 'Lax');
 }

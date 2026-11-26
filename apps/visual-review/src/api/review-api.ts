@@ -1,96 +1,94 @@
-import { z } from 'zod';
+import * as z from 'zod';
+import type { DecisionRequest, ErrorCode } from './contract.js';
+import {
+	errorBodySchema,
+	errorCodeSchema,
+	pullReviewResponseSchema,
+	pullSummarySchema,
+	pullsResponseSchema,
+	reviewSchema,
+	signedInSchema,
+	signedOutSchema,
+} from './contract.js';
 
-const SHA_PATTERN = /^[0-9a-f]{40}$/;
 const JSON_MEDIA_TYPE_PATTERN = /^application\/json\b/i;
 
-const sha = z.string().regex(SHA_PATTERN);
-const positiveInteger = z.number().int().positive();
-
 /**
- * The review of a pull request's head commit, as the backend reads it from the `visual-review`
- * check run. The browser redeclares the worker's contract rather than importing it.
+ * The contract's schemas, narrowed to the fields the app reads. A field the app does not read can
+ * change without breaking it, and anything else the backend adds is dropped.
  */
-const reviewSchema = z.object({
-	baselineRunId: positiveInteger.nullable(),
-	baselineSha: sha.nullable(),
-	checkUrl: z.url({ protocol: /^https$/ }),
-	decidedBy: z.string().nullable(),
-	headSha: sha,
-	kind: z.enum(['clean', 'failed', 'pending', 'review']),
-	reasons: z.array(z.enum(['infrastructure', 'visual'])),
-	runAttempt: positiveInteger,
-	runId: positiveInteger,
-	state: z.enum(['approved', 'changes-requested', 'clean', 'comparing', 'failed', 'needs-review']),
+const reviewReadSchema = reviewSchema.pick({
+	checkUrl: true,
+	decidedBy: true,
+	headSha: true,
+	kind: true,
+	reasons: true,
+	runAttempt: true,
+	runId: true,
+	state: true,
 });
 
-const sessionSchema = z.union([
-	z.object({ user: z.null() }),
-	z.object({
-		canReview: z.boolean(),
-		user: z.object({ avatarUrl: z.string(), login: z.string() }),
-	}),
+const sessionReadSchema = z.union([
+	signedOutSchema,
+	signedInSchema.extend({ user: signedInSchema.shape.user.pick({ login: true }) }),
 ]);
 
-const pullReviewSchema = z.object({ headSha: sha, review: reviewSchema.nullable() });
+const pullReviewReadSchema = pullReviewResponseSchema.extend({
+	review: reviewReadSchema.nullable(),
+});
 
-const pullsSchema = z.object({
+const pullsReadSchema = pullsResponseSchema.extend({
 	pulls: z.array(
-		z.object({
-			author: z.string().nullable(),
-			draft: z.boolean(),
-			headRef: z.string(),
-			headSha: sha,
-			number: positiveInteger,
-			review: reviewSchema.nullable(),
-			title: z.string(),
-			url: z.string(),
-		}),
+		pullSummarySchema.omit({ url: true }).extend({ review: reviewReadSchema.nullable() }),
 	),
 });
 
-const decisionResponseSchema = z.object({ review: reviewSchema });
+const decisionReadSchema = z.object({ review: reviewReadSchema });
 
-const errorBodySchema = z.object({ error: z.string(), message: z.string() });
-
-export type Review = z.infer<typeof reviewSchema>;
-export type Session = z.infer<typeof sessionSchema>;
-export type PullReview = z.infer<typeof pullReviewSchema>;
-export type Decision = 'approve' | 'request-changes';
-
-/** The comparison a decision applies to. The backend refuses it once the pull request moves on. */
-export type DecisionTarget = Pick<Review, 'headSha' | 'runAttempt' | 'runId'>;
+export type Review = z.infer<typeof reviewReadSchema>;
+export type Session = z.infer<typeof sessionReadSchema>;
+export type PullReview = z.infer<typeof pullReviewReadSchema>;
+type Pulls = z.infer<typeof pullsReadSchema>;
+export type Decision = DecisionRequest['decision'];
 
 /**
  * A failed request. `unavailable` means no review backend answered: the development server, a
- * deployment without its configuration, or the network. `error` is an answer from the backend.
+ * deployment without its configuration, or the network. `error` is an answer from the backend. Its
+ * `code` is `invalid-response` when a successful answer breaks the contract, and `unknown` when an
+ * error carries a code this app does not know.
  */
 export type ApiFailure =
-	| { kind: 'error'; code: string; message: string | undefined; status: number }
+	| {
+			kind: 'error';
+			code: ErrorCode | 'invalid-response' | 'unknown';
+			message: string | undefined;
+			status: number;
+	  }
 	| { kind: 'unavailable' };
 
 export type ApiResult<T> = ApiFailure | { data: T; kind: 'ok' };
 
 /** `GET /api/session`. */
 export function fetchSession(): Promise<ApiResult<Session>> {
-	return request('/api/session', sessionSchema);
+	return request('/api/session', sessionReadSchema);
 }
 
 /** `GET /api/pulls/<number>/review`. */
 export function fetchPullReview(number: number): Promise<ApiResult<PullReview>> {
-	return request(`/api/pulls/${number}/review`, pullReviewSchema);
+	return request(`/api/pulls/${number}/review`, pullReviewReadSchema);
 }
 
 /** `GET /api/pulls`. */
-export function fetchPulls(): Promise<ApiResult<z.infer<typeof pullsSchema>>> {
-	return request('/api/pulls', pullsSchema);
+export function fetchPulls(): Promise<ApiResult<Pulls>> {
+	return request('/api/pulls', pullsReadSchema);
 }
 
 /** `POST /api/pulls/<number>/decision`. */
 export function postDecision(
 	number: number,
-	body: DecisionTarget & { decision: Decision; note?: string },
+	body: DecisionRequest,
 ): Promise<ApiResult<{ review: Review }>> {
-	return request(`/api/pulls/${number}/decision`, decisionResponseSchema, {
+	return request(`/api/pulls/${number}/decision`, decisionReadSchema, {
 		body: JSON.stringify(body),
 		headers: { 'Content-Type': 'application/json' },
 		method: 'POST',
@@ -134,10 +132,7 @@ async function request<T>(
  * Reads a backend response. Anything that is not the backend's JSON, such as the development
  * server's HTML fallback, counts as no backend, and so does `503 unconfigured`.
  */
-export async function readApiResponse<T>(
-	response: Response,
-	schema: z.ZodType<T>,
-): Promise<ApiResult<T>> {
+async function readApiResponse<T>(response: Response, schema: z.ZodType<T>): Promise<ApiResult<T>> {
 	if (!JSON_MEDIA_TYPE_PATTERN.test(response.headers.get('Content-Type') ?? '')) {
 		return { kind: 'unavailable' };
 	}
@@ -150,10 +145,11 @@ export async function readApiResponse<T>(
 	if (!response.ok) {
 		const parsed = errorBodySchema.safeParse(body);
 		if (parsed.success && parsed.data.error === 'unconfigured') return { kind: 'unavailable' };
+		const code = errorCodeSchema.safeParse(parsed.data?.error);
 		return {
-			code: parsed.success ? parsed.data.error : 'unknown',
+			code: code.success ? code.data : 'unknown',
 			kind: 'error',
-			message: parsed.success ? parsed.data.message : undefined,
+			message: parsed.data?.message,
 			status: response.status,
 		};
 	}

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { page, userEvent } from 'vite-plus/test/context';
@@ -6,17 +7,16 @@ import { App } from '../app.js';
 const mountedApps = new Set<() => void>();
 
 /**
- * Mounts the app at `search`, such as `?source=local`. The local source is the committed report in
- * `fixtures/report`, served by the same development route the app uses outside tests.
+ * Mounts the app at `search`, such as `?source=local`. The local source is the report drawn in
+ * `fixture-report.ts`, served by the same development route the app uses outside tests.
  */
-export async function renderApp(search: string) {
+export async function renderApp(search: string, content: ReactNode = <App />) {
 	window.history.replaceState(null, '', `${window.location.pathname}${search}`);
 	const container = document.body.appendChild(document.createElement('div'));
-	container.style.blockSize = '100vh';
 	container.dataset.testid = 'app';
 	const root = createRoot(container);
 	await act(async () => {
-		root.render(<App />);
+		root.render(content);
 	});
 
 	function unmount() {

@@ -11,7 +11,8 @@ export const visualReviewLintOverrides = [
 				{
 					patterns: [
 						{
-							group: ['../*'],
+							// The API contract is shared: both sides parse the same responses.
+							group: ['../**', '!../api/contract.js'],
 							message: 'The worker must not import the browser app.',
 						},
 					],

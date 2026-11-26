@@ -1,7 +1,7 @@
 /** A rectangle in image pixels that bounds a cluster of differing pixels. */
 export type DiffRegion = { height: number; width: number; x: number; y: number };
 
-export type DiffRegions = { height: number; regions: Array<DiffRegion>; width: number };
+type DiffRegions = { height: number; regions: Array<DiffRegion>; width: number };
 
 /** Rows of unchanged pixels that separate one region from the next. */
 const ROW_GAP = 16;
@@ -26,7 +26,7 @@ export function loadDiffRegions(diffUrl: string): Promise<DiffRegions | undefine
  * Groups the diff colour's pixels into regions. Rows with differences that sit within `ROW_GAP`
  * rows of each other share a region, which spans their leftmost to rightmost differing pixel.
  */
-export function findDiffRegions(
+function findDiffRegions(
 	data: Uint8ClampedArray,
 	width: number,
 	height: number,

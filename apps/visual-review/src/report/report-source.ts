@@ -26,7 +26,7 @@ export function reportBaseUrl(source: ReportSource): string | undefined {
 }
 
 /** Fills a pull request's number into the data URL template, without a trailing slash. */
-export function pullRequestDataUrl(template: string, number: number): string {
+function pullRequestDataUrl(template: string, number: number): string {
 	return template.replace('{pr}', String(number)).replace(TRAILING_SLASH_PATTERN, '');
 }
 

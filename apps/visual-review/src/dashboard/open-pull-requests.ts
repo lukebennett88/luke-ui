@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from 'zod';
 import type { Review } from '../api/review-api.js';
 import { fetchPulls } from '../api/review-api.js';
 import { repository } from '../config.js';
@@ -34,7 +34,9 @@ let pending: Promise<PullRequestsResult> | undefined;
 /**
  * Lists the repository's open pull requests once per page load: from the review backend, with each
  * one's review, or from GitHub's public API where no backend answers, such as the development
- * server. The promise never rejects: every failure is a state the dashboard renders.
+ * server. A backend that answers with an error fails the list, rather than hiding every status
+ * behind the public list. The promise never rejects: every failure is a state the dashboard
+ * renders.
  */
 export function loadOpenPullRequests(): Promise<PullRequestsResult> {
 	pending ??= fetchOpenPullRequests();
@@ -43,11 +45,14 @@ export function loadOpenPullRequests(): Promise<PullRequestsResult> {
 
 async function fetchOpenPullRequests(): Promise<PullRequestsResult> {
 	const result = await fetchPulls();
-	if (result.kind === 'ok') {
-		const pullRequests = result.data.pulls.map(({ url: _url, ...pull }) => pull);
-		return { pullRequests, status: 'ready' };
+	switch (result.kind) {
+		case 'ok':
+			return { pullRequests: result.data.pulls, status: 'ready' };
+		case 'unavailable':
+			return fetchFromGitHub();
+		case 'error':
+			return { status: 'failed' };
 	}
-	return fetchFromGitHub();
 }
 
 async function fetchFromGitHub(): Promise<PullRequestsResult> {

@@ -1,4 +1,6 @@
-import { z } from 'zod';
+import * as z from 'zod';
+import type { Decision, Review } from '../api/contract.js';
+import { positiveIntegerSchema, reviewSchema, shaSchema } from '../api/contract.js';
 
 /** The check run's name. One per head commit, written by the publish workflow. */
 export const CHECK_NAME = 'visual-review';
@@ -11,47 +13,26 @@ const MAX_OUTPUT_LENGTH = 60_000;
 const HISTORY_HEADING = '### History';
 const MAX_NOTE_LENGTH = 500;
 const STATUS_PREFIX = '**Status:** ';
-const STATUS_SECTION = /<!-- visual-review-status -->[\s\S]*?<!-- \/visual-review-status -->/;
-const DECIDED_TITLE = /^(?:Approved|Changes requested) by @([A-Za-z0-9-]{1,39})$/;
-
-export const shaSchema = z.string().regex(/^[0-9a-f]{40}$/);
-export const positiveIntegerSchema = z.number().int().positive().max(Number.MAX_SAFE_INTEGER);
+const STATUS_SECTION_PATTERN =
+	/<!-- visual-review-status -->[\s\S]*?<!-- \/visual-review-status -->/;
+const DECIDED_TITLE_PATTERN = /^(?:Approved|Changes requested) by @([A-Za-z0-9-]{1,39})$/;
+const WHITESPACE_RUN_PATTERN = /\s+/g;
+const CONTROL_CHARACTER_PATTERN = /\p{Cc}/u;
 
 const externalIdSchema = z.object({
 	// Written since revision 2.1. An external id without it has an unverified baseline.
 	baselineRunAttempt: positiveIntegerSchema.nullable().default(null),
 	baselineRunId: positiveIntegerSchema.nullable(),
 	baselineSha: shaSchema.nullable(),
-	kind: z.enum(['clean', 'failed', 'pending', 'review']),
-	reasons: z.array(z.enum(['infrastructure', 'visual'])),
+	kind: reviewSchema.shape.kind,
+	reasons: reviewSchema.shape.reasons,
 	runAttempt: positiveIntegerSchema,
 	runId: positiveIntegerSchema,
 	v: z.literal(1),
 });
 
 export type ExternalId = z.infer<typeof externalIdSchema>;
-export type Decision = 'approve' | 'request-changes';
-type ReviewState =
-	| 'approved'
-	| 'changes-requested'
-	| 'clean'
-	| 'comparing'
-	| 'failed'
-	| 'needs-review';
-
-export interface Review {
-	baselineRunAttempt: number | null;
-	baselineRunId: number | null;
-	baselineSha: string | null;
-	checkUrl: string;
-	decidedBy: string | null;
-	headSha: string;
-	kind: ExternalId['kind'];
-	reasons: ExternalId['reasons'];
-	runAttempt: number;
-	runId: number;
-	state: ReviewState;
-}
+type ReviewState = Review['state'];
 
 /** The fields of a check run, from REST or GraphQL, that a `Review` reads. */
 export interface CheckRunSnapshot {
@@ -100,7 +81,7 @@ export function reviewFromCheckRun(run: CheckRunSnapshot): Review | null {
 		baselineRunId: externalId.baselineRunId,
 		baselineSha: externalId.baselineSha,
 		checkUrl: run.htmlUrl,
-		decidedBy: decided ? (DECIDED_TITLE.exec(run.title ?? '')?.[1] ?? null) : null,
+		decidedBy: decided ? (DECIDED_TITLE_PATTERN.exec(run.title ?? '')?.[1] ?? null) : null,
 		headSha: run.headSha,
 		kind: externalId.kind,
 		reasons: externalId.reasons,
@@ -124,7 +105,9 @@ function reviewState(
 ): ReviewState {
 	if (kind === 'failed') return 'failed';
 	if (conclusion === 'failure') {
-		return kind === 'review' && DECIDED_TITLE.test(title ?? '') ? 'changes-requested' : 'failed';
+		return kind === 'review' && DECIDED_TITLE_PATTERN.test(title ?? '')
+			? 'changes-requested'
+			: 'failed';
 	}
 	if (kind === 'pending') return 'comparing';
 	if (conclusion === 'success') return kind === 'clean' ? 'clean' : 'approved';
@@ -189,11 +172,11 @@ function formatTimestamp(date: Date): string {
 
 /** Collapses whitespace to single spaces and trims. */
 export function normalizeNote(value: string): string {
-	return value.replaceAll(/\s+/g, ' ').trim();
+	return value.replaceAll(WHITESPACE_RUN_PATTERN, ' ').trim();
 }
 
 export function isValidNote(note: string): boolean {
-	return note.length <= MAX_NOTE_LENGTH && !/\p{Cc}/u.test(note);
+	return note.length <= MAX_NOTE_LENGTH && !CONTROL_CHARACTER_PATTERN.test(note);
 }
 
 function escapeNote(note: string): string {
@@ -209,10 +192,10 @@ export function rewriteCommentStatus(
 	status: string,
 	note?: string,
 ): string | undefined {
-	if (!STATUS_SECTION.test(body)) return undefined;
+	if (!STATUS_SECTION_PATTERN.test(body)) return undefined;
 	const message = note ? `\n\n**Note:**\n\n<pre>${escapeNote(note)}</pre>` : '';
 	return body.replace(
-		STATUS_SECTION,
+		STATUS_SECTION_PATTERN,
 		() =>
 			`<!-- visual-review-status -->\n${statusLine(status)}${message}\n<!-- /visual-review-status -->`,
 	);

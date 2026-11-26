@@ -1,8 +1,9 @@
-import { z } from 'zod';
+import * as z from 'zod';
 
 const CAPTURE_ID_PATTERN = /^[a-z0-9-]+\/[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const VIEWPORT_PATTERN = /^\d{1,5}x\d{1,5}$/;
 const SHA_PATTERN = /^[0-9a-f]{40}$/;
+const FINGERPRINT_PATTERN = /^[0-9a-f]{64}$/;
 
 const count = z.number().int().nonnegative();
 const viewport = z.string().regex(VIEWPORT_PATTERN);
@@ -10,6 +11,7 @@ const viewport = z.string().regex(VIEWPORT_PATTERN);
 const resultSchema = z.object({
 	actualViewport: viewport.optional(),
 	expectedViewport: viewport.optional(),
+	fingerprint: z.string().regex(FINGERPRINT_PATTERN).optional(),
 	height: count.optional(),
 	id: z.string().regex(CAPTURE_ID_PATTERN),
 	mismatchedPixels: count.optional(),
@@ -44,6 +46,11 @@ export type Capture = {
 	/** The id's first segment, such as `button`. */
 	component: string;
 	expectedViewport?: string;
+	/**
+	 * SHA-256 of the expected and actual images, written by the publisher. A local comparison has
+	 * none.
+	 */
+	fingerprint?: string;
 	height?: number;
 	id: string;
 	mismatchedPixels?: number;
@@ -76,4 +83,20 @@ export function parseReport(data: unknown): Report {
 
 export function imageUrl(baseUrl: string, captureId: string, kind: ImageKind): string {
 	return `${baseUrl}/diff/${captureId}.${kind}.png`;
+}
+
+/**
+ * An image's size in pixels, where the report knows it. A report's size is the larger of the
+ * expected and actual images, which is always the diff's size. The other two have it unless their
+ * sizes differ, and a size change marks every pixel as differing.
+ */
+export function imageSize(
+	capture: Capture,
+	kind: ImageKind,
+): { height: number; width: number } | undefined {
+	const { height, mismatchedPixels, width } = capture;
+	if (width === undefined || height === undefined) return undefined;
+	if (kind === 'diff') return { height, width };
+	if (mismatchedPixels === undefined || mismatchedPixels >= width * height) return undefined;
+	return { height, width };
 }

@@ -1,11 +1,15 @@
 const BASE64URL_PATTERN = /^[\w-]*$/;
 const BASE64_PATTERN = /^[A-Za-z0-9+/]*={0,2}$/;
+const TRAILING_PADDING_PATTERN = /=+$/;
 
 /** Encodes bytes as unpadded base64url, the encoding JWTs and signed cookies use. */
 export function encodeBase64Url(bytes: Uint8Array): string {
 	let binary = '';
 	for (const byte of bytes) binary += String.fromCodePoint(byte);
-	return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replace(/=+$/, '');
+	return btoa(binary)
+		.replaceAll('+', '-')
+		.replaceAll('/', '_')
+		.replace(TRAILING_PADDING_PATTERN, '');
 }
 
 /** Decodes unpadded base64url, or returns `undefined` when the text is not base64url. */

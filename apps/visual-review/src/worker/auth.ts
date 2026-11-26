@@ -1,4 +1,5 @@
-import { z } from 'zod';
+import * as z from 'zod';
+import type { SessionResponse } from '../api/contract.js';
 import type { Context } from './access.js';
 import { assertSameOrigin, nowSeconds, readSession, reviewerLogin } from './access.js';
 import { githubFetch, readGitHubJson, upstream, USER_AGENT } from './github.js';
@@ -8,7 +9,7 @@ import {
 	LOGIN_COOKIE,
 	LOGIN_SECONDS,
 	loginCookie,
-	parseLoginState,
+	loginStateSchema,
 	parseReturnPath,
 	pkceChallenge,
 	randomToken,
@@ -24,10 +25,11 @@ import {
 const AUTHORIZE_URL = 'https://github.com/login/oauth/authorize';
 const TOKEN_URL = 'https://github.com/login/oauth/access_token';
 const CODE_PATTERN = /^[\w-]{1,256}$/;
+const HTTPS_PROTOCOL_PATTERN = /^https$/;
 
 const tokenSchema = z.object({ access_token: z.string().min(1) });
 const userSchema = z.object({
-	avatar_url: z.url({ protocol: /^https$/ }),
+	avatar_url: z.url({ protocol: HTTPS_PROTOCOL_PATTERN }),
 	id: z.number().int().positive(),
 	login: z.string().refine(isLogin),
 });
@@ -68,13 +70,12 @@ export async function login(context: Context): Promise<Response> {
 export async function callback(context: Context): Promise<Response> {
 	const clearLogin = loginCookie('', 0);
 	try {
-		const stored = parseLoginState(
-			await verifyToken(
-				context.config.sessionSecret,
-				LOGIN_COOKIE,
-				readCookie(context.request, LOGIN_COOKIE),
-				nowSeconds(context),
-			),
+		const stored = await verifyToken(
+			context.config.sessionSecret,
+			LOGIN_COOKIE,
+			readCookie(context.request, LOGIN_COOKIE),
+			nowSeconds(context),
+			loginStateSchema,
 		);
 		const state = context.url.searchParams.get('state');
 		const code = context.url.searchParams.get('code');
@@ -144,10 +145,12 @@ export async function session(context: Context): Promise<Response> {
 	const current = await readSession(context);
 	if (!current) {
 		const hasCookie = readCookie(context.request, SESSION_COOKIE) !== undefined;
-		return json({ user: null }, { cookies: hasCookie ? [sessionCookie('', 0)] : [] });
+		return json({ user: null } satisfies SessionResponse, {
+			cookies: hasCookie ? [sessionCookie('', 0)] : [],
+		});
 	}
 	return json({
 		canReview: (await reviewerLogin(context, current)) !== undefined,
 		user: { avatarUrl: current.avatarUrl, login: current.login },
-	});
+	} satisfies SessionResponse);
 }

@@ -1,199 +1,204 @@
-import { vars } from '@luke-ui/react/theme';
-import { globalStyle, style } from '@vanilla-extract/css';
+import { breakpoints, vars } from '@luke-ui/react/theme';
+import { createVar, keyframes, style } from '@vanilla-extract/css';
+import { appVars } from '../styles/app-tokens.css.js';
+import {
+	MAIN_PADDING,
+	MAIN_RADIUS,
+	noTransitionWhenReduced,
+	PHONE,
+	REDUCED_MOTION,
+	touchTargetSize,
+} from '../styles/style-rules.js';
 
-const hairline = `${vars.borderWidth.thin} solid ${vars.color.border.decorative}`;
-const focusRing = { outline: `2px solid ${vars.color.focus}`, outlineOffset: '-2px' };
-
-export const layout = style({
-	display: 'grid',
-	flexGrow: 1,
-	gridTemplateColumns: 'minmax(16rem, 20rem) minmax(0, 1fr)',
-	minBlockSize: 0,
+/** The review reads at label size: 14px, the smallest size the app uses for anything a reviewer reads. */
+export const app = style({
+	fontFamily: vars.font.label.fontFamily,
+	fontSize: vars.font.label.fontSize,
+	lineHeight: vars.font.label.lineHeight,
+	minBlockSize: '100dvh',
 });
 
-export const sidebar = style({
-	background: vars.color.background.surface.base,
-	borderInlineEnd: hairline,
-	display: 'flex',
-	flexDirection: 'column',
-	minBlockSize: 0,
+export const numeric = style({
+	fontVariantNumeric: 'tabular-nums',
 });
 
-export const sidebarSection = style({
-	borderBlockEnd: hairline,
-	padding: vars.space['12'],
+/* ----------------------------------------------------------------- top bar */
+
+export const reportTitle = style({ maxInlineSize: '32ch' });
+
+export const progress = style({
+	whiteSpace: 'nowrap',
 });
 
-export const captureScroll = style({
-	flexGrow: 1,
-	minBlockSize: 0,
-	overflowY: 'auto',
-	overscrollBehavior: 'contain',
-	padding: vars.space['8'],
+export const status = style({
+	alignItems: 'center',
+	display: 'inline-flex',
+	gap: vars.space['4'],
+	whiteSpace: 'nowrap',
 });
 
-export const captureGroup = style({
-	listStyle: 'none',
-	margin: 0,
-	padding: 0,
-});
-
-export const captureGroupHeading = style({
-	paddingBlock: vars.space['8'],
-	paddingInline: vars.space['8'],
-});
-
-export const captureLink = style({
-	alignItems: 'baseline',
-	borderRadius: vars.radius.control,
-	color: vars.color.foreground.secondary,
-	display: 'flex',
-	gap: vars.space['8'],
-	justifyContent: 'space-between',
-	paddingBlock: vars.space['8'],
-	paddingInline: vars.space['8'],
-	scrollMarginBlock: vars.space['32'],
-	selectors: {
-		'&:focus-visible': focusRing,
-		'&:hover': {
-			background: `color-mix(in oklab, ${vars.color.foreground.primary} 6%, transparent)`,
-			color: vars.color.foreground.primary,
-		},
-		'&[aria-current="true"]': {
-			background: vars.color.background.accent.subtle,
-			color: vars.color.foreground.primary,
-		},
-	},
-	textDecoration: 'none',
-});
-
-export const captureStatus = style({
-	flexShrink: 0,
-});
-
-export const shortcuts = style({
-	borderBlockStart: hairline,
-	display: 'flex',
-	flexWrap: 'wrap',
-	gap: vars.space['8'],
-	padding: vars.space['12'],
-});
-
-export const viewer = style({
-	display: 'flex',
-	flexDirection: 'column',
-	minBlockSize: 0,
-	minInlineSize: 0,
-});
-
-export const toolbar = style({
-	alignItems: 'end',
-	background: vars.color.background.surface.base,
-	borderBlockEnd: hairline,
-	display: 'flex',
-	flexWrap: 'wrap',
-	gap: vars.space['16'],
-	justifyContent: 'space-between',
-	paddingBlock: vars.space['12'],
-	paddingInline: vars.space['16'],
-});
-
-export const zoomField = style({
-	inlineSize: '7rem',
-});
-
-export const opacityField = style({
+export const differences = style({
 	alignItems: 'center',
 	display: 'flex',
 	gap: vars.space['8'],
 });
 
-export const opacityInput = style({
-	accentColor: vars.color.background.accent.solid.rest,
-	inlineSize: '10rem',
-	selectors: {
-		'&:focus-visible': { ...focusRing, outlineOffset: '2px' },
-	},
+/** Wide enough for `9 of 12`, so the arrows stay put as the position changes. */
+export const differencesPosition = style({
+	minInlineSize: '6ch',
+	textAlign: 'center',
+	whiteSpace: 'nowrap',
 });
 
-export const stage = style({
-	flexGrow: 1,
-	minBlockSize: 0,
-	overflow: 'auto',
-	padding: vars.space['16'],
-	selectors: {
-		'&:focus-visible': focusRing,
-	},
+/** Wide enough for `9/12`, so the phone's arrows stay put as the position changes. */
+export const differencesPositionCompact = style({
+	minInlineSize: '4ch',
+	textAlign: 'center',
+	whiteSpace: 'nowrap',
 });
 
-export const sideBySide = style({
-	alignItems: 'start',
+/** Wide enough for `Fit width`, so the zoom steps stay put as the level changes. */
+export const zoomLevel = style({
+	fontVariantNumeric: 'tabular-nums',
+	minInlineSize: '9ch',
+});
+
+/** Touch targets on phones. */
+export const touchTarget = style({
+	'@container': { [PHONE]: touchTargetSize },
+});
+
+/* ------------------------------------------------------------------ layout */
+
+const sidebarMotion = '300ms ease-in-out';
+const sidebarWidth = '300px';
+const sidebarOffset = createVar();
+
+const WIDE = `(inline-size >= ${breakpoints.bp1280}px)`;
+
+/** One column, or on wide screens with Contents, a sidebar column beside the comparisons. */
+export const layout = style({
 	display: 'grid',
-	gap: vars.space['16'],
-	gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-});
-
-/** At a fixed zoom each column takes its image's size and the stage scrolls. */
-export const sideBySideFixed = style({
-	gridTemplateColumns: 'repeat(2, max-content)',
-});
-
-export const sideBySideStacked = style({
 	gridTemplateColumns: 'minmax(0, 1fr)',
+	minBlockSize: `calc(100dvh - ${appVars.topBarHeight})`,
+	'@container': {
+		[WIDE]: {
+			selectors: {
+				'&[data-has-sidebar]': {
+					gridTemplateColumns: `${vars.space['24']} minmax(0, 1fr)`,
+					transition: `grid-template-columns ${sidebarMotion}`,
+				},
+				'&[data-has-sidebar][data-contents-open]': {
+					gridTemplateColumns: `${sidebarWidth} minmax(0, 1fr)`,
+				},
+			},
+			...noTransitionWhenReduced,
+		},
+	},
 });
 
-export const figure = style({
-	display: 'grid',
-	gap: vars.space['8'],
-	justifyItems: 'start',
-	margin: 0,
+export const sidebar = style({
+	alignSelf: 'start',
+	gridColumn: 1,
+	gridRow: 1,
+	inlineSize: sidebarWidth,
+	insetBlockStart: appVars.topBarHeight,
+	position: 'sticky',
+	transition: `translate ${sidebarMotion}, opacity ${sidebarMotion}, visibility 0s`,
+	translate: '0 0',
+	vars: { [sidebarOffset]: '-100%' },
+	selectors: {
+		'&:dir(rtl)': { vars: { [sidebarOffset]: '100%' } },
+		'&[inert]': {
+			opacity: 0,
+			transition: `translate ${sidebarMotion}, opacity ${sidebarMotion}, visibility 0s 300ms`,
+			translate: `${sidebarOffset} 0`,
+			visibility: 'hidden',
+		},
+	},
+	'@media': {
+		[REDUCED_MOTION]: {
+			transition: 'opacity 100ms ease-in-out, visibility 0s',
+			selectors: {
+				'&[inert]': {
+					transition: 'opacity 100ms ease-in-out, visibility 0s 100ms',
+					translate: 'none',
+				},
+			},
+		},
+	},
+});
+
+export const main = style({
+	boxSizing: 'border-box',
+	gridColumn: 1,
+	gridRow: 1,
 	minInlineSize: 0,
+	overflow: 'clip',
+	padding: MAIN_PADDING,
+	'@container': {
+		[PHONE]: {
+			paddingBlock: `0 ${vars.space['16']}`,
+			paddingInline: 0,
+		},
+		[WIDE]: {
+			selectors: {
+				// Only a sidebar beside it gives the comparisons a corner to round.
+				[`${layout}[data-has-sidebar] > &`]: {
+					borderEndStartRadius: MAIN_RADIUS,
+					borderStartStartRadius: MAIN_RADIUS,
+					gridColumn: 2,
+				},
+			},
+		},
+	},
 });
 
-/** Stacks the expected and actual images in one cell so they share an origin. */
-export const overlay = style({
-	display: 'grid',
-	justifyItems: 'start',
+export const empty = style({
+	color: vars.color.foreground.secondary,
 });
 
-globalStyle(`${overlay} > *`, {
-	gridArea: '1 / 1',
+/* ------------------------------------------------------------------- toast */
+
+const rise = keyframes({
+	from: { opacity: 0, translate: '0 24px' },
 });
 
-/** Sizes to its image so region outlines can be placed as a share of it. */
-export const imageFrame = style({
-	inlineSize: 'fit-content',
-	maxInlineSize: '100%',
-	position: 'relative',
+/** The undo offer after marking viewed: transient, bottom centre. */
+export const toast = style({
+	animation: `${rise} 220ms cubic-bezier(0.16, 1, 0.3, 1)`,
+	background: vars.color.background.surface.raised,
+	borderRadius: vars.radius.surface,
+	boxShadow: vars.shadow.floating,
+	boxSizing: 'border-box',
+	insetBlockEnd: `calc(${vars.space['16']} + env(safe-area-inset-bottom))`,
+	insetInlineStart: '50%',
+	maxInlineSize: `calc(100vw - ${vars.space['32']})`,
+	paddingBlock: '6px',
+	paddingInline: `${vars.space['16']} 6px`,
+	position: 'fixed',
+	translate: '-50% 0',
+	zIndex: 40,
+	'@media': {
+		[REDUCED_MOTION]: { animation: 'none' },
+	},
 });
 
-export const region = style({
-	borderRadius: vars.radius.detail,
-	boxShadow: `0 0 0 1px ${vars.color.background.surface.base}`,
-	outline: `2px solid ${vars.color.foreground.danger.rest}`,
-	pointerEvents: 'none',
-	position: 'absolute',
-	scrollMargin: vars.space['48'],
-});
+/* --------------------------------------------------------- message pages */
 
-export const image = style({
-	background: vars.color.background.surface.base,
-	display: 'block',
-	outline: hairline,
-});
-
-export const imageFit = style({
-	blockSize: 'auto',
-	maxInlineSize: '100%',
-});
-
-/** Keeps pixel edges crisp when an image is scaled up to inspect a small difference. */
-export const imagePixelated = style({
-	imageRendering: 'pixelated',
+export const messagePanel = style({
+	borderStartStartRadius: vars.radius.surface,
+	marginInlineStart: vars.space['16'],
+	minBlockSize: `calc(100dvh - ${appVars.topBarHeight})`,
+	'@container': {
+		[`(inline-size >= ${breakpoints.bp768}px)`]: { marginInlineStart: vars.space['24'] },
+	},
 });
 
 export const message = style({
+	boxSizing: 'border-box',
 	marginInline: 'auto',
-	maxInlineSize: '36rem',
-	padding: vars.space['32'],
+	maxInlineSize: '40rem',
+	paddingBlock: vars.space['64'],
+	paddingInline: vars.space['16'],
 });

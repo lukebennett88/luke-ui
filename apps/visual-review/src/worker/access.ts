@@ -1,10 +1,10 @@
-import { z } from 'zod';
+import * as z from 'zod';
 import type { Config } from './config.js';
 import type { Deps, GitHubApp } from './github.js';
 import { githubFetch, readGitHubJson } from './github.js';
 import { ApiError } from './http.js';
 import type { Session } from './session.js';
-import { parseSession, readCookie, SESSION_COOKIE, verifyToken } from './session.js';
+import { readCookie, SESSION_COOKIE, sessionSchema, verifyToken } from './session.js';
 
 /** One request, with the configuration and dependencies its route needs. */
 export interface Context {
@@ -44,8 +44,12 @@ export async function installationFetch(
 export async function readSession(context: Context): Promise<Session | undefined> {
 	const token = readCookie(context.request, SESSION_COOKIE);
 	if (!token) return undefined;
-	return parseSession(
-		await verifyToken(context.config.sessionSecret, SESSION_COOKIE, token, nowSeconds(context)),
+	return verifyToken(
+		context.config.sessionSecret,
+		SESSION_COOKIE,
+		token,
+		nowSeconds(context),
+		sessionSchema,
 	);
 }
 
