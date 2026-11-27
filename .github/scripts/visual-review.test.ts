@@ -255,7 +255,9 @@ test('rejects duplicate capture ids', () => {
 		{ id: 'button/hover', status: 'changed' },
 		{ id: 'button/hover', status: 'unchanged' },
 	];
-	expect(() => parseArtifactSummary(artifactSummary(results))).toThrow(DUPLICATE_CAPTURE_ID_PATTERN);
+	expect(() => parseArtifactSummary(artifactSummary(results))).toThrow(
+		DUPLICATE_CAPTURE_ID_PATTERN,
+	);
 });
 
 for (const status of ['modified', '', undefined, 1]) {
@@ -376,7 +378,11 @@ test('publishes the rewritten summary and exactly the images each status implies
 				status: 'changed',
 			},
 			{ fingerprint: expect.stringMatching(FINGERPRINT_PATTERN), id: 'card/new', status: 'added' },
-			{ fingerprint: expect.stringMatching(FINGERPRINT_PATTERN), id: 'text/sizes', status: 'removed' },
+			{
+				fingerprint: expect.stringMatching(FINGERPRINT_PATTERN),
+				id: 'text/sizes',
+				status: 'removed',
+			},
 		],
 	});
 	expect(JSON.parse(await readFile(path.join(outDir, 'summary.json'), 'utf8'))).toEqual(summary);
