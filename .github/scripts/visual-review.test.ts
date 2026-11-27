@@ -68,6 +68,17 @@ import {
 	writeSweepPresentation,
 } from './visual-review.js';
 
+const DUPLICATE_CAPTURE_ID_PATTERN = /Duplicate capture id/;
+const WIDTH_PATTERN = /width/;
+const COUNTS_UNCHANGED_PATTERN = /counts\.unchanged/;
+const SUMMARY_JSON_PATTERN = /summary\.json/;
+const LARGER_THAN_PATTERN = /larger than/;
+const NOT_A_REGULAR_FILE_PATTERN = /not a regular file/;
+const ENOENT_PATTERN = /ENOENT/;
+const BASELINE_JSON_PATTERN = /baseline\.json/;
+const APP_URL_ERROR_PATTERN = /APP_URL/;
+const FINGERPRINT_PATTERN = /^[0-9a-f]{64}$/;
+
 const HEAD_SHA = 'a'.repeat(40);
 const PNG = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00]);
 
@@ -244,7 +255,9 @@ test('rejects duplicate capture ids', () => {
 		{ id: 'button/hover', status: 'changed' },
 		{ id: 'button/hover', status: 'unchanged' },
 	];
-	expect(() => parseArtifactSummary(artifactSummary(results))).toThrow(/Duplicate capture id/);
+	expect(() => parseArtifactSummary(artifactSummary(results))).toThrow(
+		DUPLICATE_CAPTURE_ID_PATTERN,
+	);
 });
 
 for (const status of ['modified', '', undefined, 1]) {
@@ -275,25 +288,25 @@ for (const [field, value] of [
 test('rejects a non-finite numeric field', () => {
 	// JSON cannot carry Infinity, so 1e999 is how a hostile file would smuggle one in.
 	const raw = `{"counts":{"unchanged":0},"results":[{"id":"button/hover","status":"changed","width":1e999}]}`;
-	expect(() => parseArtifactSummary(raw)).toThrow(/width/);
+	expect(() => parseArtifactSummary(raw)).toThrow(WIDTH_PATTERN);
 });
 
 for (const unchanged of [-1, 1.5, '3', undefined]) {
 	test(`rejects the unchanged count ${JSON.stringify(unchanged)}`, () => {
 		const raw = JSON.stringify({ counts: { unchanged }, results: [] });
-		expect(() => parseArtifactSummary(raw)).toThrow(/counts\.unchanged/);
+		expect(() => parseArtifactSummary(raw)).toThrow(COUNTS_UNCHANGED_PATTERN);
 	});
 }
 
 for (const raw of ['', 'not json', '[]', 'null', '{"counts":{"unchanged":0}}', '{"results":[]}']) {
 	test(`rejects the malformed summary ${JSON.stringify(raw)}`, () => {
-		expect(() => parseArtifactSummary(raw)).toThrow(/summary\.json/);
+		expect(() => parseArtifactSummary(raw)).toThrow(SUMMARY_JSON_PATTERN);
 	});
 }
 
 test('rejects an oversized summary before parsing it', () => {
 	const raw = artifactSummary([], { padding: 'x'.repeat(MAX_SUMMARY_BYTES) });
-	expect(() => parseArtifactSummary(raw)).toThrow(/larger than/);
+	expect(() => parseArtifactSummary(raw)).toThrow(LARGER_THAN_PATTERN);
 });
 
 test('reads run metadata from the environment', () => {
@@ -358,9 +371,18 @@ test('publishes the rewritten summary and exactly the images each status implies
 		meta,
 		counts: { added: 1, changed: 1, removed: 1, unchanged: 7 },
 		results: [
-			{ id: 'button/hover', mismatchedPixels: 3, status: 'changed' },
-			{ id: 'card/new', status: 'added' },
-			{ id: 'text/sizes', status: 'removed' },
+			{
+				fingerprint: expect.stringMatching(FINGERPRINT_PATTERN),
+				id: 'button/hover',
+				mismatchedPixels: 3,
+				status: 'changed',
+			},
+			{ fingerprint: expect.stringMatching(FINGERPRINT_PATTERN), id: 'card/new', status: 'added' },
+			{
+				fingerprint: expect.stringMatching(FINGERPRINT_PATTERN),
+				id: 'text/sizes',
+				status: 'removed',
+			},
 		],
 	});
 	expect(JSON.parse(await readFile(path.join(outDir, 'summary.json'), 'utf8'))).toEqual(summary);
@@ -403,7 +425,9 @@ test('takes metadata and counts from the workflow, never from the artefact', asy
 	expect(summary.schemaVersion).toBe(1);
 	expect(summary.meta).toEqual(meta);
 	expect(summary.counts).toEqual({ added: 1, changed: 0, removed: 0, unchanged: 2 });
-	expect(summary.results).toEqual([{ id: 'card/new', status: 'added' }]);
+	expect(summary.results).toEqual([
+		{ fingerprint: expect.stringMatching(FINGERPRINT_PATTERN), id: 'card/new', status: 'added' },
+	]);
 });
 
 test('publishes a summary alone when nothing differs', async () => {
@@ -496,7 +520,7 @@ test('rejects a symlinked summary', async () => {
 
 	await expect(
 		prepareSite({ artifactDir, meta: runMeta, outDir: path.join(root, 'deploy', 'site') }),
-	).rejects.toThrow(/not a regular file/);
+	).rejects.toThrow(NOT_A_REGULAR_FILE_PATTERN);
 });
 
 test('rejects an image over the size cap', async () => {
@@ -505,7 +529,9 @@ test('rejects an image over the size cap', async () => {
 		{ 'diff/card/new.actual.png': Buffer.concat([PNG, Buffer.alloc(MAX_IMAGE_BYTES)]) },
 	);
 
-	await expect(prepareSite({ artifactDir, meta: runMeta, outDir })).rejects.toThrow(/larger than/);
+	await expect(prepareSite({ artifactDir, meta: runMeta, outDir })).rejects.toThrow(
+		LARGER_THAN_PATTERN,
+	);
 });
 
 test('rejects an oversized summary file without reading it', async () => {
@@ -513,7 +539,9 @@ test('rejects an oversized summary file without reading it', async () => {
 		artifactSummary([], { padding: 'x'.repeat(MAX_SUMMARY_BYTES) }),
 	);
 
-	await expect(prepareSite({ artifactDir, meta: runMeta, outDir })).rejects.toThrow(/larger than/);
+	await expect(prepareSite({ artifactDir, meta: runMeta, outDir })).rejects.toThrow(
+		LARGER_THAN_PATTERN,
+	);
 });
 
 test('refuses a deploy directory that already exists, even an empty one', async () => {
@@ -582,7 +610,7 @@ test('rejects a report over the total size budget before writing anything', asyn
 	await expect(prepareSite({ artifactDir, meta: runMeta, outDir })).rejects.toThrow(
 		`Refusing to publish more than ${MAX_PUBLISHED_BYTES} bytes.`,
 	);
-	await expect(readdir(path.dirname(outDir))).rejects.toThrow(/ENOENT/);
+	await expect(readdir(path.dirname(outDir))).rejects.toThrow(ENOENT_PATTERN);
 });
 
 test('rejects a report with more files than the cap', async () => {
@@ -654,7 +682,7 @@ for (const raw of [
 	'{"runId":7,"runAttempt":null,"artifactId":9}',
 ]) {
 	test(`rejects the baseline file ${JSON.stringify(raw)}`, () => {
-		expect(() => parseBaseline(raw)).toThrow(/baseline\.json/);
+		expect(() => parseBaseline(raw)).toThrow(BASELINE_JSON_PATTERN);
 	});
 }
 
@@ -2081,8 +2109,8 @@ test('uses only the origin of the configured app URL', () => {
 
 for (const url of ['', 'not a url', 'http://insecure.example', 'javascript:alert(1)']) {
 	test(`rejects the app URL ${JSON.stringify(url)}`, () => {
-		expect(() => comment({ appUrl: url })).toThrow(/APP_URL/);
-		expect(() => payloadFor(checkState(), { appUrl: url })).toThrow(/APP_URL/);
+		expect(() => comment({ appUrl: url })).toThrow(APP_URL_ERROR_PATTERN);
+		expect(() => payloadFor(checkState(), { appUrl: url })).toThrow(APP_URL_ERROR_PATTERN);
 	});
 }
 

@@ -30,10 +30,10 @@ export default {
 			entry: ['src/**/*.browser.test.tsx'],
 			project: ['src/**/*.{ts,tsx}'],
 		},
-		'apps/visual-review': {
-			// `vite.worker.config.ts` builds the worker entry into `dist/_worker.js`.
-			entry: ['src/**/*.browser.test.tsx', 'src/worker/index.ts'],
-			project: ['src/**/*.{ts,tsx}'],
+		'apps/squint': {
+			// `vite.worker.config.ts` builds the worker entry into `dist/client/_worker.js`.
+			entry: ['src/**/*.browser.test.tsx', 'src/routes/**/*.tsx', 'src/worker/index.ts'],
+			project: ['src/**/*.{ts,tsx}', 'vite.plugins.ts'],
 		},
 		'packages/@luke-ui/playground-core': {
 			entry: [

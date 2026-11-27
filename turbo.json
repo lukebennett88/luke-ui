@@ -98,15 +98,15 @@
 		},
 		"//#check:cycles:run": {
 			"cache": false,
-			"dependsOn": ["@luke-ui/react#generate", "docs#generate"]
+			"dependsOn": ["@luke-ui/react#generate", "docs#generate", "squint#generate"]
 		},
 		"//#check:unused:run": {
 			"cache": false,
-			"dependsOn": ["@luke-ui/react#generate", "docs#generate"]
+			"dependsOn": ["@luke-ui/react#generate", "docs#generate", "squint#generate"]
 		},
 		"//#fix:unused:run": {
 			"cache": false,
-			"dependsOn": ["@luke-ui/react#generate", "docs#generate"]
+			"dependsOn": ["@luke-ui/react#generate", "docs#generate", "squint#generate"]
 		},
 		"build": {
 			"dependsOn": ["^build", "generate"],
@@ -278,17 +278,20 @@
 			"dependsOn": ["^build", "generate"],
 			"passThroughEnv": ["PLAYWRIGHT_BROWSERS_PATH"]
 		},
-		"visual-review#build": {
-			"dependsOn": ["^build"],
+		"squint#build": {
+			"dependsOn": ["^build", "generate"],
 			"env": ["VITE_VISUAL_REVIEW_DATA_URL_TEMPLATE", "VITE_VISUAL_REVIEW_REPOSITORY"],
 			"inputs": ["$TURBO_DEFAULT$", ".env*"],
 			"outputs": ["dist/**"]
 		},
-		"visual-review#dev": {
+		"squint#dev": {
 			"cache": false,
-			"dependsOn": ["^build"],
+			"dependsOn": ["generate", "^build"],
 			"persistent": true,
 			"with": ["@luke-ui/react#dev"]
+		},
+		"squint#generate": {
+			"dependsOn": ["generate:routes"]
 		}
 	}
 }

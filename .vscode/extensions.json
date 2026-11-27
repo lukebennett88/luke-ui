@@ -1,3 +1,8 @@
 {
-	"recommendations": ["oxc.oxc-vscode", "unifiedjs.vscode-mdx", "vitest.explorer"]
+	"recommendations": [
+		"mrmlnc.vscode-json5",
+		"oxc.oxc-vscode",
+		"unifiedjs.vscode-mdx",
+		"vitest.explorer"
+	]
 }

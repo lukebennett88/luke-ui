@@ -95,8 +95,8 @@ after merge.
 
 ## Visual review app
 
-`apps/visual-review` shows a comparison's expected, actual, and diff images in the browser. Its
-[README](../apps/visual-review/README.md) describes the interface and its URLs. The app and every
+`apps/squint` shows a pull request's screenshot differences in the browser and records the
+reviewer's decision. Its [README](../apps/squint/README.md) describes its URLs. The app and every
 pull request's report live in one Cloudflare Pages project that takes direct uploads:
 
 - The `Visual review deploy` workflow builds the app from `main` and deploys it to the project's
@@ -110,7 +110,7 @@ comment on the pull request, which it updates on each run. The comment gives the
 the counts, and links to the review. A report with no differences is still published, so the app can
 tell "no visual changes" from "no report".
 
-To review a local comparison, run `pnpm test:visual`, then `pnpm dev:visual-review`, and open
+To review a local comparison, run `pnpm test:visual`, then `pnpm dev:squint`, and open
 `http://localhost:5175/?source=local`.
 
 ### Review check
@@ -339,8 +339,8 @@ Cloudflare keeps a closed pull request's deployments. Nothing removes them.
 ### Review backend
 
 The app's production deployment includes a backend that records approvals on the `visual-review`
-check run. The [app README](../apps/visual-review/README.md#review-backend) describes its routes. It
-ships as `dist/_worker.js`, so `Visual review deploy` uploads it with the app. Report deployments
+check run. The [app README](../apps/squint/README.md#review-backend) describes its routes. It ships
+as `dist/client/_worker.js`, so `Visual review deploy` uploads it with the app. Report deployments
 upload only the allow-listed report, so they never run it.
 
 The backend acts as a GitHub App. Create one with these settings:
@@ -352,21 +352,19 @@ The backend acts as a GitHub App. Create one with these settings:
 - Webhook: inactive.
 - Install it on this repository only.
 
-A reviewer signs in through the App's user authorisation flow, from the review page's status bar.
-[Reviewing in the app](../apps/visual-review/README.md#reviewing-in-the-app) describes it. The
-session keeps the account's immutable GitHub user id. The backend reads the account's current login
-from that id, then allows a decision when GitHub reports the admin, maintain, or write role on the
-repository for the same id. A renamed account keeps its access, and an account that takes over an
-old login gains none. The backend asks GitHub again on every decision, so removing someone's access
-takes effect at once. The [app README](../apps/visual-review/README.md#review-backend) lists the
-freshness checks a decision must pass.
+A reviewer signs in through the App's user authorisation flow, from the review page's Review button.
+The session keeps the account's immutable GitHub user id. The backend reads the account's current
+login from that id, then allows a decision when GitHub reports the admin, maintain, or write role on
+the repository for the same id. A renamed account keeps its access, and an account that takes over
+an old login gains none. The backend asks GitHub again on every decision, so removing someone's
+access takes effect at once. The [app README](../apps/squint/README.md#review-backend) lists the
+codes the backend refuses a decision with.
 
 The backend writes a check run's conclusion, title, summary, and history, but never its
 `external_id`. Only `Visual review publish` writes it. When a decision races a newer result, a
 comparison re-run, or a replaced baseline, the backend restores that result's presentation or
 withdraws the decision. It never passes the check unless it restores a clean result. It reports a
-check run that failed without a new record as failed, not as changes requested. The
-[app README](../apps/visual-review/README.md#review-backend) describes each repair.
+check run that failed without a new record as failed, not as changes requested.
 
 Set these variables as secrets on the Pages project's production environment only. Preview
 deployments, including every `pr-<number>` branch, then have no credentials, and the backend answers

@@ -8,7 +8,7 @@ on:
     branches:
       - main
     paths:
-      - apps/visual-review/**
+      - apps/squint/**
       - packages/@luke-ui/**
       - pnpm-lock.yaml
       - .github/workflows/visual-review-deploy.yml
@@ -56,7 +56,7 @@ jobs:
           VITE_VISUAL_REVIEW_DATA_URL_TEMPLATE: >-
             https://pr-{pr}.${{ vars.VISUAL_REVIEW_PAGES_PROJECT }}.pages.dev
           VITE_VISUAL_REVIEW_REPOSITORY: ${{ github.repository }}
-        run: pnpm exec turbo run build --filter=visual-review
+        run: pnpm exec turbo run build --filter=squint
 
       # Plain `mkdir` fails if the directory already exists, so Wrangler's working directory is
       # known to be empty.
@@ -65,13 +65,13 @@ jobs:
           DEPLOY_DIR: ${{ runner.temp }}/visual-review-deploy
         run: mkdir "$DEPLOY_DIR"
 
-      # Wrangler runs from that empty directory outside the checkout and deploys `dist` by absolute
+      # Wrangler runs from that empty directory outside the checkout and deploys `dist/client` by absolute
       # path. Run from the repository root, `pages deploy` would bundle the root `functions/`
       # directory (the docs site's Pages Functions) into this deployment. Run from a workspace
       # directory, the action would try to install Wrangler into the pnpm workspace.
       #
-      # The review backend ships inside `dist` as Pages Functions in advanced mode. The build writes
-      # a self-contained `dist/_worker.js` and a `dist/_routes.json` that sends only `/api/*` to it,
+      # The review backend ships inside `dist/client` as Pages Functions in advanced mode. The build
+      # writes a self-contained `_worker.js` and a `_routes.json` that sends only `/api/*` to it,
       # so the deployment needs no `functions/` directory and the working directory stays empty.
       #
       # The action and Wrangler are pinned to exact versions because this job holds the Cloudflare
@@ -85,6 +85,6 @@ jobs:
           packageManager: npm
           wranglerVersion: '4.165.0'
           command: >-
-            pages deploy ${{ github.workspace }}/apps/visual-review/dist --project-name=${{
+            pages deploy ${{ github.workspace }}/apps/squint/dist/client --project-name=${{
             vars.VISUAL_REVIEW_PAGES_PROJECT }} --branch=main --commit-hash=${{ github.sha }}
             --commit-dirty=true

@@ -1,0 +1,24 @@
+{
+	"compilerOptions": {
+		"isolatedModules": true,
+		"jsx": "react-jsx",
+		"lib": ["ES2022", "DOM", "DOM.Iterable"],
+		"module": "ESNext",
+		"moduleResolution": "Bundler",
+		"noEmit": true,
+		"noFallthroughCasesInSwitch": true,
+		"noUncheckedSideEffectImports": true,
+		"skipLibCheck": true,
+		"strict": true,
+		"target": "ES2022",
+		"types": ["vite/client", "node"],
+		"verbatimModuleSyntax": true
+	},
+	"include": [
+		"src",
+		"vite.config.ts",
+		"vite.plugins.ts",
+		"vite.worker.config.ts",
+		"vitest.config.ts"
+	]
+}

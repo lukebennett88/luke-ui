@@ -30,6 +30,7 @@ for (const directory of directories) {
 for (const output of [
 	'apps/docs/src/generated',
 	'apps/docs/src/routeTree.gen.ts',
+	'apps/squint/src/routeTree.gen.ts',
 	'packages/@luke-ui/react/.visual-captures',
 	'packages/@luke-ui/react/screenshots',
 ]) {
