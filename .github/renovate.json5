@@ -48,7 +48,9 @@
 			// `vitest` at exact versions, and `overrides` forces one copy workspace-wide. They only
 			// resolve if they move in the same commit. vite-plus-core follows Vite's version numbers, so
 			// its majors arrive alongside vite-plus minors. Keeping majors on their own branch would
-			// split the pair across two PRs that each fail to build.
+			// split the pair across two PRs that each fail to build. vite-plus also pins vitest and
+			// @vitest/* exactly, and Renovate may offer a vitest release that vite-plus has not adopted.
+			// Reset those catalog entries to vite-plus's versions. `vitest-pins.test.ts` fails until then.
 			matchPackageNames: [
 				'@voidzero-dev/vite-plus-core',
 				'@vitest/**',
