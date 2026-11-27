@@ -22,6 +22,7 @@ import {
 } from 'react-aria-components';
 import type { ApiResult, Decision, Review, Session } from '../api/review-api.js';
 import { loginHref, postDecision, postLogout } from '../api/review-api.js';
+import { pullRequestUrl } from '../config.js';
 import type { Report } from '../report/schema.js';
 import * as overlayStyles from './overlays.css.js';
 import * as styles from './review-panel.css.js';
@@ -275,16 +276,16 @@ function ReviewControls(props: ReviewControlsProps) {
 					</Text>
 					{progress ? ` · ${progressText(progress)}` : null}
 				</p>
-				{review ? (
+				{review || number ? (
 					<Link
 						appearance="button"
 						endContent={<Icon name="externalLink" size="xsmall" />}
-						href={review.checkUrl}
+						href={review ? review.checkUrl : `${pullRequestUrl(number)}/checks`}
 						prominence="low"
 						size="small"
 						target="_blank"
 					>
-						Check on GitHub
+						{review ? 'Check on GitHub' : 'Checks on GitHub'}
 					</Link>
 				) : null}
 			</div>
@@ -450,6 +451,17 @@ function reviewNotes({
 	session: ApiResult<Session>;
 }): Array<string> {
 	const notes: Array<string> = [];
+	if (!review) {
+		notes.push(
+			'No visual-review check ran for this commit, so there is nothing to approve. Re-run the visual regression workflow on the pull request, or push a new commit.',
+		);
+	} else if (review.kind === 'failed') {
+		notes.push('The comparison failed, so there are no changes to decide on. Re-run it.');
+	} else if (review.kind === 'pending') {
+		notes.push('The comparison is still running. Decisions open when it finishes.');
+	} else if (review.kind === 'clean') {
+		notes.push('This comparison found no visual changes, so there is nothing to decide.');
+	}
 	if (review?.kind === 'review' && review.reasons.includes('infrastructure')) {
 		notes.push('This pull request changes visual testing infrastructure.');
 	}

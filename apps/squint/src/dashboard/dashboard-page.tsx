@@ -32,7 +32,7 @@ export function DashboardPage() {
 
 	return (
 		<>
-			<title>Visual review</title>
+			<title>Squint</title>
 			<AppHeader />
 			<Box backgroundColor="surface.base" className={styles.panel}>
 				<Box

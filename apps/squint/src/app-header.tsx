@@ -6,6 +6,7 @@ import { Lockup, LockupBody, LockupRail } from '@luke-ui/react/lockup';
 import { Text } from '@luke-ui/react/text';
 import type { ReactNode } from 'react';
 import * as styles from './app-header.css.js';
+import logo from './assets/squint-logo.png';
 import { repository } from './config.js';
 import { TOP_BAR_ID } from './review/scroll-position.js';
 
@@ -24,9 +25,13 @@ export function AppHeader({
 			href={window.location.pathname}
 			prominence="low"
 		>
-			<Text color="primary" fontWeight="emphasis" typography="label">
-				Visual review
-			</Text>
+			<span className={styles.brand}>
+				{/* The name beside it says it all, so the logo is decoration. */}
+				<img alt="" className={styles.logo} height={28} src={logo} width={28} />
+				<Text color="primary" fontWeight="emphasis" typography="label">
+					Squint
+				</Text>
+			</span>
 		</Link>
 	);
 

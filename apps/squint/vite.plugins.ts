@@ -1,9 +1,9 @@
-import { randomUUID } from 'node:crypto';
+import { createHash, randomUUID } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type * as ThemeCompiler from '@luke-ui/react/theme/compiler';
-import { stat } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
 import type { Plugin } from 'vite-plus';
 import { fixtureReportFiles } from './src/test/fixture-report.js';
 import { visualReviewThemeInput } from './src/theme/input.js';
@@ -45,6 +45,18 @@ export function localReport(): Plugin {
 					response.end(body);
 					return;
 				}
+				if (pathname === '/summary.json') {
+					withFingerprints(directory)
+						.then((body) => {
+							response.setHeader('Content-Type', contentType);
+							response.end(body);
+						})
+						.catch(() => {
+							response.statusCode = 404;
+							response.end();
+						});
+					return;
+				}
 				const file = path.join(directory, pathname);
 				stat(file)
 					.then((stats) => {
@@ -60,6 +72,36 @@ export function localReport(): Plugin {
 		},
 		name: 'visual-review-local-report',
 	};
+}
+
+/**
+ * The local `summary.json` with each changed capture's fingerprint, written the way a published
+ * report does: SHA-256 of the expected image, then the actual one, each after its role. Reviewers
+ * can then mark local captures viewed, and a capture whose images change counts as changed again.
+ */
+async function withFingerprints(directory: string): Promise<string> {
+	const summary = JSON.parse(await readFile(path.join(directory, 'summary.json'), 'utf8')) as {
+		results?: Array<{ fingerprint?: string; id: string; status: string }>;
+	};
+	await Promise.all(
+		(summary.results ?? []).map(async (result) => {
+			if (result.status === 'unchanged') return;
+			const hash = createHash('sha256');
+			let hasImage = false;
+			for (const kind of ['expected', 'actual']) {
+				// oxlint-disable-next-line no-await-in-loop
+				const bytes = await readFile(
+					path.join(directory, 'diff', `${result.id}.${kind}.png`),
+				).catch(() => undefined);
+				if (!bytes) continue;
+				hasImage = true;
+				hash.update(`${kind}\n`);
+				hash.update(bytes);
+			}
+			if (hasImage) result.fingerprint = hash.digest('hex');
+		}),
+	);
+	return JSON.stringify(summary);
 }
 
 /**

@@ -482,7 +482,7 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 
 	return (
 		<div className={styles.app}>
-			<title>{`${currentCapture?.id ?? 'Review'} · ${sourceLabel(source)} · Visual review`}</title>
+			<title>{`${currentCapture?.id ?? 'Review'} · ${sourceLabel(source)} · Squint`}</title>
 			<AppHeader
 				actions={
 					<Box

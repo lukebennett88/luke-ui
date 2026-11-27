@@ -16,7 +16,8 @@ export const section = style({
 	borderRadius: SECTION_RADIUS,
 	marginBlockEnd: vars.space['24'],
 	overflow: 'clip',
-	scrollMarginBlockStart: appVars.topBarHeight,
+	// Scrolling to a section stops below the top bar with room to spare.
+	scrollMarginBlockStart: `calc(${appVars.topBarHeight} + ${vars.space['16']})`,
 	'@container': {
 		[PHONE]: {
 			borderRadius: 0,

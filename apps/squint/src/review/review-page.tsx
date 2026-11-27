@@ -59,7 +59,7 @@ function MessagePage({ children, report, source, title }: MessagePageProps) {
 	const review = usePullRequestReview(source.kind === 'pull-request' ? source.number : undefined);
 	return (
 		<div className={styles.app}>
-			<title>{`${sourceLabel(source)} · Visual review`}</title>
+			<title>{`${sourceLabel(source)} · Squint`}</title>
 			<AppHeader
 				actions={
 					review ? (

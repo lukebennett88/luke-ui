@@ -16,5 +16,6 @@ globalStyle('::selection', {
 });
 
 globalStyle('html', {
+	'@media': { '(prefers-reduced-motion: no-preference)': { scrollBehavior: 'smooth' } },
 	scrollbarColor: `${vars.color.border.control.rest} transparent`,
 });

@@ -49,7 +49,9 @@ Zod. The app imports nothing from the scripts that write it.
 The app stores viewed progress only in `localStorage`, keyed by repository and capture id. It
 compares the saved fingerprint with the capture's `fingerprint` in `summary.json`. A capture stays
 viewed in later commits while its images are the same. The Mark viewed button requires a fingerprint
-and is disabled for captures without one, including local comparisons.
+and the development server writes one for each local capture from its images. A report published
+before fingerprints existed uses its head commit as the fingerprint, so its captures need marking
+again after the next commit.
 
 ## Theme
 

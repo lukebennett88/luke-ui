@@ -111,7 +111,7 @@ export function ExampleSection({ ref, ...props }: ExampleSectionProps) {
 			});
 		} else {
 			if (target.restore) restoreCapturePosition(section, scrollerRef.current, target.restore);
-			else if (target.shouldScroll) scrollToSection(section);
+			else if (target.shouldScroll) scrollToSection(section, target.isInstant);
 			if (target.shouldFocus) toggleRef.current?.focus({ preventScroll: true });
 		}
 		onRevealed(seq);

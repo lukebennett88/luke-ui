@@ -40,6 +40,8 @@ export type RevealTarget =
 	 */
 	| {
 			exampleId: string;
+			/** Jumps instead of scrolling smoothly, for the deep link a page opens on. */
+			isInstant?: boolean;
 			kind: 'example';
 			restore?: CapturePosition | undefined;
 			shouldFocus: boolean;
@@ -131,7 +133,13 @@ export function initialReviewState({
 		// The deep link's section scrolls into view once the sections have laid out.
 		reveal: {
 			seq: 1,
-			target: { exampleId: example.id, kind: 'example', shouldFocus: false, shouldScroll: true },
+			target: {
+				exampleId: example.id,
+				isInstant: true,
+				kind: 'example',
+				shouldFocus: false,
+				shouldScroll: true,
+			},
 		},
 		views: { [captureId]: { ...view, activeRegion: undefined } },
 	};

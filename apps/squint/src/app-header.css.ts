@@ -13,3 +13,16 @@ export const header = style([
 export const reviewWordmark = style({
 	'@container': { [PHONE]: { display: 'none' } },
 });
+
+export const brand = style({
+	alignItems: 'center',
+	display: 'inline-flex',
+	gap: vars.space['8'],
+});
+
+export const logo = style({
+	blockSize: '28px',
+	display: 'block',
+	flexShrink: 0,
+	inlineSize: '28px',
+});

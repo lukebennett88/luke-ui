@@ -43,14 +43,17 @@ export function restoreCapturePosition(
 	stage: HTMLElement | null,
 	position: CapturePosition,
 ): void {
-	window.scrollBy({ top: section.getBoundingClientRect().top - position.top });
+	// Instant: this puts a section back where it was, not somewhere new.
+	window.scrollBy({ behavior: 'instant', top: section.getBoundingClientRect().top - position.top });
 	stage?.scrollTo({ left: position.left });
 }
 
-/** Scrolls so the section's header sits just below the top bar. */
-export function scrollToSection(section: HTMLElement): void {
-	const top = section.getBoundingClientRect().top + window.scrollY - stickyTop();
-	window.scrollTo({ top: Math.max(top, 0) });
+/**
+ * Scrolls the section's header to just below the top bar. The section's `scroll-margin` sets the
+ * gap and the document's `scroll-behavior` makes it smooth, so the stylesheet owns both.
+ */
+export function scrollToSection(section: HTMLElement, isInstant = false): void {
+	section.scrollIntoView({ behavior: isInstant ? 'instant' : 'auto', block: 'start' });
 }
 
 /** The elements around a difference's outline that scrolling to it reads. */

@@ -1,5 +1,6 @@
 import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router';
 import type { ReactNode } from 'react';
+import logo from '../assets/squint-logo.png';
 
 export const Route = createRootRoute({
 	component: RootComponent,
@@ -8,8 +9,9 @@ export const Route = createRootRoute({
 			{ charSet: 'utf-8' },
 			{ content: 'width=device-width, initial-scale=1', name: 'viewport' },
 			{ content: 'noindex', name: 'robots' },
-			{ title: 'Visual review' },
+			{ title: 'Squint' },
 		],
+		links: [{ href: logo, rel: 'icon', type: 'image/png' }],
 	}),
 	shellComponent: RootDocument,
 });

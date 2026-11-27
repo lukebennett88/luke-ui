@@ -47,8 +47,9 @@ export type Capture = {
 	component: string;
 	expectedViewport?: string;
 	/**
-	 * SHA-256 of the expected and actual images, written by the publisher. A local comparison has
-	 * none.
+	 * SHA-256 of the expected and actual images, written by the publisher. A report published before
+	 * publishers wrote it falls back to its head commit, so the capture counts as changed in the next
+	 * commit. A local comparison has none.
 	 */
 	fingerprint?: string;
 	height?: number;
@@ -75,7 +76,14 @@ export function parseReport(data: unknown): Report {
 	for (const result of results) {
 		if (result.status === 'unchanged') continue;
 		const [component = '', name = ''] = result.id.split('/');
-		captures.push({ ...result, component, name, status: result.status });
+		const fingerprint = result.fingerprint ?? (meta ? `commit:${meta.headSha}` : undefined);
+		captures.push({
+			...result,
+			component,
+			fingerprint,
+			name,
+			status: result.status,
+		});
 	}
 	captures.sort((a, b) => a.id.localeCompare(b.id));
 	return { captures, counts, meta };
