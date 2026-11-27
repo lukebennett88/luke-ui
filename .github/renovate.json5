@@ -46,7 +46,9 @@
 		{
 			// The catalog aliases `vite` to @voidzero-dev/vite-plus-core, pins it beside `vite-plus` and
 			// `vitest` at exact versions, and `overrides` forces one copy workspace-wide. They only
-			// resolve if they move in the same commit.
+			// resolve if they move in the same commit. vite-plus-core follows Vite's version numbers, so
+			// its majors arrive alongside vite-plus minors. Keeping majors on their own branch would
+			// split the pair across two PRs that each fail to build.
 			matchPackageNames: [
 				'@voidzero-dev/vite-plus-core',
 				'@vitest/**',
@@ -55,6 +57,7 @@
 				'vitest',
 			],
 			groupName: 'vite-plus toolchain',
+			separateMajorMinor: false,
 		},
 		{
 			// @types/react has to land with the react major it describes, so it stays out of the
@@ -101,9 +104,12 @@
 			// The visual workflows render inside this image, and its tag tracks the `playwright` npm
 			// package. Moving only one leaves the library driving browsers it does not match, so keep
 			// the two in one PR. The digest stays pinned so the tag cannot resolve to a new image.
+			// MCR publishes no release timestamps, and the default `timestamp-required` would hold the
+			// image back from `minimumReleaseAge` indefinitely while the npm package moves alone.
 			matchManagers: ['dockerfile'],
 			groupName: 'playwright',
 			pinDigests: true,
+			minimumReleaseAgeBehaviour: 'timestamp-optional',
 		},
 		{
 			matchPackageNames: ['playwright'],
