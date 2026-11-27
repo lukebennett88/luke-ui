@@ -190,8 +190,8 @@ catalogs:
       specifier: ^4.1.3
       version: 4.1.3
     '@capsizecss/metrics':
-      specifier: ^4.4.0
-      version: 4.4.0
+      specifier: ^4.5.0
+      version: 4.5.0
     '@capsizecss/unpack':
       specifier: ^4.0.1
       version: 4.0.1
@@ -553,7 +553,7 @@ importers:
     devDependencies:
       '@capsizecss/metrics':
         specifier: 'catalog:'
-        version: 4.4.0
+        version: 4.5.0
       '@tanstack/router-cli':
         specifier: 'catalog:'
         version: 1.168.0(supports-color@7.2.0)
@@ -613,7 +613,7 @@ importers:
     dependencies:
       '@capsizecss/metrics':
         specifier: 'catalog:'
-        version: 4.4.0
+        version: 4.5.0
       '@luke-ui/react':
         specifier: workspace:*
         version: link:../../packages/@luke-ui/react
@@ -828,7 +828,7 @@ importers:
         version: 0.18.5
       '@capsizecss/metrics':
         specifier: 'catalog:'
-        version: 4.4.0
+        version: 4.5.0
       '@capsizecss/unpack':
         specifier: 'catalog:'
         version: 4.0.1
@@ -964,7 +964,7 @@ importers:
     devDependencies:
       '@capsizecss/metrics':
         specifier: 'catalog:'
-        version: 4.4.0
+        version: 4.5.0
       '@luke-ui/react':
         specifier: workspace:*
         version: link:../react
@@ -985,7 +985,7 @@ importers:
     devDependencies:
       '@capsizecss/metrics':
         specifier: 'catalog:'
-        version: 4.4.0
+        version: 4.5.0
       '@luke-ui/react':
         specifier: workspace:*
         version: link:../react
@@ -1132,8 +1132,8 @@ packages:
   '@capsizecss/core@4.1.3':
     resolution: {integrity: sha512-d2sTTBwKuVioYxpwpU4URMp8VkFK+GI1VNGNawQcF8HBMHzCDa1FLcbeXJSzb5AJik7ZGv3aFVCTs7IS9MhvHg==}
 
-  '@capsizecss/metrics@4.4.0':
-    resolution: {integrity: sha512-c2hY6gnHsHdt41zKv2RAbUM3v1m9TnBGKOWv0ksdScBMlwE5AdZPt+hjZEIziEiYUpdyytZ/ct07WqjzdBOIJw==}
+  '@capsizecss/metrics@4.5.0':
+    resolution: {integrity: sha512-BD0pz1JksZXEX9RLNtUCYYD72sQIVzOPIjaCAXPSz18lWdtPGmNbj6AVL2Q3n0trOLPOjZ9fnvtuAmSPv7yO1g==}
 
   '@capsizecss/unpack@4.0.1':
     resolution: {integrity: sha512-CuNiSqg7+e1cO/GjffyMOm5Tt2jUF9CWHHnvQ/UkqvtkGfHdgwEC0wpmq7fkN3gxwpRnrAN0WzO3vREKmNolMQ==}
@@ -6484,7 +6484,7 @@ snapshots:
     dependencies:
       csstype: 3.2.4
 
-  '@capsizecss/metrics@4.4.0': {}
+  '@capsizecss/metrics@4.5.0': {}
 
   '@capsizecss/unpack@4.0.1':
     dependencies:
