@@ -121,9 +121,8 @@ type Ref<A, B> = [NonNullable<A>] extends [never]
 	? Retained<A, B>
 	: [NonNullable<B>] extends [never]
 		? Retained<A, B>
-		:
-				| RefCallback<RefTarget<A> & RefTarget<B>>
-				| (Extract<A | B, null | undefined> extends never ? never : Retained<A, B>);
+		: | RefCallback<RefTarget<A> & RefTarget<B>>
+			| (Extract<A | B, null | undefined> extends never ? never : Retained<A, B>);
 
 type MergedValue<A, B, K extends PropertyKey> = K extends 'className'
 	? Presentation<A, B, string, string>
