@@ -182,4 +182,18 @@ for (const { filename, workflow: workflowFile } of workflowContents) {
 	}
 }
 assert.ok(setupNodeCount > 0);
+// vite-plus-core majors arrive alongside vite-plus minors. Separate branches would each fail CI.
+const catalogDeps = (await extractPnpmWorkspaceFile(workspace, 'pnpm-workspace.yaml')).deps;
+const catalogBranchName = async (name, updateType, newMajor) => {
+	const dep = catalogDeps.find((entry) => entry.depName === name);
+	assert.ok(dep, `Expected ${name} in the pnpm catalog`);
+	const branch = { ...getConfig(), ...(await apply(dep, 'npm', updateType)), updateType, newMajor };
+	generateBranchName(branch);
+	return branch.branchName;
+};
+assert.equal(
+	await catalogBranchName('vite', 'major', 9),
+	await catalogBranchName('vite-plus', 'minor', 1),
+);
+
 process.stdout.write('Renovate Node extraction and update checks passed\n');
