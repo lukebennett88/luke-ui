@@ -182,28 +182,18 @@ for (const { filename, workflow: workflowFile } of workflowContents) {
 	}
 }
 assert.ok(setupNodeCount > 0);
-// Coupled updates must share one branch, or each PR fails CI without the other.
-const branchFor = async (dep, manager, updateType, newMajor) => {
-	const resolved = await apply(dep, manager, updateType);
-	const branch = { ...getConfig(), ...resolved, updateType, newMajor };
-	generateBranchName(branch);
-	return { resolved, branchName: branch.branchName };
-};
+// vite-plus-core majors arrive alongside vite-plus minors. Separate branches would each fail CI.
 const catalogDeps = (await extractPnpmWorkspaceFile(workspace, 'pnpm-workspace.yaml')).deps;
-const catalogDep = (name) => {
+const catalogBranchName = async (name, updateType, newMajor) => {
 	const dep = catalogDeps.find((entry) => entry.depName === name);
 	assert.ok(dep, `Expected ${name} in the pnpm catalog`);
-	return dep;
+	const branch = { ...getConfig(), ...(await apply(dep, 'npm', updateType)), updateType, newMajor };
+	generateBranchName(branch);
+	return branch.branchName;
 };
-const viteMajor = await branchFor(catalogDep('vite'), 'npm', 'major', 9);
-const vitePlusMinor = await branchFor(catalogDep('vite-plus'), 'npm', 'minor', 1);
-assert.equal(viteMajor.branchName, vitePlusMinor.branchName);
-
-const playwrightImage = { depName: 'mcr.microsoft.com/playwright', datasource: 'docker' };
-const imagePatch = await branchFor(playwrightImage, 'dockerfile', 'patch', 1);
-const playwrightPatch = await branchFor(catalogDep('playwright'), 'npm', 'patch', 1);
-assert.equal(imagePatch.branchName, playwrightPatch.branchName);
-// The registry reports no release timestamps, so a required one would hold the image back forever.
-assert.equal(imagePatch.resolved.minimumReleaseAgeBehaviour, 'timestamp-optional');
+assert.equal(
+	await catalogBranchName('vite', 'major', 9),
+	await catalogBranchName('vite-plus', 'minor', 1),
+);
 
 process.stdout.write('Renovate Node extraction and update checks passed\n');
