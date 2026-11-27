@@ -3,57 +3,23 @@ import { createReadStream } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type * as ThemeCompiler from '@luke-ui/react/theme/compiler';
-import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
-import react from '@vitejs/plugin-react';
 import { stat } from 'node:fs/promises';
 import type { Plugin } from 'vite-plus';
-import { defineConfig } from 'vite-plus';
-import { playwright } from 'vite-plus/test/browser-playwright';
 import { fixtureReportFiles } from './src/test/fixture-report.js';
 import { visualReviewThemeInput } from './src/theme/input.js';
+
+// Plugins shared by the app build in `vite.config.ts` and the tests in `vitest.config.ts`.
 
 const LOCAL_REPORT_ROUTE = '/__local-report';
 const LOCAL_REPORT_FILE_PATTERN =
 	/^\/(?:summary\.json|diff\/[a-z0-9-]+\/[a-z0-9-]+\.(?:expected|actual|diff)\.png)$/;
-
-export default defineConfig({
-	plugins: [visualReviewTheme(), localReport(), vanillaExtractPlugin(), react()],
-	server: {
-		port: 5175,
-	},
-	test: {
-		projects: [
-			{
-				extends: true,
-				test: { include: ['src/**/*.test.ts'], name: 'unit' },
-			},
-			{
-				extends: true,
-				optimizeDeps: { include: ['axe-core'] },
-				test: {
-					browser: {
-						enabled: true,
-						headless: true,
-						instances: [{ browser: 'chromium' }],
-						provider: playwright({}),
-					},
-					// Pull request reports come from this origin, which the tests' mocked fetch answers.
-					env: { VITE_VISUAL_REVIEW_DATA_URL_TEMPLATE: 'https://pr-{pr}.reports.test' },
-					include: ['src/**/*.browser.test.tsx'],
-					name: 'browser',
-					setupFiles: ['./src/test/browser-setup.ts'],
-				},
-			},
-		],
-	},
-});
 
 /**
  * Serves a local comparison at `/__local-report` while developing, so `?source=local` reviews the
  * output of `pnpm test:visual`. Set `VISUAL_REVIEW_LOCAL_DIR` to read another directory. Production
  * builds have no local source: pull requests publish their own data.
  */
-function localReport(): Plugin {
+export function localReport(): Plugin {
 	// Browser tests always review the small report drawn in `src/test`, through the same route.
 	const fixture = process.env.VITEST ? fixtureReportFiles() : undefined;
 	const directory = path.resolve(
@@ -100,7 +66,7 @@ function localReport(): Plugin {
  * Serves the app theme as `virtual:visual-review-theme.css`. Vite restarts when `src/theme/input.ts`
  * changes because it is a config dependency.
  */
-function visualReviewTheme(): Plugin {
+export function visualReviewTheme(): Plugin {
 	const id = 'virtual:visual-review-theme.css';
 	const resolvedId = `\0${id}`;
 	return {

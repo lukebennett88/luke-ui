@@ -34,7 +34,7 @@ Useful repo commands:
 - `pnpm run test`: run every test suite, including the Docker visual comparison.
 - `pnpm run test:code`: run every suite except the visual comparison. It needs no Docker.
 - `pnpm run dev:reference-app`: develop the consumer reference app.
-- `pnpm run dev:visual-review`: review a visual comparison in the browser.
+- `pnpm run dev:squint`: review a visual comparison in the browser.
 
 See [Workflows](docs/WORKFLOWS.md) for focused commands, generation, fixing, cleaning, and task
 orchestration.

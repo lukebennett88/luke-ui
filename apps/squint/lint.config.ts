@@ -1,9 +1,9 @@
 import type { OxlintOverride } from 'vite-plus/lint';
 
-export const visualReviewLintOverrides = [
+export const squintLintOverrides = [
 	{
 		// The Pages worker runs on Cloudflare, not Node, and bundles only its own modules.
-		files: ['apps/visual-review/src/worker/**/*.ts'],
+		files: ['apps/squint/src/worker/**/*.ts'],
 		rules: {
 			'import/no-nodejs-modules': 'error',
 			'no-restricted-imports': [
@@ -21,8 +21,8 @@ export const visualReviewLintOverrides = [
 		},
 	},
 	{
-		excludeFiles: ['apps/visual-review/src/worker/**'],
-		files: ['apps/visual-review/src/**/*.{ts,tsx}'],
+		excludeFiles: ['apps/squint/src/worker/**'],
+		files: ['apps/squint/src/**/*.{ts,tsx}'],
 		rules: {
 			'no-restricted-imports': [
 				'error',

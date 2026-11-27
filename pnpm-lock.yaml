@@ -673,7 +673,7 @@ importers:
         specifier: 5.1.0
         version: 5.1.0(@types/node@26.6.6)(@vitest/browser-playwright@5.1.0)(@vitest/browser-preview@5.1.0)(@vitest/coverage-v8@5.1.0)(@vitest/ui@5.1.0)(@voidzero-dev/vite-plus-core@8.3.8000(@arethetypeswrong/core@0.18.5)(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(tsx@4.23.15)(typescript@7.0.2)(yaml@2.9.1))
 
-  apps/visual-review:
+  apps/squint:
     dependencies:
       '@capsizecss/metrics':
         specifier: 'catalog:'
@@ -681,6 +681,12 @@ importers:
       '@luke-ui/react':
         specifier: workspace:*
         version: link:../../packages/@luke-ui/react
+      '@tanstack/react-router':
+        specifier: 'catalog:'
+        version: 1.170.46(react-dom@19.3.1(react@19.3.1))(react@19.3.1)
+      '@tanstack/react-start':
+        specifier: 'catalog:'
+        version: 1.169.7(@voidzero-dev/vite-plus-core@1.6.0(@arethetypeswrong/core@0.18.5)(@types/node@26.6.6)(esbuild@0.28.2)(jiti@2.7.0)(publint@0.3.25)(tsx@4.23.15)(typescript@7.0.2)(yaml@2.9.1))(esbuild@0.28.2)(react-dom@19.3.1(react@19.3.1))(react@19.3.1)(rollup@4.66.0)(supports-color@7.2.0)
       '@vanilla-extract/css':
         specifier: 'catalog:'
         version: 1.21.3
@@ -697,6 +703,9 @@ importers:
         specifier: 'catalog:'
         version: 4.6.7
     devDependencies:
+      '@tanstack/router-cli':
+        specifier: 'catalog:'
+        version: 1.168.0(supports-color@7.2.0)
       '@types/node':
         specifier: ^26.6.6
         version: 26.6.6

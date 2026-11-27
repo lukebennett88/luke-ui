@@ -15,7 +15,7 @@ The app development commands prepare them automatically.
 | `pnpm build:packages`                      | Workspace libraries                                                                                                                |
 | `pnpm build:docs`                          | Docs production output and output validation                                                                                       |
 | `pnpm build:reference-app`                 | Reference app production output                                                                                                    |
-| `pnpm build:visual-review`                 | Visual review app production output                                                                                                |
+| `pnpm build:squint`                        | Visual review app production output                                                                                                |
 | `pnpm check`                               | Format, ordinary and type-aware lint, every TypeScript project, barrels, docs, generated site validations, cycles, and unused code |
 | `pnpm check:format`                        | Repository formatting                                                                                                              |
 | `pnpm check:lint`                          | Ordinary repository lint                                                                                                           |
@@ -24,7 +24,7 @@ The app development commands prepare them automatically.
 | `pnpm check:cycles` / `pnpm check:unused`  | Repository-wide graph checks                                                                                                       |
 | `pnpm lint:changed`                        | Lint JS/TS files changed since `origin/main` (run `git add` on new files first)                                                    |
 | `pnpm dev:docs` / `pnpm dev:reference-app` | App development with workspace changes                                                                                             |
-| `pnpm dev:visual-review`                   | Visual review app, serving the local comparison at `?source=local`                                                                 |
+| `pnpm dev:squint`                          | Visual review app, serving the local comparison at `?source=local`                                                                 |
 
 The comprehensive check runs `vp check` once for repository formatting and ordinary lint, then runs
 explicit TypeScript projects, type-aware lint, generated-file validations, barrels, cycles, and

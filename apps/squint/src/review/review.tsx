@@ -4,10 +4,10 @@ import { Heading } from '@luke-ui/react/heading';
 import { IconButton } from '@luke-ui/react/icon-button';
 import { Link } from '@luke-ui/react/link';
 import { VisuallyHidden } from '@luke-ui/react/visually-hidden';
-import { useEffect, useMemo, useReducer, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { Dialog, Modal, ModalOverlay } from 'react-aria-components';
 import { AppHeader } from '../app-header.js';
-import { hrefWithParams, navigate, useLocationSearch } from '../navigation/location.js';
+import { hrefWithParams, useLocationSearch, useNavigateHref } from '../navigation/location.js';
 import type { ReportSource } from '../report/report-source.js';
 import type { Capture, Report } from '../report/schema.js';
 import { Contents } from './contents.js';
@@ -43,6 +43,7 @@ type ReviewProps = { baseUrl: string; report: Report; source: ReportSource };
 /** One scrolling report with capture controls inside each example. */
 export function Review({ baseUrl, report, source }: ReviewProps) {
 	const params = parseReviewParams(useLocationSearch());
+	const replaceParams = useReplaceParams();
 	const { restoreSeen, setSeen, stateOf, storedFor } = useSeen();
 	const pullRequestReview = usePullRequestReview(
 		source.kind === 'pull-request' ? source.number : undefined,
@@ -154,7 +155,7 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 			...reviewParamValues({ hideViewed, query, status, ...currentView, layout }),
 			capture: currentCapture?.id,
 		});
-	}, [currentCapture, currentView, hideViewed, query, status]);
+	}, [currentCapture, currentView, hideViewed, query, replaceParams, status]);
 
 	const revealExampleId = reveal?.target.exampleId;
 	useScrollSpy({
@@ -632,7 +633,16 @@ export function Review({ baseUrl, report, source }: ReviewProps) {
 	);
 }
 
-/** Replaces the query string without a history entry, so Back leaves the review. */
-function replaceParams(updates: Record<string, string | undefined>) {
-	navigate(hrefWithParams(window.location.search, updates), { replace: true });
+/** Updates the review URL without moving the capture or adding a history entry. */
+function useReplaceParams() {
+	const navigate = useNavigateHref();
+	return useCallback(
+		(updates: Record<string, string | undefined>) => {
+			navigate(hrefWithParams(window.location.search, updates), {
+				replace: true,
+				resetScroll: false,
+			});
+		},
+		[navigate],
+	);
 }

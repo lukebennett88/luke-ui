@@ -6,7 +6,7 @@ import { cleanupApps } from './render-app.js';
 
 (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
-// `index.html` carries the identity class in the app. Tests render without it.
+// The root route puts the identity class on `<html>` in the app. Tests render without it.
 document.documentElement.classList.add(getThemeClassName(visualReviewThemeInput.name));
 
 beforeEach(async () => {

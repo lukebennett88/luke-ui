@@ -95,9 +95,9 @@ after merge.
 
 ## Visual review app
 
-`apps/visual-review` shows a pull request's screenshot differences in the browser and records the
-reviewer's decision. Its [README](../apps/visual-review/README.md) describes its URLs. The app and
-every pull request's report live in one Cloudflare Pages project that takes direct uploads:
+`apps/squint` shows a pull request's screenshot differences in the browser and records the
+reviewer's decision. Its [README](../apps/squint/README.md) describes its URLs. The app and every
+pull request's report live in one Cloudflare Pages project that takes direct uploads:
 
 - The `Visual review deploy` workflow builds the app from `main` and deploys it to the project's
   production branch. A pull request cannot change the deployed app.
@@ -110,7 +110,7 @@ comment on the pull request, which it updates on each run. The comment gives the
 the counts, and links to the review. A report with no differences is still published, so the app can
 tell "no visual changes" from "no report".
 
-To review a local comparison, run `pnpm test:visual`, then `pnpm dev:visual-review`, and open
+To review a local comparison, run `pnpm test:visual`, then `pnpm dev:squint`, and open
 `http://localhost:5175/?source=local`.
 
 ### Review check
@@ -339,8 +339,8 @@ Cloudflare keeps a closed pull request's deployments. Nothing removes them.
 ### Review backend
 
 The app's production deployment includes a backend that records approvals on the `visual-review`
-check run. The [app README](../apps/visual-review/README.md#review-backend) describes its routes. It
-ships as `dist/_worker.js`, so `Visual review deploy` uploads it with the app. Report deployments
+check run. The [app README](../apps/squint/README.md#review-backend) describes its routes. It ships
+as `dist/client/_worker.js`, so `Visual review deploy` uploads it with the app. Report deployments
 upload only the allow-listed report, so they never run it.
 
 The backend acts as a GitHub App. Create one with these settings:
@@ -357,8 +357,8 @@ The session keeps the account's immutable GitHub user id. The backend reads the 
 login from that id, then allows a decision when GitHub reports the admin, maintain, or write role on
 the repository for the same id. A renamed account keeps its access, and an account that takes over
 an old login gains none. The backend asks GitHub again on every decision, so removing someone's
-access takes effect at once. The [app README](../apps/visual-review/README.md#review-backend) lists
-the codes the backend refuses a decision with.
+access takes effect at once. The [app README](../apps/squint/README.md#review-backend) lists the
+codes the backend refuses a decision with.
 
 The backend writes a check run's conclusion, title, summary, and history, but never its
 `external_id`. Only `Visual review publish` writes it. When a decision races a newer result, a

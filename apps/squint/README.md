@@ -16,7 +16,7 @@ Run these commands from the repository root:
 
 ```bash
 pnpm test:visual
-pnpm run dev:visual-review
+pnpm run dev:squint
 ```
 
 `pnpm test:visual` writes the comparison that `http://localhost:5175/?source=local` reviews. Set
@@ -29,6 +29,16 @@ Two build-time variables configure a deployment:
   standing for its number. Without it, only the local source loads.
 - `VITE_VISUAL_REVIEW_REPOSITORY` is the `owner/name` of the GitHub repository. It defaults to
   `lukebennett88/luke-ui`.
+
+## App
+
+Squint is a TanStack Start app in SPA mode. The build prerenders one shell to
+`dist/client/index.html`, and the browser renders every view. `src/routes/index.tsx` is the only
+route: the query string picks the view, so links in pull request comments keep working. The router
+keeps search values as strings, as the app reads them.
+
+The browser tests mount the app on a router of their own, so `vitest.config.ts` leaves out the
+TanStack Start plugin. `vite.plugins.ts` holds the plugins both configs share.
 
 ## Reports
 
@@ -44,15 +54,16 @@ and is disabled for captures without one, including local comparisons.
 ## Theme
 
 The app has its own theme, so its chrome stays distinct from the screenshots it frames. A Vite
-plugin in `vite.config.ts` compiles `src/theme/input.ts` and serves it as
+plugin in `vite.plugins.ts` compiles `src/theme/input.ts` and serves it as
 `virtual:visual-review-theme.css`. Values the theme has no token for are in
 `src/styles/app-tokens.css.ts`.
 
 ## Review backend
 
-`src/worker/` is the backend that records decisions. The build compiles it into `dist/_worker.js`,
-and `dist/_routes.json` sends only `/api/*` to it. The browser app does not import the worker. Both
-read the API's shapes from the Zod schemas in `src/api/contract.ts`.
+`src/worker/` is the backend that records decisions. The build compiles it into
+`dist/client/_worker.js`, and `dist/client/_routes.json` sends only `/api/*` to it. The browser app
+does not import the worker. Both read the API's shapes from the Zod schemas in
+`src/api/contract.ts`.
 
 | Route                               | Purpose                                                |
 | ----------------------------------- | ------------------------------------------------------ |

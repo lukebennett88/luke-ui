@@ -2,8 +2,8 @@ import type { Plugin } from 'vite-plus';
 import { defineConfig } from 'vite-plus';
 
 /**
- * Builds the review backend into `dist/_worker.js`, a Cloudflare Pages Functions worker in advanced
- * mode, after the app build. The deploy uploads `dist` from an empty directory with no
+ * Builds the review backend into `dist/client/_worker.js`, a Cloudflare Pages Functions worker in advanced
+ * mode, after the app build. The deploy uploads `dist/client` from an empty directory with no
  * `node_modules`, so the worker must be one self-contained ES module.
  */
 export default defineConfig({
@@ -15,7 +15,7 @@ export default defineConfig({
 			formats: ['es'],
 		},
 		minify: false,
-		outDir: 'dist',
+		outDir: 'dist/client',
 		target: 'es2022',
 	},
 	plugins: [pagesWorker()],
