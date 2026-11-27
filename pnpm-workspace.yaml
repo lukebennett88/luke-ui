@@ -68,9 +68,9 @@ catalog:
   '@vanilla-extract/rollup-plugin': ^1.5.4
   '@vanilla-extract/vite-plugin': ^5.2.6
   '@vitejs/plugin-react': ^6.3.0
-  '@vitest/browser-playwright': 5.1.1
-  '@vitest/coverage-v8': 5.1.1
-  '@vitest/ui': 5.1.1
+  '@vitest/browser-playwright': 5.1.0
+  '@vitest/coverage-v8': 5.1.0
+  '@vitest/ui': 5.1.0
   axe-core: ^4.14.1
   csstype: ^3.2.4
   dom-accessibility-api: ^0.7.1
@@ -113,7 +113,7 @@ catalog:
   unist-util-visit: ^5.2.0
   vite: npm:@voidzero-dev/vite-plus-core@8.3.8000
   vite-plus: 1.7.0
-  vitest: 5.1.1
+  vitest: 5.1.0
   zbsearch: ^4.0.4
   zod: ^4.6.7
 minimumReleaseAgeExclude:
