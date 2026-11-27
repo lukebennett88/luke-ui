@@ -262,7 +262,9 @@ function ReviewControls(props: ReviewControlsProps) {
 	const isBusy = pending !== undefined;
 	const returnPath = `${window.location.pathname}${window.location.search}`;
 	const size = isCompact ? 'medium' : 'small';
-	const notes = reviewNotes({ isCurrent, refusal, report, review, session });
+	const notes = reviewNotes({ isCurrent, refusal, report, review, session }).filter(
+		(text) => text !== announcement,
+	);
 
 	return (
 		<>
