@@ -137,9 +137,9 @@ not help. Silence in this log is not evidence.
 - Where: `.github/workflows/check.yml`, `packages/@luke-ui/theme-paper/package.json`,
   `packages/@luke-ui/theme-tactile/package.json`. `docs/DEPENDENCIES.md` says to commit updated
   metadata when bundled dependencies change.
-- Problem: The packer writes the bundled version during the build, and Renovate cannot run the build.
-  Every Renovate PR that moves a bundled dependency fails CI until someone rebuilds and commits the
-  manifests.
+- Problem: The packer writes the bundled version during the build, and Renovate cannot run the
+  build. Every Renovate PR that moves a bundled dependency fails CI until someone rebuilds and
+  commits the manifests.
 
 ## Agent stashed changes despite the no-stash rule
 
@@ -148,5 +148,5 @@ not help. Silence in this log is not evidence.
   restored it with `git stash pop`. No user work was affected.
 - Where: `.github/tests/renovate-node.mjs` verification. `AGENTS.md`, Universal rules, says not to
   reset, clean, stash, or overwrite existing work.
-- Problem: The agent reached for a stash to test a pre-change file instead of using a temporary copy,
-  contradicting a rule it had loaded.
+- Problem: The agent reached for a stash to test a pre-change file instead of using a temporary
+  copy, contradicting a rule it had loaded.
