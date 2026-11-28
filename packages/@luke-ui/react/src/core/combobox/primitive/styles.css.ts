@@ -338,11 +338,6 @@ const comboboxConfig = {
 			paddingInline: vars.space['12'],
 			textAlign: 'center',
 		},
-		// Select reuses this option model. The active option, which follows the keyboard and the
-		// pointer only while focus is not visible, paints `accent.solid` with on-solid text and a 2px
-		// inset outline that replaces the focus ring. Selected shows only the check icon. Hover alone
-		// adds nothing. The compiler gates the outline against the solid fills, not the fill against
-		// `surface.raised`.
 		item: {
 			'@media': {
 				'(forced-colors: active)': {
@@ -385,7 +380,7 @@ const comboboxConfig = {
 
 			// React Aria moves the one active item (`data-focused`) with the pointer and the keyboard.
 			// The solid fill plus a 2px inset outline in the on-solid foreground mark focus. Selection
-			// shows only the check, and hover alone has no style.
+			// shows only the check, and hover alone has no style. Select renders this item too.
 			selectors: {
 				'&[data-disabled="true"]': {
 					color: vars.color.foreground.disabled,

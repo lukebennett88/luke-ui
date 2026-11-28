@@ -94,6 +94,9 @@ writes it. When a newer record, a re-run, or a replaced baseline landed in betwe
 record or withdraws the decision, and answers `409` or `502 upstream`. A repair never passes the
 check, except when it restores a clean record.
 
+`Visual review sweep` can race a decision and revoke a valid approval. This fails closed. Refresh
+the review page and approve again. Add coordination only if this causes practical problems.
+
 ## Deployment
 
 The app and every report live in one Cloudflare Pages project that takes direct uploads.

@@ -108,6 +108,10 @@ uses a colon instead, in the form `<page or component>: <qualifier>`.
 it, and any closing summary. Explain a shared rule on the page that owns the topic and link to it
 from the others. An example appears on exactly one page, which `check:docs` enforces.
 
+**Editing.** Leave clear prose unchanged. Keep the source's facts, qualifications, and uncertainty,
+and invent no names, quantities, causes, or guarantees to make a claim sound specific. Flag an
+unsupported claim or a contradiction instead of silently resolving it.
+
 ## Comments and JSDoc
 
 JSDoc on a public type is published documentation. A guide's `## API` section renders it, so the

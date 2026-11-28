@@ -1,13 +1,16 @@
 # Architecture
 
+Group code by what it does, not by its technical type.
+
 ## Ownership and interfaces
 
 - Colocate implementation, styles, tests, fixtures, and helpers with the function that owns them.
   Another consumer does not make a module shared. A control-specific sizing constant stays with that
   control even when a related control imports it. Share a module only when its responsibility is
   cross-cutting and can be named independently of its callers.
-- Put functional directories directly under an app's `src/`, with no `features/` wrapper. A
-  directory name such as `components/`, `lib/`, or `shared/` does not establish shared ownership.
+- Prefer verticals directly under an app's `src/`, named for what they do, such as `playground/` or
+  `settings/`. A `features/` wrapper is not required. A type folder such as `components/`, `lib/`,
+  or `shared/` does not make its contents shared.
 - Within a workspace, import defining modules directly. Related verticals may depend on one another
   when the dependency follows ownership, such as a composed field using Field primitives.
   Foundations never depend on their consumers. Independent verticals stay out of each other's state
