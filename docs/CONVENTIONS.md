@@ -2,106 +2,84 @@
 
 ## TypeScript
 
-Use strict TypeScript. Import types with `import type`. Local imports include the explicit `.js`
-extension.
+Import types with `import type`. Local imports include the explicit `.js` extension.
 
 Only modules in `src/exports/` re-export symbols defined in another module. Internal code imports
 symbols directly from their defining modules.
 
-Derive helper parameters and result types from existing props or domain types with `Pick`, indexed
-access, or `ComponentProps` when they describe the same contract. Keep an independent type when the
-helper has a different contract. Do not widen a public prop by copying its shape by hand.
+Derive helper parameter and result types from existing props or domain types with `Pick`, indexed
+access, or `ComponentProps` when they describe the same contract. Do not widen a public prop by
+copying its shape by hand.
 
-## Formatting
+## Formatting and linting
 
-`oxfmt` owns formatting. The repo uses tabs, 100-column wrapping, single quotes in TypeScript, and
-double quotes in JSX.
+`oxfmt` owns formatting and `oxlint` owns linting, both through `vp`. The syntax pass reports unused
+disable directives as errors. Type-aware passes do not run the syntax rules, so they do not repeat
+that check. Use a scoped configuration override for an intentional exception to a type-aware rule.
+Matching overrides for the same rule replace each other rather than merge.
 
-## Linting
-
-`oxlint` owns linting (via `vp lint`). Configure rules in the `lint` block of the root
-`vite.config.ts`. The syntax pass reports unused disable directives as errors. Type-only passes do
-not repeat that check because they do not run the syntax rules. Use a scoped configuration override
-for an intentional exception to a type-aware rule. Matching overrides for the same rule replace
-rather than merge with each other. To suppress a rule, explain why in a plain comment, then put
-`// oxlint-disable-next-line <plugin>/<rule>` directly above the offending line — the directive
+To suppress a rule, explain why in a plain comment, then put
+`// oxlint-disable-next-line <plugin>/<rule>` directly above the offending line. The directive
 applies to the literal next line, so it cannot sit inside a multi-line comment.
 
-## React Compiler
+## React
 
-`@luke-ui/react` is built with the React Compiler, so do not add `useMemo`, `useCallback`, or `memo`
-for performance. Pass plain objects as context values, because the compiler memoises them. The docs
-and reference apps are not compiled and may use `useMemo` / `useCallback` when those hooks earn
-their keep.
+`@luke-ui/react` is built with the React Compiler. Do not add `useMemo`, `useCallback`, or `memo`
+for performance there. Pass plain objects as context values, because the compiler memoises them. The
+docs and reference apps are not compiled and may use those hooks when they earn their keep.
 
-## State modelling
+Keep state that must transition together in one value. Model an async load's status, data, and error
+as a discriminated union so impossible combinations cannot be represented. Keep independent state
+separate, and derive values instead of storing duplicates. Use a reducer when named transitions make
+complex update logic easier to follow.
 
-Keep state that must transition together in one state value. For an async load, model status, data,
-and error as a discriminated union so impossible combinations cannot be represented. Keep
-independent state separate and derive values instead of storing duplicates. A single `useState` is
-sufficient when replacing the whole value keeps transitions clear. Use a reducer when named
-transitions make more complex update logic easier to follow.
-
-## Effects
-
-Do not use `useEffect` to reset state when a prop changes, or to mirror React state into a ref for
-event handlers. Prefer remounting with `key`, deriving values during render, or reading values from
-the render that created the handler. Reserve effects for synchronising with systems outside React.
-
-## Server Components
+Reserve effects for synchronising with systems outside React. To reset state when a prop changes,
+remount with `key` or derive the value during render. Event handlers read values from the render
+that created them, not from a ref that mirrors state.
 
 The docs app does not use React Server Components. Do not add `'use client'` directives there.
 
 ## Reuse
 
-Prefer utilities the repo already ships over hand-rolling: `cx` from `@luke-ui/react/utils` for
-class names, `zod` schemas for validating untrusted data (URL state, `postMessage` payloads, results
-from JSON.parse), and `react-error-boundary` in the docs app for error boundaries.
+Use utilities the repo already ships: `cx` from `@luke-ui/react/utils` for class names, `zod`
+schemas for validating untrusted data (URL state, `postMessage` payloads, results from JSON.parse),
+and `react-error-boundary` in the docs app for error boundaries.
 
 Author sample or template code as real `.tsx` files imported with `?raw` so it stays typechecked,
 not as inline string constants.
 
 ## Naming
 
-- Components: `PascalCase`, for example `IconButton`.
-- Props: `PascalCaseProps`, for example `ButtonProps`.
-- Files: `kebab-case`, for example `icon-button.tsx`.
-- CSS: `*.css.ts`.
+Name components in `PascalCase` (`IconButton`), props types `<Component>Props` (`ButtonProps`),
+files in `kebab-case` (`icon-button.tsx`), and style modules `*.css.ts`.
 
 ## Code style
 
-- Prefer `.map()` for one-to-one transforms. Prefer `.filter()` for selection. Prefer `.flatMap()`
-  when filtering and mapping are combined. In `.flatMap()`, use an early return for the filtering
-  case unless a ternary is clearly easier to read.
-- Prefer `for...of` when a transform needs more explicit control or mutation. Prefer `for...of` over
-  `.reduce`. Use `.reduce` only when it makes the operation substantially clearer.
-- Prefer `Map` or `Set` for repeated lookup or deduplication. Do not repeatedly scan arrays inside
-  loops.
+- Prefer `.map()` for one-to-one transforms and `.filter()` for selection. Prefer `.flatMap()` when
+  filtering and mapping are combined, with an early return for the filtering case unless a ternary
+  is clearly easier to read.
+- Prefer `for...of` over `.forEach` and `.reduce`, especially when a loop needs mutation, `break`,
+  `continue`, or an early exit. Use `.reduce` only when it makes the operation substantially
+  clearer.
+- Use a `Map` or `Set` for repeated lookup or deduplication instead of scanning arrays inside loops.
 - Prefer `function` declarations for named helpers. Use an arrow when a short implicit return is
-  clearer, or when assigning a named function type. Prefer an explicit `return` when an arrow body
+  clearer, or when assigning a named function type. Use an explicit `return` when an arrow body
   wraps across multiple lines.
 - Prefer early returns when a branch finishes the current function.
 - Prefer a ternary for a simple two-way branching assignment. Do not nest ternaries. Multiple
   independent simple ternaries are fine.
-- For three or more branches on the same value, use `switch` when it makes the branches easier to
-  scan. Flat early returns are also fine. For a pure key-to-value mapping, use a `Record` or lookup
-  object. Consider whether a value modelled as a boolean should actually be a union, in which case a
-  lookup object is often the better design.
-- Prefer `for...of` over `.forEach` for side-effect iteration, especially when `break`, `continue`,
-  or early exit helps.
-- Put the exported entry point first. Put supporting constants and helpers below it. If a helper
-  uses a non-hoisted constant, place that constant before the helper.
-- Keep branching or search mutation scoped with an inline IIFE when that improves locality. If only
-  one value escapes, return that value directly. If multiple values escape, return an object.
-- Extract multi-step object construction into its own function only when the construction would
-  otherwise mix with unrelated logic.
+- For three or more branches on the same value, use `switch` or flat early returns, whichever scans
+  more easily. For a pure key-to-value mapping, use a `Record` or lookup object. Consider whether a
+  boolean should be a union, in which case a lookup object is often the better design.
+- Put the exported entry point first, with supporting constants and helpers below it. Place a
+  non-hoisted constant before the helper that uses it.
+- Scope branching or search mutation in an inline IIFE when that improves locality. Return one
+  escaping value directly, or several as an object.
+- Extract multi-step object construction into its own function only when it would otherwise mix with
+  unrelated logic.
 - Define every static regex as a named module-scope `SCREAMING_SNAKE_CASE` constant with a
   `_PATTERN` suffix, including trivial or one-use regexes. Regexes with `g` or `y` are stateful when
   used with `.test()` or `.exec()`, because they mutate `lastIndex`.
-
-## Testing
-
-See [TESTING.md](TESTING.md) for test type, placement, and writing rules.
 
 ## Components
 
@@ -109,14 +87,14 @@ Components wrap `react-aria-components` and use `composeRenderProps` for styling
 
 Use function components. Keep JSX inline, or extract a module-scope component rendered as `<Name />`
 when it needs its own structure. Do not define a component inside another component or call a nested
-`render*()` helper to produce JSX. Keep callbacks required by React Aria and Luke UI render-prop
-APIs, including `composeRenderProps`, `renderRoot`, and `render<Name>`.
+`render*()` helper to produce JSX. Callbacks required by React Aria and Luke UI render-prop APIs,
+including `composeRenderProps`, `renderRoot`, and `render<Name>`, are fine.
 
 ### Exported prop types
 
 For components in `@luke-ui/react`, define an internal `_ComponentProps` interface and export
 `ComponentProps` wrapped in `Prettify` from `src/core/types/prettify.ts`. Prefer `interface extends`
-over intersections for prop types so IDEs display them clearly.
+over intersections so IDEs display prop types clearly.
 
 Extend the source type directly when inheriting its whole surface:
 
@@ -126,8 +104,8 @@ interface _CodeProps extends React.ComponentProps<'code'> {}
 export type CodeProps = Prettify<_CodeProps>;
 ```
 
-When removing inherited props, declare a named `DistributiveOmit` alias before extending it.
-Interfaces cannot extend conditional types directly:
+When removing inherited props, declare a named `DistributiveOmit` alias before extending it, because
+interfaces cannot extend conditional types directly:
 
 ```ts
 type _ComponentOmit = DistributiveOmit<SourceType, OmittedKeys>;
@@ -141,50 +119,32 @@ export type ComponentProps = Prettify<_ComponentProps>;
 ```
 
 Use `DistributiveOmit` from `src/core/types/distributive-omit.ts` only when removing props. Its
-strict key constraint checks omitted keys. Do not use `DistributiveOmit<SourceType, never>`.
+strict key constraint checks the omitted keys. Do not use `DistributiveOmit<SourceType, never>`.
 
 ### Element choice
 
 `elementType`, `renderRoot`, and `render<Part>` are **opt-in capabilities**, not universal component
-props. Consistent naming means that when a component exposes one of these seams, it uses the Luke UI
-name and `(domProps, state)` contract. It does not mean every component exposes them.
+props. A component that exposes one uses the Luke UI name.
 
 Prefer recipes, dedicated components (`Link` for links, `Button` for buttons), and state-aware
 `className`/`style` over root replacement. Interactive controls keep fixed semantics unless a
-concrete composition need is demonstrated.
-
-When polymorphism is justified:
+concrete composition need is demonstrated. When polymorphism is justified:
 
 - Use `elementType` to choose a supported semantic or structural element without changing the
   accepted DOM props. Accept only the elements that component is designed to render.
-- Use `renderRoot` when a caller must own the root element and its DOM attributes. Keep
-  `elementType` and `renderRoot` mutually exclusive.
-- Use `render<Name>` only for a deliberately replaceable named part. Do not conflate children-as-
-  function or state-aware `className`/`style` with root replacement.
+- Use `renderRoot` when a caller must own the root element and its DOM attributes, including
+  Luke-owned layout and typography roots such as `Box` and `Text`. Keep `elementType` and
+  `renderRoot` mutually exclusive.
+- Use `render<Name>` only for a deliberately replaceable named part. Children-as-function and
+  state-aware `className`/`style` are not root replacement.
 
-Keep root replacement consistent: when a caller owns a Luke UI root, expose `renderRoot` with the
-Luke UI `(domProps, state)` contract. Keep React Aria's `render` only when a documented integration
-needs React Aria's host-prop merging while preserving its component semantics. `Link` uses this
-exception for MDX anchors, which merge authored anchor attributes with React Aria's resolved link
-props and preserve the root React Aria selects. Do not keep RAC `render` as a second
-root-replacement API or add it to wrappers without a demonstrated integration need. Prefer Luke UI
-`renderRoot` for Luke-owned layout and typography roots such as `Box` and `Text`.
+`renderRoot` and `render<Name>` callbacks receive `(domProps, state)`. The first argument contains
+resolved presentation props. Pass an empty object as the second argument when the component has no
+public render state.
 
-Luke UI `renderRoot` and `render<Name>` callbacks receive `(domProps, state)`. The first argument
-contains resolved presentation props. Pass an empty object as the second argument when the component
-has no public render state.
+Keep React Aria's `render` only when a documented integration needs its host-prop merging while
+preserving its component semantics, as `Link` does for MDX anchors. Do not keep RAC `render` as a
+second root-replacement API.
 
-Do not add generic polymorphic props, `as`, or `asChild` without a demonstrated need. Apply this
-rule to public component APIs, not internal prop handling.
-
-See [COMPONENTS.md](COMPONENTS.md) for component and primitive structure, package paths, and
-generator rules.
-
-## Styling
-
-See [STYLING.md](STYLING.md) for cascade layers, recipes, styling utilities, and logical CSS rules.
-
-## Documentation
-
-See [DOCUMENTATION.md](DOCUMENTATION.md) for what to document, writing style, examples, MDX page
-structure, and docs freshness rules. It also governs JSDoc and code comments.
+Do not add generic polymorphic props, `as`, or `asChild` to public component APIs without a
+demonstrated need. Internal prop handling is exempt.

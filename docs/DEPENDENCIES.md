@@ -1,199 +1,79 @@
 # Dependencies
 
-This guide explains where dependency versions live, and the workspace rules Renovate has to respect.
-
 ## Where versions live
 
-Almost every version lives in the `catalog:` block of `pnpm-workspace.yaml`. Package manifests say
-`catalog:` and follow it. `catalogMode: prefer` keeps new dependencies pointing at the catalog.
-Renovate updates the catalog entry, so a shared dependency moves once rather than once per package.
+Put versions in the `catalog:` block of `pnpm-workspace.yaml` and write `catalog:` in package
+manifests, so Renovate moves a shared dependency once.
 
-Two entries are not plain versions:
+Two dependencies have coupled versions:
 
 - `vite` is an alias for `@voidzero-dev/vite-plus-core`, pinned to the same version as `vite-plus`.
   `overrides` forces one copy of `vite` and `vitest` across the workspace, so they only resolve if
   they move together. Renovate groups them.
-- `playwright` is `*`. Renovate cannot upgrade a wildcard and skips it. The version is decided by
-  the browser install step in CI.
+- `playwright` is pinned to the exact version in the
+  [visual test image](VISUAL_TESTING.md#baseline). Renovate groups the npm package and Docker image
+  updates in one pull request.
 
 ## The release quarantine
 
-`minimumReleaseAge: 4320` is exactly three days. It stops pnpm resolving any release, direct or
-transitive, that is younger than three days. `.github/renovate.json5` sets
-`minimumReleaseAge: '3 days'`, so Renovate and pnpm use the same three-day quarantine.
-
-The two settings do not cover the same ground. Renovate's applies to the dependency it is updating.
-pnpm's applies to everything the update pulls in. A bump to a three-day-old release can still drag
-in a transitive package published yesterday, and the lockfile update then fails.
-
-`trustLockfile: true` means the check is not re-run against entries already in the lockfile, so this
-only bites when a lockfile is generated, never on a plain `pnpm install --frozen-lockfile` in CI.
+pnpm (`minimumReleaseAge: 4320`) and Renovate (`.github/renovate.json5`) both quarantine releases
+for three days. Renovate's quarantine covers the dependency it updates. pnpm's covers everything the
+update pulls in, so a bump to a three-day-old release can still fail on a transitive package
+published yesterday. `trustLockfile: true` skips the check for entries already in the lockfile, so
+it fails only when a lockfile is generated, never on `pnpm install --frozen-lockfile`.
 
 ## The exclude lists
 
-`minimumReleaseAgeExclude` and `trustPolicyExclude` stay hand maintained. Renovate has no manager
-for these keys. Catalog entries are the only part of `pnpm-workspace.yaml` it reads and writes. It
-cannot add an entry, and it cannot prune one.
+Renovate edits only catalog entries in `pnpm-workspace.yaml`. Maintain `minimumReleaseAgeExclude`,
+`trustPolicyExclude`, `peerDependencyRules`, `overrides`, and `allowBuilds` by hand. An update can
+make an entry unnecessary or wrong, and only a maintainer reading the failure will notice.
 
-This is the intended release valve. When a pull request fails to install because a version is too
-young or trips `trustPolicy: no-downgrade`, add the exact version to the matching list.
-
-Stale entries are inert rather than wrong. Each entry names an exact version, so once that version
-is older than the quarantine the exemption grants nothing. Pruning is optional housekeeping: delete
-an entry, run `pnpm install`, and keep the deletion if the install succeeds.
-
-`peerDependencyRules`, `overrides`, and `allowBuilds` are hand maintained for the same reason. An
-update can make an entry unnecessary or wrong, and only a maintainer reading the failure will
-notice.
+When a pull request fails to install because a version is too young or fails `trustPolicy`, add the
+exact version to the matching exclude list. An exact-version entry grants nothing once that version
+is older than the quarantine. To prune one, delete it, run `pnpm install`, and keep the deletion if
+the install succeeds.
 
 ## Runtime dependencies
 
 Every consumer installs the `dependencies` of `@luke-ui/react`. Declare a package there only when
 the published JavaScript or declarations import it. Keep build-time packages in `devDependencies`.
-The packed-consumer harness in [TESTING.md](TESTING.md#package-consumption) fails on an undeclared
-import or an unused dependency.
-
-The dependency decisions and release findings from the package audit are in
+The [packed-consumer harness](TESTING.md#package-consumption) fails on an undeclared import or an
+unused dependency. The package audit's decisions are in
 [research/719-package-release-audit.md](../research/719-package-release-audit.md).
 
-Prefer declaring a dependency to bundling it. Bundle one only for a concrete reason, such as
-published code that needs a small part of a package whose install would cost consumers far more than
-that part. To bundle a dependency, list it in `devDependencies` and in `deps.onlyBundle` in
-`packages/@luke-ui/react/vite.config.ts`. The build fails when it bundles a package that
-`deps.onlyBundle` does not list. The packer records each bundled version in `inlinedDependencies` in
-`package.json`. Commit the updated metadata when changing bundled dependencies. Unchanged builds
-preserve the committed manifests. Paper and Tactile inline `@capsizecss/metrics` the same way,
-through `deps.onlyBundle` in `packages/@luke-ui/theme-build/theme-package.ts`.
+Declare a dependency rather than bundling it, unless there is a concrete reason, such as needing a
+small part of a package whose install would cost consumers far more. To bundle one, list it in
+`devDependencies` and in `deps.onlyBundle` in `packages/@luke-ui/react/vite.config.ts`. The build
+fails on a bundled package that `deps.onlyBundle` does not list. Commit the `inlinedDependencies`
+metadata the packer writes to `package.json`. Paper and Tactile bundle `@capsizecss/metrics` the
+same way, in `packages/@luke-ui/theme-build/theme-package.ts`.
 
 ## Changesets
 
-`@luke-ui/react` is unpublished at version `0.0.0`. `@luke-ui/rainbow-sprinkles` is a publishable
-0.x support package used by `@luke-ui/react` at runtime. It is not part of the stable Luke UI 1.x
-consumer API. Publish it with React whenever React depends on a Rainbow version that is not yet on
-the registry. `@luke-ui/theme-paper` and `@luke-ui/theme-tactile` are unpublished 0.x theme packages
-with `@luke-ui/react` as a peer dependency. Their final peer ranges belong to
-[#721](https://github.com/lukebennett88/luke-ui/issues/721). `apps/docs`,
-`@luke-ui/playground-core`, and `@luke-ui/theme-build`, the build the two theme packages share, are
-private. Before `1.0.0` no pull request needs a changeset, including one that moves a runtime or
-peer dependency.
+Before `@luke-ui/react` 1.0.0, no pull request needs a changeset, including one that moves a runtime
+or peer dependency. [#721](https://github.com/lukebennett88/luke-ui/issues/721) owns release
+mechanics, the theme packages' final peer ranges, and dependency compatibility.
 
-The `needs-changeset` label in `.github/renovate.json5` is advance notice. It marks packages that
-will be runtime, peer, or bundled dependencies of the published package at `1.0.0`. Re-sync that
-list against `dependencies`, `peerDependencies`, and `inlinedDependencies` in
-`packages/@luke-ui/react/package.json` at `1.0.0`.
+`@luke-ui/rainbow-sprinkles` is a publishable 0.x runtime support package outside the stable Luke UI
+1.x consumer API. Publish it with React whenever React depends on a Rainbow version that is not on
+the registry.
 
-`react` and `react-dom` use `rangeStrategy: 'replace'` rather than `bump`, so the catalog range only
-widens when the caret stops covering the new version. The catalog range is what gets published as
-the peer range, and bumping it on every minor would narrow what consumers can satisfy.
+## Renovate
 
-### Published-change versioning
+Monthly `lockFileMaintenance` is the only update that moves transitive versions.
 
-Before `@luke-ui/react` 1.0, no pull request needs a changeset.
-
-After React 1.0:
-
-- Every release-worthy change to a published package needs a Changeset, including 0.x packages.
-- Describe every intentional change to published visuals in release notes, even a small refinement.
-- Private-only changes with no published impact need no release.
-
-For stable (1.x+) packages, classify changes by consumer impact:
-
-- **Major:** Remove or rename a public token, prop, or theme option.
-- **Major:** Break documented behaviour or a documented guarantee.
-- **Major:** Make a previously compiling, supported theme fail compilation.
-- **Minor:** Add a compatible public token, prop, or optional theme authoring option.
-- **Minor:** Deliberately change a theme's overall look or multiple component families.
-- **Patch:** Correct an implementation that contradicts its documented contract.
-- **Patch:** Fix other non-breaking defects, including accessibility bugs.
-- **Patch:** Make a narrow visual refinement, including a small generated-colour change.
-
-Rejecting a supported theme through stricter validation is breaking, even for accessibility.
-
-Enforcing an existing, explicit guarantee can instead be a patch if acceptance was a defect.
-
-Semantic tokens guarantee public names, meanings, documented behaviour and theme compatibility.
-
-Exact generated colour values are not guaranteed. Classify repaints by their published impact.
-
-Changes to private code can still be breaking if they violate a public contract.
-
-For 0.x packages:
-
-- **Minor:** Breaking changes, new public capabilities and broad visual redesigns.
-- **Patch:** Fixes and narrow visual refinements.
-
-Version only affected published packages, including those with changed compiled theme CSS.
-
-Issue #721 owns release mechanics and dependency/peer compatibility.
-
-## Grouping and schedule
-
-Renovate runs weekly before 6am on Monday. It groups non-major updates by release train and splits
-major updates into separate pull requests.
-
-`lockFileMaintenance` runs on the first of the month and refreshes transitive versions, which
-nothing else moves.
-
-## Automerge
-
-Only `type definitions` automerges: non-major `@types/*` updates, excluding `@types/react` and
-`@types/react-dom`, which have to land with the `react` major they describe. Type packages ship
-nothing to consumers, and a bad bump fails `check:types`.
-
-Everything else is merged by hand. Two reasons. Visual regression reports screenshot differences
-without failing, so someone has to look at a change to rendered output before it merges. And a share
-of pull requests need an exclude list entry before they will install, which no amount of green CI
-will produce.
+Only the `type definitions` group automerges. Merge every other Renovate pull request by hand.
+Visual regression reports screenshot differences without failing, and some pull requests need an
+exclude list entry before they install.
 
 ## Tooling versions
 
-The root `package.json` `packageManager` field pins the exact pnpm version. Omitting the hash avoids
-Renovate's Corepack-based hash regeneration.
-
-The root `devEngines.runtime` field declares the supported Node major as a conventional semver
-range, currently `^24.0.0`, with `onFail: 'download'`. That range is the minimum compatible Node
-version for this major, not a pin of the newest patch. pnpm resolves an exact runtime and records it
-in the lockfile (`node@runtime:…`), with a download and integrity hash for each platform. A newer
-Node 24 release does not, by itself, justify raising the minimum in the manifest.
-
-GitHub Actions sets up tooling with `pnpm/setup`. It installs the pnpm version from `packageManager`
-and the Node runtime from `devEngines.runtime`.
-
-A local developer bootstraps by installing pnpm itself. `pnpm install` then downloads the declared
-Node runtime and links it as `node_modules/.bin/node`, so `pnpm exec node` and pnpm scripts run it.
-Bare `node` is project-aware only when pnpm's global Node shim is the `node` found first on `PATH`.
-
-Cloudflare Pages documents `NODE_VERSION`, `.nvmrc`, and `.node-version` as host Node selectors, but
-does not list `devEngines.runtime`. Its current Pages project setting is `NODE_VERSION=24`. The host
-must be able to bootstrap pnpm before pnpm installs the runtime from the manifest. Test a preview
-with that setting removed before relying on the build image default, and check the pnpm and Node
-versions used during install and build. Until that works, update the Pages setting when the Node
-major changes. No extra version file is needed in the repository.
-
-Renovate's npm manager reads `devEngines.runtime` natively (from Renovate 44.128.0). The repo-wide
-`rangeStrategy: 'bump'` would raise `^24.0.0` on every in-range patch, so the Node runtime rule
-suppresses non-major manifest updates. The separate major rule uses `replace` to retain the caret
-range, groups the update as `node`, and disables automerge. Renovate does not allow `rangeStrategy`
-and `matchUpdateTypes` in the same rule. Monthly lockfile maintenance can refresh the resolved
-runtime. Renovate follows Node's release schedule and proposes stable LTS lines for majors.
-
-Other tools, including Taze, may update the lower bound of a caret range when they bump Node. That
-is legitimate for those tools. When a routine dependency sweep should not change the Node minimum,
-exclude Node from that command (for example `taze major -w` with an ignore, or omit the runtime
-field from the update set).
-
-`@types/node` tracks the Node major, and an `overrides` entry forces every copy onto the catalog.
-Renovate groups its major updates with the Node runtime and never automerges them. The Renovate Node
-configuration check compares the manifest and catalog majors, so an incomplete group fails CI. The
-two releases can arrive at different times, and a maintainer may need to complete the group by hand.
-Non-major type updates stay in the automerged `type definitions` group.
-
-GitHub Actions uses `node-version-file: package.json` for `actions/setup-node`. The action reads
-`devEngines.runtime`, so its Node version follows the manifest without a separate workflow pin.
-Other workflow actions use major tags, group into one `github actions` pull request, and are never
-automerged.
-
-The Renovate Node configuration check exercises extraction and updates against isolated fixtures and
-checks the actual workflow inputs and Node and type ranges. It runs with the pinned Renovate version
-in `.github/workflows/renovate-node.yml`. Update that pin when validating a newer Renovate release.
-For a Node major upgrade, review the type update, lockfile, and Cloudflare preview and host setting.
+- **pnpm:** The root `packageManager` field pins the exact version without a hash, which avoids
+  Renovate's Corepack-based hash regeneration. Install pnpm yourself to bootstrap.
+- **Node:** The root `devEngines.runtime` caret range is the minimum compatible Node version, not a
+  pin of the newest patch. pnpm installs the runtime and links it as `node_modules/.bin/node`, so
+  `pnpm exec node` and pnpm scripts use it. Bare `node` may not.
+- **Node majors:** Renovate groups Node majors with `@types/node` majors as `node`, but they can
+  arrive at different times. The Renovate Node configuration check fails CI until their majors
+  agree, so complete a split group by hand. Also update the Cloudflare Pages `NODE_VERSION` setting,
+  because Pages ignores `devEngines.runtime`.

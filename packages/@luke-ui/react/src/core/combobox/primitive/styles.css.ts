@@ -380,7 +380,7 @@ const comboboxConfig = {
 
 			// React Aria moves the one active item (`data-focused`) with the pointer and the keyboard.
 			// The solid fill plus a 2px inset outline in the on-solid foreground mark focus. Selection
-			// shows only the check, and hover alone has no style.
+			// shows only the check, and hover alone has no style. Select renders this item too.
 			selectors: {
 				'&[data-disabled="true"]': {
 					color: vars.color.foreground.disabled,

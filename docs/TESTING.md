@@ -2,44 +2,41 @@
 
 ## Test types
 
-- Unit tests (`*.test.ts`) run in Node for pure, non-DOM logic.
-- Component tests (`*.browser.test.tsx`) run in Chromium. Each component has one file for behaviour,
-  axe, and visual captures.
+Choose the smallest test that proves the contract:
 
-Two tests sit outside these types. The packed-consumer harness runs in Node and drives Chromium for
-hydration. See [Package consumption](#package-consumption). The theme build test runs
-`vp pack --watch`. See [Theme build](#theme-build).
+- **Pure logic**, including validation cases and return values: a Node unit test (`*.test.ts`). Keep
+  it out of browser tests, even when the code serves a component.
+- **Component behaviour and axe**: a component test (`*.browser.test.tsx`) in Chromium. Each
+  component has one file for behaviour, axe, and visual captures.
+- **Meaningful appearance**: a `visual`-tagged component test. See
+  [Visual regression](#visual-regression).
+- **Public type contract** that can regress while compilation succeeds, such as a union widening: a
+  unit test. See [Type contracts](#type-contracts).
 
-Do not add another test type.
+The [packed-consumer harness](#package-consumption) and the [theme build test](#theme-build) are the
+only other test types. Do not add another.
+
+For a bug fix, add a regression test when the intention needs protection.
 
 ## Component tests
 
-Test Luke UI's contract, not React Aria Components (RAC). RAC owns its interaction and ARIA
-semantics. Test only what Luke UI changes or composes.
+- **Queries:** Locate an interactive control by its role and accessible name, such as
+  `getByRole('combobox', { name: 'Country' })`, not with `querySelector`. Use a DOM selector only
+  for structure that has no role, such as a wrapper, a decorative node, or a pseudo-element.
+- **No test-only production code:** Give every production prop, export, context default, and code
+  path a production caller. Do not add one to make a test easier, such as a cache-reset export.
+  Exercise the real loading and rendering path, and supply fixtures through the seams the product
+  uses.
+- **Scope:** Test what Luke UI changes or composes. React Aria Components owns its interaction and
+  ARIA semantics.
 
-Import components from public package exports. Import test utilities relatively. Use `render()`. Do
-not mount React yourself.
+Import components from public package exports and test utilities relatively. Mount with `render()`.
+Assert observable public behaviour with `userEvent` and local setup, not private functions,
+implementation details, or incidental styling. Read computed styles only when layout, a semantic
+colour, or an interaction state is the contract.
 
-Assert observable public behaviour. Prefer roles and accessible names, `userEvent`, and local setup.
-Locate an interactive control by its role and accessible name, not with `querySelector`. A DOM
-selector is fine for structural inspection, such as a wrapper, a decorative node, or a
-pseudo-element that has no role. Do not test private functions, implementation details, or
-incidental styling. Use computed styles only when layout, a semantic colour, or an interaction state
-is the contract.
-
-Controls transition their colours, so a computed colour read straight after a state change is an
-interpolated value. Read a surface's settled colours with `settledSurfaceColors` from
-`test-utils/surface-colors.ts`, and set a hover or pressed state with `setInteractionState`. Emulate
-media features through `test-utils/emulate-media.ts`. Chromium ignores `pointer` in emulated media,
-so call `emulatePointer('coarse')` for a coarse pointer and restore `emulatePointer('fine')` after
-the test. The helper enables touch emulation, which also reports `hover: none`.
-
-Do not add production props, context defaults, or code paths that exist only to make tests easier.
-Exercise the real loading and rendering path, and supply fixtures through the same seams the product
-uses.
-
-Do not use `test.each`, `it.each`, or `describe.each`. Parameterise with a `for…of` loop that calls
-`test()` (or `describe()`) inside, and put the distinguishing value in the title:
+Parameterise with a `for…of` loop that calls `test()` or `describe()`, with the distinguishing value
+in the title. Do not use `test.each`, `it.each`, or `describe.each`.
 
 ```ts
 for (const ratio of ratios) {
@@ -49,89 +46,65 @@ for (const ratio of ratios) {
 }
 ```
 
-Shared assertions take concrete elements and values. Keep the test, fixture, and contract choice in
-the component's test file.
+Keep the test, fixture, and contract choice in the component's test file. Shared assertions take
+concrete elements and values.
 
-Fixture themes name `Inter`. Browser setup awaits `loadInter()` before each test so mounts use the
-Inter file the theme packages ship from the first paint, not a host fallback. `captureVisual` awaits
-the same loader. Code surfaces keep the production `--luke-font-family-code` stack. Do not override
-component font styles in the test harness. Visual baseline and compare jobs run in a digest-pinned
-Playwright container so browser, OS fonts, and font rendering stay aligned — see
-[`VISUAL_TESTING.md`](./VISUAL_TESTING.md). A non-visual test whose layout depends on real font
-metrics, such as Capsize trims or the cap height, can still call `await loadInter()`. Compare
-positions with Inter's published metrics (`INTER_CAP_HEIGHT_EM`) and measured baselines, not with
-the CSS under test.
+### Browser gotchas
 
-Package component tests pin `window.screen.width` to a desktop value in `@luke-ui/react` browser
-setup so `useIsMobileDevice` stays desktop. Vitest's browser iframe is 414px wide. Playwright
-mirrors that onto `screen.width`, which would otherwise look like a phone. Call `mockScreenWidth`
-for tray or mobile-modal cases. The docs app browser setup does not pin screen width.
-
-Cascade contracts that need a real third-party stylesheet live beside `layer-order.browser.test.ts`.
-`tailwind-integration.browser.test.tsx` is the Tailwind v4 consumer fixture. It runs in the
-`tailwind-integration` Vitest project so it can compile Tailwind without loading the default browser
-suite's global stylesheet.
-
-Browser tests render with the built `@luke-ui/react/stylesheet.css` from `dist`, but a test's own
-imports of `.css.ts` modules compile with debug identifiers. A `createVar` imported into a test
-therefore names a different custom property from the one the built stylesheet declares. When a test
-must read a private custom property, give it a stable name in source, as `core/styles/surface.ts`
-does for its `--luke-internal-foreground-*` overrides, and import helpers from a plain `.ts` module.
-A `.css.ts` module that exports a function fails to load in a browser test.
+- **Colours:** Controls transition their colours, so a read straight after a state change is
+  interpolated. Use `settledSurfaceColors` from `test-utils/surface-colors.ts`, and set hover or
+  pressed with `setInteractionState`.
+- **Media:** Emulate media features through `test-utils/emulate-media.ts`. Chromium ignores emulated
+  `pointer`, so call `emulatePointer('coarse')` and restore `emulatePointer('fine')` after the test.
+  It also reports `hover: none`.
+- **Screen width:** Vitest's 414px iframe would make `useIsMobileDevice` report a phone, so
+  `@luke-ui/react` browser setup pins a desktop `screen.width`. Call `mockScreenWidth` for tray or
+  mobile-modal cases. The docs app setup does not pin it.
+- **Fonts:** Setup loads the shipped Inter. Do not override component font styles in the harness.
+  For layout that depends on font metrics, `await loadInter()` and compare with
+  `INTER_CAP_HEIGHT_EM` and measured baselines, not the CSS under test.
+- **Private custom properties:** Tests use the built stylesheet, but their own `.css.ts` imports
+  compile with debug identifiers, so an imported `createVar` names a different property. Give the
+  property a stable name in source, as `core/styles/surface.ts` does for
+  `--luke-internal-foreground-*`. Import helpers from a plain `.ts` module, because a `.css.ts`
+  module that exports a function fails to load.
+- **Cascade:** Put contracts that need a real third-party stylesheet beside
+  `layer-order.browser.test.ts`. `tailwind-integration.browser.test.tsx`, the Tailwind v4 consumer
+  fixture, runs in its own Vitest project without the default suite's global stylesheet.
 
 ## Timing and synchronisation
 
-Almost never sleep in a test. Do not use `setTimeout`, a fixed `delay()`, or an arbitrary frame
-count to "give something time". Identify the event or observable state the test needs, then wait for
-that.
+Wait for the event or observable state the test needs. Do not sleep with `setTimeout`, a fixed
+`delay()`, or a guessed frame count.
 
-- For asynchronous behaviour, control completion (for example with a promise gate or an injected
-  clock) or assert the observable result with the browser/test framework's polling assertions. Avoid
-  new test-only production APIs, and do not test implementation details.
-- Treat negative assertions specially: an absence observed after an arbitrary delay does not prove
-  something will never happen. Control the event or clock, or assert the completed operation and its
-  final state — for a failure, await the failure outcome itself.
-- Use fake time when elapsed time is the contract (debouncing, temporary feedback, spinner
-  thresholds, timeout handling). Advance it deliberately, test the boundary when it matters, and
-  restore real timers after the test.
-- Distinguish a wait's maximum failure deadline from a delay the test must sit through. Bounded
-  polling and execution limits protect against hangs. They are not themselves a reason to fail a
-  review. Do not inflate a timeout to hide a slow or broken dependency, and give any unusually large
-  deadline a comment saying what slow step it covers.
-- Wait for an input's observable effect before sending the next input when it depends on that
-  effect. Independent native discrete key events can be batched when the test asserts the final
-  outcome.
-- Use browser animation APIs and frame synchronisation only where rendering or animation genuinely
-  matters. Prefer explicit animation completion over guessed milliseconds.
-- Choose the smallest test that proves Luke UI's own contract. Avoid waiting for a large integration
-  path when a smaller component test can establish the behaviour.
+- Control asynchronous completion, such as with a promise gate or an injected clock, or assert the
+  result with polling assertions.
+- An absence after an arbitrary delay proves nothing. Control the event or clock, or await the
+  completed operation, including a failure outcome.
+- Use fake time when elapsed time is the contract, such as a debounce or a timeout. Advance it
+  deliberately, test the boundary when it matters, and restore real timers.
+- Wait for an input's effect before sending an input that depends on it. Independent native discrete
+  key events can be batched when the test asserts the final outcome.
+- Prefer explicit animation completion to guessed milliseconds, and use frame synchronisation only
+  where rendering matters.
 
-Legitimate deadlines stay: packed-consumer and theme-build execution limits, feedback-expiry tests
-on a fake clock, and visual-capture animation waits all guard real work. This section bans guessed
-durations, not `timeout`, `expect.poll`, or fake timers as such.
+A failure deadline is not a sleep. `timeout`, `expect.poll`, execution limits, and visual-capture
+animation waits are fine. Do not inflate a timeout to hide a slow or broken dependency. Comment an
+unusually large deadline with the slow step it covers.
 
 ## Accessibility
 
-Run axe with `expectNoAxeViolations` in component tests. Axe is a floor. Use behavioural assertions
-for accessibility contracts it cannot express. Gradients can produce an `incomplete` colour-contrast
-result. To check text over a gradient or a translucent layer, such as the control finish, measure
-the screenshot pixels behind it with `lowestRenderedTextContrast`.
+Run axe with `expectNoAxeViolations` in component tests. Axe is a floor, so add behavioural
+assertions for contracts it cannot express. For text over a gradient or a translucent layer, such as
+the control finish, axe can return `incomplete`. Measure the pixels behind it with
+`lowestRenderedTextContrast`.
 
 ## Material contrast
 
-`defineTheme` validates token colours but does not see `controlFinish`.
-`core/styles/material-contrast.browser.test.tsx` measures rendered text contrast in Chromium. Solid
-role specimens cover all six semantic roles in rest, hover, and pressed states. The Button matrix
-covers high, standard, and low prominence, neutral and danger tones, medium and small sizes, and
-rest, hover, and pressed states across ten surfaces: three page surfaces, `danger.subtle`, and the
-six role solid fills. Each combination runs in Tactile, Paper, layered-finish, flat, contrast-edge,
-and chromatic appearances in light and dark modes. Every measurement must reach 4.5:1. Fixture
-themes also verify that the gate catches gradient and flat-wash failures.
-
-The test measures normal text using 8-bit sRGB pixels from Chromium screenshots. Its coverage is
-limited to the rendered sizes, text, fills, and layers. It excludes disabled and inactive UI and
-forced colours. The React theme fixtures are the subject. The packed-consumer harness checks their
-solid fills, on-solid text, and finish against the published packages.
+`defineTheme` does not see `controlFinish`, so `core/styles/material-contrast.browser.test.tsx`
+measures rendered text contrast from Chromium screenshots. Each solid role specimen and Button state
+must reach 4.5:1 in every fixture appearance. A pass guarantees only what it measures. It excludes
+disabled and inactive UI, forced colours, and arbitrary composition.
 
 To check a custom theme, add its `ThemeInput` to `fixtureThemes` in `test-utils/fixture-themes.ts`,
 add its name to `appearances` in the test, then run:
@@ -142,83 +115,54 @@ pnpm --filter @luke-ui/react exec vp test run --project=browser --tagsFilter='!v
   src/core/styles/material-contrast.browser.test.tsx
 ```
 
-A pass is a guarantee for the finishes and specimens measured, not for arbitrary composition. CI
-runs the suite in the browser job with the rest of `pnpm test:code`.
-
 ## Visual regression
 
-Visual cases are `visual`-tagged browser tests. `render()` compiles React-owned copies of the
-Tactile and Paper inputs from `src/theme/__fixtures__/`. Those copies can diverge from the published
-theme packages, except in their solid fills, on-solid text, and control finish, which the
-packed-consumer harness requires to match. Capture each visually meaningful component in its
-representative fixture across Tactile light, Tactile dark, Paper light, and Paper dark. This is not
-an exhaustive state matrix. Add another capture only for a materially different state.
+Capture each visually meaningful component in its representative fixture across Tactile light,
+Tactile dark, Paper light, and Paper dark. Add a capture only for a materially different state. To
+prove states stay distinct without materials, capture `flatAppearances` outside that matrix.
 
-`flatAppearances` renders Tactile's colours with every shadow and control finish set to `none`. Use
-it, outside the theme matrix, for a capture that proves states stay distinct without materials.
+Comparison is per-pixel with no mismatch allowance. Remove nondeterminism instead of adding one.
 
-Comparison is per-pixel with `includeAA: true` and `threshold: 0.1`. There is no canvas-wide
-mismatch allowance. Remove nondeterminism. Do not add an allowance.
-
-[`VISUAL_TESTING.md`](./VISUAL_TESTING.md) explains the baseline and review workflow.
+`render()` uses React-owned copies of the theme inputs in `src/theme/__fixtures__/`. Only their
+solid fills, on-solid text, and control finish must match the published packages, and the
+packed-consumer harness checks that. [`VISUAL_TESTING.md`](./VISUAL_TESTING.md) owns the rendering
+environment, baseline, and review workflow.
 
 ## Type contracts
 
-`check:types` protects normal source types. Add a unit test only when a public type contract can
-regress while compilation still succeeds, such as a union widening.
-
 Use `expectTypeOf` for positive shape and equality contracts. Use `assertType` with
-`@ts-expect-error` for rejected values and prop combinations. Put those checks inside `test()`
-blocks. Do not wrap rejected assignments in a runtime `expect([...]).toHaveLength(...)` or similar
-just to create an assertion or keep consts referenced.
+`@ts-expect-error` for rejected values and prop combinations. Put both inside `test()` blocks. Do
+not wrap rejected assignments in a runtime `expect` just to create an assertion or keep consts
+referenced.
 
 ## Package consumption
 
-`packages/@luke-ui/react/src/core/packed-consumer/` tests packed React, Paper, and Tactile packages
-in consumers installed outside the repository, so workspace links cannot satisfy imports. The theme
-consumer also builds the Installation guide and renders it in Chromium. The comprehensive
-`pnpm test` includes the harness and requires network access. Run it separately with
-`pnpm test:consumer`. The `consumer-tests` CI job runs it on every pull request and on `main`.
+`packages/@luke-ui/react/src/core/packed-consumer/` installs the packed React, Paper, and Tactile
+packages in consumers outside the repository, so workspace links cannot satisfy imports. It needs
+network access. Run it with `pnpm test:consumer`.
 
-Keep it to the package boundary: tarball contents, dependencies, peers, assets, server rendering, a
-client build, hydration in Chromium, type checking, and what small imports bundle. Check installed
-support packages for undeclared JavaScript and declaration imports too. For the theme packages it
-also runs the docs' `compile-theme.ts` sample with Node 24, checks each stylesheet rule by rule
-against the token contract, and renders the packages' Inter and a Lora display font from
-`@fontsource/lora`. Component behaviour belongs in component tests.
+Keep it to the package boundary: tarball contents, dependencies, peers, assets, server rendering,
+client builds, hydration, types, published samples, and what small imports bundle. Component
+behaviour belongs in component tests.
 
-One consumer installs the lowest published version each peer range allows, and the first release of
-the TypeScript version in `MINIMUM_TYPESCRIPT`. That run is the evidence for those floors. Change a
-peer range or `MINIMUM_TYPESCRIPT` only when the harness passes with the new floor.
-
-A runtime import must not pull in theme-generation code, styling-authoring code, or components it
-does not render. A failing bundle-boundary check means one does. Fix the import graph. Change a
-boundary only when the code it flags has intentionally become runtime code.
-
-Set `LUKE_UI_REACT_SPEC` to a published version or dist-tag to test that package from the registry
-instead of the workspace build. That run skips the theme package checks and prints why.
+- **Floors:** One consumer installs the lowest version each peer range allows and the first release
+  of `MINIMUM_TYPESCRIPT`. Change a peer range or `MINIMUM_TYPESCRIPT` only when the harness passes
+  with the new floor.
+- **Bundle boundaries:** A runtime import must not pull in theme-generation code, styling-authoring
+  code, or components it does not render. When a boundary check fails, fix the import graph. Move a
+  boundary only when the flagged code has intentionally become runtime code.
+- **Registry runs:** Set `LUKE_UI_REACT_SPEC` to a published version or dist-tag to test React from
+  the registry. That run skips the theme package checks.
 
 ## Theme build
 
-`packages/@luke-ui/theme-build/theme-package.test.ts` runs `vp pack --watch` with the shared theme
-build on a small theme package in a temporary directory. It edits the theme input twice and checks
-the stylesheet after each rebuild. The comprehensive `pnpm test` includes this suite. Run it
-separately with `pnpm test:integration`. The `package-tests` CI job runs it.
+`packages/@luke-ui/theme-build/theme-package.test.ts` runs `vp pack --watch` on a theme package and
+checks each rebuild. Run it with `pnpm test:integration`.
 
-The React theme tests compile the copies in `src/theme/__fixtures__/`, not the published inputs.
-Each theme package's `src/input.test.ts` compiles its published input with the public `defineTheme`,
-so a contract or gate change that rejects Paper or Tactile fails there too. Tactile's test also
-checks the custom-canvas contrast failures against the published input.
+Each theme package's `src/input.test.ts` compiles its published input with `defineTheme`, so a
+contract or gate change that rejects Paper or Tactile fails there, not only against the React
+fixture copies.
 
 ## Docs
 
 Docs examples must type-check and build. They are not another test corpus.
-
-## Bug fixes
-
-Add a regression test when the intention needs protection. Put it with the contract it covers:
-
-- pure logic: unit test
-- component behaviour or axe: browser test
-- meaningful appearance: `visual`-tagged browser test
-- public type contract `check:types` cannot catch: unit test (see [Type contracts](#type-contracts))

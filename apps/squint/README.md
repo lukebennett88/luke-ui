@@ -2,8 +2,8 @@
 
 The visual review app shows a pull request's screenshot differences and records the reviewer's
 decision on its `visual-review` check run.
-[Visual regression testing](../../docs/VISUAL_TESTING.md#visual-review-app) explains how reports are
-published and how the app and its backend are deployed.
+[Visual regression testing](../../docs/VISUAL_TESTING.md#visual-review-app) explains the review
+check. [Deployment](#deployment) covers setup.
 
 - `/` lists the open pull requests with their review status and report counts.
 - `/?pr=<number>` reviews one pull request.
@@ -93,3 +93,44 @@ GitHub has no conditional write for check runs, so the backend checks a decision
 writes it. When a newer record, a re-run, or a replaced baseline landed in between, it restores that
 record or withdraws the decision, and answers `409` or `502 upstream`. A repair never passes the
 check, except when it restores a clean record.
+
+`Visual review sweep` can race a decision and revoke a valid approval. This fails closed. Refresh
+the review page and approve again. Add coordination only if this causes practical problems.
+
+## Deployment
+
+The app and every report live in one Cloudflare Pages project that takes direct uploads.
+`Visual review deploy` deploys the app from `main`. `Visual review publish` deploys each pull
+request's report to `https://pr-<number>.<project>.pages.dev`. Report deployments upload only an
+allow-listed report, so they never run the backend.
+
+The deploy, publish, and sweep workflows skip until `VISUAL_REVIEW_PAGES_PROJECT` is set. The
+publisher records no check run or comment, and the sweep skips, until `VISUAL_REVIEW_APP_CLIENT_ID`
+is set.
+
+| Setting                                            | Where                                      | Value                                                       |
+| -------------------------------------------------- | ------------------------------------------ | ----------------------------------------------------------- |
+| `VISUAL_REVIEW_PAGES_PROJECT`                      | Repository variable                        | The Pages project's name, with production branch `main`     |
+| `VISUAL_REVIEW_APP_URL`                            | Repository variable, optional              | The app's origin. Defaults to `https://<project>.pages.dev` |
+| `VISUAL_REVIEW_APP_CLIENT_ID`                      | Repository variable                        | The GitHub App's client id                                  |
+| `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` | Secrets of the `visual-review` environment | A token with Cloudflare Pages edit, and its account id      |
+| `VISUAL_REVIEW_APP_PRIVATE_KEY`                    | Secret of the `visual-review` environment  | A private key for the App                                   |
+
+Restrict the `visual-review` environment's deployment branches to `main`, so a workflow edited in a
+pull request cannot read its secrets. Renovate does not update the pinned `wranglerVersion`, so
+raise it by hand in both workflows.
+
+The GitHub App is installed on this repository only, with Checks and Pull requests read and write,
+and Actions and Metadata read. Its callback URL is `<APP_ORIGIN>/api/auth/callback`, and its webhook
+is inactive. The backend checks a reviewer's current role on every decision. Admin, maintain, and
+write may decide.
+
+Set the backend's variables as secrets on the Pages project's production environment only, so
+preview deployments answer `503 unconfigured`:
+
+- `GITHUB_APP_ID`, `GITHUB_APP_CLIENT_ID`, and `GITHUB_APP_CLIENT_SECRET`.
+- `GITHUB_APP_PRIVATE_KEY`, converted to PKCS#8 for the Web Crypto API:
+  `openssl pkcs8 -topk8 -nocrypt -in app.private-key.pem -out app.pkcs8.pem`.
+- `SESSION_SECRET`, at least 32 random bytes. Changing it signs every reviewer out.
+- `GITHUB_REPOSITORY`, such as `lukebennett88/luke-ui`.
+- `APP_ORIGIN`, such as `https://luke-ui-visual-review.pages.dev`.

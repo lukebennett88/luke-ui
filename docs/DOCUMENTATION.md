@@ -1,12 +1,8 @@
 # Documentation
 
-This is the only normative documentation guide for the repository. It covers MDX pages in the hosted
-docs app, JSDoc, code comments, READMEs, and the internal guides in `docs/`. Package-level
-`AGENTS.md` files must not restate these rules. Point here instead.
-
-A skill in `.agents/skills/` may name a rule from a guide in `docs/` in one actionable line that
-links to the section that owns it. A skill must not explain, extend, or weaken the rule, or drop its
-qualifications and exceptions. When a skill and a guide disagree, the guide wins.
+This guide owns the rules for hosted MDX, JSDoc, code comments, READMEs, and `docs/`. A skill or
+`AGENTS.md` may name a guide's rule in one line that links to the owning section, without restating
+or weakening it. When a skill and a guide disagree, the guide wins.
 
 ## Authoring checklist
 
@@ -14,99 +10,58 @@ qualifications and exceptions. When a skill and a guide disagree, the guide wins
   [`apps/docs/content/docs/components/actions/button.mdx`](../apps/docs/content/docs/components/actions/button.mdx)
   as the exemplar for a component guide.
 - Run `pnpm run check` from the repo root. It includes `check:docs`.
-- Update or delete docs and skills that describe code in the same change as the code.
-- Follow [Where documentation lives](#where-documentation-lives) for generated output.
-- Schema-owned files such as `apps/docs/PRODUCT.md` keep the headings the schema requires. Edit the
-  body. Leave those headings in place.
+- Keep docs and skills current in the same change as the code. See
+  [Keeping docs current](#keeping-docs-current).
+- Do not hand-edit generated output. See [Where documentation lives](#where-documentation-lives).
+- Schema-owned files such as `apps/docs/PRODUCT.md` keep the headings their schema requires. Edit
+  only the body.
 
-The rest of this guide is the editorial reference behind that checklist. `check:docs` owns the
-mechanical rules: the structural checks (heading order, navigation, and the API contract) plus the
-deterministic prose rules below. This page explains why they exist.
-
-```text
-no prose semicolon
-no unspaced em dash
-no plural "assistive technologies"
-no filler: simply, note that, it is important to, allows you to, enables you to,
-  can be used to, seamless
-no first-person: we, us, let's
-no terminology: users, the user, a person, people
-```
-
-A rule that needs semantic judgement to apply correctly, such as telling a correct third-person
-end-user reference apart from an incorrect third-person reader reference, stays editorial guidance
-in this page rather than a `check:docs` rule, because a regex cannot make that judgement reliably.
+`check:docs` enforces heading order, navigation, the API contract, and the regex prose rules in
+`apps/docs/src/lib/docs-prose-rules.ts`, across hosted MDX and `docs/*.md`. A rule that needs
+judgement stays editorial guidance here. One example is whether a third-person reference means
+someone using an interface, which is correct, or the reader, which is not.
 
 ## Surfaces
-
-Luke UI has two documentation audiences, and they need different content:
 
 | Surface                  | Lives in                                  | Reader                            | Purpose                           |
 | ------------------------ | ----------------------------------------- | --------------------------------- | --------------------------------- |
 | Public documentation     | Hosted MDX, public JSDoc, package READMEs | A developer building with Luke UI | How to use Luke UI                |
 | Internal repository docs | `docs/*.md`                               | A contributor maintaining Luke UI | How to build and maintain Luke UI |
 
-Both surfaces follow the shared editorial rules in this guide: a clear purpose for the intended
-reader, enough context, no redundancy, no session-history prose, and no detail that does not help
-that reader. They differ in scope. Public docs explain observable behaviour and usage. Internal docs
-deliberately explain architecture, recipes, generators, and implementation.
-
-## What documentation is for
-
-A section of documentation should help its reader answer at least one of these questions:
-
-- What is this?
-- When would I use it?
-- How do I use it?
-- How do I choose between the available options?
-- What mistake does this guidance prevent?
-
-This is an editorial test, not a page template. Do not add a heading per question. Content that
-answers none of them probably does not belong.
-
-Documentation can follow every rule in this guide and still be poor documentation. Prose that is
-verbose, redundant, or obvious fails its reader even when the wording is correct.
+Both surfaces follow every editorial rule here and differ only in scope. Public docs explain
+observable behaviour and usage. Internal docs may explain architecture, cascade layers, recipes,
+generators, and implementation. On either surface, cut a detail that does not help its reader do the
+work the page is for.
 
 ## Public documentation scope
 
-Public documentation helps a developer build an interface with Luke UI. Document how developers use
-Luke UI, including the observable behaviour they rely on. Do not document how Luke UI is
-implemented.
+Document how developers use Luke UI, including the observable behaviour they rely on. Do not
+document how Luke UI is implemented.
 
 ### Implementation detail
 
-Include an implementation detail only when it changes what a developer writes or chooses. Before you
-keep one, name the decision, constraint, or observable behaviour it explains. When you cannot name
-one, cut it.
+Keep an implementation detail only when you can name the decision, constraint, or observable
+behaviour it explains. Otherwise cut it.
 
-Keep the detail that changes the reader's code:
-
-- `Button` sizes a nested `Icon`, so an icon needs no `size` prop.
-- When a field component exposes both `ref` and `inputRef`, `ref` reaches the root and `inputRef`
-  reaches the input.
-
-Cut the detail that only explains the mechanism:
-
-- `Icon` renders a `<span>` that the stylesheet paints with a CSS mask.
-- Which internal modules a component imports.
+- Keep: `Button` sizes a nested `Icon`, so an icon needs no `size` prop.
+- Keep: when a field component exposes both `ref` and `inputRef`, `ref` reaches the root and
+  `inputRef` reaches the input.
+- Cut: `Icon` renders a `<span>` that the stylesheet paints with a CSS mask.
+- Cut: which internal modules a component imports.
 
 ### Other technologies
 
-Document the Luke UI part. Do not document React, React Aria, CSS, TypeScript, or a form library in
-general, because their own documentation owns that. Link upstream when the reader needs it, and
-write link text that says where it goes.
-
-Describe upstream behaviour only when Luke UI changes it, constrains it, or a developer must
-configure it to use Luke UI. Setting `validationBehavior="aria"` to hand validation to a form
-library qualifies. The React Aria validation model in general does not.
+Document the Luke UI part. For React, React Aria, CSS, TypeScript, or a form library in general,
+link upstream with link text that says where it goes. Describe upstream behaviour only when Luke UI
+changes or constrains it, or a developer must configure it to use Luke UI. Setting
+`validationBehavior="aria"` to hand validation to a form library qualifies. The React Aria
+validation model in general does not.
 
 ### The supported path
 
-Document the ordinary, supported way to use a component. Do not catalogue usage that is unsupported,
-obscure, or merely technically possible. Options crowd out the path most readers need, and a
-documented obscure path becomes a support obligation.
-
-Do not write "you can do this, but it is not recommended". Either recommend it or leave it out.
+Document the ordinary, supported way to use a component. Leave out unsupported, obscure, or merely
+possible usage, which crowds out the main path and becomes a support obligation. Recommend an
+approach or leave it out, never "you can do this, but it is not recommended".
 
 ### Internal distinctions
 
@@ -114,53 +69,23 @@ Expose an internal architectural distinction only when it reaches the public API
 choice. Primitives do, because they use `@luke-ui/react/primitives/*` entrypoints when the normal
 component API does not fit. See [COMPONENTS.md](COMPONENTS.md).
 
-Do not document an export that is not public API. The same applies to every docs page, including the
-home page. Show the public tokens a theme produces, not the private 12-step colour scales behind
-them.
-
-## Internal documentation scope
-
-Internal guides such as [COMPONENTS.md](COMPONENTS.md), [STYLING.md](STYLING.md),
-[TESTING.md](TESTING.md), and [PUBLIC_API.md](PUBLIC_API.md) explain how contributors build and
-maintain Luke UI. They may document architecture, cascade layers, recipes, generators, and
-implementation. The public "do not document implementation" rule does not apply to them.
-
-They still need a clear purpose for a maintainer, enough context to act, no redundancy, and no prose
-that only explains one editing session. Cut an implementation detail that does not help a
-contributor do the work the guide is for.
+Document only public API exports, on every page including the home page. Show the public tokens a
+theme produces, not the private 12-step colour scales behind them.
 
 ## Writing style
 
-These rules cover public MDX, JSDoc, code comments, package READMEs, and the internal guides in
-`docs/`. The public and internal surfaces still differ in scope. They share voice, terminology, and
-punctuation so a contributor does not have to remember two styles.
+These rules apply to every surface.
 
-Write short, plain sentences. Split a sentence that carries two ideas rather than trimming the words
-that carry meaning.
-
-- Write one instruction per sentence. Write an instruction as a command: "Pass a title", not "A
-  title should be passed".
-- Break a paragraph when it changes subject.
-- Use active voice and name the actor. Passive voice is fine when Luke UI is the actor and naming it
-  adds nothing, as in "The spinner is hidden from assistive technology".
-- Write in the present tense. Use another tense only when the timing is the point.
+- Write an instruction as a command: "Pass a title", not "A title should be passed".
 - Keep articles. Do not drop "the" or "a" to shorten a sentence.
-- Do not open a sentence with a participial phrase that hides the actor. A gerund is fine in a
-  heading or a title, as in "Choosing a scale".
-- Break up a stack of nouns when the relationship between them is unclear. Add a preposition.
-- Write positively. Avoid a double negative, such as "not uncommon".
-- State what a thing does. Name the action. Do not describe it as a capability the reader is
-  granted.
-- Use "you can" only to grant permission or present a real choice. When the reader should do
-  something, tell them to do it.
-- Address the reader as "you".
-- Cut empty promotional filler and adjectives used only for praise. Keep a word when it names a real
-  property.
+- Address the reader as "you". State what a thing does, not a capability the reader is granted. Use
+  "you can" only to grant permission or present a real choice.
+- Cut filler such as `simply` and `note that`, first-person `we`, `us`, and `let's`, and adjectives
+  used only for praise.
 
-**One term per concept.** Do not use different words for the same concept. Use the same word every
-time. `check:docs` flags `users`, `the user`, `a person`, and `people` as forbidden synonyms for
-`developer` and `someone`, and the plural form of `assistive technology`, so this table can stay a
-glossary of the preferred terms. The rest of the table is editorial and not mechanically enforced.
+**One term per concept.** `check:docs` rejects `users`, `the user`, `a person`, and `people` in
+favour of `developer` and `someone`, and the plural of `assistive technology`. The rest of the table
+is editorial.
 
 | Term                   | Definition                                                                                         |
 | ---------------------- | -------------------------------------------------------------------------------------------------- |
@@ -175,281 +100,172 @@ glossary of the preferred terms. The rest of the table is editorial and not mech
 | `select`               | Use `select` only for a control's selection state.                                                 |
 
 **Spelling and punctuation.** Spell words in Australian English. Write headings in sentence case,
-and capitalise only proper nouns and product names. Split a sentence rather than joining two ideas
-with a semicolon. An em dash is fine when it has a space on each side, as in `foo — bar`. An
-`<ExampleBlock title>` uses a colon instead, in the form `<page or component>: <qualifier>`.
+capitalising only proper nouns and product names. Split a sentence rather than joining two ideas
+with a semicolon. Give an em dash a space on each side, as in `foo — bar`. An `<ExampleBlock title>`
+uses a colon instead, in the form `<page or component>: <qualifier>`.
 
-**Say it once.** Cut a sentence whose only content restates its heading, a prop name, or the example
-below it. Do not summarise a section at the end of it. When more than one page needs the same rule,
-explain it on the page that owns the topic and link to it from the others. An example may appear on
-exactly one page, because that is the mechanical handle on "say it once".
+**Say it once.** Cut a sentence that only restates its heading, a prop name, or the example below
+it, and any closing summary. Explain a shared rule on the page that owns the topic and link to it
+from the others. An example appears on exactly one page, which `check:docs` enforces.
 
-### Editing prose
-
-Start with the claim or instruction. Cut empty introductions, staged questions, decorative
-contrasts, and conclusions that repeat the section. Use headings and lists when they help navigation
-or express real structure, rather than imposing the same shape on every passage.
-
-Keep facts, technical terms, useful context, uncertainty, and the author's voice within this guide's
-voice and punctuation rules. Do not invent names, quantities, timings, causes, or guarantees to make
-a vague claim sound specific. Check behavioural claims against the implementation. Flag unsupported
-claims or contradictions instead of silently resolving them. Leave already clear prose unchanged.
+**Editing.** Leave clear prose unchanged. Keep the source's facts, qualifications, and uncertainty,
+and invent no names, quantities, causes, or guarantees to make a claim sound specific. Flag an
+unsupported claim or a contradiction instead of silently resolving it.
 
 ## Comments and JSDoc
 
 JSDoc on a public type is published documentation. A guide's `## API` section renders it, so the
-public documentation rules above apply to it. JSDoc and TypeScript types drive the docs app.
-
-When adding or changing a component:
+public documentation rules apply. When adding or changing a component:
 
 - Write function-level JSDoc on the exported component that describes it for a developer.
 - Document every public prop. Include `@default` when the component destructures a default value.
-- Keep a straightforward prop description to one concise sentence. Add explanation when a
-  constraint, choice, caveat, or non-obvious behaviour affects how the prop is used. Do not optimise
-  JSDoc for line count.
+- Keep a straightforward prop description to one sentence. Add explanation when a constraint,
+  choice, caveat, or non-obvious behaviour affects how the prop is used. Do not optimise JSDoc for
+  line count.
 - Do not restate the prop name. `endContent` needs "Non-interactive adornment shown after the
   label", not "The end content".
-- On components, redeclare important inherited `react-aria-components` props with useful JSDoc,
-  using the passthrough pattern such as `isDisabled?: RacButtonProps['isDisabled']`. Redeclare only
-  the props a developer is likely to reach for. Point a long-tail inherited prop at the upstream
-  React Aria component through the page's `reactAria` frontmatter link.
+- Redeclare the inherited `react-aria-components` props a developer is likely to reach for, with
+  useful JSDoc, using the passthrough pattern such as `isDisabled?: RacButtonProps['isDisabled']`.
+  Point a long-tail inherited prop at the upstream React Aria component through the page's
+  `reactAria` frontmatter link.
 
 A code comment explains the code, not its history. Luke UI is pre-1.0, so no comment carries a prior
 state.
 
-- Do not write "previously", "used to", "no longer", "an earlier pass", or "the old X".
-- Do not use an issue number to narrate why a change happened.
+- Do not write "previously", "used to", "no longer", "an earlier pass", or "the old X". Do not use
+  an issue number to narrate why a change happened.
 - Do not name another design system to justify a decision. A design system may appear as test
   reference data, as `theme/__fixtures__/radix-scales.ts` does.
 - Do not narrate what the next line does.
-- Keep an explanation that justifies a rule a reader would otherwise undo. When unsure, shorten the
-  explanation rather than delete it.
+- Keep an explanation that justifies a rule a reader would otherwise undo. When unsure, shorten it
+  rather than delete it.
 
 ## Examples
 
-An example carries more of the explanation than the prose around it, because most readers look for
-the code first.
+Readers look for the code first, so an example carries most of the explanation.
 
 ### What to show
 
-- Use content that makes the component or behaviour easy to understand. Do not introduce application
-  context that the example does not need.
-- When content exists only so the component has something to render, prefer neutral or
-  self-referential copy, such as "Example checkbox" or "Example destination".
-- Use application-specific content only when its meaning helps explain the component or behaviour.
-  "Save changes" can clarify a button action. An account or workspace does not clarify a checkbox
-  state. Avoid invented accounts, workspaces, billing details, characters, or other surrounding
-  application details.
-- In comparison examples, content may name the value being demonstrated when the content is only a
-  specimen label, such as "Small", "Medium", and "Large". Keep those names in a caption beside the
-  control, not in the control's own label.
-- Use `Comparison` and `ComparisonItem` from `#docs` when repeated caption and layout markup would
-  hide the component JSX. Keep each demonstrated component and its prop values visible in the
-  example.
-- Do not use API terms as labels for interactive controls. When the control's purpose is incidental,
-  use a neutral or self-referential label instead.
-- When an example needs extended text, choose a subject that helps explain why the component
-  contains that structure. Do not invent an application scenario just to fill the example.
-- Let the example make the behaviour obvious. A reader should see what the section describes without
-  hunting for it.
-- Keep the example as small as it can be without becoming artificial.
-- Choose one approach and show it. Do not present several interchangeable ways to reach the same
-  result.
-- Show all values of one prop when readers need to compare the values or select one. Give all other
-  props the same value.
-- Combine values from two props only when the combination changes the result. Show only the
-  combinations that explain the change.
-- Do not show all prop combinations only to provide coverage. The Props page lists all available
-  props and values.
-
-A reference page can show a full scale or catalogue when the page is about that scale or catalogue.
+- Keep an example as small as it can be without becoming artificial, and make the described
+  behaviour obvious.
+- Use neutral or self-referential copy, such as "Example checkbox", when content exists only so the
+  component renders. Use application content only when its meaning explains the behaviour. "Save
+  changes" can clarify a button action. An account or workspace does not clarify a checkbox state.
+  Do not invent accounts, workspaces, billing details, characters, or scenarios to fill an example.
+  For extended text, choose a subject that explains why the component contains that structure.
+- Do not use API terms as labels for interactive controls.
+- In a comparison, put a specimen label such as "Small" in a caption beside the control, not in the
+  control's own label. Use `Comparison` and `ComparisonItem` from `#docs` when repeated caption and
+  layout markup would hide the component JSX. Keep each component and its prop values visible.
+- Show one approach, not several interchangeable ones.
+- To compare one prop, show all its values and give every other prop the same value. Combine two
+  props only to show a combination that changes the result. Do not show combinations for coverage.
+  The `## API` table lists every prop and value. A reference page about a scale or catalogue can
+  show all of it.
 
 ### Example layout
 
 Use layout primitives for structure, not one-off wrappers.
 
-- Use `Stack` for vertical columns. Set `gap` on the stack instead of margin on children.
-- Use `Cluster` for inline groups that wrap, such as button rows or chip-like controls.
-- Use `Container` only when the example is about max width or container queries. Do not use it as a
-  generic narrow-form wrapper.
-- Use `Box` when you need grid, a flex direction other than a column stack, or visual chrome such as
-  padding and borders. Do not add an empty `Box` just to group children. If a control needs to keep
-  its intrinsic inline size inside a stretching `Stack`, wrap it in `Cluster` instead of stretching
-  it.
-- Use `previewWidth="narrow"` for a narrow docs preview when the width is incidental to the example.
-  Define the width in the example source when it demonstrates the layout itself, such as a complete
-  form. For a fixed width, use `style={{ maxInlineSize: '20rem' }}`.
-- Do not set `inlineSize="100%"` to fill the preview. A block-level example root already fills it.
-- Use `ExampleItem` from `#docs` for placeholder children in a layout example, so each child's box
-  is visible.
+- `Stack` for vertical columns. Set `gap` on the stack instead of margin on children.
+- `Cluster` for inline groups that wrap, such as button rows. To keep a control's intrinsic inline
+  size inside a stretching `Stack`, wrap it in `Cluster` instead of stretching it.
+- `Container` only when the example is about max width or container queries, not as a generic
+  narrow-form wrapper.
+- `Box` for grid, a flex direction other than a column, or visual chrome such as padding and
+  borders. Do not add an empty `Box` just to group children.
+- `ExampleItem` from `#docs` for placeholder children in a layout example, so each child's box is
+  visible.
+- No `inlineSize="100%"` to fill the preview. A block-level example root already fills it.
 
 ### Prose around an example
 
-Explain what the reader should notice when the example does not already make it obvious. Put what a
-reader needs before the example, not after it.
-
-Do not add a lead-in for its own sake. "The following example shows a button with an icon" adds
-nothing beside a titled, rendered example.
+Put what the reader needs before the example. Explain what to notice only when the example does not
+make it obvious. Skip lead-ins such as "The following example shows a button with an icon".
 
 ### Example files
 
-Interactive examples live in `apps/docs/src/examples/<component>/`. An example module
-default-exports an anonymous arrow function, `export default () => {...}`. The module path
-identifies the component and variation, so the rendered source repeats no function name.
+Interactive examples live in `apps/docs/src/examples/<component>/` and default-export an anonymous
+arrow function, `export default () => {...}`, so the rendered source repeats no function name.
+Reference one with `<ExampleBlock src="<component>/<name>" title="Button: Icons" />`. Add or update
+a section's example in the same change as the section.
 
-Reference an example from an MDX page with `<ExampleBlock src="<component>/<name>" title="..." />`.
-Use `previewWidth="narrow"` to constrain the docs preview when useful. This is a docs-only setting:
-opening the example in the Playground uses the available width. Put any width that is part of the
-example itself in its source. Title it `<page or component>: <qualifier>`, for example
-`Button: Icons`.
+- **Width.** Use `previewWidth="narrow"` when a narrow width is incidental. It is docs-only, and the
+  Playground uses the available width. When the width is part of the example, such as a complete
+  form, set it in the source, for example `style={{ maxInlineSize: '20rem' }}`.
+- **Layout.** A block-level example fills the preview width. Pass `layout="centered"` for an
+  intrinsically sized example, such as a button or an icon. Pass `layout="full-bleed"` when the
+  example paints its own surface and needs no preview padding.
 
-The preview renders an example in normal document flow, so a block-level example fills the preview
-width. Pass `layout="centered"` for an example with an intrinsic size, such as a button or an icon.
-Pass `layout="full-bleed"` when the example paints its own surface and needs no preview padding.
+Every component guide opens with a focused `basic.tsx` as its primary `ExampleBlock`, which the
+generator scaffolds and `component-doc-contract` enforces. An example that no page references and no
+other example imports fails `example-reachability`.
 
-Every component guide opens with a focused `basic.tsx` example as its primary `ExampleBlock`, which
-the generator scaffolds and `component-doc-contract` enforces. An example that no page references
-and no other example imports fails `example-reachability`.
-
-Prefer a typechecked `ExampleBlock` over an inline TSX fence whenever the code benefits from a
-rendered preview. Reserve an inline fence for non-renderable setup, partial composition, or an API
-detail that is clearer outside a complete example.
-
-Samples that cannot render live in `apps/docs/src/samples/` and appear through
-`<SourceCodeBlock src="<path>" />`, which shows source with no preview. Use it for installation,
-provider setup, and configuration.
-
-Keep an example aligned with the section that references it. When you add a feature section, add or
-update its example in the same change.
+Prefer a typechecked `ExampleBlock` over an inline TSX fence when a rendered preview helps. Reserve
+an inline fence for non-renderable setup, partial composition, or an API detail that is clearer
+outside a complete example. Samples that cannot render, such as installation, provider setup, and
+configuration, live in `apps/docs/src/samples/` and appear through
+`<SourceCodeBlock src="<path>" />`, which shows source with no preview.
 
 ## Instructions
 
-### Choose for the reader
-
-When a task has several valid approaches, the reader still needs only one.
-
-1. State the requirement, goal, or criterion that decides the choice.
-2. Choose one approach and show it.
-3. Mention an alternative only when the reader has to pick between them.
-
-"Set the theme's identity class on `<html>` in the root layout" beats "You can set the identity
-class in `index.html`, the root layout, or a script".
-
-### Move forwards
-
-Instructions run in one direction. A reader on step four should never have to replay step two.
-
-- Put a prerequisite before the step that needs it.
-- Do not annotate a finished step with what the reader could have done instead.
-- Write the steps a reader follows, not a narrative walkthrough of what you did.
+- **Choose for the reader.** When a task has several valid approaches, state the criterion that
+  decides it and show one approach. Mention an alternative only when the reader has to pick. "Set
+  the theme's identity class on `<html>` in the root layout" beats "You can set the identity class
+  in `index.html`, the root layout, or a script".
+- **Move forwards.** Put a prerequisite before the step that needs it. Do not annotate a finished
+  step with what the reader could have done instead.
+- Write the steps a reader follows, not a narrative of what you did.
 - Give a guide one outcome. Split a guide that teaches two unrelated goals.
 
 ## Review
 
-Review the page, not the sentences. New content anchors a reviewer to the words in front of them.
-The problem is more often the shape of the page. Use this checklist for public documentation. For an
-internal guide, ask the same questions with a maintainer as the reader.
+Review the page, not the sentences, because the problem is more often the page's shape. For an
+internal guide, ask these questions with a maintainer as the reader. Read the whole page, then ask:
 
-Read the whole page, then ask:
-
-- Does this belong on this page, in this section?
-- Does another page already say it? Link instead of repeating.
+- Does this belong on this page, in this section? Does another page already say it?
 - Can someone scanning headings and examples find the important information?
-- Does each section earn its place? Could anything go without losing information?
-- Is the page helping with usage and decisions, or describing implementation that does not affect
-  them?
-- Are the examples realistic and focused?
-- Do the instructions move forwards?
-- Is prose repeating what a heading, prop name, or example already says?
+- Could any section go without losing information?
+- Does the page help with usage and decisions, or describe implementation that does not affect them?
+- Are the examples realistic and focused? Do the instructions move forwards?
+- Does prose repeat what a heading, prop name, or example already says?
 - Has comprehensiveness made the page worse?
 - Is context missing because the author already knew the system?
 
-The last question pulls against the others, and it is the one an author is least likely to catch.
-Cutting applies to words and phrases, not to ideas and context. Adding the missing step often makes
-a page feel shorter.
+The last question pulls against the others, and an author is least likely to catch it. Cut words and
+phrases, not ideas and context. Adding the missing step often makes a page feel shorter.
 
 ## Where documentation lives
 
-The hosted docs app in `apps/docs` is the primary docs surface for developers. Authored guides live
-under `apps/docs/content/docs/docs/`, at `/docs/<slug>`. Component guides live under
+The hosted docs app in `apps/docs` is the primary docs surface. Authored guides live under
+`apps/docs/content/docs/docs/`, at `/docs/<slug>`. Component guides live under
 `apps/docs/content/docs/components/`, at `/components/<group>/<name>`.
 
-Generated files come from the docs `generate` script in `apps/docs/package.json`. Do not hand-edit
-them. Walking the docs page tree, parsing frontmatter, extracting `<ExampleBlock>` `src` values, and
-mapping page URLs to files each have one owner in `apps/docs/src/lib/`.
-
-Do not add generated package docs or `*.docs.md` files under `packages/@luke-ui/react/src/`.
-
-### Docs app architecture
-
-Visible docs UI is owned by Luke UI components and docs-local Vanilla Extract `.css.ts` files under
-`apps/docs/src/`. The app stylesheet imports Luke UI and theme stylesheets only. It does not import
-Tailwind or Fumadocs CSS.
-
-Fumadocs stays as non-visual infrastructure: MDX compilation (`fumadocs-mdx`), page tree and loaders
-(`fumadocs-core/source`), search index data (`fumadocs-core/search`), TypeScript prop extraction
-(`fumadocs-typescript`), and `RootProvider` from `fumadocs-ui/provider/tanstack` with search and
-theme UI disabled. Do not import Fumadocs UI components for chrome. The page-tree client may wrap
-item names in a `fd-page-tree-item-name` span. Docs do not load Fumadocs CSS or style that class.
-
-[Docs app styling](STYLING.md#docs-app-styling) says when a docs-local `.css.ts` file is
-appropriate.
-
-A module imported by browser code must not import `node:fs` or `node:path`, including through
-`src/lib/`. These imports can leave an MDX body empty even when the page returns HTTP 200. Keep
-filesystem work in build-time or server modules.
-
-The playground host lives in `apps/docs/src/playground/`. Compilation, hashing, formatting, and the
-iframe protocol live in the private `@luke-ui/playground-core` package.
-
-The package README links to the hosted docs, which also serve agents:
-
-- `/llms.txt`, an llmstxt.org index of every docs guide and every component guide.
-- `/llms-full.txt` for full docs.
-- Per-page Markdown by appending `.md` to a docs URL, for example `/docs/installation.md` or
-  `/components/actions/button.md`. `/index.md` is a short homepage summary. A missing page's `.md`
-  returns a Markdown 404 body, not HTML.
-- Content negotiation: a request whose `Accept` header prefers `text/markdown` over HTML gets the
-  page's Markdown instead of its HTML. Browsers get HTML as usual.
-- `/sitemap.xml` and `/robots.txt` for search engines and agents, built from the `SITE_URL`
-  build-time origin and `VITE_BASE_URL` base path. Production defaults to
-  `https://ui.lukebennett.dev` and development to `http://localhost:3000`. Set `SITE_URL` to
-  override the origin. Cloudflare Pages also reads `SITE_URL` (and `VITE_BASE_URL` for subpath
-  deploys) at request time for Markdown 404 links. Keep those bindings aligned with the build, or
-  absolute URLs drift from the custom host.
-- Each HTML page links to its Markdown twin (`<link rel="alternate" type="text/markdown">`) and to
-  `/llms.txt` (`<link rel="describedby">`).
+The docs `generate` script in `apps/docs/package.json` writes generated files. Do not hand-edit
+them. Walking the page tree, parsing frontmatter, extracting `<ExampleBlock>` `src` values, and
+mapping page URLs to files each have one owner in `apps/docs/src/lib/`. Do not add generated package
+docs or `*.docs.md` files under `packages/@luke-ui/react/src/`. The
+[docs app README](../apps/docs/README.md) covers the app's architecture.
 
 ## Component docs
 
-Components get hosted docs pages in the primary component navigation.
+The `/components` landing page lists every component guide by category. `generate` builds it from
+the guides, so a new guide appears with no further edit.
 
-The components landing page at `/components` lists every component guide, grouped by category. The
-list is generated from the guides themselves as part of `generate`. A new component appears on the
-landing page with no further edit.
+Primitives are public API. Document every primitive export path in the "Primitives" section, which
+stays at the end of the Components area. A component page may link to its primitive pages for when
+the normal component API does not fit.
 
-Primitives are public API. Document every primitive export path in hosted docs. Primitive pages live
-in the "Primitives" section under components.
-
-Component pages may link to their related primitive pages when the normal component API does not
-fit. Keep primitive pages at the end of the Components area.
-
-`apps/docs/content/docs/components/meta.json` is the source for component category and order. List
-every component guide there once. Each category `meta.json` must list the same components as its
-slice of that file, in the same order. A leftover category file with no remaining guides or root
-entries is stale. A guide's `source` must name the explicit module under
-`packages/@luke-ui/react/src/exports/` for a public entry point in
-`packages/@luke-ui/react/package.json`. `check:docs` enforces all of this, so a guide cannot leave
-the navigation or point at a path a developer cannot import.
+`apps/docs/content/docs/components/meta.json` sets component category and order. Each category
+`meta.json` mirrors its slice. A guide's `source` names the `packages/@luke-ui/react/src/exports/`
+module for a public entry point. `check:docs` enforces all of this.
 
 ## MDX page structure
 
-`<group>/<name>.mdx` is the authored component guide, the only hosted page for that component. It
-keeps the `/components/<group>/<name>` URL. There is no separate Props route.
-
-Use this order for component guide pages. Follow
-[`button.mdx`](../apps/docs/content/docs/components/actions/button.mdx) when the heading names or
-order are unclear.
+`<group>/<name>.mdx` is the component's only hosted page, at `/components/<group>/<name>`. There is
+no separate Props route. Order a component guide as follows, and follow
+[`button.mdx`](../apps/docs/content/docs/components/actions/button.mdx) when heading names or order
+are unclear.
 
 1. Frontmatter.
 2. Short usage lead-in.
@@ -459,174 +275,29 @@ order are unclear.
 6. `## Accessibility`. Required for actions, forms, and feedback. Optional elsewhere.
 7. `## API`, the last section on every guide that declares `source:`.
 
-A closed heading vocabulary keeps related content on the same kind of page findable. Feature
-sections stay free. The fixed sections stay in that order so a reader scanning headings always meets
-practices, then features, then accessibility, then the API reference. Link to another component or
-primitive inline in the prose where it is relevant, rather than in a dedicated section.
+Feature section headings are free. Link to another component or primitive inline where it is
+relevant, not in a dedicated section. Add only sections that help a developer use the component.
+`check:docs` fails on leftover scaffold placeholders.
 
-Authored guides under `/docs` stay free-form apart from a closing `## Continue learning` section
-that contains `<Cards>`. That heading is the way off the page. Component guides must not use it.
-
-Add only the sections that help a developer use the component. The generated guide ships with the
-primary example and no placeholder prose, and `check:docs` fails on a leftover placeholder.
+Authored guides under `/docs` are free-form apart from a closing `## Continue learning` section that
+contains `<Cards>`. Component guides do not use it.
 
 ## API reference
 
-You write the `## API` section yourself, the same as every other heading on a guide. Add a
-`<component-props-table path="…" name="…" />` tag for each exported prop type, where `path` is the
-repo-relative file that exports it and `name` is the exported type name, for example `ButtonProps`.
-`remarkAutoTypeTable` expands the tag into the rendered table at MDX compile time, so it stays
-accurate to the type without a generation step. In `vp dev`, editing the documented file or a
-relative import it pulls in recompiles the MDX module and refreshes the table without touching the
-MDX file or restarting the server. A guide with one table has no extra heading above it. A guide
-with several tables adds a `### <TypeName>` heading above each one, in the order they appear.
+Write the `## API` section by hand. Add a `<component-props-table path="…" name="…" />` tag for each
+exported prop type, where `path` is the repo-relative file that exports it and `name` is the type
+name, for example `ButtonProps`. `remarkAutoTypeTable` expands it at MDX compile time, and `vp dev`
+refreshes it when the documented file or its relative imports change. With several tables, add a
+`### <TypeName>` heading above each. `check:docs` enforces the section's position and tag placement.
 
-The prose on a table comes from JSDoc in the component's source, so a prop is documented where it is
-declared. When a type still accepts arbitrary DOM and ARIA attributes and event handlers, the table
-renders that note automatically. Do not write the note by hand.
-
-The generator also collects the definitions of the types each signature names. The page's Markdown
-lists every collected type under `#### Type definitions` after the table. Luke UI types come first.
-The list includes each Luke UI type that another definition names, so every Luke UI name on the page
-has a definition. External types come last, with their package and declaring file. A short external
-type alias also keeps its declaration. When a Luke UI declaration hides its values, as
-`keyof typeof responsiveConditions` does, the list adds the type TypeScript resolves it to. Do not
-write type definitions by hand.
-
-The build formats object members, unions or intersections with more than two members, and parameter
-lists with more than two parameters on separate indented lines. Named types stay named, Markdown
-table cells show types on one line, and code blocks preserve line breaks. In the HTML table, Luke UI
-type links open their declaration and resolved type in a popover, where linked names navigate to
-nested definitions and breadcrumbs return to earlier types. Definitions load from separate JSON
-files on first use, and the build validates them.
-
-`check:docs` requires `## API` to be the last heading on a guide that declares `source:`, requires
-at least one `component-props-table` tag inside it, and rejects a tag placed anywhere else on the
-page.
-
-## Site chrome
-
-Every surface shares one header, `SiteHeader` in `apps/docs/src/navigation/site-header.tsx`. It is
-one `3.5rem` row (`SITE_HEADER_BLOCK_SIZE`). On desktop it holds the wordmark, the sidebar toggle
-when the page has a docs sidebar, and the Docs, Components and Playground links, then search, Theme
-and GitHub. The compact row holds the wordmark, search, Theme and Menu. The wordmark links to `/`,
-the landing page. Docs opens `/docs/installation`. Components opens `/components`. The destination
-list and its active-route matching live in `apps/docs/src/navigation/site-destinations.ts`.
-Appearance controls belong to the header on every surface, not to the docs sidebar footer.
-
-Pass `tree` to `SiteHeader` on a page with a sidebar. Home, the playground and the 404 page pass
-nothing. Menu opens `SiteDrawer` (`site-drawer.tsx`), a React Aria `Modal` that slides in from the
-inline end and is named by its visible "Menu" title. It has three variants, chosen from the tree and
-the header row:
-
-- Simple: a page with no tree. A `Site` navigation of Docs, Components, Playground and GitHub.
-- Switcher: a page with a tree, under the compact header. A `Sections` navigation of segmented
-  links, then the current section's tree, then GitHub. There is no Home entry, because the wordmark
-  links home.
-- Tree only: a page with a tree, under the desktop header but with no sidebar. Only the tree,
-  because the header already links to the sections.
-
-The drawer closes when a link is chosen and when it is no longer needed: the header becomes desktop
-on a page with no tree, or the sidebar layout is reached. `DocsNav` names its landmark after the
-active section, so the Components tree is announced as "Components". Drawer rows are at least
-`2.75rem` tall, and the sidebar keeps its own row size. The landing page has no active destination.
-
-The docs routes render `DocsShell`, a docs-local grid with the desktop navigation and the header.
-`DocsArticle` in `apps/docs/src/components/docs-article/` renders each page into the shell: title
-block, MDX body, previous and next links, and the table of contents. The playground and the 404
-render the header directly.
-
-The header and the docs shell are named containers, built from
-`apps/docs/src/navigation/docs-container-queries.ts`. The header (`site-header`) switches between
-the compact and desktop rows at `SITE_HEADER_DESKTOP_MIN`, which sits just above the desktop row's
-measured width. `docs-shell.browser.test.tsx` fails if it drops below that width. The shell
-(`docs-shell`) shows the sidebar from `DOCS_SIDEBAR_MIN`. Both are in `rem`, so a larger text size
-switches layouts sooner. Between the two, on a docs page, the header keeps its links and Menu opens
-a drawer with the tree. The sidebar threshold must stay at or above the header threshold.
-Environmental queries such as `prefers-reduced-motion` and `hover: none` stay `@media`. The article,
-table of contents, playground and example gutters are still unnamed `@container` queries, which
-resolve against the nearest container: `docs-shell` in the docs, and `:root` elsewhere. A query
-measures its container's content box, so the header and the shell keep their padding on an inner
-element.
-
-The docs article and each example frame use `isolation: isolate` so in-flow stacking, such as
-example resize grips, cannot paint over the sticky header. Do not raise the header `z-index` to
-compete with page content.
-
-## Playground
-
-The docs site has a live playground at `/playground`: a Monaco editor with TypeScript IntelliSense
-for `@luke-ui/react`, a live preview iframe, and code shared through the `#code=` URL hash
-(lz-string compressed, plus a `&shape=` param of per-line indent/length pairs so the pre-hydration
-loading skeleton can mirror the shared code before any JavaScript loads). `<ExampleBlock>` renders
-an "Open in playground" button when the example's imports are all in the docs playground specifier
-list in `apps/docs/src/playground/docs-playground-specifiers.ts`. The button opens that source
-pre-loaded. Examples that import a relative module, or anything else the preview cannot `require`,
-omit the button.
-
-Each example shows a six-line source preview below its live preview. Longer snippets fade at the
-bottom and have an "Expand code" control to reveal the full source. Copy always copies the full
-source, including while collapsed. Expansion and collapse animate unless reduced motion is
-preferred.
-
-User code compiles in the browser with sucrase and can import `react` and any `@luke-ui/react/*`
-subpath. The compiler only rejects a missing default export (`undefined` or `null`) and returns
-`unknown` rather than a React component type, because it does not depend on React to validate the
-result. The preview runner casts the result to render it, and its `ErrorBoundary` reports an invalid
-export as a render-time error. The import map, editor types, and pre-hydration skeleton are
-generated as part of `generate`. New component subpaths in `@luke-ui/react`'s `exports` map are
-picked up automatically. The preview iframe only accepts messages from its parent.
-
-### Playground core
-
-The private `packages/@luke-ui/playground-core` package holds the parts of the playground that any
-React component library could reuse. It knows nothing about Luke UI, its themes, or the docs site.
-It has no root entrypoint. Import each subpath directly:
-
-| Subpath                               | Runs in       | Provides                                                                                    |
-| ------------------------------------- | ------------- | ------------------------------------------------------------------------------------------- |
-| `@luke-ui/playground-core/compiler`   | Browser       | Compiles source with sucrase and resolves its imports from a host-supplied scope            |
-| `@luke-ui/playground-core/protocol`   | Browser       | `playground:code`, `ready`, `success`, and `error` messages, trust checks, the page session |
-| `@luke-ui/playground-core/hash`       | Browser, Node | Encodes code in a URL hash, with optional host params after it                              |
-| `@luke-ui/playground-core/format`     | Browser, Node | Formats source with lazily loaded Prettier and host-supplied style options                  |
-| `@luke-ui/playground-core/specifiers` | Browser, Node | Base React specifiers, `exports`-map specifiers, and the import allowlist check             |
-| `@luke-ui/playground-core/generate`   | Node          | Scope-module rendering and the editor type-map builder                                      |
-
-`generate`'s implementation lives under `src/node/`, the only directory allowed to import Node
-built-ins. Lint rules in the root `vite.config.ts` stop the other subpaths from importing Node
-built-ins or anything under `src/node/`, and their type check runs without Node types. The compiler
-does not import React at runtime or in its types, so the package has no `react` peer dependency. A
-host renders the compiled result with its own React.
-
-Docs supplies everything specific to Luke UI:
-
-- `docs-playground-specifiers.ts` names `@luke-ui/react`, reads its `exports`, and appends the
-  third-party and `#docs` specifiers.
-- `docs-playground-hash.ts` adds the skeleton `shape` param from `playground-editor-shape.ts`.
-- `playground-format.ts` holds the Prettier style. `playground/monaco-format.ts` registers it as
-  Monaco's formatter and binds the save shortcut.
-- `playground-appearance-message.ts` defines the `luke-ui-docs:appearance` theme message. The
-  playground page posts it on a theme change and from the session's `onPreviewReady` handler, so the
-  preview applies the theme before the replayed code renders.
-- `src/playground/generate/` modules pass Luke UI paths, the type-package allowlist, and the output
-  paths to `generate`.
-
-The playground page owns hash updates and debounce. It creates one page session when it mounts and
-calls `resync()` to cover a preview that announced ready before the message listener attached. The
-preview runner calls the compiler.
-
-`@luke-ui/playground-core` builds like `@luke-ui/react`: `exports` points at `dist`, so run its
-`build` before consuming it and its `dev` script to watch it. Turbo orders this automatically for
-every docs task that needs it. Docs imports it only through its subpaths, never a relative
-`packages/@luke-ui/playground-core/src/...` path.
+The table's prose comes from JSDoc where each prop is declared. The generator adds the notice that a
+type accepts arbitrary DOM and ARIA attributes and event handlers, and the `#### Type definitions`
+list in the page's Markdown. Do not write either by hand.
 
 ## Keeping docs current
 
-Docs must stay factually accurate. No authored doc should keep a stale path, command, script,
-export, type, snippet, or cross-reference.
-
-This applies to comments, JSDoc, MDX files in `apps/docs/content/docs/`, `README.md`, package
-READMEs, files in `docs/`, and skills in `.agents/skills/`.
+Comments, JSDoc, hosted MDX, READMEs, `docs/`, and `.agents/skills/` keep no stale path, command,
+script, export, type, snippet, or cross-reference.
 
 - Update or delete docs and skills that describe code in the same change as the code.
 - When you move, rename, or remove a file, script, command, export, or symbol, search docs for old
