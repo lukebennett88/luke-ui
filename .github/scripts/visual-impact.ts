@@ -20,7 +20,7 @@ export const SAFE_PROSE_PATHS = new Set([
 	'docs/PUBLIC_API.md',
 	'docs/STYLING.md',
 	'docs/TESTING.md',
-	'docs/THEME_COLOUR_GENERATION.md',
+	'packages/@luke-ui/react/src/theme/README.md',
 	'docs/VISUAL_TESTING.md',
 	'docs/WORKFLOWS.md',
 	'.agents/papercuts.md',

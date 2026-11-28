@@ -1,10 +1,8 @@
 # Documentation
 
-This is the only normative guide for hosted MDX, JSDoc, code comments, READMEs, and `docs/`. Package
-`AGENTS.md` files point here instead of restating it. A skill in `.agents/skills/` may name a rule
-from a `docs/` guide in one actionable line that links to the owning section. It must not explain,
-extend, or weaken the rule, or drop its qualifications and exceptions. When a skill and a guide
-disagree, the guide wins.
+This guide owns the rules for hosted MDX, JSDoc, code comments, READMEs, and `docs/`. A skill or
+`AGENTS.md` may name a guide's rule in one line that links to the owning section, without restating
+or weakening it. When a skill and a guide disagree, the guide wins.
 
 ## Authoring checklist
 
@@ -34,13 +32,6 @@ Both surfaces follow every editorial rule here and differ only in scope. Public 
 observable behaviour and usage. Internal docs may explain architecture, cascade layers, recipes,
 generators, and implementation. On either surface, cut a detail that does not help its reader do the
 work the page is for.
-
-## What documentation is for
-
-Each section should help its reader answer at least one question: What is this? When would I use it?
-How do I use it? How do I choose between the options? What mistake does this prevent? Cut content
-that answers none. This is an editorial test, not a template, so do not add a heading per question.
-Verbose, redundant, or obvious prose fails its reader even when every rule passes.
 
 ## Public documentation scope
 
@@ -85,17 +76,8 @@ theme produces, not the private 12-step colour scales behind them.
 
 These rules apply to every surface.
 
-- Write short, plain sentences with one idea each. Split a long sentence rather than trimming the
-  words that carry meaning.
-- Write an instruction as a command, in the present tense: "Pass a title", not "A title should be
-  passed". Use another tense only when the timing is the point.
-- Use active voice and name the actor. Passive voice is fine when Luke UI is the actor and naming it
-  adds nothing, as in "The spinner is hidden from assistive technology".
+- Write an instruction as a command: "Pass a title", not "A title should be passed".
 - Keep articles. Do not drop "the" or "a" to shorten a sentence.
-- Do not open a sentence with a participial phrase that hides the actor. A gerund is fine in a
-  heading, as in "Choosing a scale".
-- Add a preposition to break up a stack of nouns whose relationship is unclear. Avoid double
-  negatives such as "not uncommon".
 - Address the reader as "you". State what a thing does, not a capability the reader is granted. Use
   "you can" only to grant permission or present a real choice.
 - Cut filler such as `simply` and `note that`, first-person `we`, `us`, and `let's`, and adjectives
@@ -125,15 +107,6 @@ uses a colon instead, in the form `<page or component>: <qualifier>`.
 **Say it once.** Cut a sentence that only restates its heading, a prop name, or the example below
 it, and any closing summary. Explain a shared rule on the page that owns the topic and link to it
 from the others. An example appears on exactly one page, which `check:docs` enforces.
-
-### Editing prose
-
-Start with the claim or instruction. Cut empty introductions, staged questions, decorative
-contrasts, and conclusions that repeat the section. Use headings and lists only for navigation or
-real structure. Keep facts, technical terms, useful context, uncertainty, and the author's voice. Do
-not invent names, quantities, timings, causes, or guarantees to make a vague claim sound specific.
-Check behavioural claims against the implementation. Flag unsupported claims or contradictions
-instead of silently resolving them. Leave already clear prose unchanged.
 
 ## Comments and JSDoc
 
@@ -267,29 +240,8 @@ The hosted docs app in `apps/docs` is the primary docs surface. Authored guides 
 The docs `generate` script in `apps/docs/package.json` writes generated files. Do not hand-edit
 them. Walking the page tree, parsing frontmatter, extracting `<ExampleBlock>` `src` values, and
 mapping page URLs to files each have one owner in `apps/docs/src/lib/`. Do not add generated package
-docs or `*.docs.md` files under `packages/@luke-ui/react/src/`.
-
-### Docs app architecture
-
-Luke UI components and docs-local Vanilla Extract `.css.ts` files under `apps/docs/src/` own the
-visible docs UI. [Docs app styling](STYLING.md#docs-app-styling) owns the stylesheet rules and when
-a `.css.ts` file is appropriate.
-
-Fumadocs provides only non-visual infrastructure, such as MDX compilation, the page tree, search
-data, and prop extraction. Its one UI import is `RootProvider` from `fumadocs-ui/provider/tanstack`,
-with search and theme UI disabled. Do not import Fumadocs UI components for chrome, load Fumadocs
-CSS, or style the `fd-page-tree-item-name` span the page-tree client may add.
-
-A module imported by browser code must not import `node:fs` or `node:path`, including through
-`src/lib/`. Such an import can leave an MDX body empty while the page still returns HTTP 200. Keep
-filesystem work in build-time or server modules.
-
-For agents, the docs serve `/llms.txt`, `/llms-full.txt`, and per-page Markdown at a docs URL plus
-`.md` or through an `Accept` header that prefers `text/markdown`. Each HTML page links to its
-Markdown twin and to `/llms.txt`. A missing page's `.md` returns a Markdown 404 body. `/sitemap.xml`
-and `/robots.txt` use the `SITE_URL` origin and `VITE_BASE_URL` base path from the build. Cloudflare
-Pages also reads both at request time for Markdown 404 links. Keep those bindings aligned with the
-build, or absolute URLs drift from the custom host.
+docs or `*.docs.md` files under `packages/@luke-ui/react/src/`. The
+[docs app README](../apps/docs/README.md) covers the app's architecture.
 
 ## Component docs
 
@@ -337,55 +289,6 @@ refreshes it when the documented file or its relative imports change. With sever
 The table's prose comes from JSDoc where each prop is declared. The generator adds the notice that a
 type accepts arbitrary DOM and ARIA attributes and event handlers, and the `#### Type definitions`
 list in the page's Markdown. Do not write either by hand.
-
-## Site chrome
-
-Every surface shares `SiteHeader` in `apps/docs/src/navigation/`. Appearance controls belong to the
-header, not to the docs sidebar footer. Pass `tree` to `SiteHeader` only on a page with a sidebar.
-Its Menu opens `SiteDrawer`, whose variants and closing behaviour `site-drawer.browser.test.tsx`
-specifies.
-
-`docs-container-queries.ts` builds the named `site-header` and `docs-shell` containers:
-
-- `SITE_HEADER_DESKTOP_MIN` sits just above the desktop row's measured width.
-  `docs-shell.browser.test.tsx` fails if it drops below.
-- `DOCS_SIDEBAR_MIN` must stay at or above the header threshold.
-- Thresholds are in `rem`, so a larger text size switches layouts sooner.
-- A query measures its container's content box, so the header and the shell keep their padding on an
-  inner element.
-- Environmental queries such as `prefers-reduced-motion` and `hover: none` stay `@media`. Unnamed
-  `@container` queries resolve against `docs-shell` in the docs and `:root` elsewhere.
-
-The docs article and each example frame use `isolation: isolate` so in-flow stacking, such as
-example resize grips, cannot paint over the sticky header. Do not raise the header `z-index` to
-compete with page content.
-
-## Playground
-
-The `/playground` host lives in `apps/docs/src/playground/`. [Architecture](ARCHITECTURE.md) owns
-its boundary with the private, library-independent `@luke-ui/playground-core` package.
-
-- `<ExampleBlock>` offers "Open in playground" only when every import is in
-  `docs-playground-specifiers.ts`. New subpaths in `@luke-ui/react`'s `exports` map are picked up
-  automatically.
-- The compiler rejects only a missing default export and returns `unknown`, because it does not
-  depend on React. The preview runner casts the result, and its `ErrorBoundary` reports an invalid
-  export at render time. The preview iframe accepts messages only from its parent.
-- The page owns hash updates and debounce. It creates one page session on mount and calls `resync()`
-  to cover a preview that announced ready before the message listener attached.
-- The page posts the `luke-ui-docs:appearance` message on a theme change and from the session's
-  `onPreviewReady` handler, so the preview applies the theme before the replayed code renders.
-
-### Playground core
-
-- Docs imports `@luke-ui/playground-core` only through its subpaths, never a relative
-  `packages/@luke-ui/playground-core/src/...` path.
-- Only `src/node/`, which implements `generate`, may import Node built-ins. Lint rules in the root
-  `vite.config.ts` and a type check without Node types enforce this.
-- The compiler does not import React at runtime or in its types, so the package has no `react` peer
-  dependency. A host renders the result with its own React.
-- Its `exports` point at `dist`, like `@luke-ui/react`. Run its `build` before consuming it, or its
-  `dev` script to watch it. Turbo orders this for docs tasks.
 
 ## Keeping docs current
 

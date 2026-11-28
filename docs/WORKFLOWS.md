@@ -32,40 +32,16 @@ pnpm exec turbo run test:browser:run --filter=@luke-ui/react -- src/core/visuall
 pnpm exec turbo run test --filter=docs -- src/components/search.browser.test.tsx
 ```
 
-## Commit hook
+## Hooks, fixers, and cleanup
 
-`pnpm install` runs `vp config`, which installs the Vite+ Git hook dispatcher. The committed
-`.vite-hooks/pre-commit` runs `vp staged --no-stash`, which applies the lint-only `staged` rules in
-`vite.config.ts`. `--no-stash` keeps the hook away from the stash that every Git worktree shares.
-`vp config` leaves `core.hooksPath` alone when it already points somewhere else. In that case, run
-`pnpm exec vp hooks status` to see which hooks are active, and `pnpm exec vp hooks enable` to
-install the dispatcher.
-
-## Fixing and cleaning
-
-`pnpm fix` applies lint fixes, scoped type-aware fixes, and formatting. `pnpm fix:unsafe` also
-applies lint suggestions, dangerous lint fixes, and Knip fixes. Review the diff after either
-command.
-
-`pnpm clean:build` removes known build and generated outputs and keeps dependencies. `pnpm clean`
-also removes known tool caches and workspace dependencies. Use these instead of broad Git cleanup,
-which also removes local settings. `pnpm clean:unsafe` opens Git's interactive ignored-file cleanup.
-Review the listed paths before choosing `clean`, because they include ignored `.env` files and local
-settings.
-
-## Task runner
-
-`turbo.json` owns dependency ordering, caching, and companion processes. Package scripts own the
-operations. Deterministic builds and derived generation can reuse cached outputs. Tests, watchers,
-fixers, and cleanup always execute. Checks that cover repository-wide inputs are not cached. An
-internal tool cache must never substitute for required test execution.
-
-Turbo's [`with` relationship](https://turborepo.dev/docs/reference/configuration#with) starts and
-stops each package's generator watcher with the app. Generator watch scripts use
-`tsx watch --include` for non-code inputs, such as Markdown, SVG, package manifests, and workspace
-build outputs, because the installed tsx glob watcher grows in memory during repeated package
-rebuilds. Existing Vite/Rolldown plugins already reload the built theme compiler for stylesheet
-regeneration, so it needs no companion process.
+- The pre-commit hook runs `vp staged --no-stash`, because every Git worktree shares one stash. When
+  `core.hooksPath` already points elsewhere, `vp config` leaves it alone, so run
+  `pnpm exec vp hooks enable`.
+- Review the diff after `pnpm fix` or `pnpm fix:unsafe`.
+- Use `pnpm clean:build` or `pnpm clean` instead of broad Git cleanup. `pnpm clean:unsafe` lists
+  ignored `.env` files and local settings, so review the paths before choosing `clean`.
+- Generator watch scripts use `tsx watch --include` for non-code inputs, because the tsx glob
+  watcher grows in memory during repeated rebuilds.
 
 ## Reading CI
 

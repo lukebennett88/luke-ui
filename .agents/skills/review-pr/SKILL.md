@@ -69,7 +69,9 @@ isolation is not practical, report the check as not run. Leave `fix:*` scripts a
 ## Report
 
 Try to disprove each finding before you report it. Drop what you can't support with code, a
-reproduction, or a guide.
+reproduction, or a guide. Cite the guide section that owns a convention, not a skill. A preference
+with neither a convention nor a concrete impact is not a finding. Report each problem once, with
+every location.
 
 Report in chat, or as a single pull request comment when asked to post. Leave out empty sections.
 

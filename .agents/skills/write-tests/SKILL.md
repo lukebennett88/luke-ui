@@ -31,10 +31,5 @@ as visual regression.
 
 ## Reviewing
 
-- Follow [review-pr's check boundaries](../review-pr/SKILL.md#checks), even when this skill runs
-  alone. Read existing results first, run checks or affected tests in isolation, and spend the
-  review on what the checks cannot catch.
-- Cite the TESTING.md section that owns a convention, not this skill. For a bug, an accessibility
-  failure, or a flaky test, give a reproduction, a failing assertion, or the failed run. A
-  preference with neither a convention nor a concrete impact is not a defect.
-- Report each problem once, with every location. Leave out speculative findings and nits.
+Review with [review-pr](../review-pr/SKILL.md), citing the TESTING.md section that owns each
+convention. Show a flaky test with the failed run.

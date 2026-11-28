@@ -27,7 +27,7 @@ and Node-compatible, and throws on invalid input, missed WCAG 2.2 AA contrast, o
 interaction tints. `ThemeFoundation` and `buildTheme` are internal. Keep the runtime entry,
 `@luke-ui/react/theme`, free of theme generation, colour solving, Capsize, and Node-only code.
 `package-exports.test.ts` and the packed-consumer harness check its import graph. See
-[THEME_COLOUR_GENERATION.md](THEME_COLOUR_GENERATION.md) for the colour pipeline.
+[Theme colour generation](../packages/@luke-ui/react/src/theme/README.md) for the colour pipeline.
 
 No generated value references another token, so `font.family.display` is a literal copy of a family,
 never a `var()`.
@@ -182,20 +182,7 @@ Use `cx()` only to mix a recipe result with another non-consumer class, such as 
 ### Single-part recipes
 
 A single-part recipe takes `base`, `variants`, `defaultVariants`, and `compoundVariants`, and
-returns one class string:
-
-```ts
-export const buttonRecipe = recipe({
-	base: {/* … */},
-	defaultVariants: { appearance: 'solid', size: 'medium', tone: 'neutral' },
-	variants: {
-		appearance: { solid: {}, subtle: {}, transparent: {} },
-		size: {/* … */},
-		tone: { accent: {}, danger: {}, neutral: {} },
-	},
-	compoundVariants: [/* … */],
-});
-```
+returns one class string.
 
 ### Slotted recipes
 
@@ -256,26 +243,6 @@ Pass `extraStates` for a state the defaults miss, such as a bare `<input>` that 
 than `:has()`, which cannot tell a disabled control from one that contains a disabled button. Use
 `descendantDisabledSelector` to style a part when an ancestor control is disabled.
 
-### Dropdown option states
-
-Select and Combobox options share one state model, from React Aria's Vanilla CSS dropdown. The
-combobox recipe's `item` slot implements it and `SelectItem` reuses it. A standalone list box and
-other collections need their own decision.
-
-| State                   | Treatment                                                                |
-| ----------------------- | ------------------------------------------------------------------------ |
-| Active (`data-focused`) | `accent.solid.rest` with the on-solid foreground and a 2px inset outline |
-| Active + pressed        | `accent.solid.pressed` with the same on-solid text and inset outline     |
-| Selected                | The check icon only, with no fill or extra weight                        |
-| Hovered but not active  | No style                                                                 |
-
-The active option follows the keyboard, and the pointer only while focus is not visible. Its fill
-and inset outline replace the global ring. Select moves DOM focus onto the option. Combobox keeps
-focus and its ring in the input and uses `aria-activedescendant`. Forced colours use `Highlight` and
-`HighlightText` for the active option. The compiler gates the outline at 3:1 against the solid
-fills, but does not require the fill to contrast with `surface.raised`. See
-[Border contrast policy](THEME_COLOUR_GENERATION.md#border-contrast-policy).
-
 ## Styling utilities
 
 `core/styles/utilities.css.ts` defines the package-internal Rainbow Sprinkles utilities that `Box`
@@ -306,19 +273,13 @@ return (
 );
 ```
 
-### Package-internal `createSprinkles`
-
-`createSprinkles(props)` returns `{ className, style }` plus own enumerable string-keyed non-utility
-props. Generated `className` and `style` replace input keys of those names. Symbol keys and
-non-enumerable properties are dropped. `createSprinkles.properties` is typed `ReadonlySet` but is a
-mutable `Set` at runtime.
+### Spacing and containers
 
 `vars.space['16']` is a fixed 1rem reference measurement that scales with the root font size. Zero
 stays outside `vars.space`, and themes cannot redefine the steps. Build literal scales such as
 `vars.space` and `vars.controlSize` with `literalScale` from `theme/literal-scale.ts`, so numeric
 keys (CSS pixels at a 16px root) and `rem` values cannot drift. Keep logical properties and `bp*`
-conditions, with no `px`/`py` shorthands. This supersedes the spacing naming policy in
-[#761](https://github.com/lukebennett88/luke-ui/issues/761).
+conditions, with no `px`/`py` shorthands.
 
 `container.*` presets set a fixed `rem` maximum inline size and a local container-query boundary,
 with no theme variable family.
@@ -368,9 +329,7 @@ Safari zooms into a focused input under 16px. Block size and padding stay. `touc
 
 `ControlSizeContext` carries inherited defaults. Composed components pass an omitted size through
 until the owning primitive resolves it. Control-specific contexts preserve explicit part overrides
-and carry resolved sizes through Select and Combobox portals. Independent Dialog surfaces, when
-[#799](https://github.com/lukebennett88/luke-ui/issues/799) adds them, set their own default,
-normally `medium`, rather than inheriting a trigger's.
+and carry resolved sizes through Select and Combobox portals.
 
 Icon size context is CSS. A recipe spreads `iconSizeVars(size)` from `core/icon/icon-sizing.ts` to
 set the inherited `--luke-icon-size`, which icons and the spinner read when they have no `size`
@@ -422,8 +381,8 @@ reads:
 - Solid and standard Buttons paint the control finish above their fill layers and under the label. A
   standard Button paints the state layer over its subtle fill.
 - Forced colours clear the state layer. See
-  [Interaction states](THEME_COLOUR_GENERATION.md#interaction-states) for how the compiler gates
-  state fills and tints.
+  [Interaction states](../packages/@luke-ui/react/src/theme/README.md#interaction-states) for how
+  the compiler gates state fills and tints.
 
 A high Button keeps its own solid pairing, so a neutral high Button on `accent.solid`, or a danger
 one on `danger.solid`, paints its parent's fill. This known limitation is deliberate. See
@@ -475,13 +434,6 @@ export const sidebar = style({
 	{navigation}
 </Box>
 ```
-
-### Styling engine boundary
-
-[DEPENDENCIES.md](DEPENDENCIES.md#changesets) owns the publishing status of
-`@luke-ui/rainbow-sprinkles`. Keep engine authoring and compilation private. If the engine changes,
-preserve the `createSprinkles` contract, `vars` paths and custom property names, class-string
-recipes, and generated cascade layers and source order.
 
 ## Implementation rules
 

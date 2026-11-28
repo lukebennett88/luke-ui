@@ -3,8 +3,8 @@
 Decision record for [#716](https://github.com/lukebennett88/luke-ui/issues/716). It is
 non-normative: it records why the 1.0 token contract looks the way it does. The rules themselves
 live in [docs/STYLING.md](../docs/STYLING.md),
-[docs/THEME_COLOUR_GENERATION.md](../docs/THEME_COLOUR_GENERATION.md), and the docs app's theming
-pages, and the full token list is in the token reference.
+[packages/@luke-ui/react/src/theme/README.md](../packages/@luke-ui/react/src/theme/README.md), and
+the docs app's theming pages, and the full token list is in the token reference.
 
 [#707](https://github.com/lukebennett88/luke-ui/issues/707) and the settings reference application
 (`apps/reference-app`) are the design inputs. Paper, Tactile, the reference-app theme, and a flat

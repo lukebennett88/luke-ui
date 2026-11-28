@@ -24,10 +24,5 @@ skill disagrees.
 
 ## Reviewing
 
-- Follow [review-pr's check boundaries](../review-pr/SKILL.md#checks), even when this skill runs
-  alone. Read existing check results first, cover gaps with isolated checks, and spend the review on
-  what the checks cannot catch.
-- Cite the DOCUMENTATION.md section that owns a convention, not this skill. Show a defect that has
-  no written convention, such as a wrong statement, a broken link, or a rendering problem. A
-  preference with neither a convention nor a concrete impact is not a defect.
-- Report each problem once, with every location. Leave out speculative findings and nits.
+Review with [review-pr](../review-pr/SKILL.md), citing the DOCUMENTATION.md section that owns each
+convention.

@@ -338,6 +338,11 @@ const comboboxConfig = {
 			paddingInline: vars.space['12'],
 			textAlign: 'center',
 		},
+		// Select reuses this option model. The active option, which follows the keyboard and the
+		// pointer only while focus is not visible, paints `accent.solid` with on-solid text and a 2px
+		// inset outline that replaces the focus ring. Selected shows only the check icon. Hover alone
+		// adds nothing. The compiler gates the outline against the solid fills, not the fill against
+		// `surface.raised`.
 		item: {
 			'@media': {
 				'(forced-colors: active)': {

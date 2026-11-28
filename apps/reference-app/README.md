@@ -49,3 +49,11 @@ The dev server runs at http://localhost:5174.
 Cloudflare Pages deploys the app from the repository root, so it also picks up the docs site's
 `functions/` middleware. `public/_routes.json` excludes every path, so that middleware never runs
 for the app and Pages serves `dist` as static assets.
+
+## Ownership
+
+`src/settings/` owns the stored settings aggregate: persistence, query invalidation, the shell, and
+the outlet contract. Profile, preferences, and security own their UI, workflows, and validation,
+reuse that infrastructure rather than copying it, and import neither routes nor each other.
+`src/routes/` keeps registration and composition. Keep the consumer-level tests for persistence,
+validation, mutation ordering, and navigation.

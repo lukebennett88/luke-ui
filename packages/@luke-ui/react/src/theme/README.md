@@ -1,31 +1,15 @@
 # Theme colour generation
 
-`theme/build-theme.ts` generates every colour token from a private 12-step scale engine (`scale.ts`,
-`surfaces.ts`, `semantic-map.ts`). Read [STYLING.md](STYLING.md) first for the theme module layout.
+`build-theme.ts` generates every colour token from a private 12-step scale engine (`scale.ts`,
+`surfaces.ts`, `semantic-map.ts`). [STYLING.md](../../../../../docs/STYLING.md#themes) owns the
+theme contract.
 
-## The pipeline
-
-Per colour mode, `compileTheme`:
-
-1. Takes the source colours and surfaces that `defineTheme` has already defaulted and parsed to
-   OKLCH. `surface.base` is split from `neutral`'s hue and chroma.
-2. Computes `text.primary` (`highContrastText`, the neutral step-12 rung) before any solid-anchor
-   search, then generates the six role families, each gated against that `text.primary`.
-3. Resolves `base`, `subdued`, and `raised` with `generateSurfaces`. `base` and authored surfaces
-   pass through. Each missing surface is a fixed, mode-specific lightness offset from `base`, never
-   from a sibling. Surfaces are never adjusted for contrast. Validation throws instead, and the
-   author can set the surface.
-4. Solves the control border states. See [Border contrast policy](#border-contrast-policy).
-5. Applies `mapSemanticColors`, which aliases every colour leaf onto a family step, a generated
-   surface, or a generated interaction state, and passes the authored backdrop through. Neutral step
-   12 becomes `text.primary`. `color.background.skeleton` maps to neutral step 8 so the loading
-   state stays perceptible.
-6. Runs `validateContrast`, the authoritative WCAG 2.2 matrix, on the final emitted, rounded, and
-   gamut-mapped colours. It throws `ThemeContrastError` on a hard-gate miss and never repairs a
-   cross-role failure. Both text hierarchy colours and all six roles' three foreground states (162
-   role pairs per mode) are checked against the three surfaces and six subtle resting fills. Each
-   `onSolid` is checked against its role's solid rest, hover, and pressed fills. No hidden colour
-   surface exists. `shadow.resting` is a shadow material, not a colour surface.
+- Missing surfaces are fixed, mode-specific lightness offsets from `base`, never from a sibling, and
+  are never adjusted for contrast. Validation throws instead, and the author can set the surface.
+- `validateContrast` is the authoritative WCAG 2.2 matrix. It runs on the final emitted, rounded,
+  and gamut-mapped colours, throws `ThemeContrastError` on a hard-gate miss, and never repairs a
+  cross-role failure.
+- `contrast-policy.ts` owns the shared thresholds and `SEMANTIC_ROLES`.
 
 ## Generator changes
 
@@ -48,28 +32,24 @@ both modes and for custom themes.
   subtle fills. They are dedicated contrast boundaries rather than step-7 aliases, because the
   border is often a form control's only resting boundary. Hover and pressed mix the emitted rest 20%
   and 40% toward `foreground.primary` in encoded sRGB, and are published as tokens so no CSS mixes
-  at paint time. Field controls paint them. The search checks all three rounded states.
+  at paint time.
 - `color.border.<role>.strong` reaches 3:1 against every surface and that role's own subtle fill
   only. The solver starts at the role's step-7 border, walks lightness away from the backgrounds,
-  keeps hue and chroma, and checks the emitted colour. A failure names the border, background, and
-  ratio.
+  keeps hue and chroma, and checks the emitted colour.
 - Invalid controls use `color.border.danger.strong` for borders and outline edges. Their selected or
   checked fills use `color.background.danger.solid.*`, whose on-solid foregrounds are gated at 4.5:1
   in every state. Danger solids carry no 3:1 guarantee against the surrounding surface.
 - `color.focus` reaches 3:1 against all three surfaces and every role's subtle fill, because a focus
   ring can sit beside any of them. It is not an alias for `border.accent.strong`, and the compiler
-  never repairs it. A failure carries a `source` of `authored` or `default`, and a failing default
-  points to `ThemeInput.color.focus`. Every ring is a 2px outline with a 2px offset, using
-  `Highlight` in forced colours. Inside a role solid the ring paints `onSolid`, already gated at
-  4.5:1, so solids need no extra focus gate. See
-  [Focus ring context](STYLING.md#focus-ring-context). `focus-ring-contrast.browser.test.tsx`
-  measures painted rings on the nine structural and subtle backgrounds and the six role solids.
+  never repairs it. Inside a role solid the ring paints `onSolid`, already gated at 4.5:1, so solids
+  need no extra focus gate. See
+  [Focus ring context](../../../../../docs/STYLING.md#focus-ring-context).
 - `color.foreground.accent.onSolid` reaches 3:1 against `color.background.accent.solid.rest` and
   `color.background.accent.solid.pressed`, because the active Select or Combobox option draws a 2px
   inset outline in it on those fills. The compiler never changes an authored accent to pass this
   gate.
-- `color.border.decorative` is advisory: a deliberately subtle, Radix-style separator below 3:1.
-  Roles have no decorative border.
+- `color.border.decorative` is advisory: a deliberately subtle separator below 3:1. Roles have no
+  decorative border.
 
 A component that uses an advisory border as the only cue for a required state (invalid, selected,
 checked) must add another 3:1 or non-colour cue, such as error text, an icon, a thickness or shape
@@ -89,8 +69,6 @@ headroom over the emitted solid rest, hover, and pressed.
 - An explicit per-mode accent (`accent: { light, dark }`) skips pre-adaptation. The solid-anchor
   search moves the author's lightness only as far as the on-solid text needs.
 
-`contrast-policy.ts` owns the shared thresholds and `SEMANTIC_ROLES`.
-
 ## Interaction states
 
 Hover and pressed colours are public semantic tokens generated at compile time. Theme authors set
@@ -106,19 +84,17 @@ raises contrast, so there is no circular solve.
 
 Each step is the smallest change whose emitted colour clears its visibility floor plus
 `VISIBILITY_MARGIN`: 0.04 OKLab ΔE from rest to hover, and 0.025 from hover to pressed. The floors
-measure fills alone, so `controlFinish` and `shadow` never count. The compiler checks emitted
-colours against the nominal floors and 4.5:1 text contrast.
+measure fills alone, so `controlFinish` and `shadow` never count.
 
 The solid-anchor search moves the resting solid within ±0.035 L of its source, clamped to 0.30–0.92,
 until the text clears 4.5:1 in all three states. The on-solid dead zone, where neither near-white
 nor near-black text reads, is narrower than that window, so the search never fails inside it.
-`ThemeGenerationError` stays exported as a guard. Each role's `distanceToEdge` diagnostic reports
-the remaining window, or for neutral, the distance to its curated band's edge.
+`ThemeGenerationError` stays exported as a guard.
 
 **Adaptive tint.** Buttons and unchecked or invalid Checkbox controls paint a registered `<color>`
 state layer as their first `background-image`. `solveInteractionTints` emits the per-mode
 `vars.interaction.tint.hover` and `vars.interaction.tint.pressed` pair, black in light mode and
-white in dark mode. It starts from today's neutral subtle hover and pressed over `surface.base` and
+white in dark mode. It starts from the neutral subtle hover and pressed over `surface.base` and
 picks the nearest pair where both conditions hold over the three surfaces and six subtle fills:
 
 - Every supported foreground keeps 4.5:1 with the tint on top.
@@ -132,9 +108,5 @@ encoded sRGB, matching CSS. Dark step-11 text sits at 0.79 so the tint cap stays
 
 A translucent tint leaves too little difference between hover and pressed on some solids, so a low
 Button on a role solid paints the solid's own states. See
-[Surface pairing](STYLING.md#surface-pairing). Checked Checkbox, Switch fills, focus rings, and text
-actions use opaque tokens.
-
-`color.background.backdrop` is the authored modal dimming layer. `color.background.surface.raised`
-is the opaque fill for elevated panels, cards, menus, popovers, and dialogs, with no border or
-shadow of its own.
+[Surface pairing](../../../../../docs/STYLING.md#surface-pairing). Checked Checkbox, Switch fills,
+focus rings, and text actions use opaque tokens.
