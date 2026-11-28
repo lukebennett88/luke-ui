@@ -39,7 +39,7 @@ Every consumer installs the `dependencies` of `@luke-ui/react`. Declare a packag
 the published JavaScript or declarations import it. Keep build-time packages in `devDependencies`.
 The [packed-consumer harness](TESTING.md#package-consumption) fails on an undeclared import or an
 unused dependency. The package audit's decisions are in
-[research/719-package-release-audit.md](../research/719-package-release-audit.md).
+[#719](https://github.com/lukebennett88/luke-ui/issues/719).
 
 Declare a dependency rather than bundling it, unless there is a concrete reason, such as needing a
 small part of a package whose install would cost consumers far more. To bundle one, list it in

@@ -1,8 +1,8 @@
 # Public API
 
 Luke UI is pre-1.0, so prefer a clean breaking change to a compatibility alias.
-[research/711-public-api-audit.md](../research/711-public-api-audit.md) records the per-export
-decisions from [#711](https://github.com/lukebennett88/luke-ui/issues/711) and their evidence.
+[#711](https://github.com/lukebennett88/luke-ui/issues/711) records the per-export decisions and
+their evidence.
 
 ## What is public
 
@@ -22,8 +22,8 @@ The stylesheet's built-in icons need `img-src data:` in a Content Security Polic
 it needs. `@luke-ui/react/primitives/<name>` holds parts for composing a variant of a component.
 `@luke-ui/react/theme` is runtime only, and `@luke-ui/react/theme/compiler` is build time only.
 Runtime code must never import the compiler.
-[research/715-theme-authoring-contract.md](../research/715-theme-authoring-contract.md) records the
-split and the separate `@luke-ui/theme-paper` and `@luke-ui/theme-tactile` packages.
+[#715](https://github.com/lukebennett88/luke-ui/issues/715) records the split and the separate
+`@luke-ui/theme-paper` and `@luke-ui/theme-tactile` packages.
 
 There is no `@luke-ui/react/styles` subpath. Layout utilities stay package-internal behind `Box` and
 the other layout components.

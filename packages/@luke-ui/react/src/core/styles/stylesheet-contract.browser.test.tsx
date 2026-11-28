@@ -14,8 +14,8 @@ import { cascadeLayerOrder } from './layer-names.js';
 const layerOrder = ['base', 'luke-ui', 'luke-ui.reset', 'luke-ui.recipes', 'luke-ui.utilities'];
 
 /**
- * The whole global stylesheet. Every other rule belongs to a component. Read
- * `research/717-global-stylesheet-contract.md` before changing it.
+ * The whole global stylesheet. Every other rule belongs to a component. Read the global
+ * styles section of `docs/STYLING.md` before changing it.
  */
 const globalRules = [
 	[':where(*), :where(*)::before, :where(*)::after', 'box-sizing: border-box;'],

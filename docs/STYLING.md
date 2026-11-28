@@ -42,8 +42,7 @@ Public tokens are theme-dependent semantic values and shared fixed measurements 
 demonstrably align with. Component-specific geometry, such as the Combobox action size and Icon
 sizes, is a private constant in its component family. Cross-control dimensions, including the
 minimum target, live in `core/sizing/`. `Box` values derive from `vars`, so removing a token removes
-its `Box` value. Decision record:
-[research/716-token-contract.md](../research/716-token-contract.md).
+its `Box` value. Decision record: [#716](https://github.com/lukebennett88/luke-ui/issues/716).
 
 Author `shadow.*` and `controlFinish.*` per mode as final CSS values. Components pick semantic
 tokens and never branch on theme identity. A component keeps its essential state distinctions when
@@ -81,8 +80,7 @@ button chrome. Everything else belongs in the component:
 - `Text` zeroes its elements' margins at zero specificity, so `Prose` spacing and utility props
   still apply.
 
-Decision record:
-[research/717-global-stylesheet-contract.md](../research/717-global-stylesheet-contract.md).
+Decision record: [#717](https://github.com/lukebennett88/luke-ui/issues/717).
 
 Only native `:focus-visible` draws the global ring. React Aria also sets `data-focus-visible` on
 wrappers such as labels and groups, so a recipe that rings from that attribute draws on the element
@@ -386,7 +384,7 @@ reads:
 
 A high Button keeps its own solid pairing, so a neutral high Button on `accent.solid`, or a danger
 one on `danger.solid`, paints its parent's fill. This known limitation is deliberate. See
-[research/1023-same-role-high-buttons.md](../research/1023-same-role-high-buttons.md).
+[#1023](https://github.com/lukebennett88/luke-ui/issues/1023).
 
 #### Focus ring context
 
