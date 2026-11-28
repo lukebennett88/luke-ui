@@ -13,10 +13,14 @@ import { SHIKI_THEME_REGISTRATIONS, SHIKI_THEMES } from './shiki-theme.js';
 
 const HIGHLIGHT_QUERY = '?highlight';
 
+// Vanilla Extract compiles any ID whose path ends in `.css.ts`, whatever its query, so the resolved
+// ID carries the file path in its query instead.
+const RESOLVED_ID_PREFIX = '\0docs-highlight?file=';
+
 /**
  * Converts a `?highlight` TSX import into a {@link HighlightedSource} module.
  *
- * The resolved module ID retains the file path, so Vite invalidates it when the file changes.
+ * The module watches its source file, so Vite invalidates it when the file changes.
  */
 export function highlightSourcePlugin(): Plugin {
 	// One highlighter serves all source modules in each build environment.
@@ -24,8 +28,17 @@ export function highlightSourcePlugin(): Plugin {
 
 	return {
 		enforce: 'pre',
+		async resolveId(source, importer, options) {
+			if (!source.endsWith(HIGHLIGHT_QUERY)) return null;
+
+			const resolved = await this.resolve(source.slice(0, -HIGHLIGHT_QUERY.length), importer, {
+				...options,
+				skipSelf: true,
+			});
+			return resolved ? `${RESOLVED_ID_PREFIX}${resolved.id}` : null;
+		},
 		async load(id) {
-			if (!id.endsWith(HIGHLIGHT_QUERY)) return null;
+			if (!id.startsWith(RESOLVED_ID_PREFIX)) return null;
 
 			highlighter ??= createHighlighterCore({
 				engine: createJavaScriptRegexEngine(),
@@ -33,7 +46,8 @@ export function highlightSourcePlugin(): Plugin {
 				themes: SHIKI_THEME_REGISTRATIONS,
 			});
 
-			const path = id.slice(0, -HIGHLIGHT_QUERY.length);
+			const path = id.slice(RESOLVED_ID_PREFIX.length);
+			this.addWatchFile(path);
 			const source = (await readFile(path, 'utf8')).trim();
 
 			const highlighted: HighlightedSource = {

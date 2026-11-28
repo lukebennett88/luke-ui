@@ -15,15 +15,7 @@ describe('highlightSourcePlugin', () => {
 		try {
 			await writeFile(path, source);
 
-			const load = highlightSourcePlugin().load;
-			if (typeof load !== 'function') throw new Error('Expected a plugin load hook');
-
-			const module = await load.call({} as never, `${path}?highlight`);
-			if (typeof module !== 'string') throw new Error('Expected a JavaScript module');
-
-			const highlighted = JSON.parse(
-				module.slice('export default '.length, -';\n'.length),
-			) as HighlightedSource;
+			const highlighted = await loadHighlightedSource(path);
 
 			expect(highlighted.html).toContain('<code');
 			expect(highlighted.html).not.toContain('<pre');
@@ -36,6 +28,22 @@ describe('highlightSourcePlugin', () => {
 		}
 	});
 
+	test('highlights a Vanilla Extract sample instead of compiling it', async () => {
+		const loaders = Object.values(
+			import.meta.glob<HighlightedSource>('../samples/*/*.css.ts', {
+				import: 'default',
+				query: '?highlight',
+			}),
+		);
+		expect(loaders).not.toHaveLength(0);
+
+		for (const highlighted of await Promise.all(loaders.map((load) => load()))) {
+			expect(highlighted).toMatchObject({
+				source: expect.stringContaining("from '@vanilla-extract/css'"),
+			});
+		}
+	});
+
 	test('sets playgroundHash to null when an import is not in the playground scope', async () => {
 		const directory = await mkdtemp(join(tmpdir(), 'luke-ui-highlight-source-'));
 		const path = join(directory, 'example.tsx');
@@ -44,15 +52,7 @@ describe('highlightSourcePlugin', () => {
 		try {
 			await writeFile(path, source);
 
-			const load = highlightSourcePlugin().load;
-			if (typeof load !== 'function') throw new Error('Expected a plugin load hook');
-
-			const module = await load.call({} as never, `${path}?highlight`);
-			if (typeof module !== 'string') throw new Error('Expected a JavaScript module');
-
-			const highlighted = JSON.parse(
-				module.slice('export default '.length, -';\n'.length),
-			) as HighlightedSource;
+			const highlighted = await loadHighlightedSource(path);
 
 			expect(highlighted.playgroundHash).toBeNull();
 		} finally {
@@ -60,3 +60,18 @@ describe('highlightSourcePlugin', () => {
 		}
 	});
 });
+
+async function loadHighlightedSource(path: string): Promise<HighlightedSource> {
+	const { load, resolveId } = highlightSourcePlugin();
+	if (typeof resolveId !== 'function') throw new Error('Expected a plugin resolveId hook');
+	if (typeof load !== 'function') throw new Error('Expected a plugin load hook');
+
+	const resolver = { resolve: async (source: string) => ({ id: source }) };
+	const id = await resolveId.call(resolver as never, `${path}?highlight`, undefined, {} as never);
+	if (typeof id !== 'string') throw new Error('Expected a resolved module ID');
+
+	const module = await load.call({ addWatchFile() {} } as never, id);
+	if (typeof module !== 'string') throw new Error('Expected a JavaScript module');
+
+	return JSON.parse(module.slice('export default '.length, -';\n'.length)) as HighlightedSource;
+}
