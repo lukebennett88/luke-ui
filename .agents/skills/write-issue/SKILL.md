@@ -8,22 +8,16 @@ description: >-
 
 # Write an issue
 
-When the task concerns ownership or dependencies, consult
-[Architecture](../../../docs/ARCHITECTURE.md).
-
-A good issue lets someone act on it without repeating your investigation or reopening decisions that
-are already made. It is not an implementation spec.
-
-Use `git` and `gh` when they are available. Equivalent tools and connectors are fine.
-
-Follow [DOCUMENTATION.md](../../../docs/DOCUMENTATION.md#writing-style) for prose, and consult the
+A good issue lets someone act on it without repeating your investigation or reopening settled
+decisions. It is not an implementation spec. Follow
+[DOCUMENTATION.md](../../../docs/DOCUMENTATION.md#writing-style) for prose, and the
 [repository guides](../../../README.md#repository-guides) that govern the problem.
 
 ## Before you write
 
 1. Search open and closed issues for the same problem or outcome. When an existing issue owns it,
-   propose updating that issue instead of opening another. Do not stretch a loosely related issue to
-   avoid a new one. Distinct, actionable work gets its own issue.
+   propose updating that issue. Give distinct, actionable work its own issue rather than stretching
+   a loosely related one.
 2. Investigate in proportion. Reproduce a bug when practical, and keep the evidence, such as a
    failing command, an accessibility tree, or a screenshot. For a task, read enough code and docs to
    state the problem and the decisions already made. Say what you confirmed and what you assumed.
@@ -31,48 +25,46 @@ Follow [DOCUMENTATION.md](../../../docs/DOCUMENTATION.md#writing-style) for pros
 ## Write
 
 Use [#771](https://github.com/lukebennett88/luke-ui/issues/771), a bug, and
-[#799](https://github.com/lukebennett88/luke-ui/issues/799), a task, as examples, not as a template.
-Leave out any section that has nothing in it.
+[#799](https://github.com/lukebennett88/luke-ui/issues/799), a task, as examples, not templates.
+Leave out empty sections.
 
-- Title a bug after its symptom and a task after its outcome, such as "Add a composed Dialog for
-  Luke UI 1.0". The title should still fit if the fix changes.
+- Title a bug by its symptom and a task by its outcome, such as "Add a composed Dialog for Luke UI
+  1.0", so the title still fits if the fix changes.
 - Start with `Parent: #n.` and where the problem was found, when those apply.
-- Explain the problem or why the work matters: what happens now, what should happen, and who it
-  affects.
+- Explain what happens now, what should happen, and who it affects.
 - Include a cause only when you confirmed it, and an approach only when it is decided or technically
   required. Present anything else as an open question.
 - List decisions already made and what is out of scope.
-- Write completion criteria as checkboxes for outcomes someone can verify, not steps to follow.
-- Link specific evidence with permalinks pinned to a commit. Plain paths are fine for general
-  navigation. Put long reproduction notes and investigation in a collapsed `<details>` block.
+- Write completion criteria as checkboxes for verifiable outcomes, not steps to follow.
+- Link evidence with permalinks pinned to a commit. Plain paths are fine for general navigation. Put
+  long reproduction notes and investigation in a collapsed `<details>` block.
 
 Keep large work in one issue, even when it needs several pull requests. Use native sub-issues only
-when parts need to be tracked separately. Do not create an epic or tracking issues by default.
+when parts need separate tracking. Create no epic or tracking issue by default.
 
 ## Work context
 
-Classify the next useful action during issue triage and handoff. Apply exactly one work-context
-label to each actionable open issue, and to a PR when it helps select the next review or fix.
+Give each actionable open issue exactly one work-context label for its next useful action. Label a
+pull request too when it helps pick the next review or fix.
 
-| Label             | Next useful action                                                                                                                                                                                     |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `context:phone`   | Discuss requirements, research a decision, clarify acceptance criteria, delegate a sufficiently specified task, or review a PR remotely. The maintainer needs no local edit/test loop for that action. |
-| `context:desktop` | Work hands-on with a local development environment, fast edit/test feedback, device or browser testing, live visual assessment, debugging, or exploratory prototyping.                                 |
+- `context:phone`: the action needs no local edit/test loop. Examples are discussing requirements,
+  researching a decision, clarifying acceptance criteria, delegating a well-specified task, and
+  reviewing a pull request remotely.
+- `context:desktop`: the action needs a local environment. Examples are hands-on edit/test work,
+  device or browser testing, live visual assessment, debugging, and prototyping.
 
-Classify the next action, not all the work needed to close the issue. A code task can be
-`context:phone` when it can be delegated and reviewed remotely. Replace the context label as work
-progresses. For blocked work, classify the next actionable step, not the blocked implementation.
-
-Work context is independent of priority, ownership, issue type, and agent readiness.
-`ready-for-agent` means sufficiently specified for autonomous implementation; `claimed` means
-claimed. Revisit ambiguous classifications during triage instead of adding more context labels.
+Classify the next action, not all the work to close the issue. A code task that can be delegated and
+reviewed remotely is `context:phone`. Blocked work takes the label of its next actionable step.
+Replace the label as work progresses. Work context is independent of priority, ownership, issue
+type, `ready-for-agent`, and `claimed`. Revisit ambiguous cases during triage instead of adding
+labels.
 
 ## Publish
 
-Return the title and body as a draft unless you are asked to create or edit the issue. Add the
-`ready-for-agent` label only when you are told the issue is ready for an agent. Apply the
-[work-context rules](#work-context), and add no other labels. After you create or edit an issue,
-read it back to confirm it.
+Return the title and body as a draft unless you are asked to create or edit the issue. Add
+`ready-for-agent` only when told the issue is ready for an agent, apply the
+[work-context label](#work-context), and add no other labels. Read the issue back after you create
+or edit it.
 
 ## Update a resolved issue
 
