@@ -86,14 +86,19 @@ export default async function setup(project: TestProject): Promise<() => Promise
 		{
 			isLowest: false,
 			label: 'the newest peers',
-			resolve: (_name, range) => range,
+			resolve: (name, range) => {
+				if (name === 'react' || name === 'react-dom') {
+					return publishedVersion(workDir, name, range, 'newest');
+				}
+				return range;
+			},
 			slug: 'newest',
 			typescriptRange: readManifest(workspaceRequire.resolve('typescript/package.json')).version,
 		},
 		{
 			isLowest: true,
 			label: `the lowest peers and TypeScript ${MINIMUM_TYPESCRIPT}`,
-			resolve: (name, range) => lowestPublished(workDir, name, range),
+			resolve: (name, range) => publishedVersion(workDir, name, range, 'lowest'),
 			slug: 'lowest',
 			typescriptRange: `~${MINIMUM_TYPESCRIPT}.0`,
 		},
@@ -123,8 +128,9 @@ async function createConsumer(
 		]),
 	);
 	const typescript = peerSet.resolve('typescript', peerSet.typescriptRange);
-	const reactRange = react.manifest.peerDependencies.react;
-	if (reactRange === undefined) throw new Error('Expected a react peer range.');
+	const reactVersion = peers.react;
+	if (reactVersion === undefined) throw new Error('Expected a react peer.');
+	const reactDomVersion = peers['react-dom'] ?? reactVersion;
 	const typeChecked = fixtures.flatMap((fixture) => fixture.typeChecked);
 
 	const files: Record<string, string> = {
@@ -139,9 +145,9 @@ async function createConsumer(
 				},
 				devDependencies: {
 					...Object.assign({}, ...fixtures.map((fixture) => fixture.devDependencies)),
-					// The React types follow the React peer range, so the lowest set gets the lowest types.
-					'@types/react': peerSet.resolve('@types/react', reactRange),
-					'@types/react-dom': peerSet.resolve('@types/react-dom', reactRange),
+					// DefinitelyTyped publishes its patch versions independently of the runtimes.
+					'@types/react': reactVersion.split('.')[0]!,
+					'@types/react-dom': reactDomVersion.split('.')[0]!,
 					typescript,
 					vite: VITE_SPEC,
 				},
@@ -271,14 +277,18 @@ function listFiles(root: string, prefix = ''): Array<string> {
 	});
 }
 
-/** Lowest published version a range admits, so the lowest set never floats. */
-function lowestPublished(workDir: string, name: string, range: string): string {
+function publishedVersion(
+	workDir: string,
+	name: string,
+	range: string,
+	edge: 'lowest' | 'newest',
+): string {
 	const versions: unknown = JSON.parse(
 		npm(['view', `${name}@${range}`, 'version', '--json'], workDir),
 	);
-	const lowest = Array.isArray(versions) ? versions[0] : versions;
-	if (typeof lowest !== 'string') {
+	const version = Array.isArray(versions) ? versions.at(edge === 'lowest' ? 0 : -1) : versions;
+	if (typeof version !== 'string') {
 		throw new Error(`No published version of ${name} satisfies "${range}".`);
 	}
-	return lowest;
+	return version;
 }
