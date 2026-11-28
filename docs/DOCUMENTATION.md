@@ -247,6 +247,10 @@ mapping page URLs to files each have one owner in `apps/docs/src/lib/`. Do not a
 docs or `*.docs.md` files under `packages/@luke-ui/react/src/`. The
 [docs app README](../apps/docs/README.md) covers the app's architecture.
 
+Put research, audits, and decision records in the issue that owns the decision. Move each durable
+rule into the guide that owns its subject, and link to the issue for the reasoning. Link supporting
+files, such as a prototype or benchmark, at a commit SHA so the link survives their removal.
+
 ## Component docs
 
 The `/components` landing page lists every component guide by category. `generate` builds it from

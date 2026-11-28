@@ -6,8 +6,8 @@ import { surfaceStyle } from './surface.js';
 // The global stylesheet: every rule here applies to the whole document. Keep it to rules that
 // correct a cross-browser difference or replace a default almost every application overrides,
 // without erasing native structure such as heading sizes, list markers, or button chrome.
-// Component resets belong in the component's recipe. See
-// `research/717-global-stylesheet-contract.md` before adding a rule.
+// Component resets belong in the component's recipe. Read `docs/STYLING.md#global-styles` before
+// adding a rule.
 
 // Pseudo-elements are invalid inside `:where()`, so they sit outside it.
 globalStyleInLayer('reset', ':where(*), :where(*)::before, :where(*)::after', {

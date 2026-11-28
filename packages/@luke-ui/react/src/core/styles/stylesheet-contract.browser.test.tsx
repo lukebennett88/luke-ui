@@ -15,7 +15,7 @@ const layerOrder = ['base', 'luke-ui', 'luke-ui.reset', 'luke-ui.recipes', 'luke
 
 /**
  * The whole global stylesheet. Every other rule belongs to a component. Read
- * `research/717-global-stylesheet-contract.md` before changing it.
+ * `docs/STYLING.md#global-styles` before changing it.
  */
 const globalRules = [
 	[':where(*), :where(*)::before, :where(*)::after', 'box-sizing: border-box;'],
